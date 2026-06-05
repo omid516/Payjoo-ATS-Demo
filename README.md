@@ -1,6 +1,6 @@
 # Payjoo ATS - Applicant Tracking System / سامانه جذب و استخدام پیجو
 
-Payjo ATS is a modern, responsive, and bilingual (Persian & English) Applicant Tracking System built with Python, Django, and HTMX. It provides recruiters and managers with tools to manage job opportunities, define custom evaluation stages with dynamic weights, assign recruiters, track candidate progress through pipeline workflows, and generate printable audit-ready exam documents.
+Payjoo ATS is a modern, responsive, and bilingual (Persian & English) Applicant Tracking System built with Python, Django, and HTMX. It provides recruiters and managers with tools to manage job opportunities, define custom evaluation stages with dynamic weights, assign recruiters, track candidate progress through pipeline workflows, and generate printable audit-ready exam documents.
 
 **Note**: This system is specifically designed and optimized for **Internal Job Postings / Internal Recruitment Processes** (اعلان‌های شغلی داخلی) within an organization, supporting attributes like personnel numbers, national IDs, and direct regional manager approvals.
 
@@ -49,8 +49,8 @@ Payjo ATS is a modern, responsive, and bilingual (Persian & English) Applicant T
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/omid516/Payjo-ATS.git
-   cd Payjo-ATS
+   git clone https://github.com/omid516/Payjoo-ATS.git
+   cd Payjoo-ATS
    ```
 
 2. **Create a Virtual Environment**:
@@ -117,8 +117,8 @@ Payjo ATS is a modern, responsive, and bilingual (Persian & English) Applicant T
 
 ۱. **کلون کردن پروژه**:
    ```bash
-   git clone https://github.com/omid516/Payjo-ATS.git
-   cd Payjo-ATS
+   git clone https://github.com/omid516/Payjoo-ATS.git
+   cd Payjoo-ATS
    ```
 
 ۲. **ایجاد محیط مجازی پایتون (Virtual Environment)**:

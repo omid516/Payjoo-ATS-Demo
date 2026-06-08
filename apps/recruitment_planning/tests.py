@@ -329,4 +329,14 @@ class RecruitmentPlanningTests(TestCase):
         self.assertEqual(response_save_htmx.status_code, 200)
         self.assertEqual(response_save_htmx['HX-Redirect'], reverse('job_print_doc', kwargs={'pk': new_job.id}))
 
+    def test_job_planning_suggestions_view(self):
+        """تست نمای دستیار هوشمند پیشنهاد تاریخ شروع و ظرفیت"""
+        self.client.login(username='admin_planning', password='testpassword123')
+        suggestions_url = reverse('job_planning_suggestions', kwargs={'job_id': self.job1.id})
+        response = self.client.get(suggestions_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'دستیار هوشمند تاریخ و ظرفیت ماه‌ها')
+        self.assertContains(response, 'تاریخ‌های شروع پیشنهادی')
+        self.assertContains(response, 'پایش ظرفیت تفصیلی ۶ ماهه')
+
 

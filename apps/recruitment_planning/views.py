@@ -645,3 +645,104 @@ class WeeklyAgendaPrintView(LoginRequiredMixin, RoleRequiredMixin, View):
         }
         return render(request, 'recruitment_planning/agenda_print.html', context)
 
+
+class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, job_id):
+        from django.db.models import Sum
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        
+        # 1. Monthly capacity statistics for the current month and the next 5 months
+        today_j = jdatetime.date.today()
+        year = today_j.year
+        month = today_j.month
+        
+        persian_months = ["", "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+        labels = {
+            'SCREENING': 'غربالگری اولیه',
+            'EXAM': 'آزمون کتبی/عملی',
+            'INTERVIEW': 'مصاحبه حضوری',
+            'ASSESSMENT': 'کانون ارزیابی'
+        }
+        
+        configs = {c.stage_type: c for c in StageTypeConfiguration.objects.filter(is_deleted=False)}
+        
+        months_to_analyze = []
+        curr_y, curr_m = year, month
+        for _ in range(6):
+            months_to_analyze.append((curr_y, curr_m))
+            curr_m += 1
+            if curr_m > 12:
+                curr_m = 1
+                curr_y += 1
+                
+        month_capacity = []
+        for y, m in months_to_analyze:
+            g_start, g_end = get_jalali_month_range(y, m)
+            stages_data = []
+            for stype in ['SCREENING', 'EXAM', 'INTERVIEW', 'ASSESSMENT']:
+                consumed = JobStagePlan.objects.filter(
+                    stage_type=stype,
+                    planned_end_date__range=(g_start, g_end),
+                    plan__is_deleted=False,
+                    is_deleted=False
+                ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+                
+                config = configs.get(stype)
+                limit = config.monthly_capacity if config else 100
+                remaining = max(0, limit - consumed)
+                percentage = round((consumed / limit) * 100, 1) if limit > 0 else 0
+                
+                stages_data.append({
+                    'type': stype,
+                    'label': labels.get(stype, stype),
+                    'consumed': consumed,
+                    'limit': limit,
+                    'remaining': remaining,
+                    'percentage': percentage
+                })
+            
+            month_capacity.append({
+                'label': f"{persian_months[m]} {y}",
+                'stages': stages_data
+            })
+            
+        # 2. Simulate start dates to suggest best dates
+        holidays_set = set(Holiday.objects.filter(is_deleted=False).values_list('date', flat=True))
+        suggestions = []
+        start_sim_date = datetime.date.today() + datetime.timedelta(days=1)
+        
+        for i in range(45):
+            candidate_date = start_sim_date + datetime.timedelta(days=i)
+            # Skip Fridays and holidays
+            if candidate_date.weekday() == 4 or candidate_date in holidays_set:
+                continue
+                
+            schedule = calculate_recruitment_schedule(job, candidate_date)
+            if not schedule:
+                continue
+                
+            shifted_count = sum(1 for s in schedule if s.get('capacity_shifted', False))
+            end_date = schedule[-1]['planned_end_date']
+            total_duration = (end_date - candidate_date).days
+            
+            suggestions.append({
+                'start_date_gregorian': candidate_date,
+                'start_date_jalali': to_jalali_string(candidate_date),
+                'end_date_jalali': to_jalali_string(end_date),
+                'duration_days': total_duration,
+                'shifted_count': shifted_count,
+            })
+            
+        suggestions.sort(key=lambda x: (x['shifted_count'], x['start_date_gregorian']))
+        best_suggestions = suggestions[:3]
+        
+        context = {
+            'job': job,
+            'best_suggestions': best_suggestions,
+            'month_capacity': month_capacity
+        }
+        return render(request, 'recruitment_planning/partials/date_suggestions.html', context)
+
+

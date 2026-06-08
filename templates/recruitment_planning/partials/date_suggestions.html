@@ -1,0 +1,111 @@
+<div class="card planning-card border-0 p-4 shadow-sm mb-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="accent-icon bg-primary bg-opacity-10 text-primary" style="width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        </div>
+        <div>
+            <h5 class="font-bold text-secondary m-0">دستیار هوشمند تاریخ و ظرفیت ماه‌ها</h5>
+            <p class="text-muted text-xs m-0">بررسی تاریخ‌های پیشنهادی بر اساس ظرفیت خالی و زمانبندی مراحل استخدام</p>
+        </div>
+    </div>
+
+    <!-- بخش پیشنهادهای شروع -->
+    <div class="mb-5">
+        <h6 class="font-bold text-secondary text-sm mb-3 border-bottom pb-2">تاریخ‌های شروع پیشنهادی (بر اساس ظرفیت خالی مراحل):</h6>
+        <div class="row g-3">
+            {% for suggestion in best_suggestions %}
+                <div class="col-md-4">
+                    <div class="card border-0 h-100 p-3.5 shadow-xs" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0 !important; transition: transform 0.2s ease;">
+                        <div class="d-flex justify-content-between align-items-center mb-2.5">
+                            <span class="badge bg-secondary text-white text-xxs font-semibold px-2 py-1">پیشنهاد {{ forloop.counter }}</span>
+                            {% if suggestion.shifted_count == 0 %}
+                                <span class="badge bg-success bg-opacity-10 text-success text-xxs font-bold border border-success border-opacity-20 px-2 py-1">بدون تاخیر ظرفیت</span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning text-xxs font-bold border border-warning border-opacity-20 px-2 py-1">{{ suggestion.shifted_count }} جابجایی مرحله</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="text-xxs text-muted d-block mb-1">تاریخ پیشنهادی شروع:</span>
+                            <strong class="text-secondary text-sm d-block font-bold">{{ suggestion.start_date_jalali }}</strong>
+                        </div>
+
+                        <div class="mb-4 text-xs text-secondary">
+                            <div class="d-flex justify-content-between mb-1.5">
+                                <span>پیش‌بینی پایان فرآیند:</span>
+                                <strong class="text-dark">{{ suggestion.end_date_jalali }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>کل طول دوره:</span>
+                                <strong class="text-dark">{{ suggestion.duration_days }} روز تقویمی</strong>
+                            </div>
+                        </div>
+
+                        <button type="button" 
+                                onclick="selectSuggestedDate('{{ suggestion.start_date_jalali }}');" 
+                                class="btn btn-sm btn-primary-custom w-100 py-2 text-xs font-bold"
+                                style="border-radius: 8px;">
+                            انتخاب این تاریخ شروع
+                        </button>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning text-xs text-center font-bold">پیشنهادی یافت نشد.</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- بخش نمایش ظرفیت ۶ ماه آینده -->
+    <div>
+        <h6 class="font-bold text-secondary text-sm mb-3 border-bottom pb-2">پایش ظرفیت تفصیلی ۶ ماهه (مخصوص هماهنگی با مدیران نواحی):</h6>
+        <div class="row g-3">
+            {% for month in month_capacity %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 p-3 h-100 shadow-xs" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #f1f5f9 !important;">
+                        <h6 class="font-bold text-primary text-xs mb-3 d-flex align-items-center gap-1.5 pb-1.5 border-bottom border-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            {{ month.label }}
+                        </h6>
+                        <div class="d-flex flex-column gap-2.5">
+                            {% for stage in month.stages %}
+                                <div>
+                                    <div class="d-flex justify-content-between text-xxs mb-1">
+                                        <span class="text-secondary font-semibold">{{ stage.label }}</span>
+                                        <span class="text-muted font-semibold">{{ stage.consumed }} / {{ stage.limit }} نفر ({{ stage.percentage }}٪)</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; border-radius: 3px; background-color: #f1f5f9; overflow: hidden;">
+                                        <div class="progress-bar {% if stage.percentage > 85 %}bg-danger{% elif stage.percentage > 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ stage.percentage }}%;" 
+                                             aria-valuenow="{{ stage.percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectSuggestedDate(dateStr) {
+        const input = document.getElementById('start_date');
+        if (input) {
+            input.value = dateStr;
+            // Dispatch change event to trigger HTMX preview update
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            // Scroll to the planning form area smoothly
+            document.getElementById('planning-form').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>

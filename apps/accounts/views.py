@@ -714,7 +714,7 @@ class SystemUpdateCheckView(LoginRequiredMixin, RoleRequiredMixin, View):
         error_msg = None
         
         try:
-            url = 'https://raw.githubusercontent.com/omid516/Payjo-ATS/main/version.txt'
+            url = 'https://raw.githubusercontent.com/omid516/Payjoo-ATS/main/version.txt'
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=5) as response:
                 remote_version = response.read().decode('utf-8').strip()
@@ -749,26 +749,109 @@ class SystemUpdateRunView(LoginRequiredMixin, RoleRequiredMixin, View):
 
     def post(self, request):
         git_dir = settings.BASE_DIR / '.git'
-        if not os.path.exists(git_dir):
-            return HttpResponse(
-                '<div class="alert alert-danger font-semibold text-xs text-right mb-0">خطا: پروژه با Git راه‌اندازی نشده است. به‌روزرسانی خودکار ناممکن است.</div>',
-                status=400
-            )
+        git_updated = False
+        error_logs = []
 
-        try:
-            pull_res = subprocess.run(
-                ['git', 'pull', 'origin', 'main'],
-                cwd=settings.BASE_DIR,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            if pull_res.returncode != 0:
-                return HttpResponse(
-                    f'<div class="alert alert-danger font-semibold text-xs text-right mb-0">خطا در pull از گیت‌هاب:<br><pre dir="ltr" class="text-left mt-2 mb-0">{pull_res.stderr}</pre></div>',
-                    status=500
+        # 1. Try Git update first if .git folder exists
+        if os.path.exists(git_dir):
+            try:
+                # Update remote URL to new Payjoo-ATS location
+                subprocess.run(
+                    ['git', 'remote', 'set-url', 'origin', 'https://github.com/omid516/Payjoo-ATS.git'],
+                    cwd=settings.BASE_DIR,
+                    capture_output=True,
+                    timeout=10
                 )
 
+                # Fetch code from GitHub
+                fetch_res = subprocess.run(
+                    ['git', 'fetch', 'origin', 'main'],
+                    cwd=settings.BASE_DIR,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                if fetch_res.returncode == 0:
+                    # Hard reset local codes to origin/main (overwrites local edits safely)
+                    reset_res = subprocess.run(
+                        ['git', 'reset', '--hard', 'origin/main'],
+                        cwd=settings.BASE_DIR,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    if reset_res.returncode == 0:
+                        git_updated = True
+                    else:
+                        error_logs.append(f"git reset failed: {reset_res.stderr}")
+                else:
+                    error_logs.append(f"git fetch failed: {fetch_res.stderr}")
+            except Exception as e:
+                error_logs.append(f"Git update exception: {str(e)}")
+
+        # 2. Fallback to ZIP download update if Git was not used or failed
+        if not git_updated:
+            try:
+                import tempfile
+                import zipfile
+                import shutil
+
+                url = 'https://github.com/omid516/Payjoo-ATS/archive/refs/heads/main.zip'
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    zip_path = os.path.join(tmpdir, 'update.zip')
+                    
+                    # Download the ZIP file
+                    with urllib.request.urlopen(req, timeout=30) as response, open(zip_path, 'wb') as out_file:
+                        shutil.copyfileobj(response, out_file)
+                        
+                    # Extract zip contents
+                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                        namelist = zip_ref.namelist()
+                        if not namelist:
+                            raise Exception("فایل فشرده دریافتی از گیت‌هاب خالی است.")
+                        
+                        root_prefix = namelist[0].split('/')[0] + '/'
+                        
+                        for member in zip_ref.infolist():
+                            if not member.filename.startswith(root_prefix):
+                                continue
+                            
+                            rel_path = member.filename[len(root_prefix):]
+                            if not rel_path:
+                                continue
+                            
+                            # Protect database, virtualenv, and user media files
+                            parts = rel_path.split('/')
+                            if parts[0] in ['db.sqlite3', '.venv', '.git', 'media', '.env', 'scratch_backup']:
+                                continue
+                            if rel_path.endswith('.sqlite3'):
+                                continue
+                            
+                            target_path = settings.BASE_DIR / rel_path
+                            
+                            if member.is_dir():
+                                os.makedirs(target_path, exist_ok=True)
+                            else:
+                                os.makedirs(target_path.parent, exist_ok=True)
+                                with zip_ref.open(member) as source, open(target_path, 'wb') as target:
+                                    shutil.copyfileobj(source, target)
+                                    
+                # ZIP update succeeded
+                git_updated = True
+            except Exception as e:
+                error_logs.append(f"ZIP update exception: {str(e)}")
+
+        if not git_updated:
+            errors_str = "<br>".join(error_logs)
+            return HttpResponse(
+                f'<div class="alert alert-danger font-semibold text-xs text-right mb-0">خطا در به‌روزرسانی خودکار سیستم:<br><pre dir="ltr" class="text-left mt-2 mb-0">{errors_str}</pre></div>',
+                status=500
+            )
+
+        # 3. Migrate database
+        try:
             migrate_res = subprocess.run(
                 [sys.executable, 'manage.py', 'migrate'],
                 cwd=settings.BASE_DIR,
@@ -778,18 +861,50 @@ class SystemUpdateRunView(LoginRequiredMixin, RoleRequiredMixin, View):
             )
             if migrate_res.returncode != 0:
                 return HttpResponse(
-                    f'<div class="alert alert-warning font-semibold text-xs text-right mb-0">کد با موفقیت دریافت شد، اما اعمال مهاجرت‌ها با خطا مواجه شد:<br><pre dir="ltr" class="text-left mt-2 mb-0">{migrate_res.stderr}</pre></div>',
+                    f'<div class="alert alert-warning font-semibold text-xs text-right mb-0">کدها با موفقیت دریافت شدند، اما اعمال مهاجرت‌ها با خطا مواجه شد:<br><pre dir="ltr" class="text-left mt-2 mb-0">{migrate_res.stderr}</pre></div>',
                     status=200
                 )
-
+        except Exception as e:
             return HttpResponse(
-                '<div class="alert alert-success font-semibold text-xs text-right mb-0">سیستم با موفقیت به آخرین نسخه به‌روزرسانی شد. سرور در حال راه‌اندازی مجدد است...</div>',
+                f'<div class="alert alert-warning font-semibold text-xs text-right mb-0">کدها با موفقیت دریافت شدند، اما خطا در اجرای مهاجرت‌ها رخ داد: {str(e)}</div>',
                 status=200
             )
 
+        # 4. Touch manage.py to trigger django auto-reloader restart
+        try:
+            manage_py = settings.BASE_DIR / 'manage.py'
+            if os.path.exists(manage_py):
+                os.utime(manage_py, None)
+        except Exception:
+            pass
+
+        return HttpResponse(
+            '<div class="alert alert-success font-semibold text-xs text-right mb-0">سیستم با موفقیت به آخرین نسخه به‌روزرسانی شد. سرور در حال راه‌اندازی مجدد است...</div>',
+            status=200
+        )
+
+
+class SystemHealthCheckView(View):
+    def get(self, request):
+        from django.http import JsonResponse
+        return JsonResponse({'status': 'ok', 'version': getattr(settings, 'APP_VERSION', '1.0.0')})
+
+
+class SystemRestartView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN]
+
+    def post(self, request):
+        try:
+            manage_py = settings.BASE_DIR / 'manage.py'
+            if os.path.exists(manage_py):
+                os.utime(manage_py, None)
+            return HttpResponse(
+                '<div class="alert alert-success font-semibold text-xs text-right mb-0">فرمان راه‌اندازی مجدد سرور با موفقیت صادر شد. لطفاً چند لحظه منتظر بمانید...</div>',
+                status=200
+            )
         except Exception as e:
             return HttpResponse(
-                f'<div class="alert alert-danger font-semibold text-xs text-right mb-0">خطای غیرمنتظره در حین به‌روزرسانی: {str(e)}</div>',
+                f'<div class="alert alert-danger font-semibold text-xs text-right mb-0">خطا در راه‌اندازی مجدد سرور: {str(e)}</div>',
                 status=500
             )
 

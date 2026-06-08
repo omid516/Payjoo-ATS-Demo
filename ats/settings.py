@@ -138,4 +138,9 @@ LOGOUT_REDIRECT_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Application Version
-APP_VERSION = '1.2.0'
+try:
+    with open(BASE_DIR / 'version.txt', 'r') as _f:
+        APP_VERSION = _f.read().strip()
+except Exception:
+    APP_VERSION = '1.3.1'
+

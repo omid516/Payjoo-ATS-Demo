@@ -123,7 +123,7 @@
 
     <!-- بخش به‌روزرسانی سیستم -->
     <div class="col-lg-4 col-md-12">
-        <div class="card glass-card border-0 h-100 p-4">
+        <div class="card glass-card border-0 h-100 p-4 d-flex flex-column">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <div class="accent-icon bg-warning bg-opacity-10 text-warning">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <div class="flex-grow-1 text-sm text-secondary">
+            <div class="flex-grow-1 text-sm text-secondary mb-3">
                 <div id="update-status-container" 
                      hx-get="{% url 'system_update_check' %}" 
                      hx-trigger="load" 
@@ -147,7 +147,258 @@
                     </div>
                 </div>
             </div>
+
+            <!-- دکمه راه‌اندازی مجدد دستی سرور -->
+            <div class="mt-auto pt-3 border-top">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="font-bold text-xs text-secondary d-block">راه‌اندازی مجدد دستی سرور</span>
+                        <span class="text-muted text-xxs">راه‌اندازی مجدد موتور وب‌سرور برای اعمال تنظیمات جدید</span>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm py-1.5 px-3 font-semibold text-xs" onclick="startSystemRestart();" style="border-radius: 8px;">
+                        ریست سرور
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function startSystemUpdate(event) {
+        event.preventDefault();
+        
+        if (!confirm("آیا از به‌روزرسانی خودکار سیستم اطمینان دارید؟ این فرآیند فایل‌های کد را دانلود کرده و پایگاه داده را به‌روزرسانی می‌کند.")) {
+            return;
+        }
+        
+        const container = document.getElementById('update-status-container');
+        
+        // Render progress UI
+        container.innerHTML = `
+            <div class="d-flex flex-column justify-content-center h-100 py-4">
+                <h6 class="font-bold text-secondary text-xs mb-3 text-right">در حال به‌روزرسانی سیستم...</h6>
+                <div class="progress mb-2.5" style="height: 12px; border-radius: 6px; background-color: #f1f5f9; overflow: hidden;">
+                    <div id="update-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 5%;" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="update-progress-percent" class="text-xxs font-bold text-warning">۵٪</span>
+                    <span id="update-progress-status" class="text-xxs text-muted">در حال دریافت کدهای جدید از گیت‌هاب...</span>
+                </div>
+            </div>
+        `;
+        
+        const progressBar = document.getElementById('update-progress-bar');
+        const progressPercent = document.getElementById('update-progress-percent');
+        const progressStatus = document.getElementById('update-progress-status');
+        
+        let currentPercent = 5;
+        const progressInterval = setInterval(() => {
+            if (currentPercent < 75) {
+                currentPercent += Math.floor(Math.random() * 3) + 1;
+                if (currentPercent > 75) currentPercent = 75;
+                progressBar.style.width = currentPercent + '%';
+                progressPercent.textContent = currentPercent + '٪';
+            }
+        }, 300);
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch("{% url "system_update_run" %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            clearInterval(progressInterval);
+            if (response.ok) {
+                progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-info";
+                progressBar.style.width = '80%';
+                progressPercent.textContent = '۸۰٪';
+                progressPercent.className = "text-xxs font-bold text-info";
+                progressStatus.textContent = 'کدها با موفقیت به‌روز شدند. در حال ریستارت سرور...';
+                
+                pollHealthCheck(80);
+            } else {
+                response.text().then(errorHtml => {
+                    container.innerHTML = `
+                        <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-danger mb-2" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+                            <span class="text-xs font-semibold text-danger mb-2">خطا در فرآیند به‌روزرسانی</span>
+                            <div class="w-100 mb-3" style="max-height: 150px; overflow-y: auto;">${errorHtml}</div>
+                            <button class="btn btn-sm btn-outline-secondary px-3" onclick="window.location.reload();" style="border-radius: 8px; font-size: 11px;">
+                                بارگذاری مجدد صفحه
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+        })
+        .catch(error => {
+            clearInterval(progressInterval);
+            container.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="text-danger mb-2" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span class="text-xs font-semibold text-danger mb-3">خطا در ارتباط با سرور: ${error.message}</span>
+                    <button class="btn btn-sm btn-outline-secondary px-3" onclick="window.location.reload();" style="border-radius: 8px; font-size: 11px;">
+                        بارگذاری مجدد صفحه
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function startSystemRestart() {
+        if (!confirm("آیا از راه‌اندازی مجدد دستی وب‌سرور مطمئن هستید؟")) {
+            return;
+        }
+        
+        const container = document.getElementById('update-status-container');
+        
+        container.innerHTML = `
+            <div class="d-flex flex-column justify-content-center h-100 py-4">
+                <h6 class="font-bold text-secondary text-xs mb-3 text-right">در حال راه‌اندازی مجدد وب‌سرور...</h6>
+                <div class="progress mb-2.5" style="height: 12px; border-radius: 6px; background-color: #f1f5f9; overflow: hidden;">
+                    <div id="update-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 10%;" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="update-progress-percent" class="text-xxs font-bold text-warning">۱۰٪</span>
+                    <span id="update-progress-status" class="text-xxs text-muted">ارسال دستور راه‌اندازی مجدد به سرور...</span>
+                </div>
+            </div>
+        `;
+        
+        const progressBar = document.getElementById('update-progress-bar');
+        const progressPercent = document.getElementById('update-progress-percent');
+        const progressStatus = document.getElementById('update-progress-status');
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch("{% url "system_restart" %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-info";
+                progressBar.style.width = '40%';
+                progressPercent.textContent = '۴۰٪';
+                progressPercent.className = "text-xxs font-bold text-info";
+                progressStatus.textContent = 'دستور ارسال شد. منتظر بازخوانی سرور...';
+                
+                pollHealthCheck(40);
+            } else {
+                response.text().then(errorHtml => {
+                    container.innerHTML = `
+                        <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-danger mb-2" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+                            <span class="text-xs font-semibold text-danger mb-2">خطا در راه‌اندازی مجدد</span>
+                            <div class="w-100 mb-3">${errorHtml}</div>
+                            <button class="btn btn-sm btn-outline-secondary px-3" onclick="window.location.reload();" style="border-radius: 8px; font-size: 11px;">
+                                بارگذاری مجدد صفحه
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="text-danger mb-2" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span class="text-xs font-semibold text-danger mb-3">خطا در ارتباط با سرور: ${error.message}</span>
+                    <button class="btn btn-sm btn-outline-secondary px-3" onclick="window.location.reload();" style="border-radius: 8px; font-size: 11px;">
+                        بارگذاری مجدد صفحه
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function pollHealthCheck(startPercent) {
+        let currentPercent = startPercent;
+        const progressBar = document.getElementById('update-progress-bar');
+        const progressPercent = document.getElementById('update-progress-percent');
+        const progressStatus = document.getElementById('update-progress-status');
+        const container = document.getElementById('update-status-container');
+        
+        const restartInterval = setInterval(() => {
+            if (currentPercent < 98) {
+                currentPercent += 1;
+                progressBar.style.width = currentPercent + '%';
+                progressPercent.textContent = currentPercent + '٪';
+            }
+        }, 1000);
+        
+        let attempts = 0;
+        const maxAttempts = 60; // 2 minutes max
+        
+        const checkServer = () => {
+            attempts++;
+            
+            fetch("{% url "system_health_check" %}", { cache: "no-store" })
+            .then(response => {
+                if (response.ok) {
+                    clearInterval(restartInterval);
+                    progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+                    progressBar.style.width = '100%';
+                    progressPercent.textContent = '۱۰۰٪';
+                    progressPercent.className = "text-xxs font-bold text-success";
+                    progressStatus.textContent = 'سرور با موفقیت بالا آمد. در حال بازنشانی صفحه...';
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkServer, 1500);
+                    } else {
+                        showRestartTimeoutError(container);
+                    }
+                }
+            })
+            .catch(error => {
+                // Expected to fail during restart
+                if (attempts < maxAttempts) {
+                    setTimeout(checkServer, 1500);
+                } else {
+                    showRestartTimeoutError(container);
+                }
+            });
+        };
+        
+        // Wait 2 seconds before first health check to allow server to shut down
+        setTimeout(checkServer, 2000);
+    }
+
+    function showRestartTimeoutError(container) {
+        container.innerHTML = `
+            <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="text-warning mb-2" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <span class="text-xs font-semibold text-warning mb-2">راه‌اندازی مجدد بیش از حد طول کشید</span>
+                <span class="text-xxs text-muted mb-3">ممکن است سرور با خطایی مواجه شده باشد یا فرآیند طولانی شده باشد. لطفاً کنسول یا سرویس را بررسی کنید.</span>
+                <button class="btn btn-sm btn-outline-secondary px-3" onclick="window.location.reload();" style="border-radius: 8px; font-size: 11px;">
+                    بارگذاری مجدد صفحه
+                </button>
+            </div>
+        `;
+    }
+</script>
 {% endblock %}

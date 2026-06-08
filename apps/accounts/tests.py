@@ -425,15 +425,19 @@ class SystemBackupAndRestoreTests(TestCase):
         response = self.client.get(reverse('system_backup'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('current_version', response.context)
-        self.assertEqual(response.context['current_version'], '1.2.0')
+        from django.conf import settings
+        self.assertEqual(response.context['current_version'], getattr(settings, 'APP_VERSION', '1.0.0'))
 
     @patch('urllib.request.urlopen')
     def test_update_check_up_to_date(self, mock_urlopen):
         """تست بررسی به‌روزرسانی در صورتی که سیستم به‌روز باشد"""
         self.client.login(username='admin_test_backup', password='testpassword123')
         
+        from django.conf import settings
+        current_version = getattr(settings, 'APP_VERSION', '1.0.0')
+        
         mock_response = MagicMock()
-        mock_response.read.return_value = b"1.2.0\n"
+        mock_response.read.return_value = f"{current_version}\n".encode('utf-8')
         mock_urlopen.return_value.__enter__.return_value = mock_response
         
         response = self.client.get(reverse('system_update_check'))
@@ -445,8 +449,13 @@ class SystemBackupAndRestoreTests(TestCase):
         """تست بررسی به‌روزرسانی در صورتی که نسخه جدید موجود باشد"""
         self.client.login(username='admin_test_backup', password='testpassword123')
         
+        from django.conf import settings
+        current_version = getattr(settings, 'APP_VERSION', '1.0.0')
+        parts = current_version.split('.')
+        next_version = f"{parts[0]}.{int(parts[1])+1}.{parts[2]}"
+        
         mock_response = MagicMock()
-        mock_response.read.return_value = b"1.3.0\n"
+        mock_response.read.return_value = f"{next_version}\n".encode('utf-8')
         mock_urlopen.return_value.__enter__.return_value = mock_response
         
         response = self.client.get(reverse('system_update_check'))
@@ -465,20 +474,37 @@ class SystemBackupAndRestoreTests(TestCase):
         self.assertIn("خطا در ارتباط با سرور به‌روزرسانی", response.content.decode('utf-8'))
 
     @patch('os.path.exists')
-    def test_update_run_no_git(self, mock_exists):
-        """تست عدم اجرای به‌روزرسانی در صورتی که پوشه .git موجود نباشد"""
+    @patch('urllib.request.urlopen')
+    @patch('subprocess.run')
+    def test_update_run_zip_success(self, mock_run, mock_urlopen, mock_exists):
+        """تست اجرای موفق به‌روزرسانی از طریق ZIP در صورت عدم وجود پوشه .git"""
         self.client.login(username='admin_test_backup', password='testpassword123')
         
-        mock_exists.return_value = False
+        # os.path.exists returns False for git_dir, True for manage.py
+        mock_exists.side_effect = lambda path: False if '.git' in str(path) else True
+        
+        # Mock download response containing a zip with a dummy version file
+        import io
+        import zipfile
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zf:
+            zf.writestr('Payjoo-ATS-main/version.txt', '1.3.1')
+        zip_buffer.seek(0)
+        
+        mock_urlopen.return_value.__enter__.return_value = zip_buffer
+        
+        mock_res_migrate = MagicMock()
+        mock_res_migrate.returncode = 0
+        mock_run.return_value = mock_res_migrate
         
         response = self.client.post(reverse('system_update_run'))
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("پروژه با Git راه‌اندازی نشده است", response.content.decode('utf-8'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("سیستم با موفقیت به آخرین نسخه به‌روزرسانی شد", response.content.decode('utf-8'))
 
     @patch('os.path.exists')
     @patch('subprocess.run')
     def test_update_run_success(self, mock_run, mock_exists):
-        """تست اجرای موفق به‌روزرسانی کدهای سیستم"""
+        """تست اجرای موفق به‌روزرسانی کدهای سیستم از طریق Git"""
         self.client.login(username='admin_test_backup', password='testpassword123')
         
         mock_exists.return_value = True
@@ -488,11 +514,30 @@ class SystemBackupAndRestoreTests(TestCase):
         mock_res_migrate = MagicMock()
         mock_res_migrate.returncode = 0
         
-        mock_run.side_effect = [mock_res_git, mock_res_migrate]
+        # Git: set-url, fetch, reset, migrate -> 4 calls
+        mock_run.side_effect = [mock_res_git, mock_res_git, mock_res_git, mock_res_migrate]
         
         response = self.client.post(reverse('system_update_run'))
         self.assertEqual(response.status_code, 200)
         self.assertIn("به‌روزرسانی شد. سرور در حال راه‌اندازی مجدد است", response.content.decode('utf-8'))
+
+    def test_system_health_check_view(self):
+        """تست عملکرد نمای بررسی سلامت سیستم"""
+        response = self.client.get(reverse('system_health_check'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'ok')
+
+    @patch('os.path.exists')
+    def test_system_restart_view(self, mock_exists):
+        """تست عملکرد نمای راه‌اندازی مجدد سیستم"""
+        self.client.login(username='admin_test_backup', password='testpassword123')
+        mock_exists.return_value = True
+        
+        with patch('os.utime') as mock_utime:
+            response = self.client.post(reverse('system_restart'))
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("راه‌اندازی مجدد سرور با موفقیت صادر شد", response.content.decode('utf-8'))
+            mock_utime.assert_called_once()
 
 
 class SMSTemplateAndPanelTests(TestCase):

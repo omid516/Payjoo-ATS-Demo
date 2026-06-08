@@ -6,8 +6,8 @@ from django.urls import reverse
 
 from apps.accounts.models import UserProfile
 from apps.jobs.models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate
-from .models import StageTypeConfiguration, Holiday, JobRecruitmentPlan, JobStagePlan
-from .utils import (
+from apps.recruitment_planning.models import StageTypeConfiguration, Holiday, JobRecruitmentPlan, JobStagePlan
+from apps.recruitment_planning.utils import (
     add_working_days, get_next_working_day, 
     parse_jalali_to_gregorian, to_jalali_string,
     calculate_recruitment_schedule, get_jalali_month_range

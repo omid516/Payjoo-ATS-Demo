@@ -9,6 +9,10 @@ from apps.jobs.models import JobOpportunity
 import jdatetime
 
 class CandidateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].required = True
+
     class Meta:
         model = Candidate
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'national_id', 'personnel_number', 'resume']
@@ -153,6 +157,10 @@ class CandidateSignUpForm(forms.ModelForm):
         label="تکرار کلمه عبور", 
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'تکرار کلمه عبور'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].required = True
 
     class Meta:
         model = Candidate

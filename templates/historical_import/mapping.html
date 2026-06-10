@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+{% block title %}ورود سوابق تاریخی جذب - نگاشت ستون‌ها{% endblock %}
+
+{% block extra_head %}
+<style>
+    .import-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 24px;
+        box-shadow: var(--card-shadow);
+    }
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .step-item.active {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .step-item.completed {
+        color: #10b981;
+    }
+    .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid currentColor;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .step-line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: #e2e8f0;
+        margin: 0 16px;
+    }
+    .step-line.completed {
+        background-color: #10b981;
+    }
+    .mapping-section-title {
+        border-right: 4px solid var(--primary-color);
+        padding-right: 12px;
+        margin-bottom: 20px;
+    }
+    .stage-card {
+        transition: all 0.2s ease;
+    }
+    .stage-card.disabled {
+        opacity: 0.6;
+        background-color: #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="font-semibold text-secondary mb-1">ورود سوابق تاریخی جذب</h3>
+    <p class="text-muted text-sm m-0">تعیین نحوه تطابق اطلاعات فایل اکسل با جداول و فیلدهای سیستم ATS</p>
+</div>
+
+<!-- Step Tracker -->
+<div class="import-steps mb-4">
+    <div class="step-item completed">
+        <span class="step-num">✓</span>
+        <span>بارگذاری فایل</span>
+    </div>
+    <div class="step-line completed"></div>
+    <div class="step-item active">
+        <span class="step-num">۲</span>
+        <span>نگاشت ستون‌ها</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۳</span>
+        <span>پیش‌نمایش و تعارضات</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۴</span>
+        <span>تأیید و ایمپورت</span>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger shadow-sm mb-4" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- کارت تغییر شیت اصلی -->
+<div class="card premium-card border-primary border-opacity-25 mb-4 bg-primary bg-opacity-5">
+    <div class="card-body py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h6 class="font-semibold text-primary mb-1">🛠️ تنظیم و تغییر شیت اصلی سوابق</h6>
+            <p class="text-muted text-xs m-0">در صورتی که شیت حاوی فرصت‌های شغلی (وضعیت) به طور خودکار اشتباه تشخیص داده شده است، آن را از منوی زیر تغییر دهید.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="font-semibold text-xs text-secondary mb-0 text-nowrap">شیت اصلی:</label>
+            <select id="mainSheetSelector" class="form-select form-select-sm w-auto">
+                {% for sheet_name in summary.all_sheets %}
+                <option value="{{ sheet_name }}" {% if sheet_name == summary.main_sheet %}selected{% endif %}>{{ sheet_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+<form method="post" id="mappingForm">
+    {% csrf_token %}
+    <input type="hidden" name="main_sheet" value="{{ summary.main_sheet }}">
+
+    <!-- ۱. نگاشت فیلدهای فرصت شغلی -->
+    <div class="card premium-card mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="font-semibold text-secondary m-0 mapping-section-title">۱. نگاشت فیلدهای فرصت شغلی (شیت اصلی: {{ summary.main_sheet }})</h5>
+            <p class="text-muted text-xs mb-0 mt-1">ستون‌های متناظر با اطلاعات کلی فرصت‌های شغلی را انتخاب کنید.</p>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label font-semibold text-xs">شماره / کد فرصت شغلی (منحصربه‌فرد) <span class="text-danger">*</span></label>
+                    <select name="job_code_col" class="form-select auto-select" data-keywords="کد,شناسه,شماره درخواست,درخواست" required>
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label font-semibold text-xs">عنوان شغل <span class="text-danger">*</span></label>
+                    <select name="title_col" class="form-select auto-select" data-keywords="عنوان,شغل,سمت" required>
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label font-semibold text-xs">واحد متقاضی / دپارتمان</label>
+                    <select name="department_col" class="form-select auto-select" data-keywords="بخش,دپارتمان,واحد,متقاضی">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-semibold text-xs">تعداد مورد نیاز (ظرفیت جذب)</label>
+                    <select name="headcount_col" class="form-select auto-select" data-keywords="تعداد,ظرفیت,مورد نیاز">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-semibold text-xs">وضعیت فعلی شغل</label>
+                    <select name="status_col" class="form-select auto-select" data-keywords="وضعیت">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-semibold text-xs">تاریخ شروع فرآیند</label>
+                    <select name="start_date_col" class="form-select auto-select" data-keywords="تاریخ شروع,شروع,ثبت">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-semibold text-xs">الگوی استخدام (Workflow) <span class="text-danger">*</span></label>
+                    <select name="workflow_pattern_col" id="workflowPatternColSelect" class="form-select auto-select" data-keywords="الگو,فرآیند,استخدام,مسیر" required>
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}" {% if header == summary.workflow_col %}selected{% endif %}>{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ۲. نگاشت الگوهای استخدامی به الگوهای دیتابیس -->
+    <div class="card premium-card mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="font-semibold text-secondary m-0 mapping-section-title">۲. تطبیق الگوهای استخدامی (Workflow Templates)</h5>
+            <p class="text-muted text-xs mb-0 mt-1">هر کدام از الگوهای متنی یافت شده در اکسل را به یکی از الگوهای فرآیند جاری سیستم متصل کنید.</p>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% for pattern in summary.workflow_patterns %}
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded">
+                        <label class="form-label font-bold text-xs d-block mb-2 text-primary">الگوی اکسل: « {{ pattern }} »</label>
+                        <select name="workflow_map_{{ pattern }}" class="form-select" required>
+                            <option value="auto_create" selected>✨ ایجاد خودکار الگو و مراحل جدید</option>
+                            {% for wt in workflow_templates %}
+                            <option value="{{ wt.id }}">{{ wt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3 text-muted">
+                    هیچ الگوی فرآیندی در فایل شناسایی نشد.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ۳. نگاشت شیت‌های ارزیابی و اطلاعات متقاضیان -->
+    <div class="mb-4">
+        <h5 class="font-semibold text-secondary mb-3 mapping-section-title">۳. نگاشت شیت‌های مراحل ارزیابی (متقاضیان)</h5>
+        <p class="text-muted text-sm mb-3">شیت‌های زیر مربوط به مراحل ارزیابی هستند. نوع مرحله متناظر در سیستم و نحوه نگاشت ستون‌های آن را تنظیم کنید.</p>
+        
+        <div class="row g-3">
+            {% for sheet in summary.stage_sheets %}
+            <div class="col-12">
+                <div class="card premium-card stage-card" id="card_{{ sheet.name }}">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <span class="font-semibold text-secondary">شیت: {{ sheet.name }}</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border ms-2">{{ sheet.rows_count }} ردیف متقاضی</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-xs text-muted">نوع مرحله متناظر در ATS:</span>
+                            <select name="stage_type_{{ sheet.name }}" class="form-select form-select-sm w-auto stage-type-select" data-sheet="{{ sheet.name }}">
+                                <option value="IGNORE">❌ نادیده گرفتن این شیت</option>
+                                <option value="SCREENING" {% if "غربال" in sheet.name %}selected{% endif %}>غربالگری اولیه</option>
+                                <option value="EXAM" {% if "کتبی" in sheet.name or "آزمون" in sheet.name or "امتحان" in sheet.name %}selected{% endif %}>آزمون کتبی</option>
+                                <option value="INTERVIEW" {% if "مصاحبه" in sheet.name %}selected{% endif %}>مصاحبه حضوری</option>
+                                <option value="ASSESSMENT" {% if "کانون" in sheet.name or "ارزیابی" in sheet.name %}selected{% endif %}>کانون ارزیابی</option>
+                                <option value="OTHER">سایر مراحل</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body border-top" id="body_{{ sheet.name }}">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">کد فرصت شغلی مرتبط <span class="text-danger">*</span></label>
+                                <select name="c_job_code_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="کد شغل,شناسه شغل,فرصت شغلی,شماره فرصت,کد" required>
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">کد ملی متقاضی <span class="text-danger">*</span></label>
+                                <select name="c_national_id_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="کد ملی,ملی,شناسه ملی" required>
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">نام متقاضی <span class="text-danger">*</span></label>
+                                <select name="c_first_name_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="نام,نام کوچک" required>
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">نام خانوادگی متقاضی <span class="text-danger">*</span></label>
+                                <select name="c_last_name_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="خانوادگی,نام خانوادگی,فامیل,فامیلی" required>
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">شماره تلفن / همراه</label>
+                                <select name="c_phone_number_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="تلفن,موبایل,همراه,شماره تماس">
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">ایمیل</label>
+                                <select name="c_email_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="ایمیل,پست الکترونیک,Email">
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">نمره / امتیاز در این مرحله</label>
+                                <select name="c_score_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="نمره,امتیاز,نمره مرحله,اسکور,Score">
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label font-semibold text-xs">تاریخ ارزیابی این مرحله</label>
+                                <select name="c_date_col_{{ sheet.name }}" class="form-select auto-select" data-keywords="تاریخ ارزیابی,تاریخ,تاریخ آزمون,تاریخ مصاحبه">
+                                    <option value="">-- انتخاب ستون --</option>
+                                    {% for h in sheet.headers %}
+                                    <option value="{{ h }}">{{ h }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mb-5">
+        <a href="{% url 'import_upload' %}" class="btn btn-outline-secondary px-4 py-2.5 font-medium">← بازگشت به گام اول</a>
+        <button type="submit" class="btn btn-primary-custom px-5 py-2.5 font-medium" id="submitBtn">
+            <span id="btnText">اجرای اعتبارسنجی و رفتن به پیش‌نمایش</span>
+            <span id="btnSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+        </button>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    // Auto-detection of columns based on keywords
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".auto-select").forEach(select => {
+            const keywords = select.getAttribute("data-keywords").split(",");
+            const options = Array.from(select.options);
+            
+            // Skip if already pre-selected
+            if (select.selectedIndex > 0) return;
+
+            for (let i = 0; i < options.length; i++) {
+                const optText = options[i].value.toLowerCase().replace(/[^a-zA-Z0-9آ-ی\s]/g, "").trim();
+                if (!optText) continue;
+
+                // Check matches
+                const matched = keywords.some(kw => {
+                    const cleanKw = kw.toLowerCase().trim();
+                    return optText.includes(cleanKw) || cleanKw.includes(optText);
+                });
+
+                if (matched) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        });
+
+        // Handle IGNORE sheet selection
+        function handleStageTypeChange(selectEl) {
+            const sheetName = selectEl.getAttribute("data-sheet");
+            const cardEl = document.getElementById(`card_${sheetName}`);
+            const bodyEl = document.getElementById(`body_${sheetName}`);
+            const requiredFields = bodyEl.querySelectorAll("[required]");
+
+            if (selectEl.value === "IGNORE") {
+                cardEl.classList.add("disabled");
+                bodyEl.style.display = "none";
+                requiredFields.forEach(field => {
+                    field.removeAttribute("required");
+                });
+            } else {
+                cardEl.classList.remove("disabled");
+                bodyEl.style.display = "block";
+                requiredFields.forEach(field => {
+                    // restore required attribute
+                    if (field.name.includes("c_job_code_col") || field.name.includes("c_national_id_col") || field.name.includes("c_first_name_col") || field.name.includes("c_last_name_col")) {
+                        field.setAttribute("required", "true");
+                    }
+                });
+            }
+        }
+
+        document.querySelectorAll(".stage-type-select").forEach(select => {
+            handleStageTypeChange(select); // Init state
+            select.addEventListener("change", (e) => handleStageTypeChange(e.target));
+        });
+
+        // Main Sheet change reload
+        const mainSheetSelector = document.getElementById('mainSheetSelector');
+        if (mainSheetSelector) {
+            mainSheetSelector.addEventListener('change', (e) => {
+                const selectedSheet = e.target.value;
+                window.location.href = '?main_sheet=' + encodeURIComponent(selectedSheet);
+            });
+        }
+
+        // Workflow column change reload
+        const workflowPatternColSelect = document.getElementById('workflowPatternColSelect');
+        if (workflowPatternColSelect) {
+            workflowPatternColSelect.addEventListener('change', (e) => {
+                const selectedCol = e.target.value;
+                const currentSheet = mainSheetSelector ? mainSheetSelector.value : '';
+                window.location.href = '?main_sheet=' + encodeURIComponent(currentSheet) + '&workflow_col=' + encodeURIComponent(selectedCol);
+            });
+        }
+    });
+
+    const mappingForm = document.getElementById('mappingForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    mappingForm.addEventListener('submit', () => {
+        submitBtn.setAttribute('disabled', 'true');
+        btnText.innerText = 'در حال اعتبارسنجی و درون‌ریزی داده‌ها در جداول موقت...';
+        btnSpinner.style.display = 'inline-block';
+    });
+</script>
+{% endblock %}
+{% endblock %}

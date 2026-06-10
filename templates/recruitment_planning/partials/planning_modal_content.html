@@ -1,0 +1,128 @@
+{% load jalali_tags %}
+<div class="row g-4">
+    <!-- ستون تنظیمات و دریافت اطلاعات -->
+    <div class="col-lg-5">
+        <div class="card border-0 p-4 shadow-sm" style="border-radius: 12px; background: #ffffff;">
+            <h5 class="font-bold text-secondary mb-3">تنظیم تاریخ شروع</h5>
+            
+            <form hx-post="{% url 'job_planning' job.id %}" 
+                  hx-target="#schedule-preview-container-modal" 
+                  hx-trigger="submit, change delay:400ms from:#start_date_modal" 
+                  class="m-0" 
+                  id="planning-form-modal">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="form-action-modal" value="preview">
+                <input type="hidden" name="next" value="{{ next_url|default:'/planning/sla-delays/' }}">
+                
+                <div class="mb-4">
+                    <label class="form-label font-semibold text-xs text-secondary mb-2">تاریخ شروع فرآیند استخدام:</label>
+                    <input type="text" 
+                           name="start_date" 
+                           id="start_date_modal" 
+                           value="{% if plan %}{{ plan.start_date|to_jalali }}{% else %}{{ today_jalali }}{% endif %}" 
+                           placeholder="۱۴۰۵/۰۲/۰۱" 
+                           class="form-control text-center jalali-datepicker-input font-bold" 
+                           autocomplete="off" 
+                           required 
+                           style="border-radius: 8px;">
+                    <div class="form-text text-xxs text-muted mt-1.5">شروع فرآیند جذب از این تاریخ محاسبه خواهد شد. روزهای غیرکاری و جمعه‌ها نادیده گرفته می‌شوند.</div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 mb-4" style="border-radius: 8px;">
+                    <span class="text-xxs font-bold text-muted d-block mb-1">جزئیات فرصت شغلی:</span>
+                    <div class="d-flex justify-content-between text-xs text-secondary mb-1.5">
+                        <span>ظرفیت جذب (Headcount):</span>
+                        <strong class="text-primary">{{ job.headcount }} نفر</strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-xs text-secondary">
+                        <span>نوع استخدام:</span>
+                        <strong>{{ job.get_recruitment_type_display }}</strong>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="button" 
+                            class="btn btn-outline-primary w-100 py-2.5 font-bold text-xs d-flex align-items-center justify-content-center gap-2" 
+                            style="border-radius: 8px;"
+                            hx-get="{% url 'job_planning_suggestions' job.id %}"
+                            hx-target="#suggestions-container-modal"
+                            hx-indicator="#suggestions-spinner-modal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21m0 0l-.813-5.096L3 15.187m6 5.813l6-5.813M3.14 8.868A9.047 9.047 0 0112 3c4.97 0 9 4.03 9 9 0 2.274-.843 4.35-2.23 5.942m-1.285 1.286A9.043 9.043 0 0112 21c-4.97 0-9-4.03-9-9 0-2.274.843-4.35 2.23-5.942" />
+                        </svg>
+                        دستیار هوشمند تاریخ و ظرفیت ماه‌ها
+                        <div id="suggestions-spinner-modal" class="htmx-indicator spinner-border text-primary spinner-border-sm" role="status" style="width: 12px; height: 12px; border-width: 2px;"></div>
+                    </button>
+                </div>
+
+                <button type="button" 
+                        class="btn btn-success w-100 py-2.5 font-bold text-xs d-flex align-items-center justify-content-center gap-2" 
+                        style="border-radius: 8px;"
+                        onclick="submitSaveFormModal();">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    تایید و ثبت نهایی برنامه‌ریزی
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ستون پیش‌نمایش تقویم زمانبندی -->
+    <div class="col-lg-7">
+        <div class="card border-0 p-4 shadow-sm h-100" style="border-radius: 12px; background: #ffffff;">
+            <h5 class="font-bold text-secondary mb-4">پیش‌نمایش زمانبندی و تحلیل ظرفیت مراحل</h5>
+            
+            <div id="schedule-preview-container-modal">
+                <div class="d-flex flex-column align-items-center justify-content-center py-5 h-100" 
+                     hx-post="{% url 'job_planning' job.id %}" 
+                     hx-vals='{"action": "preview", "start_date": "{% if plan %}{{ plan.start_date|to_jalali }}{% else %}{{ today_jalali }}{% endif %}"}' 
+                     hx-trigger="load" 
+                     hx-target="#schedule-preview-container-modal">
+                    <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                    <span class="text-xs text-muted">در حال شبیه‌سازی و تولید زمانبندی پیشنهادی...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12" id="suggestions-container-modal"></div>
+</div>
+
+<script>
+    function submitSaveFormModal() {
+        document.getElementById('form-action-modal').value = 'save';
+        htmx.trigger('#planning-form-modal', 'submit');
+    }
+
+    // Initialize kamaDatepicker for the dynamic modal start date input
+    if (window.kamaDatepicker) {
+        kamaDatepicker('start_date_modal', {
+            buttonsColor: '#0052cc',
+            markToday: true,
+            gotoToday: true,
+            twodigit: true,
+            closeAfterSelect: true,
+            nextButtonIcon: '>',
+            previousButtonIcon: '<'
+        });
+    }
+
+    // Clean up any existing click handlers for the picker to prevent duplicates
+    $(document).off('click', '#bd-root-start_date_modal');
+    $(document).on('click', '#bd-root-start_date_modal', function() {
+        setTimeout(function() {
+            const input = document.getElementById('start_date_modal');
+            if (input) {
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }, 50);
+    });
+
+    // Run digit conversion for the newly loaded modal content
+    if (window.convertDigitsToPersian) {
+        convertDigitsToPersian(document.getElementById('planning-form-modal').closest('.modal-content'));
+    }
+</script>

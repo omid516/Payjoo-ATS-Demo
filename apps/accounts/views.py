@@ -136,7 +136,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         total_jobs = JobOpportunity.objects.filter(is_deleted=False).count()
         active_jobs = JobOpportunity.objects.filter(is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
         total_candidates = Candidate.objects.filter(is_deleted=False).count()
-        in_progress_apps = JobApplication.objects.filter(status='IN_PROGRESS', is_deleted=False).count()
+        in_progress_apps = JobApplication.objects.filter(status='IN_PROGRESS', is_deleted=False).exclude(job__status__in=['CLOSED', 'CANCELLED']).count()
         selected_candidates = JobApplication.objects.filter(status='SELECTED', is_deleted=False).count()
         
         data.update({
@@ -159,193 +159,263 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 })
         data['job_status_distribution'] = job_status_distribution
 
-        # ۳. توزیع متقاضیان در مراحل ارزیابی فعال
+        # ۳. توزیع متقاضیان در مراحل ارزیابی فعال (بر اساس stage_type استاندارد)
         from django.db.models import Count
-        people_in_stages = JobApplication.objects.filter(
-            status='IN_PROGRESS', is_deleted=False
-        ).values('current_stage__name').annotate(count=Count('id')).order_by('-count')
-        
+        STAGE_TYPE_LABELS = {
+            'EXAM':      'آزمون کتبی',
+            'INTERVIEW': 'مصاحبه حضوری',
+            'SKILL_TEST':'آزمون مهارتی',
+            'ASSESSMENT':'کانون ارزیابی',
+        }
+        STAGE_TYPE_ORDER = ['EXAM', 'INTERVIEW', 'SKILL_TEST', 'ASSESSMENT']
+
+        # تعداد متقاضیان IN_PROGRESS در هر stage_type (بر اساس وضعیت فعلی فرصت شغلی job.status)
+        pending_counts = JobApplication.objects.filter(
+            status='IN_PROGRESS',
+            is_deleted=False,
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).values(
+            'job__status'
+        ).annotate(count=Count('id'))
+
+        stage_type_counts = {row['job__status']: row['count'] for row in pending_counts}
         stage_people_stats = []
-        for item in people_in_stages:
-            if item['current_stage__name']:
-                stage_people_stats.append({
-                    'stage_name': item['current_stage__name'],
-                    'count': item['count']
-                })
+        for stype in STAGE_TYPE_ORDER:
+            cnt = stage_type_counts.get(stype, 0)
+            stage_people_stats.append({
+                'stage_type': stype,
+                'stage_name': STAGE_TYPE_LABELS.get(stype, stype),
+                'count': cnt
+            })
         data['stage_people_stats'] = stage_people_stats
 
         # ۴. محاسبه میانگین زمان حضور در هر مرحله (روز)
-        completed_states = ApplicationStageState.objects.filter(
+        # پارامتر include_closed: اگر True باشد، متقاضیان اتمام‌یافته هم در محاسبه لحاظ می‌شوند
+        include_closed_param = self.request.GET.get('include_closed', '')
+        include_closed = include_closed_param in ('1', 'true', 'on')
+        data['include_closed'] = include_closed
+
+        completed_states_qs = ApplicationStageState.objects.filter(
             status__in=['COMPLETED', 'FAILED'],
-            is_deleted=False
-        ).select_related('application', 'stage')
-        
+            is_deleted=False,
+        ).select_related('application__job', 'stage')
+        if not include_closed:
+            completed_states_qs = completed_states_qs.exclude(
+                application__job__status__in=['CLOSED', 'CANCELLED']
+            )
+
         stage_times = {}
-        for state in completed_states:
+        for state in completed_states_qs:
             app = state.application
             stage = state.stage
-            duration = None
-            
+            days = None
+
             if stage.sequence == 1:
-                duration = state.updated_at - app.created_at
+                if state.evaluation_date:
+                    start_date = app.job.start_date if (app.job and app.job.start_date) else app.created_at.date()
+                    days = float((state.evaluation_date - start_date).days)
+                else:
+                    duration = state.updated_at - app.created_at
+                    days = duration.total_seconds() / (24 * 3600)
             else:
                 prev_state = app.stage_states.filter(
                     stage__sequence__lt=stage.sequence,
+                    status__in=['COMPLETED', 'FAILED'],
                     is_deleted=False
                 ).order_by('-stage__sequence').first()
-                if prev_state and prev_state.status in ['COMPLETED', 'FAILED']:
-                    duration = state.updated_at - prev_state.updated_at
-            
-            if duration is not None:
-                days = duration.total_seconds() / (24 * 3600)
-                days = max(days, 0.1)
-                stage_name = stage.name
-                if stage_name not in stage_times:
-                    stage_times[stage_name] = []
-                stage_times[stage_name].append(days)
                 
+                if prev_state:
+                    prev_time = prev_state.evaluation_date if prev_state.evaluation_date else prev_state.updated_at.date()
+                    curr_time = state.evaluation_date if state.evaluation_date else state.updated_at.date()
+                    days = float((curr_time - prev_time).days)
+                else:
+                    curr_time = state.evaluation_date if state.evaluation_date else state.updated_at.date()
+                    start_time = app.job.start_date if (app.job and app.job.start_date) else app.created_at.date()
+                    days = float((curr_time - start_time).days)
+
+            if days is not None:
+                days = max(days, 0.1)
+                stype = stage.stage_type
+                if stype not in stage_times:
+                    stage_times[stype] = []
+                stage_times[stype].append(days)
+
         avg_stage_days = []
-        for stage_name, durations in stage_times.items():
-            avg_stage_days.append({
-                'stage_name': stage_name,
-                'avg_days': round(sum(durations) / len(durations), 1),
-                'count': len(durations)
-            })
-        avg_stage_days.sort(key=lambda x: x['avg_days'], reverse=True)
+        for stype in STAGE_TYPE_ORDER:
+            durations = stage_times.get(stype)
+            if durations:
+                avg_stage_days.append({
+                    'stage_type': stype,
+                    'stage_name': STAGE_TYPE_LABELS.get(stype, stype),
+                    'avg_days': round(sum(durations) / len(durations), 1),
+                    'count': len(durations)
+                })
+            else:
+                avg_stage_days.append({
+                    'stage_type': stype,
+                    'stage_name': STAGE_TYPE_LABELS.get(stype, stype),
+                    'avg_days': 0,
+                    'count': 0
+                })
         data['avg_stage_days'] = avg_stage_days
 
-        # ۵. شناسایی متقاضیان تاخیردار (بیش از ۷ روز توقف در وضعیت PENDING)
-        seven_days_ago = timezone.now() - timedelta(days=7)
-        delayed_candidates = []
-        pending_states = ApplicationStageState.objects.filter(
-            status='PENDING',
-            application__status='IN_PROGRESS',
-            application__is_deleted=False,
-            is_deleted=False
-        ).select_related('application__candidate', 'application__job', 'stage')
+        # ۵. شناسایی متقاضیان تاخیردار (بر اساس SLA تعریف شده برای هر مرحله)
+        from apps.recruitment_planning.models import JobStagePlan, StageTypeConfiguration
+        from datetime import datetime
         
-        for state in pending_states:
-            app = state.application
-            stage = state.stage
+        delayed_candidates = []
+        in_progress_apps = JobApplication.objects.filter(
+            status='IN_PROGRESS',
+            is_deleted=False
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).select_related('candidate', 'job')
+        
+        for app in in_progress_apps:
+            job = app.job
+            # پیدا کردن مرحله ارزیابی متناظر با وضعیت شغل
+            stage = job.stages.filter(stage_type=job.status, is_deleted=False).first()
+            if not stage:
+                stage = app.current_stage or job.stages.filter(is_deleted=False).order_by('sequence').first()
+            
+            if not stage:
+                continue
+                
+            # دریافت تعداد روزهای مجاز طبق SLA
+            stage_plan = JobStagePlan.objects.filter(
+                plan__job=job,
+                stage=stage,
+                plan__is_deleted=False,
+                is_deleted=False
+            ).first()
+            if stage_plan:
+                sla_days = stage_plan.sla_days
+            else:
+                config = StageTypeConfiguration.objects.filter(
+                    stage_type=stage.stage_type,
+                    is_deleted=False
+                ).first()
+                sla_days = config.default_sla_days if config else 5
+                
+            # تعیین تاریخ شروع حضور در مرحله فعلی
             active_since = None
             if stage.sequence == 1:
-                active_since = app.created_at
+                if job.start_date:
+                    active_since = timezone.make_aware(datetime.combine(job.start_date, datetime.min.time()))
+                else:
+                    active_since = app.created_at
             else:
                 prev_state = app.stage_states.filter(
                     stage__sequence__lt=stage.sequence,
+                    status__in=['COMPLETED', 'FAILED'],
                     is_deleted=False
                 ).order_by('-stage__sequence').first()
-                if prev_state and prev_state.status in ['COMPLETED', 'FAILED']:
-                    active_since = prev_state.updated_at
-                    
-            if active_since and active_since < seven_days_ago:
+                
+                if prev_state:
+                    if prev_state.evaluation_date:
+                        active_since = timezone.make_aware(datetime.combine(prev_state.evaluation_date, datetime.min.time()))
+                    else:
+                        active_since = prev_state.updated_at
+                else:
+                    if job.start_date:
+                        active_since = timezone.make_aware(datetime.combine(job.start_date, datetime.min.time()))
+                    else:
+                        active_since = app.created_at
+                        
+            if active_since:
                 days_waiting = (timezone.now() - active_since).days
-                delayed_candidates.append({
-                    'candidate': app.candidate,
-                    'job': app.job,
-                    'stage_name': stage.name,
-                    'days_waiting': days_waiting
-                })
-        delayed_candidates.sort(key=lambda x: x['days_waiting'], reverse=True)
-        data['delayed_candidates'] = delayed_candidates[:5] # نمایش حداکثر ۵ مورد بحرانی
+                if days_waiting > sla_days:
+                    delayed_candidates.append({
+                        'candidate': app.candidate,
+                        'job': job,
+                        'stage_name': STAGE_TYPE_LABELS.get(stage.stage_type, stage.name),
+                        'days_waiting': days_waiting,
+                        'sla_days': sla_days,
+                        'overdue_days': days_waiting - sla_days
+                    })
+                    
+        # مرتب‌سازی بر اساس میزان تأخیر نزولی
+        delayed_candidates.sort(key=lambda x: x['overdue_days'], reverse=True)
+        data['delayed_candidates_count'] = len(delayed_candidates)
+        data['delayed_candidates'] = delayed_candidates[:5] # نمایش حداکثر ۵ مورد بحرانی‌تر
 
         # ۶. لاگ فعالیت‌های اخیر سیستم
         data['recent_activities'] = AuditLog.objects.all().select_related('user').order_by('-timestamp')[:5]
 
-        # ۷. آمارهای تکمیلی برای داشبورد (توزیع کاندیداها و دپارتمان‌ها و واحدها)
-        # دریافت تمام نام مراحل فعال در سیستم برای نمایش در ستون‌های جدول
-        active_stages_qs = JobApplication.objects.filter(
-            status='IN_PROGRESS', is_deleted=False
-        ).exclude(current_stage=None).values_list('current_stage__name', flat=True).distinct()
-        active_stages = sorted(list(set(active_stages_qs)))
+        # ۷. آمارهای تکمیلی: توزیع بر اساس stage_type استاندارد (نه نام مرحله)
+        # ستون‌های ثابت برای جداول
+        active_stages = [STAGE_TYPE_LABELS.get(st, st) for st in STAGE_TYPE_ORDER]
         data['active_stages'] = active_stages
+        data['active_stage_types'] = STAGE_TYPE_ORDER  # برای استفاده در view
+
+        def build_stage_counts(apps_qs, stage_types):
+            """برای یک queryset از applications، تعداد متقاضیان در هر stage_type را بر اساس وضعیت فرصت شغلی (job.status) برمی‌گرداند"""
+            rows = apps_qs.values('job__status').annotate(cnt=Count('id'))
+            return {row['job__status']: row['cnt'] for row in rows}
 
         # آمار دپارتمان‌ها
-        departments = list(JobOpportunity.objects.filter(is_deleted=False).values_list('department', flat=True).distinct())
+        departments = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED']
+        ).values_list('department', flat=True).order_by().distinct())
         dept_stats = []
         for dept in departments:
             if not dept:
                 continue
-            # تعداد فرصت‌های شغلی
-            total_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).count()
-            active_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
-            
+            total_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            dept_apps = JobApplication.objects.filter(
+                job__department=dept, status='IN_PROGRESS', is_deleted=False
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            counts = build_stage_counts(dept_apps, STAGE_TYPE_ORDER)
             dept_row = {
                 'department': dept,
                 'total_jobs': total_jobs_dept,
-                'active_jobs': active_jobs_dept,
-                'stages': {},
-                'total_candidates': 0
+                'active_jobs': total_jobs_dept,
+                'stages': {STAGE_TYPE_LABELS.get(st, st): counts.get(st, 0) for st in STAGE_TYPE_ORDER},
+                'total_candidates': sum(counts.get(st, 0) for st in STAGE_TYPE_ORDER),
             }
-            # متقاضیان فعال در این دپارتمان
-            apps = JobApplication.objects.filter(
-                job__department=dept,
-                status='IN_PROGRESS',
-                is_deleted=False
-            )
-            for stage_name in active_stages:
-                count = apps.filter(current_stage__name=stage_name).count()
-                dept_row['stages'][stage_name] = count
-                dept_row['total_candidates'] += count
-            
             dept_stats.append(dept_row)
         data['dept_stats'] = dept_stats
 
         # آمار واحدها
-        units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).distinct())
+        units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED']
+        ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
         unit_stats = []
         for unit in units:
             if not unit:
                 continue
-            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).count()
-            active_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
-            
+            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            unit_apps = JobApplication.objects.filter(
+                job__unit=unit, status='IN_PROGRESS', is_deleted=False
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            counts = build_stage_counts(unit_apps, STAGE_TYPE_ORDER)
             unit_row = {
                 'unit': unit,
                 'total_jobs': total_jobs_unit,
-                'active_jobs': active_jobs_unit,
-                'stages': {},
-                'total_candidates': 0
+                'active_jobs': total_jobs_unit,
+                'stages': {STAGE_TYPE_LABELS.get(st, st): counts.get(st, 0) for st in STAGE_TYPE_ORDER},
+                'total_candidates': sum(counts.get(st, 0) for st in STAGE_TYPE_ORDER),
             }
-            apps = JobApplication.objects.filter(
-                job__unit=unit,
-                status='IN_PROGRESS',
-                is_deleted=False
-            )
-            for stage_name in active_stages:
-                count = apps.filter(current_stage__name=stage_name).count()
-                unit_row['stages'][stage_name] = count
-                unit_row['total_candidates'] += count
-            
             unit_stats.append(unit_row)
         data['unit_stats'] = unit_stats
 
-        # آمار رده‌های شغلی (رده شغلی)
-        categories = list(JobOpportunity.objects.filter(is_deleted=False).exclude(job_category='').exclude(job_category=None).values_list('job_category', flat=True).distinct())
+        # آمار رده‌های شغلی
+        categories = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED']
+        ).exclude(job_category='').exclude(job_category=None).values_list('job_category', flat=True).order_by().distinct())
         category_stats = []
         for cat in categories:
             if not cat:
                 continue
-            total_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).count()
-            active_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
-            
+            total_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            cat_apps = JobApplication.objects.filter(
+                job__job_category=cat, status='IN_PROGRESS', is_deleted=False
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            counts = build_stage_counts(cat_apps, STAGE_TYPE_ORDER)
             cat_row = {
                 'job_category': cat,
                 'total_jobs': total_jobs_cat,
-                'active_jobs': active_jobs_cat,
-                'stages': {},
-                'total_candidates': 0
+                'active_jobs': total_jobs_cat,
+                'stages': {STAGE_TYPE_LABELS.get(st, st): counts.get(st, 0) for st in STAGE_TYPE_ORDER},
+                'total_candidates': sum(counts.get(st, 0) for st in STAGE_TYPE_ORDER),
             }
-            apps = JobApplication.objects.filter(
-                job__job_category=cat,
-                status='IN_PROGRESS',
-                is_deleted=False
-            )
-            for stage_name in active_stages:
-                count = apps.filter(current_stage__name=stage_name).count()
-                cat_row['stages'][stage_name] = count
-                cat_row['total_candidates'] += count
-            
             category_stats.append(cat_row)
         data['category_stats'] = category_stats
 
@@ -375,7 +445,72 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             
         data['avg_app_finalization_days'] = round(sum(app_durations) / len(app_durations), 1) if app_durations else 0
 
+        # ۹. آمار تکمیلی برای داشبورد عملیاتی
+        # تعداد فرصت‌های شغلی به تفکیک رده شغلی
+        from django.db.models import Count as DCount
+        category_job_counts = JobOpportunity.objects.filter(
+            is_deleted=False
+        ).exclude(job_category='').exclude(job_category=None).values('job_category').annotate(
+            total=DCount('id'),
+            active=DCount('id', filter=Q(status__in=['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT', 'REGISTRATION_CLOSED', 'PUBLISHED']))
+        ).order_by('job_category')
+        data['category_job_counts'] = list(category_job_counts)
+
+        # ادغام آمار رده‌های شغلی برای نمایش آسان در قالب و نمودار
+        unified_category_stats = []
+        for cat_count in category_job_counts:
+            cat_name = cat_count['job_category']
+            cat_stat = next((cs for cs in category_stats if cs['job_category'] == cat_name), None)
+            total_cand = cat_stat['total_candidates'] if cat_stat else 0
+            
+            total_jobs = cat_count['total']
+            active_jobs = cat_count['active']
+            percentage = round((active_jobs / total_jobs) * 100, 1) if total_jobs > 0 else 0
+            
+            unified_category_stats.append({
+                'name': cat_name,
+                'active_jobs': active_jobs,
+                'total_jobs': total_jobs,
+                'total_candidates': total_cand,
+                'percentage': percentage
+            })
+        data['unified_category_stats'] = unified_category_stats
+
+        # خلاصه pipeline: فرصت‌هایی که آماده تصمیم‌گیری نهایی هستند
+        from apps.jobs.models import JobOpportunityStage
+        ready_for_decision = []
+        assessment_jobs = JobOpportunity.objects.filter(
+            status__in=['ASSESSMENT', 'INTERVIEW', 'FINAL_SELECTION'], is_deleted=False
+        ).order_by('-updated_at')[:10]
+        for j in assessment_jobs:
+            pending_count = ApplicationStageState.objects.filter(
+                application__job=j,
+                application__status='IN_PROGRESS',
+                status='PENDING',
+                is_deleted=False
+            ).count()
+            completed_count = ApplicationStageState.objects.filter(
+                application__job=j,
+                application__status='IN_PROGRESS',
+                status__in=['COMPLETED', 'FAILED'],
+                is_deleted=False
+            ).count()
+            ready_for_decision.append({
+                'job': j,
+                'pending': pending_count,
+                'completed': completed_count,
+                'total': pending_count + completed_count,
+            })
+        data['ready_for_decision'] = ready_for_decision
+
+        # جداول واحد: فقط واحدهایی که متقاضی دارند
+        data['unit_stats'] = sorted(
+            [u for u in data['unit_stats'] if u['total_candidates'] > 0],
+            key=lambda x: x['total_candidates'], reverse=True
+        )
+
         return data
+
 
 
 from django.core.exceptions import PermissionDenied

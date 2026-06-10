@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}ورود سوابق تاریخی جذب - آپلود فایل{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Premium Glassmorphic Upload Card */
+    .upload-area {
+        border: 2px dashed #4f46e5;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(8px);
+        transition: all 0.25s ease-in-out;
+        cursor: pointer;
+    }
+    .upload-area:hover, .upload-area.dragover {
+        background: rgba(79, 70, 229, 0.05);
+        border-color: #4338ca;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.15);
+    }
+    /* Steps Progress Bar */
+    .import-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 24px;
+        box-shadow: var(--card-shadow);
+    }
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .step-item.active {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .step-item.completed {
+        color: #10b981;
+    }
+    .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid currentColor;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .step-line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: #e2e8f0;
+        margin: 0 16px;
+    }
+    .step-line.completed {
+        background-color: #10b981;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="font-semibold text-secondary mb-1">ورود سوابق تاریخی جذب</h3>
+    <p class="text-muted text-sm m-0">درون‌ریزی فایل‌های اکسل قدیمی فرآیندهای استخدامی به ساختار داده‌ای جدید سیستم ATS</p>
+</div>
+
+<!-- Step Tracker -->
+<div class="import-steps mb-4">
+    <div class="step-item active">
+        <span class="step-num">۱</span>
+        <span>بارگذاری فایل</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۲</span>
+        <span>نگاشت ستون‌ها</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۳</span>
+        <span>پیش‌نمایش و تعارضات</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۴</span>
+        <span>تأیید و ایمپورت</span>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger shadow-sm mb-4" role="alert" style="border-radius: var(--border-radius);">
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="card premium-card col-lg-8 mx-auto">
+    <div class="card-body p-5">
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="upload-area p-5 text-center mb-4" id="dropArea">
+                <input type="file" name="excel_file" id="fileInput" class="d-none" accept=".xlsx, .xls">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-primary mb-3">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                </svg>
+                
+                <h5 class="font-semibold text-secondary mb-2">کشیدن و رها کردن فایل اکسل</h5>
+                <p class="text-muted text-sm mb-4">یا برای انتخاب فایل از روی کامپیوتر کلیک کنید</p>
+                <span class="badge bg-light text-secondary border px-3 py-2" id="fileNameBadge" style="display: none;"></span>
+                
+                <button type="button" class="btn btn-outline-primary btn-sm px-4" id="selectBtn">انتخاب فایل</button>
+            </div>
+
+            <!-- Guidelines -->
+            <div class="bg-light rounded p-3 mb-4 text-xs text-secondary border">
+                <h6 class="font-semibold text-dark mb-2">📋 راهنمای ساختار اکسل سوابق:</h6>
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1">شیت آخر (وضعیت) شیت اصلی است که هر ردیف آن یک فرصت شغلی (Job Opportunity) می‌باشد.</li>
+                    <li class="mb-1">ستون آخر شیت اصلی باید حاوی «الگوی استخدام» (مانند "کتبی + مصاحبه + کانون") جهت تفکیک مراحل باشد.</li>
+                    <li class="mb-1">شیت‌های دیگر به تفکیک مراحل نام‌گذاری شده و شامل لیست افراد پذیرفته‌شده در آن مراحل می‌باشند.</li>
+                    <li>ستون کد یا شماره فرصت شغلی در شیت‌ها ملاک ارتباط داده‌های مراحل با شیت وضعیت خواهد بود.</li>
+                </ul>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary-custom px-5 py-2.5 font-medium" id="submitBtn" disabled>
+                    <span id="btnText">بارگذاری و شروع تحلیل فایل</span>
+                    <span id="btnSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const selectBtn = document.getElementById('selectBtn');
+    const fileNameBadge = document.getElementById('fileNameBadge');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    // Click trigger
+    selectBtn.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('click', (e) => {
+        if(e.target !== selectBtn) fileInput.click();
+    });
+
+    // File change handler
+    fileInput.addEventListener('change', handleFile);
+
+    // Drag and Drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+        }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            fileInput.files = files;
+            handleFile();
+        }
+    });
+
+    function handleFile() {
+        const file = fileInput.files[0];
+        if (file) {
+            fileNameBadge.innerText = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            fileNameBadge.style.display = 'inline-block';
+            submitBtn.removeAttribute('disabled');
+        }
+    }
+
+    uploadForm.addEventListener('submit', () => {
+        submitBtn.setAttribute('disabled', 'true');
+        btnText.innerText = 'در حال پردازش و تحلیل فایل اکسل...';
+        btnSpinner.style.display = 'inline-block';
+    });
+</script>
+{% endblock %}
+{% endblock %}

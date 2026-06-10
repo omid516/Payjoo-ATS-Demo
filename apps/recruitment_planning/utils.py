@@ -86,6 +86,7 @@ def calculate_recruitment_schedule(job, start_date):
             defaults = {
                 'SCREENING': 5,
                 'EXAM': 15,
+                'SKILL_TEST': 15,
                 'INTERVIEW': 10,
                 'ASSESSMENT': 15,
                 'OTHER': 5

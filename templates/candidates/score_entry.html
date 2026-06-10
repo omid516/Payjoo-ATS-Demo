@@ -21,11 +21,40 @@
 <!-- Job Opportunity Selector Card -->
 <div class="card premium-card mb-4">
     <div class="card-body p-4">
+        <!-- فیلتر جستجوی فرصت شغلی -->
+        <form method="get" action="" class="mb-3" id="job-search-form">
+            {% if selected_job %}<input type="hidden" name="job_id" value="{{ selected_job.id }}">{% endif %}
+            {% if selected_stage %}<input type="hidden" name="stage_id" value="{{ selected_stage.id }}">{% endif %}
+            <label class="form-label font-medium text-secondary mb-2" style="font-size: 0.85rem;">
+                🔍 جستجوی فرصت شغلی (عنوان یا کد)
+            </label>
+            <div class="input-group input-group-sm" style="max-width: 480px;">
+                <input type="text" 
+                       name="job_q" 
+                       id="job_q_input"
+                       value="{{ job_q }}"
+                       class="form-control border-slate shadow-sm"
+                       placeholder="مثلاً: کارشناس، بازرس، ۴۱۲۰..."
+                       style="border-radius: 8px 0 0 8px; font-size: 0.875rem;">
+                <button type="submit" class="btn btn-primary btn-sm px-3" style="border-radius: 0 8px 8px 0;">
+                    جستجو
+                </button>
+                {% if job_q %}
+                <a href="{% url 'candidate_score_entry' %}" class="btn btn-outline-secondary btn-sm px-2" title="پاک کردن فیلتر" style="border-radius: 0 8px 8px 0; margin-right: 4px;">✕</a>
+                {% endif %}
+            </div>
+            {% if job_q %}
+            <div class="mt-1">
+                <small class="text-muted">{{ jobs|length }} فرصت شغلی یافت شد برای «{{ job_q }}»</small>
+            </div>
+            {% endif %}
+        </form>
+
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label font-medium text-secondary mb-2" style="font-size: 0.9rem;">انتخاب فرصت شغلی</label>
                 <select name="job_id" 
-                        hx-get="{% url 'candidate_score_entry' %}" 
+                        hx-get="{% url 'candidate_score_entry' %}{% if job_q %}?job_q={{ job_q }}{% endif %}" 
                         hx-target="#stages-select-container" 
                         hx-indicator="#loading-indicator"
                         onchange="document.getElementById('score-entry-list-container').innerHTML = '<div class=\'text-center py-5 text-muted\'>لطفاً مرحله ارزیابی را انتخاب کنید.</div>';"
@@ -34,7 +63,7 @@
                     <option value="">-- لطفاً یک فرصت شغلی را انتخاب کنید --</option>
                     {% for job in jobs %}
                         <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
-                            {{ job.title }} (کد: {{ job.code }})
+                            [{{ job.code }}] {{ job.title }}
                         </option>
                     {% endfor %}
                 </select>
@@ -58,6 +87,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Candidates Scoring Table Container -->
 <div id="score-entry-list-container">

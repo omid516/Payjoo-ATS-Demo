@@ -1048,13 +1048,23 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
 
     def get(self, request):
         from django.core.paginator import Paginator
-        jobs = JobOpportunity.objects.filter(is_deleted=False).exclude(status=JobOpportunity.STATUS_CLOSED).order_by('-created_at')
+        from django.db.models import Q as DQ
+        job_q = request.GET.get('job_q', '').strip()
+        jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(status=JobOpportunity.STATUS_CLOSED)
+        if job_q:
+            jobs_qs = jobs_qs.filter(
+                DQ(title__icontains=job_q) |
+                DQ(code__icontains=job_q) |
+                DQ(request_number__icontains=job_q)
+            )
+        jobs = jobs_qs.order_by('code')
         job_id = request.GET.get('job_id')
         stage_id = request.GET.get('stage_id')
         q = request.GET.get('q')
         eval_status = request.GET.get('eval_status', 'PENDING')
         show_failed_prior_val = request.GET.get('show_failed_prior')
         show_failed_prior = show_failed_prior_val in ['true', 'on', '1']
+
         
         selected_job = None
         selected_stage = None
@@ -1137,6 +1147,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         return render(request, 'candidates/score_entry.html', {
             'jobs': jobs,
+            'job_q': job_q,
             'selected_job': selected_job,
             'selected_stage': selected_stage,
             'stages': stages,

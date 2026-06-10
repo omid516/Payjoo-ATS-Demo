@@ -14,6 +14,7 @@ urlpatterns = [
     path('jobs/', include('apps.jobs.urls')),
     path('candidates/', include('apps.candidates.urls')),
     path('planning/', include('apps.recruitment_planning.urls')),
+    path('management/import/historical/', include('apps.historical_import.urls')),
 ]
 
 if settings.DEBUG:

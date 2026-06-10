@@ -99,13 +99,16 @@
 
 <script>
     function selectSuggestedDate(dateStr) {
-        const input = document.getElementById('start_date');
+        const input = document.getElementById('start_date_modal') || document.getElementById('start_date');
+        const form = document.getElementById('planning-form-modal') || document.getElementById('planning-form');
         if (input) {
             input.value = dateStr;
             // Dispatch change event to trigger HTMX preview update
             input.dispatchEvent(new Event('change', { bubbles: true }));
             // Scroll to the planning form area smoothly
-            document.getElementById('planning-form').scrollIntoView({ behavior: 'smooth' });
+            if (form) {
+                form.scrollIntoView({ behavior: 'smooth' });
+            }
         }
     }
 </script>

@@ -50,6 +50,7 @@
     }
     .bg-screening { background-color: #6366f1; } /* Indigo */
     .bg-exam { background-color: #0ea5e9; } /* Sky */
+    .bg-skill-test { background-color: #8b5cf6; } /* Violet */
     .bg-interview { background-color: #f59e0b; } /* Amber */
     .bg-assessment { background-color: #ec4899; } /* Pink */
     .bg-other { background-color: #64748b; } /* Slate */
@@ -278,6 +279,7 @@
                             <div class="gantt-bar-segment 
                                 {% if s_plan.stage_type == 'SCREENING' %}bg-screening
                                 {% elif s_plan.stage_type == 'EXAM' %}bg-exam
+                                {% elif s_plan.stage_type == 'SKILL_TEST' %}bg-skill-test
                                 {% elif s_plan.stage_type == 'INTERVIEW' %}bg-interview
                                 {% elif s_plan.stage_type == 'ASSESSMENT' %}bg-assessment
                                 {% else %}bg-other{% endif %}"

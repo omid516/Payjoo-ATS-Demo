@@ -5,7 +5,8 @@ from apps.core.models import SoftDeleteModel
 
 STAGE_TYPE_CHOICES = [
     ('SCREENING', 'غربالگری'),
-    ('EXAM', 'آزمون'),
+    ('EXAM', 'آزمون کتبی'),
+    ('SKILL_TEST', 'آزمون مهارتی'),
     ('INTERVIEW', 'مصاحبه'),
     ('ASSESSMENT', 'کانون ارزیابی'),
     ('OTHER', 'سایر'),
@@ -47,6 +48,7 @@ class JobOpportunity(SoftDeleteModel):
     STATUS_REGISTRATION_CLOSED = 'REGISTRATION_CLOSED'
     STATUS_SCREENING = 'SCREENING'
     STATUS_EXAM = 'EXAM'
+    STATUS_SKILL_TEST = 'SKILL_TEST'
     STATUS_INTERVIEW = 'INTERVIEW'
     STATUS_ASSESSMENT = 'ASSESSMENT'
     STATUS_FINAL_SELECTION = 'FINAL_SELECTION'
@@ -60,6 +62,7 @@ class JobOpportunity(SoftDeleteModel):
         (STATUS_REGISTRATION_CLOSED, 'خاتمه ثبت‌نام'),
         (STATUS_SCREENING, 'غربالگری اولیه'),
         (STATUS_EXAM, 'آزمون کتبی'),
+        (STATUS_SKILL_TEST, 'آزمون مهارتی'),
         (STATUS_INTERVIEW, 'مصاحبه حضوری'),
         (STATUS_ASSESSMENT, 'کانون ارزیابی'),
         (STATUS_FINAL_SELECTION, 'انتخاب نهایی'),
@@ -100,7 +103,15 @@ class JobOpportunity(SoftDeleteModel):
     assigned_recruiter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_jobs', verbose_name="کارشناس جذب مسئول")
     workflow = models.ForeignKey(WorkflowTemplate, on_delete=models.SET_NULL, null=True, blank=True, related_name='jobs', verbose_name="الگوی فرآیند استخدامی")
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_RECEIVED, verbose_name="وضعیت فرصت شغلی")
-    description = models.TextField(verbose_name="شرح شغل")
+
+    SOURCE_ATS = 'ATS'
+    SOURCE_IMPORT = 'IMPORT'
+    SOURCE_CHOICES = [
+        (SOURCE_ATS, 'سیستم ATS'),
+        (SOURCE_IMPORT, 'ایمپورت شده'),
+    ]
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default=SOURCE_ATS, verbose_name="منبع ایجاد")
+    description = models.TextField(blank=True, verbose_name="شرح شغل")
     requirements = models.TextField(blank=True, verbose_name="شرایط احراز")
     start_date = models.DateField(null=True, blank=True, verbose_name="تاریخ شروع")
     end_date = models.DateField(null=True, blank=True, verbose_name="تاریخ پایان")
@@ -134,6 +145,8 @@ class JobOpportunity(SoftDeleteModel):
         name_lower = stage_name.lower()
         if any(kw in name_lower for kw in ["غربال", "screening"]):
             return self.STATUS_SCREENING
+        elif any(kw in name_lower for kw in ["مهارتی", "skill_test", "عملی"]):
+            return self.STATUS_SKILL_TEST
         elif any(kw in name_lower for kw in ["آزمون", "امتحان", "کتبی", "exam", "test"]):
             return self.STATUS_EXAM
         elif any(kw in name_lower for kw in ["مصاحبه", "interview"]):
@@ -191,8 +204,9 @@ class JobOpportunity(SoftDeleteModel):
 
         # 3. If there are no active/selected applications, and current status is a pipeline/closed status, revert to PUBLISHED
         pipeline_statuses = [
-            self.STATUS_SCREENING, self.STATUS_EXAM, self.STATUS_INTERVIEW,
-            self.STATUS_ASSESSMENT, self.STATUS_FINAL_SELECTION, self.STATUS_CLOSED
+            self.STATUS_SCREENING, self.STATUS_EXAM, self.STATUS_SKILL_TEST,
+            self.STATUS_INTERVIEW, self.STATUS_ASSESSMENT,
+            self.STATUS_FINAL_SELECTION, self.STATUS_CLOSED
         ]
         if self.status in pipeline_statuses:
             self.status = self.STATUS_PUBLISHED

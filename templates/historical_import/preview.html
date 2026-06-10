@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block title %}ورود سوابق تاریخی جذب - پیش‌نمایش و تعارضات{% endblock %}
+
+{% block extra_head %}
+<style>
+    .import-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 24px;
+        box-shadow: var(--card-shadow);
+    }
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .step-item.active {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .step-item.completed {
+        color: #10b981;
+    }
+    .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid currentColor;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .step-line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: #e2e8f0;
+        margin: 0 16px;
+    }
+    .step-line.completed {
+        background-color: #10b981;
+    }
+    .preview-card-stat {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 16px;
+        background-color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--card-shadow);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="font-semibold text-secondary mb-1">ورود سوابق تاریخی جذب</h3>
+    <p class="text-muted text-sm m-0">بررسی و اعتبارسنجی ردیف‌های استخراج شده پیش از درج نهایی در پایگاه داده</p>
+</div>
+
+<!-- Step Tracker -->
+<div class="import-steps mb-4">
+    <div class="step-item completed">
+        <span class="step-num">✓</span>
+        <span>بارگذاری فایل</span>
+    </div>
+    <div class="step-line completed"></div>
+    <div class="step-item completed">
+        <span class="step-num">✓</span>
+        <span>نگاشت ستون‌ها</span>
+    </div>
+    <div class="step-line completed"></div>
+    <div class="step-item active">
+        <span class="step-num">۳</span>
+        <span>پیش‌نمایش و تعارضات</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+        <span class="step-num">۴</span>
+        <span>تأیید و ایمپورت</span>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger shadow-sm mb-4" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- کارت‌های آماری اعتبارسنجی -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="preview-card-stat">
+            <div>
+                <span class="text-xs text-muted d-block font-semibold">فرصت‌های شغلی</span>
+                <h3 class="m-0 font-semibold mt-1">{{ stats.total_jobs }} <small class="text-xs text-muted">ردیف</small></h3>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-success bg-opacity-10 text-success border px-2 py-1 text-xs d-block mb-1">معتبر: {{ stats.valid_jobs }}</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border px-2 py-1 text-xs d-block">خطادار: {{ stats.invalid_jobs }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="preview-card-stat">
+            <div>
+                <span class="text-xs text-muted d-block font-semibold">تعارض در دیتابیس</span>
+                <h3 class="m-0 font-semibold text-warning mt-1">{{ stats.conflict_jobs }} <small class="text-xs text-muted">شغل تکراری</small></h3>
+            </div>
+            <div class="bg-warning bg-opacity-10 text-warning border rounded p-2 text-center text-xs">
+                نیازمند مدیریت تعارض
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="preview-card-stat">
+            <div>
+                <span class="text-xs text-muted d-block font-semibold">تعداد کل متقاضیان</span>
+                <h3 class="m-0 font-semibold mt-1">{{ stats.total_candidates }} <small class="text-xs text-muted">پرونده</small></h3>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-success bg-opacity-10 text-success border px-2 py-1 text-xs d-block mb-1">معتبر: {{ stats.valid_candidates }}</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border px-2 py-1 text-xs d-block">خطادار: {{ stats.invalid_candidates }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="preview-card-stat">
+            <div>
+                <span class="text-xs text-muted d-block font-semibold">وضعیت خطاها و هشدارها</span>
+                <h3 class="m-0 font-semibold mt-1">{{ stats.errors }} <small class="text-xs text-danger">خطا</small></h3>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-danger bg-opacity-10 text-danger border px-2 py-1 text-xs d-block mb-1">{{ stats.errors }} خطا</span>
+                <span class="badge bg-warning bg-opacity-10 text-warning border px-2 py-1 text-xs d-block">{{ stats.warnings }} هشدار</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" id="previewForm">
+    {% csrf_token %}
+    
+    <!-- کارت مدیریت تعارضات -->
+    <div class="card premium-card border-warning border-opacity-50 mb-4 bg-warning bg-opacity-5">
+        <div class="card-body py-4">
+            <h5 class="font-semibold text-warning-emphasis mb-2 d-flex align-items-center gap-2">
+                ⚠️ مدیریت تعارض فرصت‌های شغلی تکراری (تعداد: {{ stats.conflict_jobs }} مورد)
+            </h5>
+            <p class="text-muted text-sm mb-4">سیستم در کدهای شغل اکسل، مواردی را پیدا کرده است که از قبل در پایگاه داده ATS وجود دارند. سیاست مدیریت تعارض مد نظر خود را انتخاب کنید:</p>
+            
+            <div class="d-flex flex-column flex-md-row gap-3">
+                <div class="form-check p-3 border rounded bg-white flex-fill">
+                    <input class="form-check-input ms-2" type="radio" name="conflict_strategy" id="strategyUpdate" value="UPDATE" checked>
+                    <label class="form-check-label font-semibold text-sm cursor-pointer" for="strategyUpdate">
+                        🔄 بروزرسانی فرصت‌های موجود (پیشنهادی)
+                        <small class="text-muted d-block mt-1 font-normal text-xs">اطلاعات کلی شغل به‌روز شده و پرونده‌های ارزیابی متقاضیان جدید به آن الحاق یا در صورت تکراری بودن ادغام می‌شود.</small>
+                    </label>
+                </div>
+                <div class="form-check p-3 border rounded bg-white flex-fill">
+                    <input class="form-check-input ms-2" type="radio" name="conflict_strategy" id="strategySkip" value="SKIP">
+                    <label class="form-check-label font-semibold text-sm cursor-pointer" for="strategySkip">
+                        🚫 رد کردن ایمپورت ردیف‌های تکراری
+                        <small class="text-muted d-block mt-1 font-normal text-xs">فرصت‌های شغلی تکراری و تمامی متقاضیان مرتبط با آن‌ها در فایل اکسل نادیده گرفته شده و تغییر نمی‌کنند.</small>
+                    </label>
+                </div>
+                <div class="form-check p-3 border rounded bg-white flex-fill">
+                    <input class="form-check-input ms-2" type="radio" name="conflict_strategy" id="strategyReplace" value="REPLACE">
+                    <label class="form-check-label font-semibold text-sm cursor-pointer" for="strategyReplace">
+                        🔥 حذف قبلی و جایگزینی کامل
+                        <small class="text-muted d-block mt-1 font-normal text-xs">فرصت شغلی موجود و تمامی متقاضیان و درخواست‌های قبلی ثبت‌شده برای آن به طور کامل پاک شده و داده‌های جدید جایگزین می‌شوند.</small>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول داده‌ها به صورت تب‌بندی -->
+    <div class="card premium-card mb-4">
+        <div class="card-header bg-white border-bottom p-0">
+            <ul class="nav nav-tabs border-0" id="previewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active font-semibold border-0 py-3 px-4" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobs-panel" type="button" role="tab">
+                        💼 فرصت‌های شغلی موقت ({{ stats.total_jobs }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link font-semibold border-0 py-3 px-4" id="candidates-tab" data-bs-toggle="tab" data-bs-target="#candidates-panel" type="button" role="tab">
+                        👥 متقاضیان و ارزیابی‌ها ({{ stats.total_candidates }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link font-semibold border-0 py-3 px-4 position-relative" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-panel" type="button" role="tab">
+                        ⚠️ لیست خطاها و هشدارها
+                        {% if stats.errors > 0 %}
+                        <span class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ stats.errors }}
+                        </span>
+                        {% endif %}
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="tab-content" id="previewTabsContent">
+            <!-- تب فرصت‌های شغلی -->
+            <div class="tab-pane fade show active" id="jobs-panel" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ردیف</th>
+                                <th>کد شغل</th>
+                                <th>عنوان شغل</th>
+                                <th>واحد متقاضی</th>
+                                <th>ظرفیت جذب</th>
+                                <th>الگوی استخدام</th>
+                                <th>وضعیت</th>
+                                <th>تطبیق سیستم</th>
+                                <th class="pe-4 text-end">وضعیت اعتبارسنجی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sj in staging_jobs %}
+                            <tr>
+                                <td class="ps-4 text-muted">{{ sj.row_index }}</td>
+                                <td class="font-semibold text-primary">{{ sj.job_code|default:"-" }}</td>
+                                <td class="font-semibold">{{ sj.title|default:"-" }}</td>
+                                <td>{{ sj.department|default:"-" }}</td>
+                                <td>{{ sj.headcount }} نفر</td>
+                                <td><span class="badge bg-light text-secondary border">{{ sj.workflow_pattern }}</span></td>
+                                <td>{{ sj.status|default:"-" }}</td>
+                                <td>
+                                    {% if sj.final_job %}
+                                    <span class="text-warning text-xs font-semibold">⚠️ تکراری ({{ sj.final_job.title }})</span>
+                                    {% else %}
+                                    <span class="text-success text-xs font-semibold">✨ جدید</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-end">
+                                    {% if sj.is_valid %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border">✓ معتبر</span>
+                                    {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border" title="{{ sj.validation_errors|join:', ' }}">❌ دارای خطا</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-4 text-muted">هیچ ردیفی یافت نشد.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- تب متقاضیان -->
+            <div class="tab-pane fade" id="candidates-panel" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ردیف</th>
+                                <th>شیت</th>
+                                <th>کد ملی</th>
+                                <th>نام و نام خانوادگی</th>
+                                <th>کد فرصت مرتبط</th>
+                                <th>مرحله ارزیابی</th>
+                                <th>امتیاز</th>
+                                <th>تاریخ ارزیابی</th>
+                                <th>تطبیق سیستم</th>
+                                <th class="pe-4 text-end">وضعیت اعتبارسنجی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sc in staging_candidates %}
+                            <tr>
+                                <td class="ps-4 text-muted">{{ sc.row_index }}</td>
+                                <td><span class="badge bg-light text-secondary border">{{ sc.sheet_name }}</span></td>
+                                <td class="font-semibold">{{ sc.national_id|default:"-" }}</td>
+                                <td class="font-semibold">{{ sc.first_name }} {{ sc.last_name }}</td>
+                                <td class="text-primary font-medium">{{ sc.job_code }}</td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary border">{{ sc.stage_type }}</span></td>
+                                <td>{{ sc.score|default:"-" }}</td>
+                                <td>{{ sc.evaluation_date_str|default:"-" }}</td>
+                                <td>
+                                    {% if sc.final_candidate %}
+                                    <span class="text-warning text-xs font-semibold">⚠️ تکراری</span>
+                                    {% else %}
+                                    <span class="text-success text-xs font-semibold">✨ جدید</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-end">
+                                    {% if sc.is_valid %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border">✓ معتبر</span>
+                                    {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border" title="{{ sc.validation_errors|join:', ' }}">❌ دارای خطا</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">هیچ ردیفی یافت نشد.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- تب خطاها و هشدارها -->
+            <div class="tab-pane fade" id="logs-panel" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">سطح</th>
+                                <th>شیت</th>
+                                <th>ردیف</th>
+                                <th class="pe-4">پیام خطا / هشدار</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            {% if log.level != 'INFO' %}
+                            <tr>
+                                <td class="ps-4">
+                                    {% if log.level == 'ERROR' %}
+                                    <span class="badge bg-danger">خطا</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">هشدار</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-secondary border">{{ log.sheet_name|default:"پایه" }}</span></td>
+                                <td>{{ log.row_index|default:"-" }}</td>
+                                <td class="pe-4 {% if log.level == 'ERROR' %}text-danger{% else %}text-warning-emphasis{% endif %} font-medium">
+                                    {{ log.message }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-success font-semibold">✓ هیچ خطا یا هشداری در اعتبارسنجی یافت نشد! داده‌ها کاملاً آماده ایمپورت هستند.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش تایید و دکمه‌ها -->
+    <div class="d-flex justify-content-between mb-5">
+        <a href="{% url 'import_mapping' session.id %}" class="btn btn-outline-secondary px-4 py-2.5 font-medium">← بازگشت به گام نگاشت</a>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <div class="form-check ms-3">
+                <input class="form-check-input ms-2" type="checkbox" id="confirmCheckbox" required>
+                <label class="form-check-label text-xs font-semibold text-secondary cursor-pointer" for="confirmCheckbox">
+                    قوانین و مغایرت‌های احتمالی داده‌های فوق را بررسی کرده و مسئولیت ایمپورت سوابق را می‌پذیرم.
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-success px-5 py-2.5 font-medium" id="submitBtn" disabled>
+                <span id="btnText">تأیید و اجرای ایمپورت نهایی</span>
+                <span id="btnSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+            </button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    const confirmCheckbox = document.getElementById('confirmCheckbox');
+    const submitBtn = document.getElementById('submitBtn');
+    const previewForm = document.getElementById('previewForm');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    confirmCheckbox.addEventListener('change', (e) => {
+        if(e.target.checked && {% if stats.valid_jobs == 0 and stats.valid_candidates == 0 %}false{% else %}true{% endif %}) {
+            submitBtn.removeAttribute('disabled');
+        } else {
+            submitBtn.setAttribute('disabled', 'true');
+        }
+    });
+
+    previewForm.addEventListener('submit', () => {
+        submitBtn.setAttribute('disabled', 'true');
+        confirmCheckbox.setAttribute('disabled', 'true');
+        btnText.innerText = 'در حال اعمال تراکنشی داده‌ها در پایگاه داده اصلی...';
+        btnSpinner.style.display = 'inline-block';
+    });
+</script>
+{% endblock %}
+{% endblock %}

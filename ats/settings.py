@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.exams',
     'apps.interviews',
     'apps.recruitment_planning',
+    'apps.historical_import',
 ]
 
 MIDDLEWARE = [

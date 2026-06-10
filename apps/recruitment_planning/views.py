@@ -79,7 +79,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 delayed_plans.append(plan)
 
         # Capacity gauges for current month
-        stage_types = ['SCREENING', 'EXAM', 'INTERVIEW', 'ASSESSMENT']
+        stage_types = ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']
         capacity_stats = []
         configs = {c.stage_type: c for c in StageTypeConfiguration.objects.filter(is_deleted=False)}
         
@@ -103,7 +103,8 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             # Map type to Farsi label
             labels = {
                 'SCREENING': 'غربالگری اولیه',
-                'EXAM': 'آزمون کتبی/عملی',
+                'EXAM': 'آزمون کتبی',
+                'SKILL_TEST': 'آزمون مهارتی',
                 'INTERVIEW': 'مصاحبه حضوری',
                 'ASSESSMENT': 'کانون ارزیابی'
             }
@@ -213,6 +214,10 @@ class JobPlanningView(LoginRequiredMixin, RoleRequiredMixin, View):
             'stages': stages,
             'today_jalali': to_jalali_string(datetime.date.today())
         }
+        if request.GET.get('modal') == '1':
+            context['next_url'] = request.GET.get('next', '')
+            return render(request, 'recruitment_planning/partials/planning_modal_content.html', context)
+            
         return render(request, 'recruitment_planning/job_planning.html', context)
 
     def post(self, request, job_id):
@@ -290,10 +295,10 @@ class PlanningConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
         configs = StageTypeConfiguration.objects.filter(is_deleted=False)
         holidays = Holiday.objects.filter(is_deleted=False).order_by('date')
         
-        # Initialize default configs if they do not exist
         defaults = [
             ('SCREENING', 'غربالگری اولیه', 5, 200),
-            ('EXAM', 'آزمون کتبی/عملی', 15, 300),
+            ('EXAM', 'آزمون کتبی', 15, 300),
+            ('SKILL_TEST', 'آزمون مهارتی', 15, 150),
             ('INTERVIEW', 'مصاحبه حضوری', 10, 80),
             ('ASSESSMENT', 'کانون ارزیابی', 15, 20),
             ('OTHER', 'سایر مراحل', 5, 100)
@@ -662,6 +667,7 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
         labels = {
             'SCREENING': 'غربالگری اولیه',
             'EXAM': 'آزمون کتبی/عملی',
+            'SKILL_TEST': 'آزمون مهارتی',
             'INTERVIEW': 'مصاحبه حضوری',
             'ASSESSMENT': 'کانون ارزیابی'
         }
@@ -681,7 +687,7 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
         for y, m in months_to_analyze:
             g_start, g_end = get_jalali_month_range(y, m)
             stages_data = []
-            for stype in ['SCREENING', 'EXAM', 'INTERVIEW', 'ASSESSMENT']:
+            for stype in ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
                 consumed = JobStagePlan.objects.filter(
                     stage_type=stype,
                     planned_end_date__range=(g_start, g_end),
@@ -744,5 +750,221 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
             'month_capacity': month_capacity
         }
         return render(request, 'recruitment_planning/partials/date_suggestions.html', context)
+
+
+class SlaDelaysDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request):
+        from datetime import datetime
+        from django.utils import timezone
+        from django.db.models import Q, Count
+        from apps.candidates.models import JobApplication, ApplicationStageState
+        from .models import JobStagePlan, StageTypeConfiguration
+        
+        # 1. فیلترها و جستجو
+        search_query = request.GET.get('q', '').strip()
+        unit_filter = request.GET.get('unit', '').strip()
+        priority_filter = request.GET.get('priority', '').strip()
+        
+        # دریافت متقاضیان فعال در جریان ارزیابی فعال
+        apps = JobApplication.objects.filter(
+            status=JobApplication.STATUS_IN_PROGRESS,
+            is_deleted=False
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).select_related('candidate', 'job')
+        
+        if search_query:
+            apps = apps.filter(
+                Q(candidate__first_name__icontains=search_query) |
+                Q(candidate__last_name__icontains=search_query) |
+                Q(candidate__national_id__icontains=search_query) |
+                Q(job__title__icontains=search_query) |
+                Q(job__request_number__icontains=search_query)
+            )
+            
+        if unit_filter:
+            apps = apps.filter(job__unit=unit_filter)
+            
+        # تفکیک آمار به ازای فرصت شغلی
+        job_groups = {}
+        total_delayed_count = 0
+        total_active_count = 0
+        total_critical_jobs = 0
+        total_delay_days_sum = 0
+        
+        STAGE_TYPE_LABELS = {
+            'EXAM':      'آزمون کتبی',
+            'INTERVIEW': 'مصاحبه حضوری',
+            'SKILL_TEST':'آزمون مهارتی',
+            'ASSESSMENT':'کانون ارزیابی',
+        }
+        
+        for app in apps:
+            total_active_count += 1
+            job = app.job
+            
+            # پیدا کردن مرحله ارزیابی متناظر با وضعیت شغل
+            stage = job.stages.filter(stage_type=job.status, is_deleted=False).first()
+            if not stage:
+                stage = app.current_stage or job.stages.filter(is_deleted=False).order_by('sequence').first()
+            
+            if not stage:
+                continue
+                
+            # دریافت تعداد روزهای مجاز طبق SLA
+            stage_plan = JobStagePlan.objects.filter(
+                plan__job=job,
+                stage=stage,
+                plan__is_deleted=False,
+                is_deleted=False
+            ).first()
+            if stage_plan:
+                sla_days = stage_plan.sla_days
+            else:
+                config = StageTypeConfiguration.objects.filter(
+                    stage_type=stage.stage_type,
+                    is_deleted=False
+                ).first()
+                sla_days = config.default_sla_days if config else 5
+                
+            # تعیین تاریخ شروع حضور در مرحله فعلی
+            active_since = None
+            if stage.sequence == 1:
+                if job.start_date:
+                    active_since = timezone.make_aware(datetime.combine(job.start_date, datetime.min.time()))
+                else:
+                    active_since = app.created_at
+            else:
+                prev_state = app.stage_states.filter(
+                    stage__sequence__lt=stage.sequence,
+                    status__in=['COMPLETED', 'FAILED'],
+                    is_deleted=False
+                ).order_by('-stage__sequence').first()
+                
+                if prev_state:
+                    if prev_state.evaluation_date:
+                        active_since = timezone.make_aware(datetime.combine(prev_state.evaluation_date, datetime.min.time()))
+                      # convert datetime.date to datetime
+                        active_since = timezone.make_aware(datetime.combine(prev_state.evaluation_date, datetime.min.time()))
+                    else:
+                        active_since = prev_state.updated_at
+                else:
+                    if job.start_date:
+                        active_since = timezone.make_aware(datetime.combine(job.start_date, datetime.min.time()))
+                    else:
+                        active_since = app.created_at
+                        
+            if active_since:
+                days_waiting = (timezone.now() - active_since).days
+                is_delayed = days_waiting > sla_days
+                overdue_days = max(0, days_waiting - sla_days)
+                
+                # اولویت تأخیر
+                priority = 'ON_TRACK'
+                priority_label = 'در جریان / عادی'
+                if is_delayed:
+                    if overdue_days > 10:
+                        priority = 'CRITICAL'
+                        priority_label = 'بحرانی'
+                    elif overdue_days > 5:
+                        priority = 'HIGH'
+                        priority_label = 'بالا'
+                      # overdue_days <= 5 and > 0
+                    else:
+                        priority = 'MEDIUM'
+                        priority_label = 'متوسط'
+                        
+                # ساخت داده کاندیدا
+                cand_data = {
+                    'app_id': app.id,
+                    'candidate': app.candidate,
+                    'stage_name': STAGE_TYPE_LABELS.get(stage.stage_type, stage.name),
+                    'active_since': active_since,
+                    'days_waiting': days_waiting,
+                    'sla_days': sla_days,
+                    'overdue_days': overdue_days,
+                    'is_delayed': is_delayed,
+                    'priority': priority,
+                    'priority_label': priority_label
+                }
+                
+                # اضافه کردن به گروه‌بندی فرصت شغلی
+                if job.id not in job_groups:
+                    job_groups[job.id] = {
+                        'job': job,
+                        'delayed_candidates': [],
+                        'all_candidates_count': 0,
+                        'delayed_count': 0,
+                        'max_delay': 0,
+                        'avg_delay': 0,
+                        'priority': 'ON_TRACK',
+                        'priority_label': 'عادی',
+                        'priority_order': 0,
+                    }
+                    
+                job_groups[job.id]['all_candidates_count'] += 1
+                
+                if is_delayed:
+                    job_groups[job.id]['delayed_candidates'].append(cand_data)
+                    job_groups[job.id]['delayed_count'] += 1
+                    total_delayed_count += 1
+                    total_delay_days_sum += overdue_days
+                    
+                    if overdue_days > job_groups[job.id]['max_delay']:
+                        job_groups[job.id]['max_delay'] = overdue_days
+                        
+                    # تعیین اولویت کلی شغل بر اساس بالاترین اولویت کاندیداها
+                    p_order_map = {'ON_TRACK': 0, 'MEDIUM': 1, 'HIGH': 2, 'CRITICAL': 3}
+                    curr_p = job_groups[job.id]['priority']
+                    if p_order_map[priority] > p_order_map[curr_p]:
+                        job_groups[job.id]['priority'] = priority
+                        job_groups[job.id]['priority_label'] = priority_label
+                        job_groups[job.id]['priority_order'] = p_order_map[priority]
+        
+        # محاسبه میانگین تاخیرها برای هر شغل
+        for j_id, j_data in job_groups.items():
+            if j_data['delayed_count'] > 0:
+                total_delays = sum(c['overdue_days'] for c in j_data['delayed_candidates'])
+                j_data['avg_delay'] = round(total_delays / j_data['delayed_count'], 1)
+            if j_data['priority'] == 'CRITICAL':
+                total_critical_jobs += 1
+                
+        # تبدیل به لیست و اعمال فیلتر اولویت و مرتب‌سازی
+        jobs_list = list(job_groups.values())
+        
+        # فیلتر بر اساس اولویت کلی شغل در صورت انتخاب
+        if priority_filter:
+            jobs_list = [j for j in jobs_list if j['priority'] == priority_filter]
+        else:
+            # اگر فیلتر اولویت فعال نباشد، پیش‌فرض مشاغلی که کاندیدای تاخیردار دارند را نشان می‌دهیم
+            # مگر اینکه کاربر جستجوی خاصی کرده باشد
+            if not search_query and not unit_filter:
+                # فقط مشاغلی که حداقل یک متقاضی تاخیردار دارند
+                jobs_list = [j for j in jobs_list if j['delayed_count'] > 0]
+                
+        # مرتب‌سازی: بر اساس رتبه اولویت نزولی و سپس بیشترین تاخیر
+        jobs_list.sort(key=lambda x: (-x['priority_order'], -x['max_delay']))
+        
+        # دریافت واحدهای سازمانی متمایز جهت فیلتر کشویی
+        units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED']
+        ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
+        
+        # میانگین کل روزهای تاخیر متقاضیان تاخیردار
+        avg_total_delay = round(total_delay_days_sum / total_delayed_count, 1) if total_delayed_count > 0 else 0
+        
+        context = {
+            'jobs_list': jobs_list,
+            'units': units,
+            'selected_unit': unit_filter,
+            'selected_priority': priority_filter,
+            'search_query': search_query,
+            'total_active_count': total_active_count,
+            'total_delayed_count': total_delayed_count,
+            'total_critical_jobs': total_critical_jobs,
+            'avg_total_delay': avg_total_delay,
+        }
+        return render(request, 'recruitment_planning/sla_delays.html', context)
+
 
 

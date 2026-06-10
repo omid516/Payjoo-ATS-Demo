@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+{% block title %}میز کار مانیتورینگ تأخیرات SLA | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
+<style>
+    .kpi-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+    .job-card {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+    .job-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+    }
+    .job-card-header {
+        cursor: pointer;
+        padding: 1.25rem;
+        user-select: none;
+    }
+    .badge-priority {
+        font-weight: 700;
+        font-size: 11px;
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+    .badge-priority-critical {
+        background-color: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fca5a5;
+    }
+    .badge-priority-high {
+        background-color: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fcd34d;
+    }
+    .badge-priority-medium {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border: 1px solid #93c5fd;
+    }
+    .badge-priority-ontrack {
+        background-color: #f8fafc;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+    }
+    .candidate-row {
+        transition: background-color 0.15s ease;
+    }
+    .candidate-row:hover {
+        background-color: #f8fafc;
+    }
+    .rotate-icon {
+        transition: transform 0.2s ease;
+    }
+    .collapsed .rotate-icon {
+        transform: rotate(180deg);
+    }
+    /* Styles for the modal and datepicker */
+    .modal-content {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 18px;
+    }
+    #bd-root-start_date_modal {
+        font-family: 'Vazirmatn', sans-serif !important;
+        z-index: 1060 !important;
+    }
+    .planning-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h3 class="font-bold text-secondary mb-1">⏳ میز کار مانیتورینگ تأخیرات SLA</h3>
+        <p class="text-muted text-sm m-0">رصد هوشمند تأخیرات متقاضیان فعال بر اساس زمان استاندارد (SLA) مراحل ارزیابی</p>
+    </div>
+    <div>
+        <a href="{% url 'planning_dashboard' %}" class="btn btn-outline-secondary font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
+            📊 بازگشت به برنامه‌ریزی جذب
+        </a>
+    </div>
+</div>
+
+<!-- کارت‌های شاخص کلی (KPI) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card kpi-card border-0 p-4 shadow-xs">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted text-xs font-semibold">کل متقاضیان فعال</span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 px-2 py-1 text-xxs font-bold">ACTIVE</span>
+            </div>
+            <h2 class="font-bold text-secondary m-0">{{ total_active_count }} <small class="text-xs text-muted font-normal">نفر</small></h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card border-0 p-4 shadow-xs">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted text-xs font-semibold">دارای تأخیر SLA</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2 py-1 text-xxs font-bold">DELAYED</span>
+            </div>
+            <h2 class="font-bold text-danger m-0">{{ total_delayed_count }} <small class="text-xs text-muted font-normal">نفر</small></h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card border-0 p-4 shadow-xs">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted text-xs font-semibold">مشاغل با وضعیت بحرانی</span>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 text-xxs font-bold">CRITICAL JOBS</span>
+            </div>
+            <h2 class="font-bold text-secondary m-0">{{ total_critical_jobs }} <small class="text-xs text-muted font-normal">شغل</small></h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card border-0 p-4 shadow-xs">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted text-xs font-semibold">میانگین زمان تأخیر</span>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-10 px-2 py-1 text-xxs font-bold">AVG DELAY</span>
+            </div>
+            <h2 class="font-bold text-secondary m-0">{{ avg_total_delay }} <small class="text-xs text-muted font-normal">روز</small></h2>
+        </div>
+    </div>
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card border-0 shadow-xs p-3 mb-4" style="border-radius: 12px; background: #ffffff;">
+    <form method="GET" action="." class="row g-2">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted" style="border-radius: 0 8px 8px 0;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" /></svg></span>
+                <input type="text" name="q" value="{{ search_query }}" class="form-control bg-light border-start-0 text-xs" placeholder="جستجوی نام متقاضی، عنوان شغل یا شماره درخواست..." style="border-radius: 8px 0 0 8px;">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="unit" class="form-select bg-light text-xs" style="border-radius: 8px;">
+                <option value="">همه واحدهای سازمانی</option>
+                {% for unit in units %}
+                <option value="{{ unit }}" {% if selected_unit == unit %}selected{% endif %}>{{ unit }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="priority" class="form-select bg-light text-xs" style="border-radius: 8px;">
+                <option value="">همه اولویت‌ها</option>
+                <option value="CRITICAL" {% if selected_priority == 'CRITICAL' %}selected{% endif %}>بحرانی (تأخیر > ۱۰ روز)</option>
+                <option value="HIGH" {% if selected_priority == 'HIGH' %}selected{% endif %}>بالا (تأخیر ۵ تا ۱۰ روز)</option>
+                <option value="MEDIUM" {% if selected_priority == 'MEDIUM' %}selected{% endif %}>متوسط (تأخیر ۱ تا ۵ روز)</option>
+                <option value="ON_TRACK" {% if selected_priority == 'ON_TRACK' %}selected{% endif %}>عادی (بدون تأخیر)</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary font-bold text-xs w-100 py-2" style="border-radius: 8px;">اعمال فیلتر</button>
+            {% if search_query or selected_unit or selected_priority %}
+            <a href="." class="btn btn-outline-secondary font-bold text-xs py-2 px-3" style="border-radius: 8px;" title="پاک کردن فیلترها">✕</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- لیست مشاغل به همراه متقاضیان تأخیردار -->
+<div class="accordion" id="slaAccordion">
+    {% for item in jobs_list %}
+    <div class="card job-card mb-3 border-start border-4 {% if item.priority == 'CRITICAL' %}border-danger{% elif item.priority == 'HIGH' %}border-warning{% elif item.priority == 'MEDIUM' %}border-info{% else %}border-secondary{% endif %}">
+        <div class="job-card-header bg-white d-flex justify-content-between align-items-center" 
+             data-bs-toggle="collapse" 
+             data-bs-target="#job-collapse-{{ item.job.id }}" 
+             aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+             aria-controls="job-collapse-{{ item.job.id }}">
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="rotate-icon text-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </div>
+                <div>
+                    <h5 class="font-bold text-secondary mb-1 text-base">{{ item.job.title }}</h5>
+                    <div class="d-flex align-items-center gap-2 text-xxs text-muted">
+                        <span>🏢 {{ item.job.unit|default:"فاقد واحد" }}</span>
+                        <span>•</span>
+                        <span>رده: {{ item.job.job_category|default:"نامشخص" }}</span>
+                        <span>•</span>
+                        <span>درخواست: {{ item.job.request_number|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-xs btn-outline-primary font-bold px-2 py-1.5" 
+                        style="border-radius: 6px; font-size: 11px;"
+                        onclick="openPlanningModal('{{ item.job.id }}', '{{ item.job.title }}'); event.stopPropagation();">
+                    📅 تنظیم زمان‌بندی
+                </button>
+                <div class="text-end">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-2 py-1 text-xxs font-bold">
+                        {{ item.delayed_count }} متقاضی دارای تأخیر
+                    </span>
+                    <div class="text-xxs text-muted mt-1">
+                        حداکثر تأخیر: <strong>{{ item.max_delay }} روز</strong>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge badge-priority {% if item.priority == 'CRITICAL' %}badge-priority-critical{% elif item.priority == 'HIGH' %}badge-priority-high{% elif item.priority == 'MEDIUM' %}badge-priority-medium{% else %}badge-priority-ontrack{% endif %}">
+                        {{ item.priority_label }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="job-collapse-{{ item.job.id }}" class="collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#slaAccordion">
+            <div class="card-body p-0 border-top">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-xs">
+                        <thead class="table-light text-muted">
+                            <tr>
+                                <th class="py-3 ps-4" style="width: 20%;">متقاضی</th>
+                                <th class="py-3" style="width: 15%;">شماره تماس</th>
+                                <th class="py-3" style="width: 15%;">مرحله جاری</th>
+                                <th class="py-3" style="width: 15%;">تاریخ ورود به مرحله</th>
+                                <th class="py-3 text-center" style="width: 10%;">مدت حضور (روز)</th>
+                                <th class="py-3 text-center" style="width: 8%;">سقف SLA</th>
+                                <th class="py-3 text-center" style="width: 10%;">میزان تأخیر</th>
+                                <th class="py-3 text-end pe-4" style="width: 12%;">اقدام</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cand in item.delayed_candidates %}
+                            <tr class="candidate-row">
+                                <td class="py-3 ps-4">
+                                    <a href="{% url 'candidate_detail' cand.candidate.id %}" class="font-bold text-secondary text-decoration-none hover-primary">
+                                        {{ cand.candidate.first_name }} {{ cand.candidate.last_name }}
+                                    </a>
+                                </td>
+                                <td class="py-3 font-semibold text-muted">{{ cand.candidate.phone_number|default:"-" }}</td>
+                                <td class="py-3">
+                                    <span class="badge bg-light text-secondary border px-2.5 py-1.5 font-bold" style="border-radius: 6px;">
+                                        {{ cand.stage_name }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-muted">{{ cand.active_since|to_jalali|default:"-" }}</td>
+                                <td class="py-3 text-center font-bold text-secondary">{{ cand.days_waiting }} روز</td>
+                                <td class="py-3 text-center text-muted">{{ cand.sla_days }} روز</td>
+                                <td class="py-3 text-center">
+                                    <span class="badge {% if cand.priority == 'CRITICAL' %}bg-danger{% elif cand.priority == 'HIGH' %}bg-warning text-dark{% else %}bg-info{% endif %} bg-opacity-10 text-{% if cand.priority == 'CRITICAL' %}danger{% elif cand.priority == 'HIGH' %}warning{% else %}info{% endif %} border border-{% if cand.priority == 'CRITICAL' %}danger{% elif cand.priority == 'HIGH' %}warning{% else %}info{% endif %} border-opacity-20 px-2 py-1 font-bold text-xxs">
+                                        {{ cand.overdue_days }} روز تأخیر
+                                    </span>
+                                </td>
+                                <td class="py-3 text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-1.5">
+                                        <a href="{% url 'candidate_score_entry' %}?job_id={{ item.job.id }}&q={{ cand.candidate.first_name }}+{{ cand.candidate.last_name }}" class="btn btn-xs btn-primary font-bold px-2.5 py-1.5" style="border-radius: 6px; font-size: 11px;">
+                                            ثبت نمره
+                                        </a>
+                                        <a href="{% url 'job_pipeline' item.job.id %}" class="btn btn-xs btn-outline-secondary font-bold px-2.5 py-1.5" style="border-radius: 6px; font-size: 11px;" title="پایپلاین کل شغل">
+                                            پایپلاین
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    هیچ متقاضی دارای تأخیری در این شغل وجود ندارد.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card border-0 shadow-xs p-5 text-center" style="border-radius: 16px;">
+        <div class="text-muted mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="text-success"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+        </div>
+        <h5 class="font-bold text-secondary mb-1">تبریک! هیچ تأخیر SLA فعالی وجود ندارد</h5>
+        <p class="text-muted text-xs m-0">تمامی متقاضیان در بازه زمانی استاندارد در حال بررسی هستند.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal for Job Planning -->
+<div class="modal fade" id="planningModal" tabindex="-1" aria-labelledby="planningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-light border-0 py-3 px-4">
+                <h5 class="modal-title font-bold text-secondary" id="planningModalLabel">تنظیم برنامه زمان‌بندی جذب</h5>
+                <button type="button" class="btn-close ms-0 me-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="planning-modal-body" style="max-height: 80vh; overflow-y: auto;">
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                    <span class="text-xs text-muted">در حال بارگذاری اطلاعات برنامه‌ریزی...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- اسکریپت‌ها و لایبرری‌ها -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.js"></script>
+
+<script>
+    function openPlanningModal(jobId, jobTitle) {
+        // Set modal title
+        document.getElementById('planningModalLabel').textContent = 'تنظیم برنامه زمان‌بندی جذب: ' + jobTitle;
+        
+        // Reset body container to loading state
+        const body = document.getElementById('planning-modal-body');
+        body.innerHTML = `
+            <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                <span class="text-xs text-muted">در حال بارگذاری اطلاعات برنامه‌ریزی...</span>
+            </div>
+        `;
+        
+        // Use HTMX to load the content dynamically
+        htmx.ajax('GET', `/planning/job/${jobId}/?modal=1&next=/planning/sla-delays/`, {
+            target: '#planning-modal-body',
+            swap: 'innerHTML'
+        });
+        
+        // Show the modal using Bootstrap API
+        const modalEl = document.getElementById('planningModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function convertDigitsToPersian(element) {
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const regex = /[0-9]/g;
+        
+        function traverse(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                node.nodeValue = node.nodeValue.replace(regex, function(w) {
+                    return persianDigits[+w];
+                });
+            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' && node.tagName !== 'INPUT' && node.tagName !== 'TEXTAREA') {
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    traverse(node.childNodes[i]);
+                }
+            }
+        }
+        traverse(element || document.body);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        convertDigitsToPersian();
+        
+        // هندل کردن باز و بسته شدن فلش آیکون آکاردئون
+        const accordion = document.getElementById('slaAccordion');
+        if (accordion) {
+            accordion.addEventListener('show.bs.collapse', function (e) {
+                const header = e.target.previousElementSibling;
+                if (header) {
+                    header.classList.remove('collapsed');
+                }
+            });
+            accordion.addEventListener('hide.bs.collapse', function (e) {
+                const header = e.target.previousElementSibling;
+                if (header) {
+                    header.classList.add('collapsed');
+                }
+            });
+            
+            // در زمان شروع لود، هدرهایی که آکاردئون آنها باز نیست کلاس collapsed بگیرند
+            document.querySelectorAll('.job-card-header').forEach(function(header) {
+                const targetId = header.getAttribute('data-bs-target');
+                const target = document.querySelector(targetId);
+                if (target && !target.classList.contains('show')) {
+                    header.classList.add('collapsed');
+                }
+            });
+        }
+    });
+
+    if (window.htmx) {
+        document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+            convertDigitsToPersian(evt.detail.target);
+        });
+    }
+</script>
+{% endblock %}

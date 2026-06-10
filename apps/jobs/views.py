@@ -10,10 +10,56 @@ from apps.accounts.models import UserProfile
 from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate
 from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet
 
+def normalize_digits(s):
+    if not s:
+        return ''
+    s = str(s).strip()
+    for fa, en in zip('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789'):
+        s = s.replace(fa, en)
+    return s
+
+
+def apply_job_filters(queryset, params):
+    from django.db.models import Q
+    
+    q = params.get('q', '').strip()
+    status = params.get('status', '').strip()
+    department = params.get('department', '').strip()
+    unit = params.get('unit', '').strip()
+    source = params.get('source', '').strip()
+    recruitment_type = params.get('recruitment_type', '').strip()
+    job_category = params.get('job_category', '').strip()
+    
+    if q:
+        q_norm = normalize_digits(q)
+        queryset = queryset.filter(
+            Q(title__icontains=q) | 
+            Q(code__icontains=q) | 
+            Q(code__icontains=q_norm) |
+            Q(request_number__icontains=q) |
+            Q(request_number__icontains=q_norm)
+        )
+    if status:
+        queryset = queryset.filter(status=status)
+    if department:
+        queryset = queryset.filter(department=department)
+    if unit:
+        queryset = queryset.filter(unit=unit)
+    if source:
+        queryset = queryset.filter(source=source)
+    if recruitment_type:
+        queryset = queryset.filter(recruitment_type=recruitment_type)
+    if job_category:
+        queryset = queryset.filter(job_category=job_category)
+        
+    return queryset
+
+
 class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     model = JobOpportunity
     template_name = 'jobs/job_list.html'
     context_object_name = 'jobs'
+    paginate_by = 10
     allowed_roles = [
         UserProfile.ROLE_ADMIN,
         UserProfile.ROLE_RECRUITMENT_DIRECTOR,
@@ -25,9 +71,46 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
 
     def get_queryset(self):
         from django.db.models import Count, Q
-        return JobOpportunity.objects.filter(is_deleted=False).annotate(
+        queryset = JobOpportunity.objects.filter(is_deleted=False)
+        queryset = apply_job_filters(queryset, self.request.GET)
+        return queryset.annotate(
             candidate_count=Count('applications', filter=Q(applications__is_deleted=False))
-        ).prefetch_related('stages')
+        ).prefetch_related('stages').order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Clean current parameters to attach to pagination links
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_params'] = query_params.urlencode()
+        
+        # Get unique departments/units for filter dropdowns (only non-empty)
+        context['departments'] = JobOpportunity.objects.filter(is_deleted=False).exclude(department='').values_list('department', flat=True).distinct().order_by('department')
+        context['units'] = JobOpportunity.objects.filter(is_deleted=False).exclude(unit='').values_list('unit', flat=True).distinct().order_by('unit')
+        
+        # Pass filter choices to template
+        context['status_choices'] = JobOpportunity.STATUS_CHOICES
+        context['source_choices'] = JobOpportunity.SOURCE_CHOICES
+        context['recruitment_choices'] = JobOpportunity.RECRUITMENT_TYPE_CHOICES
+        context['category_choices'] = JobOpportunity.CATEGORY_CHOICES
+        
+        # Keep current filter values to populate form fields
+        context['filters'] = {
+            'q': self.request.GET.get('q', ''),
+            'status': self.request.GET.get('status', ''),
+            'department': self.request.GET.get('department', ''),
+            'unit': self.request.GET.get('unit', ''),
+            'source': self.request.GET.get('source', ''),
+            'recruitment_type': self.request.GET.get('recruitment_type', ''),
+            'job_category': self.request.GET.get('job_category', ''),
+        }
+        
+        # Count active filters
+        context['active_filters_count'] = sum(1 for val in context['filters'].values() if val)
+        
+        return context
 
 
 class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
@@ -205,7 +288,9 @@ class ExportJobsExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
 
     def get(self, request):
         from django.db.models import Count, Q
-        jobs = JobOpportunity.objects.filter(is_deleted=False).annotate(
+        queryset = JobOpportunity.objects.filter(is_deleted=False)
+        queryset = apply_job_filters(queryset, request.GET)
+        jobs = queryset.annotate(
             candidate_count=Count('applications', filter=Q(applications__is_deleted=False))
         ).prefetch_related('stages').order_by('-created_at')
 

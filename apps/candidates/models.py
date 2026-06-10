@@ -8,7 +8,7 @@ class Candidate(SoftDeleteModel):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='candidate_profile', verbose_name="کاربر متصل")
     first_name = models.CharField(max_length=100, verbose_name="نام")
     last_name = models.CharField(max_length=100, verbose_name="نام خانوادگی")
-    email = models.EmailField(verbose_name="ایمیل")
+    email = models.EmailField(blank=True, verbose_name="ایمیل")
     phone_number = models.CharField(max_length=15, verbose_name="شماره تماس")
     national_id = models.CharField(max_length=10, unique=True, verbose_name="کد ملی")
     personnel_number = models.CharField(max_length=20, blank=True, null=True, unique=True, verbose_name="شماره پرسنلی")
@@ -124,7 +124,7 @@ class JobApplication(SoftDeleteModel):
         super().save(*args, **kwargs)
         
         # در صورت ایجاد درخواست جدید، به تعداد مراحل فعال فرصت شغلی، رکوردهای وضعیت مراحل ثبت می‌شود
-        if is_new:
+        if is_new and not getattr(self, '_bypass_stage_creation', False):
             job_stages = self.job.stages.filter(is_deleted=False).order_by('sequence')
             
             # در صورت وجود مراحل، مرحله اول به عنوان مرحله جاری تنظیم می‌شود
@@ -258,7 +258,7 @@ class ApplicationStageState(SoftDeleteModel):
         # Auto-advance current_stage if the stage status is completed or conditionally passed, and the application is still IN_PROGRESS
         update_fields = ['final_score']
         if (self.status == self.STATUS_COMPLETED or self.is_conditional_pass) and app.status == JobApplication.STATUS_IN_PROGRESS:
-            if app.current_stage and app.current_stage.sequence <= self.stage.sequence:
+            if not app.current_stage or app.current_stage.sequence <= self.stage.sequence:
                 next_stage = app.job.stages.filter(
                     is_deleted=False,
                     sequence__gt=self.stage.sequence

@@ -8,7 +8,7 @@
         <p class="text-muted text-sm m-0">تعریف فرصت‌های شغلی جدید و تنظیم مراحل و وزن‌های پویای فرآیند ارزیابی متقاضیان</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{% url 'job_export_excel' %}" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1.5">
+        <a href="{% url 'job_export_excel' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
                 <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
                 <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
@@ -23,6 +23,104 @@
             افزودن فرصت شغلی جدید
         </a>
         {% endif %}
+    </div>
+</div>
+
+<!-- بخش فیلترهای پیشرفته -->
+<div class="card premium-card mb-4 shadow-sm border-0 bg-light-subtle">
+    <div class="card-body p-3">
+        <form method="get" action="" class="row g-3">
+            <!-- جستجوی متنی -->
+            <div class="col-12 col-md-4 col-lg-3">
+                <label for="id_q" class="form-label text-xs font-bold text-muted mb-1">🔍 جستجوی فرصت شغلی</label>
+                <input type="text" name="q" id="id_q" class="form-control form-control-sm text-sm" placeholder="عنوان، کد شغل یا شماره درخواست..." value="{{ filters.q }}">
+            </div>
+            
+            <!-- دپارتمان / واحد -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_department" class="form-label text-xs font-bold text-muted mb-1">🏢 دپارتمان</label>
+                <select name="department" id="id_department" class="form-select form-select-sm text-sm">
+                    <option value="">همه دپارتمان‌ها</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept }}" {% if filters.department == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- واحد سازمانی -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_unit" class="form-label text-xs font-bold text-muted mb-1">⚙️ واحد سازمانی</label>
+                <select name="unit" id="id_unit" class="form-select form-select-sm text-sm">
+                    <option value="">همه واحدها</option>
+                    {% for unit in units %}
+                        <option value="{{ unit }}" {% if filters.unit == unit %}selected{% endif %}>{{ unit }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- وضعیت -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_status" class="form-label text-xs font-bold text-muted mb-1">🏷️ وضعیت</label>
+                <select name="status" id="id_status" class="form-select form-select-sm text-sm">
+                    <option value="">همه وضعیت‌ها</option>
+                    {% for code, label in status_choices %}
+                        <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- نوع استخدام -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_recruitment_type" class="form-label text-xs font-bold text-muted mb-1">👥 نوع استخدام</label>
+                <select name="recruitment_type" id="id_recruitment_type" class="form-select form-select-sm text-sm">
+                    <option value="">همه موارد</option>
+                    {% for code, label in recruitment_choices %}
+                        <option value="{{ code }}" {% if filters.recruitment_type == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- رده شغلی -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_job_category" class="form-label text-xs font-bold text-muted mb-1">🎖️ رده شغلی</label>
+                <select name="job_category" id="id_job_category" class="form-select form-select-sm text-sm">
+                    <option value="">همه رده‌ها</option>
+                    {% for code, label in category_choices %}
+                        <option value="{{ code }}" {% if filters.job_category == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- منبع ایجاد -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="id_source" class="form-label text-xs font-bold text-muted mb-1">📥 منبع ایجاد</label>
+                <select name="source" id="id_source" class="form-select form-select-sm text-sm">
+                    <option value="">همه منابع</option>
+                    {% for code, label in source_choices %}
+                        <option value="{{ code }}" {% if filters.source == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- دکمه‌های عملیات -->
+            <div class="col-12 col-lg-4 d-flex align-items-end gap-2 ms-auto">
+                <button type="submit" class="btn btn-sm btn-primary-custom d-flex align-items-center justify-content-center gap-1.5 flex-grow-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v3.444c0 .362-.143.71-.4 1.033L15 15.126V21l-6-3v-2.874L3.4 9.25a1.233 1.233 0 0 1-.4-1.033V4.774c0-.54.384-1.006.917-1.096A50.065 50.065 0 0 1 12 3Z" />
+                    </svg>
+                    اعمال فیلترها
+                </button>
+                
+                {% if active_filters_count > 0 %}
+                <a href="?" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center gap-1.5 flex-grow-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    پاک کردن ({{ active_filters_count }})
+                </a>
+                {% endif %}
+            </div>
+        </form>
     </div>
 </div>
 
@@ -91,6 +189,8 @@
                                 <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">غربالگری اولیه</span>
                             {% elif job.status == 'EXAM' %}
                                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">آزمون کتبی</span>
+                            {% elif job.status == 'SKILL_TEST' %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">آزمون مهارتی</span>
                             {% elif job.status == 'INTERVIEW' %}
                                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">مصاحبه حضوری</span>
                             {% elif job.status == 'ASSESSMENT' %}
@@ -136,5 +236,58 @@
             </table>
         </div>
     </div>
+    
+    <!-- بخش صفحه‌بندی (Pagination) -->
+    {% if is_paginated %}
+    <div class="card-footer bg-white border-top py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="text-xs text-muted font-medium">
+            نمایش ردیف‌های {{ page_obj.start_index }} تا {{ page_obj.end_index }} از مجموع {{ paginator.count }} فرصت شغلی
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm m-0 gap-1">
+                <!-- دکمه قبلی -->
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link rounded px-2.5 py-1.5" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; قبلی</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link rounded px-2.5 py-1.5">&laquo; قبلی</span>
+                </li>
+                {% endif %}
+
+                <!-- شماره صفحات -->
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link rounded px-3 py-1.5 font-bold">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link rounded px-3 py-1.5" href="?page={{ num }}{% if query_params %}&{{ query_params }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- دکمه بعدی -->
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link rounded px-2.5 py-1.5" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">بعدی &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link rounded px-2.5 py-1.5">بعدی &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% else %}
+    <div class="card-footer bg-white border-top py-3">
+        <div class="text-xs text-muted font-medium text-center text-md-start">
+            مجموعاً {{ jobs|length }} فرصت شغلی یافت شد.
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

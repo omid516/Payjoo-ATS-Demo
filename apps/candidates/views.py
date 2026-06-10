@@ -1050,23 +1050,35 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         from django.core.paginator import Paginator
         from django.db.models import Q as DQ
         job_q = request.GET.get('job_q', '').strip()
-        jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(status=JobOpportunity.STATUS_CLOSED)
+        jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+        )
         if job_q:
             jobs_qs = jobs_qs.filter(
                 DQ(title__icontains=job_q) |
                 DQ(code__icontains=job_q) |
                 DQ(request_number__icontains=job_q)
             )
-        jobs = jobs_qs.order_by('code')
+        
         job_id = request.GET.get('job_id')
+        selected_job = None
+        if job_id:
+            selected_job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+
+        jobs = list(jobs_qs.order_by('code'))
+        if selected_job and selected_job not in jobs:
+            jobs.insert(0, selected_job)
+
+        is_job_closed_or_cancelled = False
+        if selected_job:
+            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+
         stage_id = request.GET.get('stage_id')
         q = request.GET.get('q')
         eval_status = request.GET.get('eval_status', 'PENDING')
         show_failed_prior_val = request.GET.get('show_failed_prior')
         show_failed_prior = show_failed_prior_val in ['true', 'on', '1']
 
-        
-        selected_job = None
         selected_stage = None
         stages = []
         pending_states = []
@@ -1074,8 +1086,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         paginator = None
         is_paginated = False
 
-        if job_id:
-            selected_job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        if selected_job:
             stages = selected_job.stages.filter(is_deleted=False).order_by('sequence')
             
             if request.headers.get('HX-Request') and 'job_id' in request.GET and 'stage_id' not in request.GET:
@@ -1143,6 +1154,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'page_obj': page_obj,
                 'is_paginated': is_paginated,
                 'paginator': paginator,
+                'is_job_closed_or_cancelled': is_job_closed_or_cancelled,
             })
 
         return render(request, 'candidates/score_entry.html', {
@@ -1158,11 +1170,11 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
             'page_obj': page_obj,
             'is_paginated': is_paginated,
             'paginator': paginator,
+            'is_job_closed_or_cancelled': is_job_closed_or_cancelled,
         })
 
     def post(self, request):
         from django.core.paginator import Paginator
-        jobs = JobOpportunity.objects.filter(is_deleted=False).exclude(status=JobOpportunity.STATUS_CLOSED).order_by('-created_at')
         job_id = request.POST.get('job_id')
         stage_id = request.POST.get('stage_id')
         q = request.POST.get('q')
@@ -1178,46 +1190,57 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         paginator = None
         is_paginated = False
 
+        jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+        )
+
         if job_id:
             selected_job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
             stages = selected_job.stages.filter(is_deleted=False).order_by('sequence')
             if stage_id:
                 selected_stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
 
-            state_ids = []
-            for key in request.POST.keys():
-                if key.startswith('score_'):
-                    try:
-                        state_ids.append(int(key.split('_')[1]))
-                    except ValueError:
-                        pass
+            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
 
-            with transaction.atomic():
-                for sid in state_ids:
-                    state = ApplicationStageState.objects.filter(pk=sid, is_deleted=False).first()
-                    if state and state.is_accessible:
-                        score_val = request.POST.get(f'score_{sid}', '0')
-                        status_val = request.POST.get(f'status_{sid}', ApplicationStageState.STATUS_PENDING)
-                        notes_val = request.POST.get(f'notes_{sid}', '')
-                        date_val = request.POST.get(f'date_{sid}', '').strip()
-                        is_conditional_pass_val = request.POST.get(f'is_conditional_pass_{sid}') in ['true', 'on']
-                        
+            jobs = list(jobs_qs.order_by('-created_at'))
+            if selected_job and selected_job not in jobs:
+                jobs.insert(0, selected_job)
+
+            if not is_job_closed_or_cancelled:
+                state_ids = []
+                for key in request.POST.keys():
+                    if key.startswith('score_'):
                         try:
-                            state.score = float(score_val)
+                            state_ids.append(int(key.split('_')[1]))
                         except ValueError:
-                            state.score = 0.0
+                            pass
+
+                with transaction.atomic():
+                    for sid in state_ids:
+                        state = ApplicationStageState.objects.filter(pk=sid, is_deleted=False).first()
+                        if state and state.is_accessible:
+                            score_val = request.POST.get(f'score_{sid}', '0')
+                            status_val = request.POST.get(f'status_{sid}', ApplicationStageState.STATUS_PENDING)
+                            notes_val = request.POST.get(f'notes_{sid}', '')
+                            date_val = request.POST.get(f'date_{sid}', '').strip()
+                            is_conditional_pass_val = request.POST.get(f'is_conditional_pass_{sid}') in ['true', 'on']
                             
-                        state.status = status_val
-                        state.notes = notes_val
-                        state.is_conditional_pass = is_conditional_pass_val
-                        state.evaluator = request.user
-                        
-                        if date_val:
-                            state.evaluation_date = parse_jalali_date(date_val)
-                        else:
-                            state.evaluation_date = None
+                            try:
+                                state.score = float(score_val)
+                            except ValueError:
+                                state.score = 0.0
+                                
+                            state.status = status_val
+                            state.notes = notes_val
+                            state.is_conditional_pass = is_conditional_pass_val
+                            state.evaluator = request.user
                             
-                        state.save()
+                            if date_val:
+                                state.evaluation_date = parse_jalali_date(date_val)
+                            else:
+                                state.evaluation_date = None
+                                
+                            state.save()
 
             if selected_stage:
                 from django.db.models import Exists, OuterRef
@@ -1272,13 +1295,14 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'selected_stage': selected_stage,
                 'stages': stages,
                 'pending_states': pending_states,
-                'bulk_success': True,
+                'bulk_success': not is_job_closed_or_cancelled and job_id is not None,
                 'selected_q': q,
                 'selected_eval_status': eval_status,
                 'show_failed_prior': show_failed_prior,
                 'page_obj': page_obj,
                 'is_paginated': is_paginated,
                 'paginator': paginator,
+                'is_job_closed_or_cancelled': is_job_closed_or_cancelled,
             })
 
         return render(request, 'candidates/score_entry.html', {
@@ -1287,13 +1311,14 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
             'selected_stage': selected_stage,
             'stages': stages,
             'pending_states': pending_states,
-            'bulk_success': True,
+            'bulk_success': not is_job_closed_or_cancelled and job_id is not None,
             'selected_q': q,
             'selected_eval_status': eval_status,
             'show_failed_prior': show_failed_prior,
             'page_obj': page_obj,
             'is_paginated': is_paginated,
             'paginator': paginator,
+            'is_job_closed_or_cancelled': is_job_closed_or_cancelled,
         })
 
 
@@ -1318,6 +1343,10 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
         stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+
+        if job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]:
+            messages.error(request, f"خطا: امکان ثبت نمرات از طریق اکسل برای فرصت شغلی در وضعیت '{job.get_status_display()}' وجود ندارد.")
+            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
 
         try:
             wb = openpyxl.load_workbook(excel_file)

@@ -30,7 +30,7 @@
                 </span>
             </div>
         {% else %}
-            {% if state.is_accessible %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled %}
                 <input type="number" 
                        name="score_{{ state.id }}" 
                        value="{{ state.score }}" 
@@ -60,7 +60,7 @@
                     {% if state.is_conditional_pass %}
                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 rounded text-xxs font-semibold d-block mt-1" style="font-size: 9px;">قبول ارفاقی / مشروط</span>
                     {% endif %}
-                    {% if state.is_accessible %}
+                    {% if state.is_accessible and not is_job_closed_or_cancelled %}
                         <div class="mt-1.5 d-flex align-items-center justify-content-center gap-1">
                             <input type="checkbox" name="is_conditional_pass_{{ state.id }}" id="is_conditional_pass_{{ state.id }}" class="form-check-input" {% if state.is_conditional_pass %}checked{% endif %} style="width: 12px; height: 12px; margin: 0;">
                             <label for="is_conditional_pass_{{ state.id }}" class="text-danger text-xxs font-semibold cursor-pointer mb-0" style="font-size: 9px; line-height: 1;">ارجاع مشروط</label>
@@ -75,7 +75,7 @@
                 {% endif %}
             </div>
         {% else %}
-            {% if state.is_accessible %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled %}
                 <select name="status_{{ state.id }}" class="form-select form-select-sm font-semibold mb-1" style="border-radius: 6px; font-size: 12px;">
                     <option value="PENDING" {% if state.status == 'PENDING' %}selected{% endif %}>در انتظار ارزیابی</option>
                     <option value="COMPLETED" {% if state.status == 'COMPLETED' %}selected{% endif %}>قبول شده در این مرحله</option>
@@ -97,7 +97,7 @@
         {% endif %}
     </td>
     <td>
-        {% if state.is_accessible %}
+        {% if state.is_accessible and not is_job_closed_or_cancelled %}
             <input type="text" 
                    name="date_{{ state.id }}" 
                    id="date_{{ state.id }}" 
@@ -119,7 +119,7 @@
         {% if state.stage.competencies.exists %}
             <div class="d-flex align-items-center justify-content-between gap-3">
                 <small class="text-muted text-xxs text-truncate" style="max-width: 320px;" title="{{ state.notes }}">{{ state.notes|default:"بدون یادداشت عمومی" }}</small>
-                {% if state.is_accessible %}
+                {% if state.is_accessible and not is_job_closed_or_cancelled %}
                     <button type="button" 
                             hx-get="{% url 'candidate_assessment_sheet' state.id %}?source=score_entry" 
                             hx-target="#assessment-modal-content"
@@ -134,7 +134,7 @@
                 {% endif %}
             </div>
         {% else %}
-            {% if state.is_accessible %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled %}
                 <input type="text" 
                        name="notes_{{ state.id }}" 
                        value="{{ state.notes|default:'' }}" 

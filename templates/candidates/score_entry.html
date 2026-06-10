@@ -63,7 +63,7 @@
                     <option value="">-- لطفاً یک فرصت شغلی را انتخاب کنید --</option>
                     {% for job in jobs %}
                         <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
-                            [{{ job.code }}] {{ job.title }}
+                            [{{ job.code }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' %}({{ job.get_status_display }}){% endif %}
                         </option>
                     {% endfor %}
                 </select>

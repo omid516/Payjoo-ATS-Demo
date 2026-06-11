@@ -73,6 +73,11 @@ class JobRecruitmentPlan(SoftDeleteModel):
     def __str__(self):
         return f"برنامه جذب برای {self.job.title} (شروع: {self.start_date})"
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.stage_plans.all().delete()
+
+
 
 class JobStagePlan(SoftDeleteModel):
     plan = models.ForeignKey(

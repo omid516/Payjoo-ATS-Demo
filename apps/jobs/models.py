@@ -141,6 +141,27 @@ class JobOpportunity(SoftDeleteModel):
                 return False
         return True
 
+    @property
+    def current_stage(self):
+        # 1. Look at furthest stage of active applications
+        active_apps = self.applications.filter(status='IN_PROGRESS', is_deleted=False)
+        if active_apps.exists():
+            from django.db.models import Max
+            max_seq = active_apps.aggregate(max_seq=Max('current_stage__sequence'))['max_seq']
+            if max_seq is not None:
+                furthest_stage = self.stages.filter(sequence=max_seq, is_deleted=False).first()
+                if furthest_stage:
+                    return furthest_stage
+                    
+        # 2. Fallback to status mapping
+        stage = self.stages.filter(stage_type=self.status, is_deleted=False).first()
+        if stage:
+            return stage
+            
+        # 3. Fallback to first stage
+        return self.stages.filter(is_deleted=False).order_by('sequence').first()
+
+
     def get_status_from_stage_name(self, stage_name):
         name_lower = stage_name.lower()
         if any(kw in name_lower for kw in ["غربال", "screening"]):
@@ -227,6 +248,15 @@ class JobOpportunity(SoftDeleteModel):
                     sequence=st.sequence,
                     stage_type=st.stage_type
                 )
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        try:
+            if hasattr(self, 'recruitment_plan') and self.recruitment_plan:
+                self.recruitment_plan.delete()
+        except Exception:
+            pass
+
 
 
 class JobOpportunityStage(SoftDeleteModel):

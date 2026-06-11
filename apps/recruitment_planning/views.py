@@ -57,8 +57,16 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         g_start, g_end = get_jalali_month_range(year, month)
 
         # Active plans
-        active_plans = JobRecruitmentPlan.objects.filter(status=JobRecruitmentPlan.STATUS_ACTIVE, is_deleted=False)
-        draft_plans = JobRecruitmentPlan.objects.filter(status=JobRecruitmentPlan.STATUS_DRAFT, is_deleted=False)
+        active_plans = JobRecruitmentPlan.objects.filter(
+            status=JobRecruitmentPlan.STATUS_ACTIVE, 
+            is_deleted=False,
+            job__is_deleted=False
+        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED])
+        draft_plans = JobRecruitmentPlan.objects.filter(
+            status=JobRecruitmentPlan.STATUS_DRAFT, 
+            is_deleted=False,
+            job__is_deleted=False
+        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED])
         
         # Find delayed plans (outside SLA)
         delayed_plans = []
@@ -94,7 +102,10 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 planned_end_date__range=(g_start, g_end),
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
             
             remaining = max(0, capacity_limit - consumed)
@@ -124,8 +135,10 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         ).exclude(
             status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
         ).exclude(
-            recruitment_plan__isnull=False
+            recruitment_plan__isnull=False,
+            recruitment_plan__is_deleted=False
         )
+
 
         # Agenda for the next 7 days
         agenda_events = []
@@ -146,14 +159,20 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 planned_start_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
                 planned_end_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             events = []
@@ -205,6 +224,8 @@ class JobPlanningView(LoginRequiredMixin, RoleRequiredMixin, View):
     def get(self, request, job_id):
         job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
         plan = getattr(job, 'recruitment_plan', None)
+        if plan and plan.is_deleted:
+            plan = None
         
         stages = job.stages.filter(is_deleted=False).order_by('sequence')
         
@@ -212,6 +233,7 @@ class JobPlanningView(LoginRequiredMixin, RoleRequiredMixin, View):
             'job': job,
             'plan': plan,
             'stages': stages,
+            'current_stage': job.current_stage,
             'today_jalali': to_jalali_string(datetime.date.today())
         }
         if request.GET.get('modal') == '1':
@@ -362,7 +384,12 @@ class ExportPlanningExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
     allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
 
     def get(self, request):
-        plans = JobRecruitmentPlan.objects.filter(is_deleted=False).prefetch_related(
+        plans = JobRecruitmentPlan.objects.filter(
+            is_deleted=False,
+            job__is_deleted=False
+        ).exclude(
+            job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+        ).prefetch_related(
             'job', 'stage_plans', 'stage_plans__stage'
         ).order_by('-created_at')
 
@@ -437,9 +464,12 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
         stage_plans = JobStagePlan.objects.filter(
             plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
             plan__is_deleted=False,
+            plan__job__is_deleted=False,
             is_deleted=False,
             planned_start_date__lte=g_end,
             planned_end_date__gte=g_start
+        ).exclude(
+            plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
         ).select_related('plan__job', 'stage')
         
         # Fetch holidays in this range
@@ -547,14 +577,20 @@ class ExportWeeklyAgendaExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
                 planned_start_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
                 planned_end_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             for sp in starts:
@@ -609,14 +645,20 @@ class WeeklyAgendaPrintView(LoginRequiredMixin, RoleRequiredMixin, View):
                 planned_start_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
                 planned_end_date=target_date,
                 plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
                 plan__is_deleted=False,
+                plan__job__is_deleted=False,
                 is_deleted=False
+            ).exclude(
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
             ).select_related('plan__job', 'stage')
 
             events = []
@@ -692,7 +734,10 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
                     stage_type=stype,
                     planned_end_date__range=(g_start, g_end),
                     plan__is_deleted=False,
+                    plan__job__is_deleted=False,
                     is_deleted=False
+                ).exclude(
+                    plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
                 ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
                 
                 config = configs.get(stype)
@@ -770,7 +815,8 @@ class SlaDelaysDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         # دریافت متقاضیان فعال در جریان ارزیابی فعال
         apps = JobApplication.objects.filter(
             status=JobApplication.STATUS_IN_PROGRESS,
-            is_deleted=False
+            is_deleted=False,
+            job__is_deleted=False
         ).exclude(job__status__in=['CLOSED', 'CANCELLED']).select_related('candidate', 'job')
         
         if search_query:

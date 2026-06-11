@@ -5,18 +5,26 @@
     <div class="d-flex mb-4 gap-3">
         <!-- دایره شماره مرحله -->
         <div class="d-flex flex-column align-items-center">
+            {% if item.is_past %}
+            <span class="badge bg-success text-white rounded-circle d-flex align-items-center justify-content-center font-bold shadow-sm" 
+                  style="width: 28px; height: 28px; font-size: 11px; z-index: 10;" title="پایان‌یافته">
+                ✓
+            </span>
+            {% else %}
             <span class="badge bg-primary text-white rounded-circle d-flex align-items-center justify-content-center font-bold shadow-sm" 
                   style="width: 28px; height: 28px; font-size: 12px; z-index: 10;">
                 {{ item.stage.sequence }}
             </span>
+            {% endif %}
             {% if not forloop.last %}
             <div class="bg-slate-light" style="width: 2px; flex-grow: 1; min-height: 40px; margin-top: 5px;"></div>
             {% endif %}
         </div>
         
         <!-- کارت اطلاعات مرحله -->
-        <div class="card flex-grow-1 border-0 bg-light bg-opacity-70 p-3" style="border-radius: 12px; border-right: 4px solid 
-            {% if item.stage_type == 'SCREENING' %}#6366f1
+        <div class="card flex-grow-1 border-0 {% if item.is_past %}bg-secondary bg-opacity-10 text-muted{% else %}bg-light bg-opacity-70{% endif %} p-3" style="border-radius: 12px; border-right: 4px solid 
+            {% if item.is_past %}#94a3b8
+            {% elif item.stage_type == 'SCREENING' %}#6366f1
             {% elif item.stage_type == 'EXAM' %}#0ea5e9
             {% elif item.stage_type == 'SKILL_TEST' %}#8b5cf6
             {% elif item.stage_type == 'INTERVIEW' %}#f59e0b
@@ -24,15 +32,26 @@
             {% else %}#64748b{% endif %} !important;">
             
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="font-bold text-secondary m-0" style="font-size: 13px;">{{ item.stage.name }}</h6>
+                <h6 class="font-bold {% if item.is_past %}text-muted{% else %}text-secondary{% endif %} m-0" style="font-size: 13px;">
+                    {{ item.stage.name }}
+                    {% if item.is_past %}
+                    <span class="text-xxs font-normal text-success me-1">(تکمیل‌شده / بدون تغییر)</span>
+                    {% endif %}
+                </h6>
+                {% if not item.is_past %}
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 px-2 py-1 text-xxs font-bold">
                     SLA: {{ item.sla_days }} روز کاری
                 </span>
+                {% else %}
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 text-xxs font-bold">
+                    گذشته
+                </span>
+                {% endif %}
             </div>
             
             <div class="d-flex justify-content-between align-items-center text-xs text-secondary mb-1">
                 <span>بازه زمانبندی ارزیابی:</span>
-                <span class="font-bold text-dark">{{ item.planned_start_date|to_jalali }} تا {{ item.planned_end_date|to_jalali }}</span>
+                <span class="font-bold {% if item.is_past %}text-muted{% else %}text-dark{% endif %}">{{ item.planned_start_date|to_jalali }} تا {{ item.planned_end_date|to_jalali }}</span>
             </div>
             
             {% if item.capacity_shifted %}

@@ -1,6 +1,37 @@
 {% extends "base.html" %}
 {% block title %}مدیریت فرصت‌های شغلی{% endblock %}
 
+{% block extra_head %}
+<!-- Tom Select CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    /* Premium RTL styling for Tom Select */
+    .ts-wrapper.multi .ts-control > div {
+        margin: 2px 0 2px 4px !important;
+        padding: 3px 6px !important;
+        background: #e2e8f0 !important;
+        color: #1e293b !important;
+        border-radius: 4px !important;
+    }
+    .ts-dropdown {
+        direction: rtl !important;
+        text-align: right !important;
+    }
+    .ts-control {
+        font-size: 0.825rem !important;
+        border-radius: 0.375rem !important;
+        border: 1px solid #dee2e6 !important;
+        padding: 6px 12px !important;
+    }
+    .ts-control input {
+        font-size: 0.825rem !important;
+    }
+    .ts-wrapper.single .ts-control {
+        background-image: none !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -37,73 +68,67 @@
             </div>
             
             <!-- دپارتمان / واحد -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_department" class="form-label text-xs font-bold text-muted mb-1">🏢 دپارتمان</label>
-                <select name="department" id="id_department" class="form-select form-select-sm text-sm">
-                    <option value="">همه دپارتمان‌ها</option>
+                <select name="department" id="id_department" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه دپارتمان‌ها">
                     {% for dept in departments %}
-                        <option value="{{ dept }}" {% if filters.department == dept %}selected{% endif %}>{{ dept }}</option>
+                        <option value="{{ dept }}" {% if dept in filters.department %}selected{% endif %}>{{ dept }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- واحد سازمانی -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_unit" class="form-label text-xs font-bold text-muted mb-1">⚙️ واحد سازمانی</label>
-                <select name="unit" id="id_unit" class="form-select form-select-sm text-sm">
-                    <option value="">همه واحدها</option>
+                <select name="unit" id="id_unit" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه واحدها">
                     {% for unit in units %}
-                        <option value="{{ unit }}" {% if filters.unit == unit %}selected{% endif %}>{{ unit }}</option>
+                        <option value="{{ unit }}" {% if unit in filters.unit %}selected{% endif %}>{{ unit }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- وضعیت -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_status" class="form-label text-xs font-bold text-muted mb-1">🏷️ وضعیت</label>
-                <select name="status" id="id_status" class="form-select form-select-sm text-sm">
-                    <option value="">همه وضعیت‌ها</option>
+                <select name="status" id="id_status" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه وضعیت‌ها">
                     {% for code, label in status_choices %}
-                        <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+                        <option value="{{ code }}" {% if code in filters.status %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- نوع استخدام -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_recruitment_type" class="form-label text-xs font-bold text-muted mb-1">👥 نوع استخدام</label>
-                <select name="recruitment_type" id="id_recruitment_type" class="form-select form-select-sm text-sm">
-                    <option value="">همه موارد</option>
+                <select name="recruitment_type" id="id_recruitment_type" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه موارد">
                     {% for code, label in recruitment_choices %}
-                        <option value="{{ code }}" {% if filters.recruitment_type == code %}selected{% endif %}>{{ label }}</option>
+                        <option value="{{ code }}" {% if code in filters.recruitment_type %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- رده شغلی -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_job_category" class="form-label text-xs font-bold text-muted mb-1">🎖️ رده شغلی</label>
-                <select name="job_category" id="id_job_category" class="form-select form-select-sm text-sm">
-                    <option value="">همه رده‌ها</option>
+                <select name="job_category" id="id_job_category" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه رده‌ها">
                     {% for code, label in category_choices %}
-                        <option value="{{ code }}" {% if filters.job_category == code %}selected{% endif %}>{{ label }}</option>
+                        <option value="{{ code }}" {% if code in filters.job_category %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- منبع ایجاد -->
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label for="id_source" class="form-label text-xs font-bold text-muted mb-1">📥 منبع ایجاد</label>
-                <select name="source" id="id_source" class="form-select form-select-sm text-sm">
-                    <option value="">همه منابع</option>
+                <select name="source" id="id_source" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه منابع">
                     {% for code, label in source_choices %}
-                        <option value="{{ code }}" {% if filters.source == code %}selected{% endif %}>{{ label }}</option>
+                        <option value="{{ code }}" {% if code in filters.source %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <!-- دکمه‌های عملیات -->
-            <div class="col-12 col-lg-4 d-flex align-items-end gap-2 ms-auto">
+            <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-sm btn-primary-custom d-flex align-items-center justify-content-center gap-1.5 flex-grow-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v3.444c0 .362-.143.71-.4 1.033L15 15.126V21l-6-3v-2.874L3.4 9.25a1.233 1.233 0 0 1-.4-1.033V4.774c0-.54.384-1.006.917-1.096A50.065 50.065 0 0 1 12 3Z" />
@@ -290,4 +315,22 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.multi-select').forEach(function(el) {
+            new TomSelect(el, {
+                plugins: ['remove_button'],
+                create: false,
+                persist: false,
+                placeholder: el.getAttribute('placeholder') || 'انتخاب کنید...',
+                rtl: true
+            });
+        });
+    });
+</script>
 {% endblock %}

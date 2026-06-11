@@ -56,10 +56,15 @@ def get_jalali_month_range(year, month):
 def calculate_recruitment_schedule(job, start_date):
     """
     Calculates stage-by-stage planned dates for a job opportunity based on SLAs and monthly capacities.
+    Plans only from the current stage onwards.
     """
-    stages = list(job.stages.filter(is_deleted=False).order_by('sequence'))
-    if not stages:
+    all_stages = list(job.stages.filter(is_deleted=False).order_by('sequence'))
+    if not all_stages:
         return []
+
+    current_stage = job.current_stage
+    if not current_stage:
+        current_stage = all_stages[0]
 
     holidays_set = set(Holiday.objects.filter(is_deleted=False).values_list('date', flat=True))
     
@@ -67,84 +72,111 @@ def calculate_recruitment_schedule(job, start_date):
     configs = {c.stage_type: c for c in StageTypeConfiguration.objects.filter(is_deleted=False)}
     
     schedule = []
-    current_start = start_date
     
-    # If the initial start_date is a weekend/holiday, roll forward to the first working day
+    # 1. Past stages: Keep existing dates if available, otherwise set to start_date with sla_days=0
+    plan = getattr(job, 'recruitment_plan', None)
+    if plan and plan.is_deleted:
+        plan = None
+
+    for stage in all_stages:
+        if stage.sequence < current_stage.sequence:
+            existing_sp = None
+            if plan:
+                existing_sp = plan.stage_plans.filter(stage=stage, is_deleted=False).first()
+            
+            if existing_sp:
+                p_start = existing_sp.planned_start_date
+                p_end = existing_sp.planned_end_date
+                sla = existing_sp.sla_days
+            else:
+                p_start = start_date
+                p_end = start_date
+                sla = 0
+
+            schedule.append({
+                'stage': stage,
+                'stage_type': stage.stage_type or 'OTHER',
+                'planned_start_date': p_start,
+                'planned_end_date': p_end,
+                'sla_days': sla,
+                'capacity_shifted': False,
+                'capacity_limit': 100,
+                'consumed_capacity': 0,
+                'is_past': True
+            })
+
+    # 2. Active stages: Plan starting from start_date
+    current_start = start_date
     while current_start.weekday() == 4 or current_start in holidays_set:
         current_start += datetime.timedelta(days=1)
 
-    for stage in stages:
-        stage_type = stage.stage_type or 'OTHER'
-        
-        # Get SLA and capacity configuration
-        config = configs.get(stage_type)
-        if config:
-            sla_days = config.default_sla_days
-            capacity_limit = config.monthly_capacity
-        else:
-            # Defaults if not configured
-            defaults = {
-                'SCREENING': 5,
-                'EXAM': 15,
-                'SKILL_TEST': 15,
-                'INTERVIEW': 10,
-                'ASSESSMENT': 15,
-                'OTHER': 5
-            }
-            sla_days = defaults.get(stage_type, 5)
-            capacity_limit = 100
+    for stage in all_stages:
+        if stage.sequence >= current_stage.sequence:
+            stage_type = stage.stage_type or 'OTHER'
+            config = configs.get(stage_type)
+            if config:
+                sla_days = config.default_sla_days
+                capacity_limit = config.monthly_capacity
+            else:
+                defaults = {
+                    'SCREENING': 5,
+                    'EXAM': 15,
+                    'SKILL_TEST': 15,
+                    'INTERVIEW': 10,
+                    'ASSESSMENT': 15,
+                    'OTHER': 5
+                }
+                sla_days = defaults.get(stage_type, 5)
+                capacity_limit = 100
 
-        # Initial planned range
-        planned_start = current_start
-        planned_end = add_working_days(planned_start, sla_days, holidays_set)
-        
-        capacity_shifted = False
-        
-        # Capacity validation loop
-        while True:
-            j_end = jdatetime.date.fromgregorian(date=planned_end)
-            g_month_start, g_month_end = get_jalali_month_range(j_end.year, j_end.month)
-            
-            # Sum headcount of OTHER active plans occupying this stage type in this Jalali month
-            consumed = JobStagePlan.objects.filter(
-                stage_type=stage_type,
-                planned_end_date__range=(g_month_start, g_month_end),
-                plan__is_deleted=False,
-                is_deleted=False
-            ).exclude(plan__job=job).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
-            
-            if consumed + job.headcount <= capacity_limit:
-                # Capacity is OK, we can finalize this month
-                break
-            
-            # Capacity exceeded! Shift to the first working day of the next Jalali month
-            capacity_shifted = True
-            
-            next_j_year = j_end.year
-            next_j_month = j_end.month + 1
-            if next_j_month > 12:
-                next_j_month = 1
-                next_j_year += 1
-            
-            # First day of the next month
-            planned_start = jdatetime.date(next_j_year, next_j_month, 1).togregorian()
-            while planned_start.weekday() == 4 or planned_start in holidays_set:
-                planned_start += datetime.timedelta(days=1)
-                
+            # Initial planned range
+            planned_start = current_start
             planned_end = add_working_days(planned_start, sla_days, holidays_set)
+            
+            capacity_shifted = False
+            
+            # Capacity validation loop
+            while True:
+                j_end = jdatetime.date.fromgregorian(date=planned_end)
+                g_month_start, g_month_end = get_jalali_month_range(j_end.year, j_end.month)
+                
+                consumed = JobStagePlan.objects.filter(
+                    stage_type=stage_type,
+                    planned_end_date__range=(g_month_start, g_month_end),
+                    plan__is_deleted=False,
+                    is_deleted=False
+                ).exclude(plan__job=job).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+                
+                if consumed + job.headcount <= capacity_limit:
+                    break
+                
+                capacity_shifted = True
+                
+                next_j_year = j_end.year
+                next_j_month = j_end.month + 1
+                if next_j_month > 12:
+                    next_j_month = 1
+                    next_j_year += 1
+                
+                planned_start = jdatetime.date(next_j_year, next_j_month, 1).togregorian()
+                while planned_start.weekday() == 4 or planned_start in holidays_set:
+                    planned_start += datetime.timedelta(days=1)
+                    
+                planned_end = add_working_days(planned_start, sla_days, holidays_set)
 
-        schedule.append({
-            'stage': stage,
-            'stage_type': stage_type,
-            'planned_start_date': planned_start,
-            'planned_end_date': planned_end,
-            'sla_days': sla_days,
-            'capacity_shifted': capacity_shifted,
-            'capacity_limit': capacity_limit,
-            'consumed_capacity': consumed
-        })
-        
-        # Next stage starts on the next working day
-        current_start = get_next_working_day(planned_end, holidays_set)
-        
+            schedule.append({
+                'stage': stage,
+                'stage_type': stage_type,
+                'planned_start_date': planned_start,
+                'planned_end_date': planned_end,
+                'sla_days': sla_days,
+                'capacity_shifted': capacity_shifted,
+                'capacity_limit': capacity_limit,
+                'consumed_capacity': consumed,
+                'is_past': False
+            })
+            
+            current_start = get_next_working_day(planned_end, holidays_set)
+
     return schedule
+

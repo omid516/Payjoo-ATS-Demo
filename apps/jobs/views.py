@@ -23,12 +23,19 @@ def apply_job_filters(queryset, params):
     from django.db.models import Q
     
     q = params.get('q', '').strip()
-    status = params.get('status', '').strip()
-    department = params.get('department', '').strip()
-    unit = params.get('unit', '').strip()
-    source = params.get('source', '').strip()
-    recruitment_type = params.get('recruitment_type', '').strip()
-    job_category = params.get('job_category', '').strip()
+    
+    def get_clean_list(key):
+        vals = params.getlist(key)
+        if len(vals) == 1 and ',' in vals[0]:
+            vals = vals[0].split(',')
+        return [v.strip() for v in vals if v.strip()]
+
+    statuses = get_clean_list('status')
+    departments = get_clean_list('department')
+    units = get_clean_list('unit')
+    sources = get_clean_list('source')
+    recruitment_types = get_clean_list('recruitment_type')
+    job_categories = get_clean_list('job_category')
     
     if q:
         q_norm = normalize_digits(q)
@@ -39,18 +46,18 @@ def apply_job_filters(queryset, params):
             Q(request_number__icontains=q) |
             Q(request_number__icontains=q_norm)
         )
-    if status:
-        queryset = queryset.filter(status=status)
-    if department:
-        queryset = queryset.filter(department=department)
-    if unit:
-        queryset = queryset.filter(unit=unit)
-    if source:
-        queryset = queryset.filter(source=source)
-    if recruitment_type:
-        queryset = queryset.filter(recruitment_type=recruitment_type)
-    if job_category:
-        queryset = queryset.filter(job_category=job_category)
+    if statuses:
+        queryset = queryset.filter(status__in=statuses)
+    if departments:
+        queryset = queryset.filter(department__in=departments)
+    if units:
+        queryset = queryset.filter(unit__in=units)
+    if sources:
+        queryset = queryset.filter(source__in=sources)
+    if recruitment_types:
+        queryset = queryset.filter(recruitment_type__in=recruitment_types)
+    if job_categories:
+        queryset = queryset.filter(job_category__in=job_categories)
         
     return queryset
 
@@ -96,21 +103,31 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         context['recruitment_choices'] = JobOpportunity.RECRUITMENT_TYPE_CHOICES
         context['category_choices'] = JobOpportunity.CATEGORY_CHOICES
         
+        def get_clean_list(key):
+            vals = self.request.GET.getlist(key)
+            if len(vals) == 1 and ',' in vals[0]:
+                vals = vals[0].split(',')
+            return [v.strip() for v in vals if v.strip()]
+
         # Keep current filter values to populate form fields
         context['filters'] = {
             'q': self.request.GET.get('q', ''),
-            'status': self.request.GET.get('status', ''),
-            'department': self.request.GET.get('department', ''),
-            'unit': self.request.GET.get('unit', ''),
-            'source': self.request.GET.get('source', ''),
-            'recruitment_type': self.request.GET.get('recruitment_type', ''),
-            'job_category': self.request.GET.get('job_category', ''),
+            'status': get_clean_list('status'),
+            'department': get_clean_list('department'),
+            'unit': get_clean_list('unit'),
+            'source': get_clean_list('source'),
+            'recruitment_type': get_clean_list('recruitment_type'),
+            'job_category': get_clean_list('job_category'),
         }
         
         # Count active filters
-        context['active_filters_count'] = sum(1 for val in context['filters'].values() if val)
+        context['active_filters_count'] = sum(
+            1 for k, val in context['filters'].items() 
+            if (isinstance(val, list) and len(val) > 0) or (not isinstance(val, list) and val)
+        )
         
         return context
+
 
 
 class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):

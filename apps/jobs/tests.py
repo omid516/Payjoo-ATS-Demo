@@ -283,3 +283,148 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response_with_plan, 'تاریخ شروع جذب (برنامه‌ریزی)')
         self.assertContains(response_with_plan, '1405/03/18') # 2026-06-08 is 1405-03-18
         self.assertContains(response_with_plan, '1405/03/23') # 2026-06-13 is 1405-03-23
+
+
+class JobOpportunityReportTests(TestCase):
+    def setUp(self):
+        self.recruiter = User.objects.create_user(username='report_recruiter', password='password123')
+        self.recruiter.profile.role = 'RECRUITMENT_SPECIALIST'
+        self.recruiter.profile.save()
+
+        self.job = JobOpportunity.objects.create(
+            request_number='REQ-REPORT-01',
+            title='مهندس صنایع',
+            code='IND-01',
+            department='تولید',
+            assigned_recruiter=self.recruiter,
+            status=JobOpportunity.STATUS_INTERVIEW,
+            description='شرح مهندس صنایع'
+        )
+        self.stage = JobOpportunityStage.objects.create(
+            job=self.job,
+            name='مصاحبه عمومی',
+            weight=100,
+            sequence=1,
+            stage_type='INTERVIEW'
+        )
+
+        # Create Candidates and Job Applications
+        from apps.candidates.models import Candidate, JobApplication, ApplicationStageState
+        
+        self.cand1 = Candidate.objects.create(first_name='علی', last_name='علوی', national_id='1111111111', phone_number='09121111111')
+        self.cand2 = Candidate.objects.create(first_name='رضا', last_name='رضایی', national_id='2222222222', phone_number='09122222222')
+
+        self.app1 = JobApplication.objects.create(job=self.job, candidate=self.cand1, status='SELECTED', final_score=85.0)
+        self.app2 = JobApplication.objects.create(job=self.job, candidate=self.cand2, status='IN_PROGRESS', final_score=60.0)
+
+    def test_job_opportunity_report_anonymous_redirect(self):
+        """تست اینکه کاربران وارد نشده به صفحه لاگین هدایت می‌شوند"""
+        url = reverse('job_opportunity_report', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_job_opportunity_report_authorized_user(self):
+        """تست مشاهده شناسنامه فرصت شغلی توسط کاربر مجاز"""
+        self.client.login(username='report_recruiter', password='password123')
+        url = reverse('job_opportunity_report', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/job_report.html')
+        self.assertContains(response, 'مهندس صنایع')
+        self.assertContains(response, 'IND-01')
+        # Check context
+        self.assertEqual(response.context['total_registered'], 2)
+        self.assertEqual(response.context['status_counts']['selected'], 1)
+        self.assertEqual(response.context['status_counts']['inprogress'], 1)
+
+
+class JobOpportunityBulkStatusTests(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_user(username='bulk_admin', password='password123')
+        self.admin_user.profile.role = 'ADMIN'
+        self.admin_user.profile.save()
+        
+        self.normal_user = User.objects.create_user(username='bulk_normal', password='password123')
+        self.normal_user.profile.role = 'INTERVIEWER'  # Not authorized to manage jobs
+        self.normal_user.profile.save()
+
+        self.job1 = JobOpportunity.objects.create(
+            request_number='REQ-BULK-01', title='برنامه‌نویس', code='DEV-BULK-01',
+            department='فناوری', status=JobOpportunity.STATUS_PUBLISHED
+        )
+        self.job2 = JobOpportunity.objects.create(
+            request_number='REQ-BULK-02', title='مدیر پروژه', code='PM-BULK-02',
+            department='فناوری', status=JobOpportunity.STATUS_PUBLISHED
+        )
+
+    def test_bulk_status_update_anonymous_redirect(self):
+        url = reverse('job_bulk_status_update')
+        response = self.client.post(url, {'job_codes': 'DEV-BULK-01', 'new_status': 'SUSPENDED'})
+        self.assertEqual(response.status_code, 302)
+
+    def test_bulk_status_update_unauthorized_user(self):
+        self.client.login(username='bulk_normal', password='password123')
+        url = reverse('job_bulk_status_update')
+        response = self.client.post(url, {'job_codes': 'DEV-BULK-01', 'new_status': 'SUSPENDED'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_bulk_status_update_success(self):
+        self.client.login(username='bulk_admin', password='password123')
+        url = reverse('job_bulk_status_update')
+        response = self.client.post(url, {
+            'job_codes': 'DEV-BULK-01, PM-BULK-02\nINVALID-CODE',
+            'new_status': 'SUSPENDED'
+        })
+        self.assertEqual(response.status_code, 302)
+        
+        self.job1.refresh_from_db()
+        self.job2.refresh_from_db()
+        self.assertEqual(self.job1.status, JobOpportunity.STATUS_SUSPENDED)
+        self.assertEqual(self.job2.status, JobOpportunity.STATUS_SUSPENDED)
+
+
+class JobOpportunitySortingTests(TestCase):
+    def setUp(self):
+        self.recruiter = User.objects.create_user(username='sorting_recruiter', password='password123')
+        self.recruiter.profile.role = 'RECRUITMENT_SPECIALIST'
+        self.recruiter.profile.save()
+
+        # Create opportunities with different attributes
+        self.job_a = JobOpportunity.objects.create(
+            request_number='REQ-SORT-A', title='A_Python Developer', code='DEV-A',
+            department='Tech', headcount=5, status=JobOpportunity.STATUS_RECEIVED
+        )
+        self.job_b = JobOpportunity.objects.create(
+            request_number='REQ-SORT-B', title='B_Project Manager', code='DEV-B',
+            department='Biz', headcount=2, status=JobOpportunity.STATUS_PLANNING
+        )
+        self.job_c = JobOpportunity.objects.create(
+            request_number='REQ-SORT-C', title='C_QA Engineer', code='DEV-C',
+            department='Tech', headcount=1, status=JobOpportunity.STATUS_PUBLISHED
+        )
+
+    def test_sorting_by_code_asc(self):
+        self.client.login(username='sorting_recruiter', password='password123')
+        url = reverse('job_list') + '?sort=code&order=asc'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        jobs = list(response.context['jobs'])
+        self.assertEqual([j.code for j in jobs], ['DEV-A', 'DEV-B', 'DEV-C'])
+
+    def test_sorting_by_title_desc(self):
+        self.client.login(username='sorting_recruiter', password='password123')
+        url = reverse('job_list') + '?sort=title&order=desc'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        jobs = list(response.context['jobs'])
+        self.assertEqual([j.title for j in jobs], ['C_QA Engineer', 'B_Project Manager', 'A_Python Developer'])
+
+    def test_sorting_by_headcount_asc(self):
+        self.client.login(username='sorting_recruiter', password='password123')
+        url = reverse('job_list') + '?sort=headcount&order=asc'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        jobs = list(response.context['jobs'])
+        self.assertEqual([j.headcount for j in jobs], [1, 2, 5])
+
+

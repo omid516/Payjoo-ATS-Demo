@@ -30,6 +30,7 @@ from .views import (
     ManageStageInterviewersView,
     JobOpportunityDescriptionView,
     AssessmentCenterSheetView,
+    InterviewScoresPanelView,
     AssessmentCenterReportView,
     AssessmentCenterDetailReportView,
     JobOpportunityFinalRankingView,
@@ -46,7 +47,13 @@ from .views import (
     ImportScoreEntryExcelView,
     CandidatePasswordChangeView,
     CandidateResumePrintView,
-    CandidateTranscriptPrintView
+    CandidateTranscriptPrintView,
+    StageRollbackView,
+    ManageJobDefaultInterviewersView,
+    BulkInterviewScoresView,
+    DownloadInterviewScoresTemplateView,
+    ImportInterviewScoresExcelView,
+    JobOpportunityReportView,
 )
 
 urlpatterns = [
@@ -68,6 +75,7 @@ urlpatterns = [
     path('interviews/export/excel/', ExportInterviewsExcelView.as_view(), name='interviews_export_excel'),
     path('interviews/<int:pk>/submit/', SubmitInterviewerScoreView.as_view(), name='candidate_submit_interviewer_score'),
     path('interviews/<int:pk>/assessment/', AssessmentCenterSheetView.as_view(), name='candidate_assessment_sheet'),
+    path('interviews/<int:pk>/scores-panel/', InterviewScoresPanelView.as_view(), name='interview_scores_panel'),
     path('assessment-center/', AssessmentCenterReportView.as_view(), name='assessment_center_report'),
     path('assessment-center/export/excel/', ExportAssessmentCenterExcelView.as_view(), name='assessment_center_export_excel'),
     path('assessment-center/<int:pk>/report/', AssessmentCenterDetailReportView.as_view(), name='assessment_center_detail_report'),
@@ -86,7 +94,16 @@ urlpatterns = [
     path('stage-state/<int:pk>/update/', UpdateApplicationStageStateView.as_view(), name='update_stage_state'),
     path('stage-state/<int:pk>/view/', ViewApplicationStageStateView.as_view(), name='view_stage_state'),
     path('application/<int:pk>/status/', UpdateApplicationStatusView.as_view(), name='update_application_status'),
+    path('application/<int:app_id>/stage/<int:stage_id>/rollback/', StageRollbackView.as_view(), name='stage_rollback'),
+
+    path('opportunity/<int:job_id>/default-interviewers/', ManageJobDefaultInterviewersView.as_view(), name='manage_default_interviewers'),
+    path('score-entry/bulk-interview/', BulkInterviewScoresView.as_view(), name='bulk_interview_scores'),
+    path('score-entry/interview-scores/template/', DownloadInterviewScoresTemplateView.as_view(), name='download_interview_scores_template'),
+    path('score-entry/interview-scores/import/', ImportInterviewScoresExcelView.as_view(), name='import_interview_scores'),
+    path('opportunity/<int:pk>/report/', JobOpportunityReportView.as_view(), name='job_opportunity_report'),
     
+
+
     path('careers/', CareersListView.as_view(), name='careers_list'),
     path('careers/<int:pk>/', CareersDetailAndApplyView.as_view(), name='careers_apply'),
     path('careers/track/', CareersTrackView.as_view(), name='careers_track'),

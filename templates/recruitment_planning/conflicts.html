@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+{% block title %}پایش همزمانی و تداخل‌ها | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .conflicts-container {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+    }
+    .conflict-card {
+        border-left: 4px solid #ef4444 !important; /* Red warning line */
+        transition: transform 0.15s;
+    }
+    .conflict-card:hover {
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- هدر بالای صفحه -->
+<div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="font-bold text-secondary mb-1">🔍 پایش همزمانی و تداخل‌های برنامه‌ریزی</h3>
+        <p class="text-muted text-sm m-0">بررسی کاندیداهای فعال در یک مرحله مشابه و کشف تداخل‌های زمانی در برنامه‌های استخدام فعال</p>
+    </div>
+    <div>
+        <a href="{% url 'planning_dashboard' %}" class="btn btn-sm btn-outline-secondary font-bold px-3 py-2" style="border-radius: 8px;">
+            🔙 بازگشت به داشبورد برنامه‌ریزی
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- بخش اول: متقاضیان همزمان در یک مرحله -->
+    <div class="col-lg-7">
+        <div class="card conflicts-container border-0 p-4 shadow-xs h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h5 class="font-bold text-secondary m-0">👥 متقاضیان همزمان در یک مرحله</h5>
+                <form method="get" class="m-0 d-flex gap-2">
+                    <select name="stage_type" onchange="this.form.submit()" class="form-select form-select-sm font-semibold" style="border-radius: 8px; min-width: 160px;">
+                        {% for code, label in stage_type_choices %}
+                        <option value="{{ code }}" {% if selected_stage_type == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover align-middle text-sm mb-0">
+                    <thead class="table-light text-xs sticky-top" style="top: 0; z-index: 5;">
+                        <tr>
+                            <th>نام متقاضی</th>
+                            <th>فرصت شغلی</th>
+                            <th class="text-center">شروع برنامه‌ریزی</th>
+                            <th class="text-center">پایان برنامه‌ریزی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in same_stage_candidates %}
+                        <tr>
+                            <td class="font-bold text-secondary">{{ item.candidate.first_name }} {{ item.candidate.last_name }}</td>
+                            <td>
+                                <span class="d-block font-semibold text-xs text-dark">{{ item.job.title }}</span>
+                                <small class="text-muted text-xxs">کد: {{ item.job.code }}</small>
+                            </td>
+                            <td class="text-center text-xs">
+                                {% if item.planned_start_date %}
+                                <span class="badge bg-light text-secondary border px-2 py-1 font-bold">{{ item.planned_start_date|to_jalali }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center text-xs">
+                                {% if item.planned_end_date %}
+                                <span class="badge bg-light text-secondary border px-2 py-1 font-bold">{{ item.planned_end_date|to_jalali }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted text-xs">هیچ متقاضی فعالی در این مرحله یافت نشد.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش دوم: تداخل‌های زمانی متقاضیان -->
+    <div class="col-lg-5">
+        <div class="card conflicts-container border-0 p-4 shadow-xs h-100">
+            <h5 class="font-bold text-secondary mb-2">⚠️ تداخل‌های زمانی متقاضیان ( overlaps )</h5>
+            <p class="text-muted text-xxs mb-4">متقاضیانی که همزمان در دو یا چند شغل پرونده فعال داشته و برنامه‌های ارزیابی جاری آن‌ها با یکدیگر همپوشانی دارد.</p>
+
+            <div class="overflow-y-auto pe-1" style="max-height: 500px;">
+                {% for conf in conflicts %}
+                <div class="card conflict-card bg-white p-3 mb-3 border border-light shadow-xs rounded-3" style="border-radius: 10px;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <strong class="text-secondary text-sm">{{ conf.candidate.first_name }} {{ conf.candidate.last_name }}</strong>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2 py-1 text-xxs font-bold">
+                            تداخل: {{ conf.overlap_days }} روز
+                        </span>
+                    </div>
+                    
+                    <div class="border-top border-light pt-2 mt-2 text-xs text-muted">
+                        <div class="mb-2">
+                            <span class="legend-color-dot me-1.5" style="background-color: #3b82f6; width: 6px; height: 6px;"></span>
+                            شغل اول: <strong>{{ conf.schedule1.job.title }}</strong>
+                            <div class="ps-3 mt-1 text-xxs">
+                                مرحله: <strong>{{ STAGE_TYPE_LABELS|get_item:conf.schedule1.stage.stage_type|default:conf.schedule1.stage.name }}</strong> 
+                                ({{ conf.schedule1.start|to_jalali }} تا {{ conf.schedule1.end|to_jalali }})
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="legend-color-dot me-1.5" style="background-color: #10b981; width: 6px; height: 6px;"></span>
+                            شغل دوم: <strong>{{ conf.schedule2.job.title }}</strong>
+                            <div class="ps-3 mt-1 text-xxs">
+                                مرحله: <strong>{{ STAGE_TYPE_LABELS|get_item:conf.schedule2.stage.stage_type|default:conf.schedule2.stage.name }}</strong> 
+                                ({{ conf.schedule2.start|to_jalali }} تا {{ conf.schedule2.end|to_jalali }})
+                            </div>
+                        </div>
+                        <div class="bg-light p-2 rounded-2 mt-2 text-danger font-bold text-xxs d-flex justify-content-between align-items-center">
+                            <span>بازه تداخل: {{ conf.overlap_start|to_jalali }} تا {{ conf.overlap_end|to_jalali }}</span>
+                            <a href="{% url 'job_planning' conf.schedule1.job.id %}" class="text-primary text-decoration-none">تغییر زمانبندی ←</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted text-xs py-5">
+                    <p class="m-0">✓ هیچ تداخل زمانی در برنامه‌های ارزیابی متقاضیان یافت نشد.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// مبدل سیستم اعداد به فارسی
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+function toPersianDigits(str) {
+    if (str === null || str === undefined) return '';
+    return str.toString().replace(/[0-9]/g, w => PERSIAN_DIGITS[+w]);
+}
+
+function convertDigitsToPersian(element) {
+    if (!element) return;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+        const parent = node.parentNode;
+        if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.closest('.no-persian-digit')) {
+            continue;
+        }
+        node.nodeValue = toPersianDigits(node.nodeValue);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+        convertDigitsToPersian(mainContent);
+    }
+});
+</script>
+{% endblock %}

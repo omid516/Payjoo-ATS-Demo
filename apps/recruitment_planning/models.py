@@ -105,6 +105,10 @@ class JobStagePlan(SoftDeleteModel):
         default=False, 
         verbose_name="جابجا شده به دلیل ظرفیت"
     )
+    is_exact = models.BooleanField(
+        default=False,
+        verbose_name="روز دقیق ارزیابی"
+    )
 
     class Meta:
         verbose_name = "برنامه مرحله جذب"

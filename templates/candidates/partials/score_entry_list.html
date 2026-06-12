@@ -44,7 +44,7 @@
                        value="{{ selected_q|default:'' }}" 
                        hx-get="{% url 'candidate_score_entry' %}"
                        hx-trigger="keyup changed delay:400ms"
-                       hx-include="[name='job_id'], [name='stage_id'], [name='eval_status'], [name='show_failed_prior']"
+                       hx-include="[name='job_id'], [name='stage_id'], [name='eval_status'], [name='show_failed_prior'], [name='bypass_locks']"
                        hx-target="#score-entry-list-container"
                        hx-indicator="#loading-indicator"
                        class="form-control border-slate border-start-0 ps-0 text-xs" 
@@ -56,7 +56,7 @@
             <select name="eval_status" 
                     hx-get="{% url 'candidate_score_entry' %}"
                     hx-trigger="change"
-                    hx-include="[name='job_id'], [name='stage_id'], [name='q'], [name='show_failed_prior']"
+                    hx-include="[name='job_id'], [name='stage_id'], [name='q'], [name='show_failed_prior'], [name='bypass_locks']"
                     hx-target="#score-entry-list-container"
                     hx-indicator="#loading-indicator"
                     class="form-select border-slate text-xs font-semibold">
@@ -65,17 +65,29 @@
                 <option value="ALL" {% if selected_eval_status == 'ALL' %}selected{% endif %}>همه متقاضیان (در انتظار و ارزیابی شده)</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <div class="form-check form-switch mb-2 pb-1">
+        <div class="col-md-2 d-flex flex-column justify-content-end mb-2">
+            <div class="form-check form-switch mb-1.5">
                 <input class="form-check-input shadow-none" type="checkbox" name="show_failed_prior" id="showFailedPrior"
                        hx-get="{% url 'candidate_score_entry' %}"
                        hx-trigger="change"
-                       hx-include="[name='job_id'], [name='stage_id'], [name='q'], [name='eval_status']"
+                       hx-include="[name='job_id'], [name='stage_id'], [name='q'], [name='eval_status'], [name='bypass_locks']"
                        hx-target="#score-entry-list-container"
                        hx-indicator="#loading-indicator"
                        {% if show_failed_prior %}checked{% endif %}>
-                <label class="form-check-label font-semibold text-xs text-muted cursor-pointer" for="showFailedPrior">
+                <label class="form-check-label font-semibold text-xxs text-muted cursor-pointer mb-0" style="line-height: 1.2;" for="showFailedPrior">
                     نمایش مردودین
+                </label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input shadow-none" type="checkbox" name="bypass_locks" id="bypassLocks"
+                       hx-get="{% url 'candidate_score_entry' %}"
+                       hx-trigger="change"
+                       hx-include="[name='job_id'], [name='stage_id'], [name='q'], [name='eval_status'], [name='show_failed_prior']"
+                       hx-target="#score-entry-list-container"
+                       hx-indicator="#loading-indicator"
+                       {% if bypass_locks %}checked{% endif %}>
+                <label class="form-check-label font-semibold text-xxs text-muted cursor-pointer mb-0" style="line-height: 1.2;" for="bypassLocks">
+                    ثبت آزاد (بای‌پس)
                 </label>
             </div>
         </div>
@@ -116,6 +128,28 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v12m0 0-3-3m3 3 3-3m-3-12h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" />
                     </svg>
                     ورود نمرات از اکسل
+                </button>
+                {% endif %}
+                {% if selected_stage and selected_stage.stage_type == 'INTERVIEW' and not is_job_closed_or_cancelled %}
+                <button type="button"
+                        class="btn btn-outline-secondary btn-xs d-flex align-items-center gap-1.5 font-semibold"
+                        hx-get="{% url 'manage_default_interviewers' job_id=selected_job.id %}"
+                        hx-target="#defaultInterviewersBody"
+                        hx-swap="innerHTML"
+                        data-bs-toggle="modal"
+                        data-bs-target="#defaultInterviewersModal"
+                        title="تعریف مصاحبه‌گران پیش‌فرض برای این فرصت شغلی">
+                    ⚙️ مصاحبه‌گران پیش‌فرض
+                </button>
+                <button type="button"
+                        class="btn btn-outline-info btn-xs d-flex align-items-center gap-1.5 font-semibold"
+                        hx-get="{% url 'bulk_interview_scores' %}?job_id={{ selected_job.id }}&stage_id={{ selected_stage.id }}"
+                        hx-target="#bulkInterviewModalBody"
+                        hx-swap="innerHTML"
+                        data-bs-toggle="modal"
+                        data-bs-target="#bulkInterviewModal"
+                        title="ورود سریع گروهی نمرات همه مصاحبه‌گران">
+                    📋 ورود سریع نمرات
                 </button>
                 {% endif %}
                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">
@@ -242,6 +276,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="job_id" value="{{ selected_job.id }}">
                 <input type="hidden" name="stage_id" value="{{ selected_stage.id }}">
+                <input type="hidden" name="bypass_locks" value="{% if bypass_locks %}true{% else %}false{% endif %}">
                 
                 <div class="modal-header bg-light">
                     <h5 class="modal-title font-bold text-secondary fs-6" id="importScoreModalLabel">ورود نمرات از فایل اکسل</h5>

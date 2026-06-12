@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Candidate, CandidateEducation, CandidateExperience, JobApplication, ApplicationStageState, InterviewerScore, AssessorCompetencyScore
+from .models import (
+    Candidate, CandidateEducation, CandidateExperience, JobApplication, 
+    ApplicationStageState, InterviewerScore, AssessorCompetencyScore, ExternalInterviewerScore,
+    JobDefaultInterviewer
+)
 
 class CandidateEducationInline(admin.TabularInline):
     model = CandidateEducation
@@ -49,3 +53,16 @@ class AssessorCompetencyScoreAdmin(admin.ModelAdmin):
     list_display = ('interviewer_score', 'competency', 'score')
     list_filter = ('competency',)
     search_fields = ('interviewer_score__interviewer__username', 'competency__name')
+
+
+@admin.register(ExternalInterviewerScore)
+class ExternalInterviewerScoreAdmin(admin.ModelAdmin):
+    list_display = ('stage_state', 'interviewer_name', 'score', 'weight')
+    search_fields = ('stage_state__application__candidate__last_name', 'interviewer_name')
+
+
+@admin.register(JobDefaultInterviewer)
+class JobDefaultInterviewerAdmin(admin.ModelAdmin):
+    list_display = ('job', 'interviewer_name', 'weight')
+    list_filter = ('job',)
+    search_fields = ('interviewer_name', 'job__title')

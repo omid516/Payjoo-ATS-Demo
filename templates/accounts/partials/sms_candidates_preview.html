@@ -63,7 +63,7 @@
                                     {% if item.job %}
                                         <div class="text-xs font-semibold text-secondary">{{ item.job.title }}</div>
                                         {% if item.stage %}
-                                            <div class="text-xs text-muted mt-0.5">{{ item.stage.name }} {% if item.stage_state.score %}(نمره: {{ item.stage_state.score }}){% endif %}</div>
+                                            <div class="text-xs text-muted mt-0.5">{{ item.stage.name }} {% if item.stage_state.score %}(نمره: {{ item.stage_state.score|floatformat:1 }}){% endif %}</div>
                                         {% endif %}
                                     {% else %}
                                         <span class="text-xs text-muted">-</span>

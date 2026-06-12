@@ -110,6 +110,21 @@ class JobApplication(SoftDeleteModel):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_IN_PROGRESS, verbose_name="وضعیت نهایی درخواست")
     final_score = models.FloatField(default=0.0, verbose_name="امتیاز کل محاسبه شده")
 
+    @property
+    def effective_status(self):
+        # 1. If any active stage state is FAILED, then status is REJECTED
+        for state in self.stage_states.all():
+            if state.status == 'FAILED' and not state.is_conditional_pass and not state.is_deleted:
+                return self.STATUS_REJECTED
+        
+        # 2. If the job status is CLOSED or FINAL_SELECTION (meaning selection is finalized), 
+        # and this app is still IN_PROGRESS, it is effectively REJECTED
+        if self.status == self.STATUS_IN_PROGRESS:
+            if self.job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_FINAL_SELECTION]:
+                return self.STATUS_REJECTED
+                
+        return self.status
+
     class Meta:
         verbose_name = "درخواست همکاری"
         verbose_name_plural = "درخواست‌های همکاری"
@@ -119,8 +134,139 @@ class JobApplication(SoftDeleteModel):
     def __str__(self):
         return f"درخواست {self.candidate} برای {self.job.title}"
 
+    def recalculate_current_stage(self, save=True):
+        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+        if not stages:
+            if self.current_stage is not None:
+                self.current_stage = None
+                if save:
+                    self.save(update_fields=['current_stage'])
+            return None
+
+        if self.pk is None:
+            # If the application is new, it has no stage states, so it's in the first stage.
+            target_stage = stages[0]
+        else:
+            # Get completed or conditional pass stages
+            completed_or_conditional = set(self.stage_states.filter(
+                is_deleted=False,
+                status='COMPLETED'
+            ).values_list('stage_id', flat=True)) | set(self.stage_states.filter(
+                is_deleted=False,
+                is_conditional_pass=True
+            ).values_list('stage_id', flat=True))
+
+            target_stage = None
+            for stage in stages:
+                if stage.id not in completed_or_conditional:
+                    target_stage = stage
+                    break
+            if not target_stage and stages:
+                target_stage = stages[-1]
+
+        if self.current_stage != target_stage:
+            self.current_stage = target_stage
+            if save:
+                self.save(update_fields=['current_stage'])
+        return target_stage
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        
+        # پیش‌محاسبه مرحله جاری قبل از ذخیره اولیه
+        if not getattr(self, '_bypass_stage_recalculation', False):
+            if not is_new:
+                # Check if this application is rejected or the job has moved past screening,
+                # meaning they failed screening if they have no scores in subsequent stages.
+                # Also, if they have no scores, they are no longer in progress, so we should reject them.
+                should_check_screening = False
+                
+                # Those that are in early statuses (RECEIVED, PLANNING, PUBLISHED, SCREENING) should not get screening failed
+                early_statuses = [
+                    JobOpportunity.STATUS_RECEIVED,
+                    JobOpportunity.STATUS_PLANNING,
+                    JobOpportunity.STATUS_PUBLISHED,
+                    JobOpportunity.STATUS_SCREENING,
+                ]
+                
+                if self.job.status not in early_statuses:
+                    if self.status == self.STATUS_REJECTED or self.effective_status == self.STATUS_REJECTED:
+                        should_check_screening = True
+                    else:
+                        # If job has moved past screening
+                        past_screening_statuses = [
+                            JobOpportunity.STATUS_EXAM,
+                            JobOpportunity.STATUS_SKILL_TEST,
+                            JobOpportunity.STATUS_INTERVIEW,
+                            JobOpportunity.STATUS_ASSESSMENT,
+                            JobOpportunity.STATUS_FINAL_SELECTION,
+                            JobOpportunity.STATUS_CLOSED,
+                            JobOpportunity.STATUS_CANCELLED,
+                            JobOpportunity.STATUS_SUSPENDED
+                        ]
+                        if self.job.status in past_screening_statuses:
+                            should_check_screening = True
+
+                if should_check_screening:
+                    stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+                    if stages:
+                        first_stage = stages[0]
+                        if 'غربالگری' in first_stage.name or first_stage.stage_type == 'SCREENING':
+                            # Check subsequent stages states
+                            subsequent_states = self.stage_states.filter(stage__sequence__gt=first_stage.sequence, is_deleted=False)
+                            all_pending_zero = True
+                            for state in subsequent_states:
+                                if state.score != 0.0 or state.status != 'PENDING':
+                                    all_pending_zero = False
+                                    break
+                            
+                            # If job is in EXAM stage, only fail them if other candidates have scores entered
+                            if self.job.status == JobOpportunity.STATUS_EXAM:
+                                other_has_scores = self.job.applications.filter(
+                                    is_deleted=False,
+                                    stage_states__stage__sequence__gt=first_stage.sequence,
+                                    stage_states__is_deleted=False
+                                ).exclude(
+                                    stage_states__score=0.0,
+                                    stage_states__status='PENDING'
+                                ).exists()
+                                if not other_has_scores:
+                                    all_pending_zero = False
+                            
+                            if subsequent_states.exists() and all_pending_zero:
+                                scr_state = self.stage_states.filter(stage=first_stage, is_deleted=False).first()
+                                if scr_state and scr_state.status != 'FAILED':
+                                    scr_state.status = 'FAILED'
+                                    if not scr_state.evaluation_date:
+                                        import datetime
+                                        scr_state.evaluation_date = datetime.date.today()
+                                    super(ApplicationStageState, scr_state).save(update_fields=['status', 'evaluation_date'])
+                                    
+                                    # clear cached relation to force refetch
+                                    if 'stage_states' in self.__dict__:
+                                        del self.__dict__['stage_states']
+                                    if hasattr(self, '_prefetched_objects_cache') and 'stage_states' in self._prefetched_objects_cache:
+                                        del self._prefetched_objects_cache['stage_states']
+                                        
+                                    if self.status != self.STATUS_REJECTED:
+                                        self.status = self.STATUS_REJECTED
+                                        update_fields = kwargs.get('update_fields')
+                                        if update_fields is not None:
+                                            update_fields = list(update_fields)
+                                            if 'status' not in update_fields:
+                                                update_fields.append('status')
+                                            kwargs['update_fields'] = update_fields
+            
+            old_stage = self.current_stage
+            self.recalculate_current_stage(save=False)
+            if self.current_stage != old_stage:
+                update_fields = kwargs.get('update_fields')
+                if update_fields is not None:
+                    update_fields = list(update_fields)
+                    if 'current_stage' not in update_fields:
+                        update_fields.append('current_stage')
+                    kwargs['update_fields'] = update_fields
+
         super().save(*args, **kwargs)
         
         # در صورت ایجاد درخواست جدید، به تعداد مراحل فعال فرصت شغلی، رکوردهای وضعیت مراحل ثبت می‌شود
@@ -194,56 +340,90 @@ class ApplicationStageState(SoftDeleteModel):
         )
         return any(state.status == self.STATUS_FAILED and not state.is_conditional_pass for state in prior_states)
 
+    @property
+    def prev_stage_state(self):
+        return self.application.stage_states.filter(
+            stage__sequence__lt=self.stage.sequence,
+            is_deleted=False
+        ).order_by('-stage__sequence').first()
+
+    @property
+    def days_since_prev_stage(self):
+        if self.status == self.STATUS_PENDING:
+            return None
+        prev = self.prev_stage_state
+        if not prev or prev.status == self.STATUS_PENDING:
+            return None
+        
+        curr_date = self.evaluation_date or (self.updated_at.date() if self.updated_at else None)
+        prev_date = prev.evaluation_date or (prev.updated_at.date() if prev.updated_at else None)
+        
+        if curr_date and prev_date:
+            return (curr_date - prev_date).days
+        return None
+
     def save(self, *args, **kwargs):
-        # Calculate score and status based on individual interviewer scores if assigned
+        # Calculate score and status based on individual interviewer scores (assigned, external or competency)
         if self.pk:
-            assigned_intv = self.stage.interviewers.filter(is_deleted=False)
-            if assigned_intv.exists():
-                scores_qs = self.interviewer_scores.filter(is_deleted=False).exclude(status='PENDING')
-                if scores_qs.exists():
-                    total_weight = 0
-                    weighted_sum = 0.0
-                    for iscore in scores_qs:
-                        mapping = assigned_intv.filter(user=iscore.interviewer).first()
-                        weight = mapping.weight if mapping else 100
-                        weighted_sum += iscore.score * weight
-                        total_weight += weight
-                    self.score = round(weighted_sum / total_weight, 2) if total_weight > 0 else 0.0
-                    
-                    if scores_qs.count() == assigned_intv.count():
-                        # Discrepancy alert calculation (max - min >= 20.0)
-                        scores_list = [iscore.score for iscore in scores_qs]
-                        if len(scores_list) > 1 and (max(scores_list) - min(scores_list)) >= 20.0:
-                            self.score_discrepancy_alert = True
-                        else:
-                            self.score_discrepancy_alert = False
-                        
-                        # Auto pass/fail detection based on stage passing cutoff
-                        if self.score >= self.stage.passing_score:
-                            self.status = self.STATUS_COMPLETED
-                        else:
-                            self.status = self.STATUS_FAILED
-                    else:
-                        self.status = self.STATUS_PENDING
-                        self.score_discrepancy_alert = False
-            else:
-                # If no interviewers are assigned, but interviewer scores exist (e.g. from competency sheet)
-                scores_qs = self.interviewer_scores.filter(is_deleted=False).exclude(status='PENDING')
-                if scores_qs.exists():
-                    total_score = sum(iscore.score for iscore in scores_qs)
-                    self.score = round(total_score / scores_qs.count(), 2)
-                    
-                    if self.score >= self.stage.passing_score:
-                        self.status = self.STATUS_COMPLETED
-                    else:
-                        self.status = self.STATUS_FAILED
+            external_scores = self.external_interviewer_scores.filter(is_deleted=False)
+            if external_scores.exists():
+                total_weight = sum(es.weight for es in external_scores)
+                weighted_sum = sum(es.score * es.weight for es in external_scores)
+                self.score = round(weighted_sum / total_weight, 2) if total_weight > 0 else 0.0
+                
+                # Auto pass/fail detection based on stage passing cutoff
+                if self.score >= self.stage.passing_score:
+                    self.status = self.STATUS_COMPLETED
                 else:
-                    # Fallback to manual score evaluation if evaluator is set
-                    if self.evaluator:
+                    self.status = self.STATUS_FAILED
+            else:
+                assigned_intv = self.stage.interviewers.filter(is_deleted=False)
+                if assigned_intv.exists():
+                    scores_qs = self.interviewer_scores.filter(is_deleted=False).exclude(status='PENDING')
+                    if scores_qs.exists():
+                        total_weight = 0
+                        weighted_sum = 0.0
+                        for iscore in scores_qs:
+                            mapping = assigned_intv.filter(user=iscore.interviewer).first()
+                            weight = mapping.weight if mapping else 100
+                            weighted_sum += iscore.score * weight
+                            total_weight += weight
+                        self.score = round(weighted_sum / total_weight, 2) if total_weight > 0 else 0.0
+                        
+                        if scores_qs.count() == assigned_intv.count():
+                            # Discrepancy alert calculation (max - min >= 20.0)
+                            scores_list = [iscore.score for iscore in scores_qs]
+                            if len(scores_list) > 1 and (max(scores_list) - min(scores_list)) >= 20.0:
+                                self.score_discrepancy_alert = True
+                            else:
+                                self.score_discrepancy_alert = False
+                            
+                            # Auto pass/fail detection based on stage passing cutoff
+                            if self.score >= self.stage.passing_score:
+                                self.status = self.STATUS_COMPLETED
+                            else:
+                                self.status = self.STATUS_FAILED
+                        else:
+                            self.status = self.STATUS_PENDING
+                            self.score_discrepancy_alert = False
+                else:
+                    # If no interviewers are assigned, but interviewer scores exist (e.g. from competency sheet)
+                    scores_qs = self.interviewer_scores.filter(is_deleted=False).exclude(status='PENDING')
+                    if scores_qs.exists():
+                        total_score = sum(iscore.score for iscore in scores_qs)
+                        self.score = round(total_score / scores_qs.count(), 2)
+                        
                         if self.score >= self.stage.passing_score:
                             self.status = self.STATUS_COMPLETED
                         else:
                             self.status = self.STATUS_FAILED
+                    else:
+                        # Fallback to manual score evaluation if evaluator is set
+                        if self.evaluator:
+                            if self.score >= self.stage.passing_score:
+                                self.status = self.STATUS_COMPLETED
+                            else:
+                                self.status = self.STATUS_FAILED
 
         # Default evaluation_date to today if status is COMPLETED or FAILED and evaluation_date is not set
         if self.status in [self.STATUS_COMPLETED, self.STATUS_FAILED] and not self.evaluation_date:
@@ -272,16 +452,10 @@ class ApplicationStageState(SoftDeleteModel):
                 app.status = JobApplication.STATUS_IN_PROGRESS
                 update_fields.append('status')
 
-        # 2. Auto-advance current_stage if the stage status is completed or conditionally passed, and the application is still IN_PROGRESS
-        if (self.status == self.STATUS_COMPLETED or self.is_conditional_pass) and app.status == JobApplication.STATUS_IN_PROGRESS:
-            if not app.current_stage or app.current_stage.sequence <= self.stage.sequence:
-                next_stage = app.job.stages.filter(
-                    is_deleted=False,
-                    sequence__gt=self.stage.sequence
-                ).order_by('sequence').first()
-                if next_stage:
-                    app.current_stage = next_stage
-                    update_fields.append('current_stage')
+        # 2. Recalculate current_stage of the application
+        app.recalculate_current_stage(save=False)
+        if 'current_stage' not in update_fields:
+            update_fields.append('current_stage')
 
         total_weighted_score = 0.0
         # Get all active stage states
@@ -395,4 +569,49 @@ class AssessorCompetencyScore(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.competency.name}: {self.score}"
+
+
+class ExternalInterviewerScore(SoftDeleteModel):
+    stage_state = models.ForeignKey(
+        ApplicationStageState, 
+        on_delete=models.CASCADE, 
+        related_name='external_interviewer_scores', 
+        verbose_name="وضعیت مرحله"
+    )
+    interviewer_name = models.CharField(max_length=255, verbose_name="نام مصاحبه‌گر")
+    score = models.FloatField(default=0.0, verbose_name="نمره ثبت شده")
+    weight = models.PositiveIntegerField(default=100, verbose_name="وزن نمره")
+    notes = models.TextField(blank=True, verbose_name="توضیحات")
+
+    class Meta:
+        verbose_name = "نمره مصاحبه‌گر خارجی"
+        verbose_name_plural = "نمرات مصاحبه‌گران خارجی"
+
+    def __str__(self):
+        return f"{self.interviewer_name}: {self.score} (وزن: {self.weight})"
+
+
+class JobDefaultInterviewer(SoftDeleteModel):
+    """
+    مصاحبه‌گران پیش‌فرض یک فرصت شغلی.
+    یک‌بار برای هر فرصت شغلی تعریف می‌شوند و در تمام دوره‌های مصاحبه
+    به‌عنوان ردیف‌های آماده نمایش داده می‌شوند.
+    """
+    job = models.ForeignKey(
+        JobOpportunity,
+        on_delete=models.CASCADE,
+        related_name='default_interviewers',
+        verbose_name="فرصت شغلی"
+    )
+    interviewer_name = models.CharField(max_length=255, verbose_name="نام مصاحبه‌گر")
+    weight = models.PositiveIntegerField(default=100, verbose_name="وزن نمره")
+    notes = models.TextField(blank=True, verbose_name="توضیحات")
+
+    class Meta:
+        verbose_name = "مصاحبه‌گر پیش‌فرض فرصت شغلی"
+        verbose_name_plural = "مصاحبه‌گران پیش‌فرض فرصت شغلی"
+        ordering = ['job', 'interviewer_name']
+
+    def __str__(self):
+        return f"{self.interviewer_name} — {self.job.title} (وزن: {self.weight})"
 

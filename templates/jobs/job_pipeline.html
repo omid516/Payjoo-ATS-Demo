@@ -16,6 +16,22 @@
     .text-xxs {
         font-size: 10px;
     }
+    .screening-failed-row td {
+        opacity: 0.45;
+        color: #64748b !important;
+    }
+    .screening-failed-row td:not(:first-child):not(:last-child) {
+        text-decoration: line-through;
+        text-decoration-color: rgba(220, 38, 38, 0.6) !important;
+    }
+    .screening-failed-row td select, 
+    .screening-failed-row td input, 
+    .screening-failed-row td button, 
+    .screening-failed-row td .btn,
+    .screening-failed-row td .badge {
+        text-decoration: none !important;
+        display: inline-block;
+    }
 </style>
 {% endblock %}
 
@@ -74,14 +90,43 @@
         <div class="row g-3 justify-content-center">
             {% for stage in stages %}
             <div class="col-md-3 text-center">
-                <div class="p-3 bg-white border border-slate rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between">
+                <div class="p-3 bg-white border {% if stage.is_completed %}border-success{% else %}border-slate{% endif %} rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between" {% if stage.is_completed %}style="background-color: #f0fdf4 !important;"{% endif %}>
                     <div>
-                        <span class="badge bg-primary text-white rounded-circle px-2.5 py-1.5 font-bold mb-2">{{ stage.sequence }}</span>
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                            {% if stage.is_completed %}
+                                <span class="badge bg-success text-white rounded-circle px-1.5 py-1.5 font-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;" title="تکمیل شده">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                </span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 rounded text-xxs font-semibold">تکمیل شده</span>
+                            {% else %}
+                                <span class="badge bg-primary text-white rounded-circle px-1.5 py-1.5 font-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
+                                    {{ stage.sequence }}
+                                </span>
+                            {% endif %}
+                        </div>
                         <h6 class="font-semibold text-secondary mb-1">{{ stage.name }}</h6>
                         <span class="text-xs text-muted d-block mb-2">وزن مرحله: {{ stage.weight }}٪</span>
+
+                        {% with sp=stage_plans|get_item:stage.id %}
+                            {% if sp %}
+                                <div class="mt-2 pt-2 border-top border-slate-light text-center">
+                                    <span class="text-xxs text-muted d-block">تاریخ برنامه‌ریزی:</span>
+                                    <span class="font-semibold text-secondary" style="font-size: 11px;">
+                                        {{ sp.planned_start_date|to_jalali }} تا {{ sp.planned_end_date|to_jalali }}
+                                    </span>
+                                    <span class="text-xxs text-muted d-block mt-0.5">({{ sp.sla_days }} روز SLA)</span>
+                                </div>
+                            {% else %}
+                                <div class="mt-2 pt-2 border-top border-slate-light text-center">
+                                    <span class="text-xxs text-muted d-block text-slate-light">بدون برنامه زمان‌بندی</span>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                         
                         {% if stage.interviewers.all %}
-                            <div class="border-top border-slate-light pt-2 text-start mb-3" style="font-size: 11px;">
+                            <div class="border-top border-slate-light pt-2 text-start mb-3 mt-2" style="font-size: 11px;">
                                 <span class="text-xxs font-semibold text-muted d-block mb-1">مصاحبه‌گران:</span>
                                 {% for mapping in stage.interviewers.all %}
                                     <div class="text-xxs text-secondary d-flex justify-content-between align-items-center mb-1">
@@ -103,7 +148,14 @@
                 </div>
             </div>
             {% if not forloop.last %}
-            <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center text-muted">
+            <div class="col-md-1 d-none d-md-flex flex-column align-items-center justify-content-center text-muted">
+                {% with gap=stage_gaps|get_item:stage.id %}
+                    {% if gap is not None %}
+                        <span class="text-xxs font-semibold bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-0.5 rounded-pill mb-1" title="فاصله زمانی تا مرحله بعد" style="white-space: nowrap;">
+                            ⏱️ {{ gap }} روز فاصله
+                        </span>
+                    {% endif %}
+                {% endwith %}
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
                 </svg>
@@ -132,35 +184,51 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="pipeline-table">
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4" style="width: 45px;">
                             <input type="checkbox" id="select-all" class="form-check-input">
                         </th>
-                        <th style="min-width: 220px;">مشخصات متقاضی</th>
-                        <th style="min-width: 150px;">وضعیت کلی درخواست</th>
-                        {% for stage in stages %}
-                        <th class="text-center">{{ stage.name }} ({{ stage.weight }}٪)</th>
+                        <th style="min-width: 220px; cursor: pointer; user-select: none;" class="sortable-header" data-column="name">
+                            مشخصات متقاضی <span class="sort-icon text-muted"></span>
+                        </th>
+                        <th style="min-width: 150px; cursor: pointer; user-select: none;" class="sortable-header" data-column="status">
+                            وضعیت کلی درخواست <span class="sort-icon text-muted"></span>
+                        </th>
+                        {% for stage in table_stages %}
+                        <th class="text-center sortable-header" style="cursor: pointer; user-select: none; min-width: 130px;" data-column="stage-{{ forloop.counter0 }}">
+                            {{ stage.name }} ({{ stage.weight }}٪) <span class="sort-icon text-muted"></span>
+                        </th>
                         {% endfor %}
-                        <th class="text-center" style="min-width: 100px;">امتیاز نهایی وزنی</th>
+                        <th class="text-center sortable-header" style="min-width: 100px; cursor: pointer; user-select: none;" data-column="final-score">
+                            امتیاز نهایی وزنی <span class="sort-icon text-muted"></span>
+                        </th>
                         <th class="pe-4 text-end" style="min-width: 120px;">عملیات</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for app in applications %}
-                    <tr>
+                    {% with screening_stage=stages|first %}
+                    {% with scr_state=app|get_stage_state:screening_stage %}
+                    {% with eff_status=app.effective_status %}
+                    <tr class="{% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %}">
                         <td class="ps-4 text-center">
-                            {% if app.status == 'IN_PROGRESS' %}
+                            {% if eff_status == 'IN_PROGRESS' %}
                             <input type="checkbox" name="application_ids" value="{{ app.id }}" form="bulk-action-form" class="app-checkbox form-check-input">
                             {% else %}
                             <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-semibold text-secondary text-decoration-none">
-                                {{ app.candidate.first_name }} {{ app.candidate.last_name }}
-                            </a>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-semibold text-secondary text-decoration-none">
+                                    {{ app.candidate.first_name }} {{ app.candidate.last_name }}
+                                </a>
+                                {% if scr_state and scr_state.status == 'FAILED' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1.5 py-0.5 rounded text-xxs font-semibold">مردود در غربالگری</span>
+                                {% endif %}
+                            </div>
                             <div class="text-muted text-xs mt-0.5">کد ملی: {{ app.candidate.national_id }}</div>
                             {% if app.candidate.personnel_number %}
                             <div class="text-primary font-semibold text-xxs mt-0.5">شماره پرسنلی: {{ app.candidate.personnel_number }}</div>
@@ -169,13 +237,13 @@
                         <td>
                             <div class="d-flex flex-column gap-1">
                                 <div id="app-status-badge-{{ app.id }}">
-                                    {% if app.status == 'IN_PROGRESS' %}
+                                    {% if eff_status == 'IN_PROGRESS' %}
                                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">در حال ارزیابی</span>
-                                    {% elif app.status == 'SELECTED' %}
+                                    {% elif eff_status == 'SELECTED' %}
                                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">قبول نهایی</span>
-                                    {% elif app.status == 'RESERVE' %}
+                                    {% elif eff_status == 'RESERVE' %}
                                         <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">ذخیره</span>
-                                    {% elif app.status == 'REJECTED' %}
+                                    {% elif eff_status == 'REJECTED' %}
                                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">مردود شده</span>
                                     {% endif %}
                                 </div>
@@ -183,14 +251,14 @@
                                     {% csrf_token %}
                                     <select name="status" onchange="this.form.dispatchEvent(new Event('submit'))" class="form-select form-select-sm" style="font-size: 11px; padding: 2px 6px;">
                                         {% for code, label in status_choices %}
-                                            <option value="{{ code }}" {% if app.status == code %}selected{% endif %}>{{ label }}</option>
+                                            <option value="{{ code }}" {% if eff_status == code %}selected{% endif %}>{{ label }}</option>
                                         {% endfor %}
                                     </select>
                                 </form>
                             </div>
                         </td>
                         
-                        {% for stage in stages %}
+                        {% for stage in table_stages %}
                             {% with state=app|get_stage_state:stage %}
                                 {% if state %}
                                     {% include "candidates/partials/stage_state_view.html" with state=state %}
@@ -202,7 +270,7 @@
 
                         <td class="text-center font-bold fs-6">
                             <span id="final-score-{{ app.id }}" class="font-bold text-secondary">
-                                {{ app.final_score }}
+                                {{ app.final_score|floatformat:1 }}
                             </span>
                         </td>
                         
@@ -210,9 +278,12 @@
                             <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info">مشاهده پرونده کامل</a>
                         </td>
                     </tr>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
                     {% empty %}
-                    <tr>
-                        <td colspan="{{ stages.count|add:5 }}" class="text-center py-5 text-muted">
+                    <tr class="empty-row">
+                        <td colspan="{{ table_stages.count|add:5 }}" class="text-center py-5 text-muted">
                             هیچ متقاضی برای این فرصت شغلی ثبت‌نام نکرده است.
                         </td>
                     </tr>
@@ -280,6 +351,112 @@
                     selectAllCheckbox.indeterminate = someChecked && !allChecked;
                 }
                 updateBulkActionsState();
+            });
+        });
+
+        // Interactive Column Sorting
+        const table = document.getElementById('pipeline-table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        const headers = table.querySelectorAll('.sortable-header');
+        let currentSortColumn = null;
+        let currentSortAsc = true;
+
+        headers.forEach((header) => {
+            header.addEventListener('click', function() {
+                const columnType = this.getAttribute('data-column');
+                
+                // Determine direction
+                if (currentSortColumn === columnType) {
+                    currentSortAsc = !currentSortAsc;
+                } else {
+                    currentSortColumn = columnType;
+                    // Default to descending for scores/final scores, ascending for name/status
+                    currentSortAsc = (columnType === 'name' || columnType === 'status');
+                }
+
+                // Update indicators
+                headers.forEach(h => {
+                    const icon = h.querySelector('.sort-icon');
+                    if (h === this) {
+                        icon.innerHTML = currentSortAsc ? ' ▲' : ' ▼';
+                        icon.classList.remove('text-muted');
+                        icon.classList.add('text-primary');
+                    } else {
+                        icon.innerHTML = '';
+                        icon.classList.remove('text-primary');
+                        icon.classList.add('text-muted');
+                    }
+                });
+
+                // Get row data (excluding the empty warning row)
+                const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+                if (rows.length === 0) return;
+
+                // Sort rows
+                rows.sort((rowA, rowB) => {
+                    let valA, valB;
+
+                    if (columnType === 'name') {
+                        const linkA = rowA.cells[1].querySelector('a');
+                        const linkB = rowB.cells[1].querySelector('a');
+                        valA = linkA ? linkA.textContent.trim() : '';
+                        valB = linkB ? linkB.textContent.trim() : '';
+                        return currentSortAsc ? valA.localeCompare(valB, 'fa') : valB.localeCompare(valA, 'fa');
+                    } else if (columnType === 'status') {
+                        const selectA = rowA.cells[2].querySelector('select[name="status"]');
+                        const selectB = rowB.cells[2].querySelector('select[name="status"]');
+                        const statusA = selectA ? selectA.value : '';
+                        const statusB = selectB ? selectB.value : '';
+                        
+                        const isScreeningFailedA = rowA.classList.contains('screening-failed-row');
+                        const isScreeningFailedB = rowB.classList.contains('screening-failed-row');
+
+                        function getStatusPriority(status, isScreeningFailed) {
+                            if (status === 'SELECTED') return 0;
+                            if (status === 'IN_PROGRESS' || status === 'RESERVE') return 1;
+                            if (status === 'REJECTED') {
+                                return isScreeningFailed ? 3 : 2;
+                            }
+                            return 4;
+                        }
+
+                        valA = getStatusPriority(statusA, isScreeningFailedA);
+                        valB = getStatusPriority(statusB, isScreeningFailedB);
+                        return currentSortAsc ? valA - valB : valB - valA;
+                    } else if (columnType === 'final-score') {
+                        const cellA = rowA.cells[rowA.cells.length - 2];
+                        const cellB = rowB.cells[rowB.cells.length - 2];
+                        valA = parseFloat(cellA.textContent.trim()) || 0;
+                        valB = parseFloat(cellB.textContent.trim()) || 0;
+                        return currentSortAsc ? valA - valB : valB - valA;
+                    } else if (columnType.startsWith('stage-')) {
+                        const colIndex = Array.from(header.parentNode.children).indexOf(header);
+                        const cellA = rowA.cells[colIndex];
+                        const cellB = rowB.cells[colIndex];
+
+                        function getScoreFromCell(cell) {
+                            if (cell.classList.contains('bg-light') && cell.classList.contains('text-muted')) {
+                                return -2; // Locked/inaccessible
+                            }
+                            const div = cell.querySelector('.font-bold');
+                            if (div) {
+                                const text = div.textContent.trim();
+                                if (text === '-') return -1; // Pending
+                                return parseFloat(text) || 0;
+                            }
+                            return -1;
+                        }
+
+                        valA = getScoreFromCell(cellA);
+                        valB = getScoreFromCell(cellB);
+                        return currentSortAsc ? valA - valB : valB - valA;
+                    }
+                    return 0;
+                });
+
+                // Re-append rows in sorted order
+                rows.forEach(row => tbody.appendChild(row));
             });
         });
     });

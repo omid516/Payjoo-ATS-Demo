@@ -26,14 +26,14 @@
         {% if state.stage.competencies.exists %}
             <div class="text-center">
                 <span class="font-bold text-secondary text-sm bg-light px-2.5 py-1 rounded border border-slate" style="font-size: 13px;">
-                    {{ state.score }}
+                    {{ state.score|floatformat:1 }}
                 </span>
             </div>
         {% else %}
             {% if state.is_accessible and not is_job_closed_or_cancelled %}
                 <input type="number" 
                        name="score_{{ state.id }}" 
-                       value="{{ state.score }}" 
+                       value="{{ state.score|floatformat:1 }}" 
                        step="0.1" 
                        min="0" 
                        max="100" 
@@ -42,7 +42,7 @@
                        required>
             {% else %}
                 <input type="number" 
-                       value="{{ state.score }}" 
+                       value="{{ state.score|floatformat:1 }}" 
                        class="form-control form-control-sm text-center font-bold bg-light" 
                        style="border-radius: 6px; font-size: 13px; opacity: 0.65;" 
                        title="{% if state.has_failed_prior_stages %}این متقاضی در مراحل قبلی مردود شده است.{% else %}این مرحله برای این متقاضی هنوز فعال نشده است (مراحل قبل ناتمام است).{% endif %}"

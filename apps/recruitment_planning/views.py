@@ -61,12 +61,12 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             status=JobRecruitmentPlan.STATUS_ACTIVE, 
             is_deleted=False,
             job__is_deleted=False
-        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED])
+        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED])
         draft_plans = JobRecruitmentPlan.objects.filter(
             status=JobRecruitmentPlan.STATUS_DRAFT, 
             is_deleted=False,
             job__is_deleted=False
-        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED])
+        ).exclude(job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED])
         
         # Find delayed plans (outside SLA)
         delayed_plans = []
@@ -105,7 +105,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
             
             remaining = max(0, capacity_limit - consumed)
@@ -133,7 +133,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         unplanned_jobs = JobOpportunity.objects.filter(
             is_deleted=False
         ).exclude(
-            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         ).exclude(
             recruitment_plan__isnull=False,
             recruitment_plan__is_deleted=False
@@ -162,7 +162,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
@@ -172,7 +172,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             events = []
@@ -250,8 +250,25 @@ class JobPlanningView(LoginRequiredMixin, RoleRequiredMixin, View):
         if not start_date:
             return HttpResponse('<div class="alert alert-danger text-xs font-bold text-right mb-0">لطفا تاریخ شروع معتبری وارد کنید.</div>', status=400)
 
+        # Parse overrides if any exist in the post data
+        stages = job.stages.filter(is_deleted=False)
+        has_interactive_schedule = any(k.startswith('start_date_') for k in request.POST.keys())
+        overrides = {}
+        if has_interactive_schedule:
+            for stage in stages:
+                stage_id = stage.id
+                overrides[stage_id] = {
+                    'is_exact': f'is_exact_{stage_id}' in request.POST
+                }
+                st_val = request.POST.get(f'start_date_{stage_id}')
+                en_val = request.POST.get(f'end_date_{stage_id}')
+                if st_val:
+                    overrides[stage_id]['planned_start_date'] = parse_jalali_to_gregorian(st_val)
+                if en_val:
+                    overrides[stage_id]['planned_end_date'] = parse_jalali_to_gregorian(en_val)
+
         # Generate schedule preview
-        schedule = calculate_recruitment_schedule(job, start_date)
+        schedule = calculate_recruitment_schedule(job, start_date, overrides=overrides)
         
         # Check if it is a preview request
         action = request.POST.get('action', 'preview')
@@ -294,7 +311,8 @@ class JobPlanningView(LoginRequiredMixin, RoleRequiredMixin, View):
                     planned_start_date=s['planned_start_date'],
                     planned_end_date=s['planned_end_date'],
                     sla_days=s['sla_days'],
-                    capacity_shifted=s['capacity_shifted']
+                    capacity_shifted=s['capacity_shifted'],
+                    is_exact=s['is_exact']
                 )
 
         next_param = request.GET.get('next') or request.POST.get('next')
@@ -388,7 +406,7 @@ class ExportPlanningExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
             is_deleted=False,
             job__is_deleted=False
         ).exclude(
-            job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         ).prefetch_related(
             'job', 'stage_plans', 'stage_plans__stage'
         ).order_by('-created_at')
@@ -469,7 +487,7 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
             planned_start_date__lte=g_end,
             planned_end_date__gte=g_start
         ).exclude(
-            plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         ).select_related('plan__job', 'stage')
         
         # Fetch holidays in this range
@@ -580,7 +598,7 @@ class ExportWeeklyAgendaExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
@@ -590,7 +608,7 @@ class ExportWeeklyAgendaExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             for sp in starts:
@@ -648,7 +666,7 @@ class WeeklyAgendaPrintView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             ends = JobStagePlan.objects.filter(
@@ -658,7 +676,7 @@ class WeeklyAgendaPrintView(LoginRequiredMixin, RoleRequiredMixin, View):
                 plan__job__is_deleted=False,
                 is_deleted=False
             ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
             ).select_related('plan__job', 'stage')
 
             events = []
@@ -737,7 +755,7 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
                     plan__job__is_deleted=False,
                     is_deleted=False
                 ).exclude(
-                    plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+                    plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
                 ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
                 
                 config = configs.get(stype)
@@ -817,7 +835,7 @@ class SlaDelaysDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             status=JobApplication.STATUS_IN_PROGRESS,
             is_deleted=False,
             job__is_deleted=False
-        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).select_related('candidate', 'job')
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).select_related('candidate', 'job')
         
         if search_query:
             apps = apps.filter(
@@ -992,7 +1010,7 @@ class SlaDelaysDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         
         # دریافت واحدهای سازمانی متمایز جهت فیلتر کشویی
         units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=['CLOSED', 'CANCELLED']
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
         
         # میانگین کل روزهای تاخیر متقاضیان تاخیردار
@@ -1010,6 +1028,135 @@ class SlaDelaysDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             'avg_total_delay': avg_total_delay,
         }
         return render(request, 'recruitment_planning/sla_delays.html', context)
+
+
+class OverlapMonitorView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request):
+        from datetime import date
+        from apps.candidates.models import JobApplication, Candidate
+        from apps.jobs.models import JobOpportunity
+        from .models import JobStagePlan
+        
+        STAGE_TYPE_LABELS = {
+            'EXAM':      'آزمون کتبی',
+            'INTERVIEW': 'مصاحبه حضوری',
+            'SKILL_TEST':'آزمون مهارتی',
+            'ASSESSMENT':'کانون ارزیابی',
+        }
+        
+        # ۱. فیلتر همزمانی بر اساس نوع مرحله
+        selected_stage_type = request.GET.get('stage_type', 'ASSESSMENT')
+        
+        # پیدا کردن کاندیداهای فعال در جریان ارزیابی فعال
+        active_apps = JobApplication.objects.filter(
+            status=JobApplication.STATUS_IN_PROGRESS,
+            is_deleted=False,
+            job__is_deleted=False
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).select_related('candidate', 'job')
+        
+        same_stage_candidates = []
+        for app in active_apps:
+            job = app.job
+            stage = job.stages.filter(stage_type=job.status, is_deleted=False).first()
+            if not stage:
+                stage = app.current_stage or job.stages.filter(is_deleted=False).order_by('sequence').first()
+            
+            if stage and stage.stage_type == selected_stage_type:
+                stage_plan = JobStagePlan.objects.filter(
+                    plan__job=job,
+                    stage=stage,
+                    plan__is_deleted=False,
+                    is_deleted=False
+                ).first()
+                
+                same_stage_candidates.append({
+                    'candidate': app.candidate,
+                    'job': job,
+                    'stage': stage,
+                    'planned_start_date': stage_plan.planned_start_date if stage_plan else None,
+                    'planned_end_date': stage_plan.planned_end_date if stage_plan else None,
+                })
+        
+        # مرتب‌سازی بر اساس تاریخ شروع زمان‌بندی
+        same_stage_candidates.sort(key=lambda x: x['planned_start_date'] or date.max)
+        
+        # ۲. تداخل‌های زمانی متقاضیان (مراحل فعال کاندیداهای چندگزینه‌ای که بازه‌های همپوشانی دارند)
+        from django.db.models import Count
+        candidates_with_multiple_apps = Candidate.objects.filter(
+            is_deleted=False,
+            applications__status=JobApplication.STATUS_IN_PROGRESS,
+            applications__is_deleted=False
+        ).annotate(active_apps_count=Count('applications')).filter(active_apps_count__gt=1)
+        
+        conflicts = []
+        for candidate in candidates_with_multiple_apps:
+            cand_apps = JobApplication.objects.filter(
+                candidate=candidate,
+                status=JobApplication.STATUS_IN_PROGRESS,
+                is_deleted=False
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).select_related('job')
+            
+            active_stages_schedules = []
+            for app in cand_apps:
+                job = app.job
+                stage = job.stages.filter(stage_type=job.status, is_deleted=False).first()
+                if not stage:
+                    stage = app.current_stage or job.stages.filter(is_deleted=False).order_by('sequence').first()
+                
+                if stage:
+                    stage_plan = JobStagePlan.objects.filter(
+                        plan__job=job,
+                        stage=stage,
+                        plan__is_deleted=False,
+                        is_deleted=False
+                    ).first()
+                    
+                    if stage_plan and stage_plan.planned_start_date and stage_plan.planned_end_date:
+                        active_stages_schedules.append({
+                            'app': app,
+                            'job': job,
+                            'stage': stage,
+                            'start': stage_plan.planned_start_date,
+                            'end': stage_plan.planned_end_date
+                        })
+            
+            # بررسی تداخل‌ها
+            n = len(active_stages_schedules)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    s1 = active_stages_schedules[i]
+                    s2 = active_stages_schedules[j]
+                    
+                    max_start = max(s1['start'], s2['start'])
+                    min_end = min(s1['end'], s2['end'])
+                    
+                    if max_start <= min_end:
+                        overlap_days = (min_end - max_start).days + 1
+                        conflicts.append({
+                            'candidate': candidate,
+                            'schedule1': s1,
+                            'schedule2': s2,
+                            'overlap_start': max_start,
+                            'overlap_end': min_end,
+                            'overlap_days': overlap_days,
+                        })
+                        
+        context = {
+            'selected_stage_type': selected_stage_type,
+            'stage_type_choices': [
+                ('EXAM', 'آزمون کتبی'),
+                ('INTERVIEW', 'مصاحبه حضوری'),
+                ('SKILL_TEST', 'آزمون مهارتی'),
+                ('ASSESSMENT', 'کانون ارزیابی'),
+            ],
+            'same_stage_candidates': same_stage_candidates,
+            'conflicts': conflicts,
+            'STAGE_TYPE_LABELS': STAGE_TYPE_LABELS,
+        }
+        return render(request, 'recruitment_planning/conflicts.html', context)
+
 
 
 

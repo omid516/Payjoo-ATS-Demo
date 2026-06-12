@@ -154,7 +154,7 @@
             <div class="rounded-3 p-3 h-100 text-white d-flex flex-column justify-content-between text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
                 <div>
                     <span class="opacity-75 text-xs d-block mb-1">امتیاز نهایی کانون ارزیابی (میانگین وزنی)</span>
-                    <span class="fs-1 font-bold">{{ state.score }}</span>
+                    <span class="fs-1 font-bold">{{ state.score|floatformat:1 }}</span>
                 </div>
                 <div class="mt-2 border-top border-secondary border-opacity-40 pt-2 text-xs">
                     حد نصاب قبولی: <span class="font-bold">{{ state.stage.passing_score }}</span> | 

@@ -133,8 +133,8 @@ class UserRoleAndPermissionTests(TestCase):
 
         # ۱. ایجاد موقعیت شغلی و فرآیند ارزیابی
         workflow = WorkflowTemplate.objects.create(name='فرآیند ارزیابی تستی')
-        stage1 = WorkflowStageTemplate.objects.create(workflow=workflow, name='آزمون کتبی تستی', default_weight=50, sequence=1)
-        stage2 = WorkflowStageTemplate.objects.create(workflow=workflow, name='مصاحبه فنی تستی', default_weight=50, sequence=2)
+        stage1 = WorkflowStageTemplate.objects.create(workflow=workflow, name='آزمون کتبی تستی', stage_type='EXAM', default_weight=50, sequence=1)
+        stage2 = WorkflowStageTemplate.objects.create(workflow=workflow, name='مصاحبه فنی تستی', stage_type='INTERVIEW', default_weight=50, sequence=2)
         
         job = JobOpportunity.objects.create(
             request_number='REQ-TEST-100', title='برنامه‌نویس', code='DEV-100',
@@ -172,7 +172,12 @@ class UserRoleAndPermissionTests(TestCase):
             created_at=timezone.now() - timedelta(days=10),
             updated_at=timezone.now() - timedelta(days=5)
         )
-        JobApplication.objects.filter(id=app2.id).update(created_at=timezone.now() - timedelta(days=10))
+        stage2_job = job.stages.filter(name='مصاحبه فنی تستی').first()
+        JobApplication.objects.filter(id=app2.id).update(
+            created_at=timezone.now() - timedelta(days=10),
+            current_stage=stage2_job
+        )
+        job.update_status()
 
         # ۵. درخواست صفحه داشبورد توسط کاربر ادمین
         self.client.login(username='admin_test', password='testpassword123')
@@ -201,8 +206,8 @@ class UserRoleAndPermissionTests(TestCase):
 
         # ۷. تایید محاسبه میانگین زمان سپری شده
         avg_days_list = response.context['avg_stage_days']
-        self.assertTrue(any(item['stage_name'] == 'آزمون کتبی تستی' for item in avg_days_list))
-        test_stage_avg = next(item for item in avg_days_list if item['stage_name'] == 'آزمون کتبی تستی')
+        self.assertTrue(any(item['stage_name'] == 'آزمون کتبی' for item in avg_days_list))
+        test_stage_avg = next(item for item in avg_days_list if item['stage_name'] == 'آزمون کتبی')
         # کاندیدای دوم بعد از ۵ روز آزمونش ثبت شده (۱۰ روز پیش ثبت‌نام، ۵ روز پیش ثبت نمره)، پس میانگین حدود ۵ روز است
         self.assertEqual(test_stage_avg['avg_days'], 5.0)
 
@@ -687,6 +692,7 @@ class SMSTemplateAndPanelTests(TestCase):
         )
         app2 = JobApplication.objects.create(job=self.job, candidate=cand2)
         app2.current_stage = stage2
+        app2._bypass_stage_recalculation = True
         app2.save()
 
         # The first candidate (self.cand) has current_stage = self.job.stages.first() (sequence 1)

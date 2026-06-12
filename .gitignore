@@ -24,3 +24,6 @@ Thumbs.db
 # Media and Uploads
 media/
 resumes/
+
+# Excel files
+*.xlsx

@@ -1,0 +1,262 @@
+{% if error %}
+<div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-0 rounded-3 text-xs">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    {{ error }}
+</div>
+{% elif not default_interviewers %}
+<div class="text-center py-4">
+    <div class="text-muted mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-secondary opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+        </svg>
+    </div>
+    <p class="text-muted text-xs mb-2">ابتدا مصاحبه‌گران پیش‌فرض را از دکمه <strong>«⚙️ مصاحبه‌گران پیش‌فرض»</strong> تعریف کنید.</p>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-dismiss="modal" onclick="openDefaultInterviewersModal()">
+        ⚙️ تعریف مصاحبه‌گران پیش‌فرض
+    </button>
+</div>
+{% else %}
+{% if saved %}
+<div class="alert alert-success border-success border-opacity-30 bg-success bg-opacity-10 d-flex align-items-center gap-2 mb-3 py-2 px-3 rounded-3">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    <span class="text-xs font-semibold">
+        {% if import_summary %}
+            {{ import_summary.saved_count }} ردیف با موفقیت از اکسل ذخیره شدند.
+            {% if import_summary.error_rows %}
+            — ⚠️ {{ import_summary.error_rows|length }} خطا:
+            <ul class="mb-0 mt-1">
+                {% for err in import_summary.error_rows %}<li>{{ err }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+        {% else %}
+            نمرات با موفقیت ذخیره شدند و میانگین‌ها محاسبه گردیدند.
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+{% comment %}نوار ابزار: دانلود قالب + آپلود اکسل{% endcomment %}
+<div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+    <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'download_interview_scores_template' %}?job_id={{ job.id }}&stage_id={{ stage.id }}"
+           class="btn btn-outline-success btn-xs d-flex align-items-center gap-1.5 font-semibold"
+           title="دانلود قالب اکسل برای ورود نمرات">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+            دانلود قالب اکسل
+        </a>
+        <label class="btn btn-outline-primary btn-xs d-flex align-items-center gap-1.5 font-semibold mb-0" for="bulkExcelUpload" title="آپلود اکسل نمرات">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v12m0 0-3-3m3 3 3-3m-3-12h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" />
+            </svg>
+            بارگذاری اکسل نمرات
+        </label>
+        <form id="bulkExcelImportForm"
+              method="post"
+              enctype="multipart/form-data"
+              hx-post="{% url 'import_interview_scores' %}"
+              hx-target="#bulkInterviewModalBody"
+              hx-swap="innerHTML"
+              hx-encoding="multipart/form-data"
+              hx-indicator="#excelImportSpinner">
+            {% csrf_token %}
+            <input type="hidden" name="job_id" value="{{ job.id }}">
+            <input type="hidden" name="stage_id" value="{{ stage.id }}">
+            <input type="file" id="bulkExcelUpload" name="excel_file" accept=".xlsx,.xls"
+                   class="d-none"
+                   onchange="document.getElementById('bulkExcelImportForm').dispatchEvent(new Event('submit', {bubbles:true})); htmx.trigger('#bulkExcelImportForm', 'submit');">
+        </form>
+        <span id="excelImportSpinner" class="htmx-indicator spinner-border spinner-border-sm text-primary" role="status"></span>
+    </div>
+    <span class="text-muted text-xxs">اعداد فارسی هم قابل قبول است</span>
+</div>
+
+<form id="bulkScoreForm"
+      hx-post="{% url 'bulk_interview_scores' %}"
+      hx-target="#bulkInterviewModalBody"
+      hx-swap="innerHTML"
+      hx-indicator="#bulkSaveSpinner">
+    {% csrf_token %}
+    <input type="hidden" name="job_id" value="{{ job.id }}">
+    <input type="hidden" name="stage_id" value="{{ stage.id }}">
+
+    <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+        <table class="table table-sm table-bordered align-middle mb-0" id="bulkScoreTable">
+            <thead class="table-light sticky-top" style="top: 0; z-index: 1;">
+                <tr>
+                    <th class="text-xs font-semibold py-2 px-2" style="min-width: 200px;">متقاضی</th>
+                    {% for iv in default_interviewers %}
+                    <th class="text-center text-xs font-semibold py-2 px-1" style="min-width: 95px;">
+                        {{ iv.interviewer_name }}
+                        <div class="text-muted" style="font-size: 0.65rem; font-weight: 400;">وزن: {{ iv.weight }}%</div>
+                    </th>
+                    {% endfor %}
+                    <th class="text-center text-xs font-semibold py-2 px-2" style="min-width: 85px; background: #f0f4ff;">
+                        میانگین وزنی
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for state in stage_states %}
+                <tr id="bulk-row-{{ state.pk }}" data-state-id="{{ state.pk }}"
+                    {% if state.status == 'COMPLETED' %}class="table-success bg-opacity-25"{% elif state.status == 'FAILED' %}class="table-danger bg-opacity-10"{% endif %}>
+                    <td class="ps-2 py-1">
+                        <div class="font-semibold text-xs">
+                            {{ state.application.candidate.first_name }} {{ state.application.candidate.last_name }}
+                        </div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ state.application.candidate.national_id }}</div>
+                        {% if state.status == 'COMPLETED' %}
+                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 text-xxs px-1 py-0">✓ ثبت شده</span>
+                        {% elif state.status == 'FAILED' %}
+                        <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-25 text-xxs px-1 py-0">✗ مردود</span>
+                        {% endif %}
+                    </td>
+                    {% for cell in state.interviewer_cells %}
+                    <td class="text-center px-1 py-1">
+                        <input type="number"
+                               name="score_{{ state.pk }}_{{ cell.interviewer.pk }}"
+                               id="sc_{{ state.pk }}_{{ cell.interviewer.pk }}"
+                               class="form-control form-control-sm text-center text-xs bulk-score-input px-1"
+                               style="width: 70px; margin: 0 auto;"
+                               min="0" max="100" step="0.5"
+                               placeholder="—"
+                               value="{% if cell.existing_score %}{{ cell.existing_score.score }}{% endif %}"
+                               data-state="{{ state.pk }}"
+                               data-weight="{{ cell.interviewer.weight }}"
+                               oninput="handleBulkInput(event, {{ state.pk }})"
+                               onkeydown="handleBulkTab(event, this)">
+                    </td>
+                    {% endfor %}
+                    <td class="text-center px-1 py-1">
+                        <span id="avg-{{ state.pk }}"
+                              class="badge px-2 py-1 text-xs font-semibold"
+                              style="background: #e8eeff; color: #3b5bdb; min-width: 52px; display: inline-block;">
+                            {% if state.score and state.score > 0 %}{{ state.score|floatformat:1 }}{% else %}—{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{{ default_interviewers|length|add:2 }}" class="text-center text-muted text-xs py-3">
+                        متقاضی فعالی در این مرحله وجود ندارد.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
+        <div class="text-muted text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="me-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            با Tab بین سلول‌ها حرکت کنید. سلول‌های خالی ذخیره نمی‌شوند.
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">بستن</button>
+            <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5">
+                <span id="bulkSaveSpinner" class="htmx-indicator spinner-border spinner-border-sm" role="status"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H5a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z" />
+                </svg>
+                ثبت همه نمرات
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+// تبدیل اعداد فارسی/عربی به لاتین
+function normalizePersianNums(str) {
+    if (!str) return str;
+    const persianMap = {'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+    const arabicMap  = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+    return str.split('').map(c => persianMap[c] || arabicMap[c] || c).join('')
+              .replace('٫','.').replace(/[،,]/g,'');
+}
+
+// محاسبه میانگین وزنی هر ردیف به‌صورت آنی
+function recalcRow(stateId) {
+    const inputs = document.querySelectorAll(`input[data-state="${stateId}"]`);
+    let totalWeight = 0, weightedSum = 0, anyValue = false;
+    inputs.forEach(input => {
+        const val = parseFloat(input.value);
+        const w = parseInt(input.dataset.weight) || 100;
+        if (!isNaN(val) && input.value.trim() !== '') {
+            weightedSum += val * w;
+            totalWeight += w;
+            anyValue = true;
+        }
+    });
+    const avgEl = document.getElementById(`avg-${stateId}`);
+    if (avgEl) {
+        if (anyValue && totalWeight > 0) {
+            const avg = (weightedSum / totalWeight).toFixed(1);
+            avgEl.textContent = avg;
+            const num = parseFloat(avg);
+            if (num >= 60) {
+                avgEl.style.background = '#d1fae5';
+                avgEl.style.color = '#065f46';
+            } else {
+                avgEl.style.background = '#fee2e2';
+                avgEl.style.color = '#991b1b';
+            }
+        } else {
+            avgEl.textContent = '—';
+            avgEl.style.background = '#e8eeff';
+            avgEl.style.color = '#3b5bdb';
+        }
+    }
+}
+
+// هندلر ترکیبی: تبدیل فارسی + محاسبه میانگین
+function handleBulkInput(event, stateId) {
+    const input = event.target;
+    const normalized = normalizePersianNums(input.value);
+    if (normalized !== input.value) {
+        const pos = input.selectionStart;
+        input.value = normalized;
+        try { input.setSelectionRange(pos, pos); } catch(e) {}
+    }
+    recalcRow(stateId);
+}
+
+// Tab-navigation سریع بین خانه‌های جدول
+function handleBulkTab(e, input) {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const table = document.getElementById('bulkScoreTable');
+    const allInputs = Array.from(table.querySelectorAll('.bulk-score-input'));
+    const idx = allInputs.indexOf(input);
+    const next = e.shiftKey ? allInputs[idx - 1] : allInputs[idx + 1];
+    if (next) {
+        next.focus();
+        next.select();
+    }
+}
+
+// بازاحیا محاسبات هنگام بارگذاری
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-state]').forEach(inp => {
+        if (inp.value && inp.value.trim() !== '') {
+            recalcRow(inp.dataset.state);
+        }
+    });
+});
+// اجرا هنگام باز شدن مودال از HTMX swap هم
+setTimeout(function() {
+    document.querySelectorAll('.bulk-score-input').forEach(inp => {
+        if (inp.value && inp.value.trim() !== '') {
+            recalcRow(inp.dataset.state);
+        }
+    });
+}, 50);
+</script>
+{% endif %}

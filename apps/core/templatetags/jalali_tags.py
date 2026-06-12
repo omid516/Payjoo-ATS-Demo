@@ -47,3 +47,26 @@ def param_replace(context, **kwargs):
     for k, v in kwargs.items():
         d[k] = v
     return d.urlencode()
+
+
+@register.simple_tag(takes_context=True)
+def sort_url(context, field):
+    request = context['request']
+    d = request.GET.copy()
+    
+    current_sort = d.get('sort', 'created_at')
+    current_order = d.get('order', 'desc')
+    
+    if current_sort == field:
+        new_order = 'desc' if current_order == 'asc' else 'asc'
+    else:
+        new_order = 'asc'
+        
+    d['sort'] = field
+    d['order'] = new_order
+    
+    if 'page' in d:
+        del d['page']
+        
+    return f"?{d.urlencode()}"
+

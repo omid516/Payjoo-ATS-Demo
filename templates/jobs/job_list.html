@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load jalali_tags %}
 {% block title %}مدیریت فرصت‌های شغلی{% endblock %}
 
 {% block extra_head %}
@@ -29,6 +30,20 @@
     .ts-wrapper.single .ts-control {
         background-image: none !important;
     }
+    /* Sorting headers styles */
+    .hover-primary {
+        transition: color 0.15s ease-in-out;
+    }
+    .hover-primary:hover {
+        color: var(--bs-primary) !important;
+    }
+    .animate-bounce-subtle {
+        animation: bounceSubtle 1s infinite alternate;
+    }
+    @keyframes bounceSubtle {
+        from { transform: translateY(0); }
+        to { transform: translateY(-1px); }
+    }
 </style>
 {% endblock %}
 
@@ -47,6 +62,12 @@
             خروجی اکسل
         </a>
         {% if user.profile.can_manage_jobs %}
+        <button type="button" data-bs-toggle="modal" data-bs-target="#bulkStatusModal" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+            </svg>
+            تغییر وضعیت دسته‌جمعی
+        </button>
         <a href="{% url 'job_add' %}" class="btn btn-sm btn-primary-custom d-flex align-items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -155,15 +176,149 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">کد / شماره درخواست</th>
-                        <th>عنوان شغل</th>
-                        <th>دپارتمان / واحد</th>
-                        <th>ظرفیت جذب</th>
-                        <th>نوع استخدام</th>
-                        <th>متقاضیان ثبت‌نامی</th>
-                        <th>مراحل و ضرایب ارزیابی (به ترتیب فرآیند)</th>
-                        <th>وضعیت</th>
-                        <th class="pe-4 text-end">عملیات</th>
+                        <th class="ps-4 align-middle">
+                            <a href="{% sort_url 'code' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                کد / شماره درخواست
+                                {% if current_sort == 'code' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'title' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                عنوان شغل
+                                {% if current_sort == 'title' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'department' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                دپارتمان / واحد
+                                {% if current_sort == 'department' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'created_at' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                تاریخ دریافت
+                                {% if current_sort == 'created_at' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'headcount' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                ظرفیت جذب
+                                {% if current_sort == 'headcount' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'recruitment_type' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                نوع استخدام
+                                {% if current_sort == 'recruitment_type' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle text-secondary font-semibold text-xs">متقاضیان ثبت‌نامی</th>
+                        <th class="align-middle text-secondary font-semibold text-xs">مراحل و ضرایب ارزیابی (به ترتیب فرآیند)</th>
+                        <th class="align-middle">
+                            <a href="{% sort_url 'status' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                وضعیت
+                                {% if current_sort == 'status' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="pe-4 text-end align-middle text-secondary font-semibold text-xs">عملیات</th>
                     </tr>
                 </thead>
                 <tbody id="job-table-body">
@@ -183,6 +338,9 @@
                             <span class="badge bg-light text-secondary text-xxs mt-1 px-1.5 py-0.5 rounded font-normal d-inline-block border">{{ job.job_category }}</span>
                             {% endif %}
                         </td>
+                        <td class="text-sm font-medium text-secondary">
+                            {{ job.created_at.date|to_jalali|default:"-" }}
+                        </td>
                         <td>{{ job.headcount }} نفر</td>
                         <td>{{ job.get_recruitment_type_display }}</td>
                         <td>
@@ -193,7 +351,12 @@
                         <td>
                             <div class="d-flex gap-1 align-items-center flex-wrap">
                                 {% for stage in job.stages.all %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1.5 rounded text-xs">
+                                <span class="badge {% if stage.is_completed %}bg-success bg-opacity-10 text-success border-success border-opacity-25{% else %}bg-primary bg-opacity-10 text-primary border-primary border-opacity-25{% endif %} border px-2 py-1.5 rounded text-xs d-inline-flex align-items-center gap-1 font-medium">
+                                    {% if stage.is_completed %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                    {% endif %}
                                     {{ stage.name }}: {{ stage.weight }}٪
                                 </span>
                                 {% empty %}
@@ -226,6 +389,8 @@
                                 <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded font-medium">اتمام یافته</span>
                             {% elif job.status == 'CANCELLED' %}
                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded font-medium">لغو شده</span>
+                            {% elif job.status == 'SUSPENDED' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">توقف موقت</span>
                             {% endif %}
                         </td>
                         <td class="pe-4 text-end">
@@ -233,6 +398,7 @@
                             <a href="{% url 'job_pipeline' job.id %}" class="btn btn-sm btn-outline-info me-1">پایپلاین ارزیابی</a>
                             {% endif %}
                             {% if user.profile.is_recruitment_staff or user.profile.can_manage_jobs %}
+                            <a href="{% url 'job_opportunity_report' job.id %}" target="_blank" class="btn btn-sm btn-outline-info me-1" title="شناسنامه فرصت شغلی (PDF)">📊</a>
                             <a href="{% url 'job_print_doc' job.id %}" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="چاپ سند آزمون">🖨️</a>
                             {% endif %}
                             {% if user.profile.can_manage_jobs %}
@@ -315,6 +481,45 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Modal for Bulk Status Change -->
+{% if user.profile.can_manage_jobs %}
+<div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-labelledby="bulkStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title font-semibold text-secondary text-sm" id="bulkStatusModalLabel">⚙️ تغییر وضعیت دسته‌جمعی فرصت‌های شغلی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'job_bulk_status_update' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body py-3">
+                    <p class="text-xs text-muted mb-3">کدهای فرصت شغلی مورد نظر را وارد کرده (هر خط یک کد یا با ویرگول جدا شده) و وضعیت جدید را انتخاب نمایید.</p>
+                    
+                    <div class="mb-3">
+                        <label for="bulk_job_codes" class="form-label text-xs font-bold text-muted mb-1">کدهای فرصت شغلی</label>
+                        <textarea class="form-control text-sm font-monospace" name="job_codes" id="bulk_job_codes" rows="5" placeholder="DEV-100&#10;SYS-101&#10;..." required style="direction: ltr; text-align: left;"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="bulk_new_status" class="form-label text-xs font-bold text-muted mb-1">وضعیت جدید</label>
+                        <select class="form-select text-sm" name="new_status" id="bulk_new_status" required>
+                            <option value="">-- انتخاب وضعیت جدید --</option>
+                            {% for code, label in status_choices %}
+                                <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-sm btn-primary-custom">اعمال تغییر وضعیت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}

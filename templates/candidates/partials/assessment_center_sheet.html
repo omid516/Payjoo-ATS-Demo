@@ -10,6 +10,9 @@
     {% if source %}
         <input type="hidden" name="source" value="{{ source }}">
     {% endif %}
+    {% if bypass_locks %}
+        <input type="hidden" name="bypass_locks" value="1">
+    {% endif %}
     <div class="modal-body p-4 text-start">
         <div class="alert alert-info border-light py-2.5 px-3 rounded text-xs d-flex align-items-center gap-2 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

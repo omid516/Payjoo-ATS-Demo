@@ -1,0 +1,309 @@
+<form id="external-scores-form" 
+      hx-post="{% url 'interview_scores_panel' state.id %}" 
+      hx-target="#score-row-{{ state.id }}" 
+      hx-swap="outerHTML"
+      class="text-start"
+      onsubmit="bootstrap.Modal.getInstance(document.getElementById('interviewModal')).hide();">
+    {% csrf_token %}
+    <input type="hidden" name="bypass_locks" value="{% if bypass_locks %}1{% else %}0{% endif %}">
+
+    <div class="modal-header bg-primary bg-opacity-10 py-3 px-4">
+        <h5 class="modal-title font-bold text-secondary fs-6 d-flex align-items-center gap-2" id="interviewModalLabel">
+            👥 کاربرگ نمرات مصاحبه‌گران: {{ state.application.candidate.first_name }} {{ state.application.candidate.last_name }}
+        </h5>
+        <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body p-4" style="direction: rtl;">
+        <div class="alert alert-info border-info border-opacity-25 bg-info bg-opacity-5 text-secondary text-xs mb-4 p-3 rounded-3">
+            <h6 class="font-bold text-secondary text-sm mb-1">💡 راهنمای ثبت نمرات مصاحبه‌گران:</h6>
+            <p class="mb-0 text-muted lh-lg" style="font-size: 11.5px;">
+                شما می‌توانید نمرات مصاحبه‌گران مختلف (که فاقد حساب کاربری در سیستم هستند) را به همراه وزن نمره هرکدام وارد نمایید. 
+                سیستم به صورت خودکار میانگین وزنی را محاسبه کرده و نمره نهایی متقاضی بر اساس آن ذخیره خواهد شد. وزن پیش‌فرض برای هر مصاحبه‌گر ۱۰۰ می‌باشد.
+            </p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0" id="external-scores-table">
+                <thead>
+                    <tr class="border-bottom border-light" style="font-size: 12px; color: var(--bs-gray-600);">
+                        <th class="pb-2 fw-semibold" style="width: 25%;">نام مصاحبه‌گر <span class="text-danger">*</span></th>
+                        <th class="pb-2 fw-semibold text-center" style="width: 20%;">نمره (از ۱۰۰) <span class="text-danger">*</span></th>
+                        <th class="pb-2 fw-semibold text-center" style="width: 15%;">وزن نمره</th>
+                        <th class="pb-2 fw-semibold" style="width: 33%;">توضیحات / یادداشت</th>
+                        <th class="pb-2 fw-semibold text-center" style="width: 7%;">حذف</th>
+                    </tr>
+                </thead>
+                <tbody id="scores-tbody">
+                    {% for score in external_scores %}
+                    <tr class="external-score-row border-bottom border-light-subtle">
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="interviewer_name[]" 
+                                   value="{{ score.interviewer_name }}" 
+                                   class="form-control form-control-sm text-sm" 
+                                   placeholder="نام مصاحبه‌گر..." 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="score[]" 
+                                   value="{{ score.score }}" 
+                                   min="0" 
+                                   max="100" 
+                                   step="0.1" 
+                                   class="form-control form-control-sm text-center font-bold score-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="weight[]" 
+                                   value="{{ score.weight }}" 
+                                   min="1" 
+                                   class="form-control form-control-sm text-center weight-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="notes[]" 
+                                   value="{{ score.notes }}" 
+                                   class="form-control form-control-sm text-xs text-muted" 
+                                   placeholder="یادداشت...">
+                        </td>
+                        <td class="py-2.5 text-center">
+                            <button type="button" class="btn btn-link text-danger p-0 shadow-none remove-row-btn" onclick="removeRow(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    {% if default_interviewers %}
+                    {# پیش‌پر کردن با مصاحبه‌گران پیش‌فرض شغل #}
+                    {% for iv in default_interviewers %}
+                    <tr class="external-score-row border-bottom border-light-subtle">
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="interviewer_name[]" 
+                                   value="{{ iv.interviewer_name }}"
+                                   class="form-control form-control-sm text-sm" 
+                                   placeholder="نام مصاحبه‌گر..." 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="score[]" 
+                                   min="0" 
+                                   max="100" 
+                                   step="0.1" 
+                                   class="form-control form-control-sm text-center font-bold score-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="weight[]" 
+                                   value="{{ iv.weight }}" 
+                                   min="1" 
+                                   class="form-control form-control-sm text-center weight-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="notes[]" 
+                                   class="form-control form-control-sm text-xs text-muted" 
+                                   placeholder="یادداشت...">
+                        </td>
+                        <td class="py-2.5 text-center">
+                            <button type="button" class="btn btn-link text-danger p-0 shadow-none remove-row-btn" onclick="removeRow(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    {# هیچ مصاحبه‌گر پیش‌فرضی تعریف نشده؛ یک ردیف خالی نشان بده #}
+                    <tr class="external-score-row border-bottom border-light-subtle">
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="interviewer_name[]" 
+                                   class="form-control form-control-sm text-sm" 
+                                   placeholder="نام مصاحبه‌گر..." 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="score[]" 
+                                   min="0" 
+                                   max="100" 
+                                   step="0.1" 
+                                   class="form-control form-control-sm text-center font-bold score-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="number" 
+                                   name="weight[]" 
+                                   value="100" 
+                                   min="1" 
+                                   class="form-control form-control-sm text-center weight-input" 
+                                   required>
+                        </td>
+                        <td class="py-2.5">
+                            <input type="text" 
+                                   name="notes[]" 
+                                   class="form-control form-control-sm text-xs text-muted" 
+                                   placeholder="یادداشت...">
+                        </td>
+                        <td class="py-2.5 text-center">
+                            <button type="button" class="btn btn-link text-danger p-0 shadow-none remove-row-btn" onclick="removeRow(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light">
+            <button type="button" class="btn btn-xs btn-outline-success font-semibold d-inline-flex align-items-center gap-1" onclick="addNewRow()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                افزودن مصاحبه‌گر
+            </button>
+            <div class="text-secondary text-sm font-semibold">
+                پیش‌نمایش نمره نهایی (میانگین وزنی): 
+                <span id="weighted-average-preview" class="badge bg-primary text-white font-bold fs-6 ms-1 px-2.5 py-1">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer bg-light py-2.5 px-4">
+        <button type="button" class="btn btn-sm btn-outline-secondary font-semibold" data-bs-dismiss="modal">انصراف</button>
+        <button type="submit" class="btn btn-sm btn-primary font-semibold">ثبت و تایید نهایی نمره</button>
+    </div>
+</form>
+
+<script>
+    // Initialize calculations on load
+    document.addEventListener("DOMContentLoaded", function() {
+        calculateAverage();
+        setupInputListeners();
+    });
+
+    // Run immediately since template loads dynamically with HTMX
+    calculateAverage();
+    setupInputListeners();
+
+    function setupInputListeners() {
+        document.querySelectorAll(".score-input, .weight-input").forEach(input => {
+            input.removeEventListener("input", calculateAverage);
+            input.addEventListener("input", calculateAverage);
+        });
+    }
+
+    function calculateAverage() {
+        let totalWeight = 0;
+        let weightedSum = 0;
+        let hasValidRow = false;
+
+        document.querySelectorAll(".external-score-row").forEach(row => {
+            const scoreInput = row.querySelector(".score-input");
+            const weightInput = row.querySelector(".weight-input");
+            const nameInput = row.querySelector("input[name='interviewer_name[]']");
+
+            if (scoreInput && weightInput && nameInput) {
+                const score = parseFloat(scoreInput.value);
+                const weight = parseInt(weightInput.value);
+                const name = nameInput.value.trim();
+
+                if (!isNaN(score) && !isNaN(weight) && weight > 0 && name !== "") {
+                    weightedSum += score * weight;
+                    totalWeight += weight;
+                    hasValidRow = true;
+                }
+            }
+        });
+
+        const finalScore = (hasValidRow && totalWeight > 0) ? (weightedSum / totalWeight).toFixed(2) : "0.00";
+        const previewSpan = document.getElementById("weighted-average-preview");
+        if (previewSpan) {
+            previewSpan.textContent = finalScore;
+        }
+    }
+
+    function removeRow(button) {
+        const row = button.closest(".external-score-row");
+        const tbody = document.getElementById("scores-tbody");
+        if (tbody && tbody.querySelectorAll(".external-score-row").length > 1) {
+            row.remove();
+            calculateAverage();
+        } else {
+            // If it's the last row, clear values instead of deleting the row
+            row.querySelectorAll("input").forEach(input => {
+                if (input.name === "weight[]") {
+                    input.value = "100";
+                } else {
+                    input.value = "";
+                }
+            });
+            calculateAverage();
+        }
+    }
+
+    function addNewRow() {
+        const tbody = document.getElementById("scores-tbody");
+        if (!tbody) return;
+
+        const template = `
+        <tr class="external-score-row border-bottom border-light-subtle">
+            <td class="py-2.5">
+                <input type="text" 
+                       name="interviewer_name[]" 
+                       class="form-control form-control-sm text-sm" 
+                       placeholder="نام مصاحبه‌گر..." 
+                       required>
+            </td>
+            <td class="py-2.5">
+                <input type="number" 
+                       name="score[]" 
+                       min="0" 
+                       max="100" 
+                       step="0.1" 
+                       class="form-control form-control-sm text-center font-bold score-input" 
+                       required>
+            </td>
+            <td class="py-2.5">
+                <input type="number" 
+                       name="weight[]" 
+                       value="100" 
+                       min="1" 
+                       class="form-control form-control-sm text-center weight-input" 
+                       required>
+            </td>
+            <td class="py-2.5">
+                <input type="text" 
+                       name="notes[]" 
+                       class="form-control form-control-sm text-xs text-muted" 
+                       placeholder="یادداشت...">
+            </td>
+            <td class="py-2.5 text-center">
+                <button type="button" class="btn btn-link text-danger p-0 shadow-none remove-row-btn" onclick="removeRow(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </td>
+        </tr>`;
+
+        tbody.insertAdjacentHTML("beforeend", template);
+        setupInputListeners();
+        calculateAverage();
+    }
+</script>

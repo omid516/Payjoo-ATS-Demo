@@ -63,7 +63,7 @@
                     <option value="">-- لطفاً یک فرصت شغلی را انتخاب کنید --</option>
                     {% for job in jobs %}
                         <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
-                            [{{ job.code }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' %}({{ job.get_status_display }}){% endif %}
+                            [{{ job.code }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' or job.status == 'SUSPENDED' %}({{ job.get_status_display }}){% endif %}
                         </option>
                     {% endfor %}
                 </select>
@@ -99,6 +99,48 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content" id="assessment-modal-content">
             <!-- Loaded dynamically via HTMX -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Interview Scores Panel -->
+<div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="interview-modal-content">
+            <!-- Loaded dynamically via HTMX -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal: مصاحبه‌گران پیش‌فرض فرصت شغلی -->
+<div class="modal fade" id="defaultInterviewersModal" tabindex="-1" aria-labelledby="defaultInterviewersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header py-3">
+                <h6 class="modal-title font-semibold" id="defaultInterviewersModalLabel">⚙️ مصاحبه‌گران پیش‌فرض فرصت شغلی</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body py-3" id="defaultInterviewersBody">
+                <div class="text-center text-muted text-sm py-3">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: ورود سریع نمرات گروهی مصاحبه‌گران -->
+<div class="modal fade" id="bulkInterviewModal" tabindex="-1" aria-labelledby="bulkInterviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header py-3">
+                <div>
+                    <h6 class="modal-title font-semibold mb-0" id="bulkInterviewModalLabel">📋 ورود سریع نمرات گروهی مصاحبه‌گران</h6>
+                    <small class="text-muted text-xs" id="bulkModalSubtitle">جدول ماتریسی: سطر = متقاضی، ستون = مصاحبه‌گر</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body py-3" id="bulkInterviewModalBody">
+                <div class="text-center text-muted text-sm py-3">در حال بارگذاری...</div>
+            </div>
         </div>
     </div>
 </div>
@@ -156,5 +198,42 @@
             initializeDatepickers();
         }
     });
+
+    // هنگام باز شدن هر مودال، همه popupهای کاما‌دیت‌پیکر را پنهان کن
+    // تا از خروج از modal overlay جلوگیری شود
+    document.addEventListener('show.bs.modal', function() {
+        // پنهان کردن تمام ریشه‌های datepicker
+        document.querySelectorAll('[id^="bd-root-"]').forEach(el => {
+            el.style.display = 'none';
+        });
+        // بستن هر picker باز شده از طریق کلیک خارج از آن
+        document.querySelectorAll('.kama-datepicker-wrap, .kd-main').forEach(el => {
+            el.style.display = 'none';
+        });
+    });
+
+    // هنگام بسته شدن مودال، پیکرها را بازگردانی کن (display را پاک کن تا مجدداً فعال شوند)
+    document.addEventListener('hidden.bs.modal', function() {
+        document.querySelectorAll('[id^="bd-root-"]').forEach(el => {
+            el.style.display = '';
+        });
+        document.querySelectorAll('.kama-datepicker-wrap, .kd-main').forEach(el => {
+            el.style.display = '';
+        });
+    });
 </script>
+
+<style>
+    /* اطمینان از اینکه popupهای datepicker هرگز روی مودال ظاهر نمی‌شوند */
+    .modal-backdrop ~ [id^="bd-root-"],
+    .modal.show ~ [id^="bd-root-"] {
+        z-index: 1 !important;
+        display: none !important;
+    }
+    /* جلوگیری از نمایش پیکر تاریخ در پشت‌زمینه وقتی مودال بازه */
+    body.modal-open [id^="bd-root-"] {
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+</style>
 {% endblock %}

@@ -80,12 +80,44 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         from django.db.models import Count, Q
         queryset = JobOpportunity.objects.filter(is_deleted=False)
         queryset = apply_job_filters(queryset, self.request.GET)
+        
+        sort_by = self.request.GET.get('sort', 'created_at').strip()
+        order = self.request.GET.get('order', 'desc').strip()
+        
+        sort_mapping = {
+            'code': ['code'],
+            'title': ['title'],
+            'department': ['department', 'unit'],
+            'headcount': ['headcount'],
+            'recruitment_type': ['recruitment_type'],
+            'candidate_count': ['candidate_count'],
+            'status': ['status'],
+            'created_at': ['created_at'],
+        }
+        
+        db_fields = sort_mapping.get(sort_by, ['created_at'])
+        
+        ordering = []
+        for field in db_fields:
+            if order == 'asc':
+                ordering.append(field)
+            else:
+                ordering.append(f'-{field}')
+                
+        if 'created_at' not in db_fields:
+            ordering.append('-created_at')
+        ordering.append('-id')
+        
         return queryset.annotate(
             candidate_count=Count('applications', filter=Q(applications__is_deleted=False))
-        ).prefetch_related('stages').order_by('-created_at')
+        ).prefetch_related('stages').order_by(*ordering)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Pass current sorting details to template
+        context['current_sort'] = self.request.GET.get('sort', 'created_at').strip()
+        context['current_order'] = self.request.GET.get('order', 'desc').strip()
         
         # Clean current parameters to attach to pagination links
         query_params = self.request.GET.copy()
@@ -371,3 +403,60 @@ class JobOpportunityPrintDocView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
 
     def get_queryset(self):
         return JobOpportunity.objects.filter(is_deleted=False).prefetch_related('stages', 'stages__interviewers__user')
+
+
+class JobOpportunityBulkStatusView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def post(self, request):
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        import re
+        
+        job_codes_text = request.POST.get('job_codes', '').strip()
+        new_status = request.POST.get('new_status', '').strip()
+        
+        status_keys = [choice[0] for choice in JobOpportunity.STATUS_CHOICES]
+        if new_status not in status_keys:
+            messages.error(request, "وضعیت انتخاب شده معتبر نیست.")
+            return redirect('job_list')
+            
+        codes = [normalize_digits(c.strip()) for c in re.split(r'[\n,\s]+', job_codes_text) if c.strip()]
+        
+        if not codes:
+            messages.error(request, "لطفاً حداقل یک کد فرصت شغلی وارد کنید.")
+            return redirect('job_list')
+            
+        jobs = JobOpportunity.objects.filter(code__in=codes, is_deleted=False)
+        updated_count = 0
+        not_found = []
+        
+        found_codes = set(j.code for j in jobs)
+        for code in codes:
+            if code not in found_codes:
+                not_found.append(code)
+                
+        for job in jobs:
+            if job.status != new_status:
+                job.status = new_status
+                job.save(update_fields=['status'])
+                # Also ensure update_status does not conflict, but it checks CANCELLED/SUSPENDED which is fine.
+                updated_count += 1
+                
+        if updated_count > 0:
+            msg = f"وضعیت {updated_count} فرصت شغلی با موفقیت به «{dict(JobOpportunity.STATUS_CHOICES).get(new_status)}» تغییر یافت."
+            if not_found:
+                msg += f" (کدهای یافت نشده: {', '.join(not_found)})"
+            messages.success(request, msg)
+        else:
+            if not_found:
+                messages.warning(request, f"هیچ فرصت شغلی با کدهای وارد شده یافت نشد. کدهای بررسی شده: {', '.join(not_found)}")
+            else:
+                messages.info(request, "وضعیت فرصت‌های شغلی مورد نظر از قبل با وضعیت انتخابی یکسان بود.")
+                
+        return redirect('job_list')

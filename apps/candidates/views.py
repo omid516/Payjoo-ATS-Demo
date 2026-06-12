@@ -245,7 +245,7 @@ class CandidateListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         data['average_experience_years'] = round((total_exp_days / 365.25) / total_candidates, 1) if total_candidates > 0 else 0.0
 
         # Pass active job opportunities for assignment dropdown (fixed query)
-        data['active_jobs'] = JobOpportunity.objects.filter(is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).order_by('-created_at')
+        data['active_jobs'] = JobOpportunity.objects.filter(is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).order_by('-created_at')
         
         # Pass all jobs for search/filters
         data['all_jobs'] = JobOpportunity.objects.filter(is_deleted=False).order_by('-created_at')
@@ -459,9 +459,58 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['stages'] = self.object.stages.filter(is_deleted=False).prefetch_related('interviewers__user').order_by('sequence')
-        data['applications'] = self.object.applications.filter(is_deleted=False).select_related('candidate').prefetch_related('stage_states__stage')
+        stages = self.object.stages.filter(is_deleted=False).prefetch_related('interviewers__user').order_by('sequence')
+        data['stages'] = stages
+        data['table_stages'] = stages.exclude(weight=0)
+        
+        stages_list = list(stages)
+        first_stage = stages_list[0] if stages_list and ('غربالگری' in stages_list[0].name or stages_list[0].stage_type == 'SCREENING') else None
+        
+        apps_qs = self.object.applications.filter(is_deleted=False).select_related('candidate').prefetch_related('stage_states__stage')
+        
+        def get_app_priority(app):
+            eff_status = app.effective_status
+            if eff_status == 'SELECTED':
+                return 0
+            elif eff_status in ['IN_PROGRESS', 'RESERVE']:
+                return 1
+            elif eff_status == 'REJECTED':
+                if first_stage:
+                    for state in app.stage_states.all():
+                        if state.stage_id == first_stage.id:
+                            if state.status == 'FAILED':
+                                return 3
+                            break
+                return 2
+            return 4
+
+        apps_list = list(apps_qs)
+        apps_list.sort(key=lambda app: (get_app_priority(app), -app.final_score, -app.id))
+        
+        data['applications'] = apps_list
         data['status_choices'] = JobApplication.STATUS_CHOICES
+        
+        # Fetch stage plans
+        plan = getattr(self.object, 'recruitment_plan', None)
+        stage_plans = {}
+        if plan and not plan.is_deleted:
+            for sp in plan.stage_plans.filter(is_deleted=False):
+                stage_plans[sp.stage_id] = sp
+        data['stage_plans'] = stage_plans
+
+        # Calculate gaps (days) between consecutive stages based on planned dates
+        stage_gaps = {}
+        stages_list = list(stages)
+        for i in range(len(stages_list) - 1):
+            curr_stage = stages_list[i]
+            next_stage = stages_list[i+1]
+            sp_curr = stage_plans.get(curr_stage.id)
+            sp_next = stage_plans.get(next_stage.id)
+            if sp_curr and sp_next:
+                gap = (sp_next.planned_start_date - sp_curr.planned_end_date).days
+                stage_gaps[curr_stage.id] = gap
+        data['stage_gaps'] = stage_gaps
+
         return data
 
 
@@ -1051,7 +1100,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         from django.db.models import Q as DQ
         job_q = request.GET.get('job_q', '').strip()
         jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         )
         if job_q:
             jobs_qs = jobs_qs.filter(
@@ -1071,13 +1120,15 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         is_job_closed_or_cancelled = False
         if selected_job:
-            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
 
         stage_id = request.GET.get('stage_id')
         q = request.GET.get('q')
         eval_status = request.GET.get('eval_status', 'PENDING')
         show_failed_prior_val = request.GET.get('show_failed_prior')
         show_failed_prior = show_failed_prior_val in ['true', 'on', '1']
+        bypass_locks_val = request.GET.get('bypass_locks') or request.POST.get('bypass_locks')
+        bypass_locks = bypass_locks_val in ['true', 'on', '1']
 
         selected_stage = None
         stages = []
@@ -1087,7 +1138,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         is_paginated = False
 
         if selected_job:
-            stages = selected_job.stages.filter(is_deleted=False).order_by('sequence')
+            stages = selected_job.stages.filter(is_deleted=False).exclude(weight=0).order_by('sequence')
             
             if request.headers.get('HX-Request') and 'job_id' in request.GET and 'stage_id' not in request.GET:
                 return render(request, 'candidates/partials/score_entry_stages_select.html', {
@@ -1097,9 +1148,12 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
             if stage_id:
                 from django.db.models import Exists, OuterRef
                 selected_stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+                app_statuses = [JobApplication.STATUS_IN_PROGRESS]
+                if show_failed_prior or bypass_locks:
+                    app_statuses.append(JobApplication.STATUS_REJECTED)
                 pending_states_qs = ApplicationStageState.objects.filter(
                     application__job=selected_job,
-                    application__status=JobApplication.STATUS_IN_PROGRESS,
+                    application__status__in=app_statuses,
                     application__is_deleted=False,
                     stage=selected_stage,
                     is_deleted=False
@@ -1151,6 +1205,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'selected_q': q,
                 'selected_eval_status': eval_status,
                 'show_failed_prior': show_failed_prior,
+                'bypass_locks': bypass_locks,
                 'page_obj': page_obj,
                 'is_paginated': is_paginated,
                 'paginator': paginator,
@@ -1167,6 +1222,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
             'selected_q': q,
             'selected_eval_status': eval_status,
             'show_failed_prior': show_failed_prior,
+            'bypass_locks': bypass_locks,
             'page_obj': page_obj,
             'is_paginated': is_paginated,
             'paginator': paginator,
@@ -1181,6 +1237,8 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         eval_status = request.POST.get('eval_status', 'PENDING')
         show_failed_prior_val = request.POST.get('show_failed_prior') or request.GET.get('show_failed_prior')
         show_failed_prior = show_failed_prior_val in ['true', 'on', '1']
+        bypass_locks_val = request.POST.get('bypass_locks') or request.GET.get('bypass_locks')
+        bypass_locks = bypass_locks_val in ['true', 'on', '1']
         
         selected_job = None
         selected_stage = None
@@ -1191,16 +1249,16 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
         is_paginated = False
 
         jobs_qs = JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         )
 
         if job_id:
             selected_job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
-            stages = selected_job.stages.filter(is_deleted=False).order_by('sequence')
+            stages = selected_job.stages.filter(is_deleted=False).exclude(weight=0).order_by('sequence')
             if stage_id:
                 selected_stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
 
-            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            is_job_closed_or_cancelled = selected_job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
 
             jobs = list(jobs_qs.order_by('-created_at'))
             if selected_job and selected_job not in jobs:
@@ -1218,7 +1276,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 with transaction.atomic():
                     for sid in state_ids:
                         state = ApplicationStageState.objects.filter(pk=sid, is_deleted=False).first()
-                        if state and state.is_accessible:
+                        if state and (state.is_accessible or bypass_locks):
                             score_val = request.POST.get(f'score_{sid}', '0')
                             status_val = request.POST.get(f'status_{sid}', ApplicationStageState.STATUS_PENDING)
                             notes_val = request.POST.get(f'notes_{sid}', '')
@@ -1244,9 +1302,12 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
 
             if selected_stage:
                 from django.db.models import Exists, OuterRef
+                app_statuses = [JobApplication.STATUS_IN_PROGRESS]
+                if show_failed_prior or bypass_locks:
+                    app_statuses.append(JobApplication.STATUS_REJECTED)
                 pending_states_qs = ApplicationStageState.objects.filter(
                     application__job=selected_job,
-                    application__status=JobApplication.STATUS_IN_PROGRESS,
+                    application__status__in=app_statuses,
                     application__is_deleted=False,
                     stage=selected_stage,
                     is_deleted=False
@@ -1299,6 +1360,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'selected_q': q,
                 'selected_eval_status': eval_status,
                 'show_failed_prior': show_failed_prior,
+                'bypass_locks': bypass_locks,
                 'page_obj': page_obj,
                 'is_paginated': is_paginated,
                 'paginator': paginator,
@@ -1315,6 +1377,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
             'selected_q': q,
             'selected_eval_status': eval_status,
             'show_failed_prior': show_failed_prior,
+            'bypass_locks': bypass_locks,
             'page_obj': page_obj,
             'is_paginated': is_paginated,
             'paginator': paginator,
@@ -1336,6 +1399,8 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         job_id = request.POST.get('job_id')
         stage_id = request.POST.get('stage_id')
         excel_file = request.FILES.get('excel_file')
+        bypass_locks_val = request.POST.get('bypass_locks')
+        bypass_locks = bypass_locks_val in ['true', 'on', '1']
 
         if not job_id or not stage_id or not excel_file:
             messages.error(request, "اطلاعات فرصت شغلی، مرحله یا فایل ارسالی نامعتبر است.")
@@ -1344,21 +1409,25 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
         stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
 
-        if job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]:
+        redirect_url = f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}"
+        if bypass_locks:
+            redirect_url += "&bypass_locks=1"
+
+        if job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]:
             messages.error(request, f"خطا: امکان ثبت نمرات از طریق اکسل برای فرصت شغلی در وضعیت '{job.get_status_display()}' وجود ندارد.")
-            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+            return redirect(redirect_url)
 
         try:
             wb = openpyxl.load_workbook(excel_file)
             ws = wb.active
         except Exception as e:
             messages.error(request, f"خطا در خواندن فایل اکسل: {str(e)}")
-            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+            return redirect(redirect_url)
 
         rows = list(ws.iter_rows(values_only=True))
         if not rows or len(rows) < 2:
             messages.error(request, "فایل اکسل خالی است یا فاقد داده‌های معتبر می‌باشد.")
-            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+            return redirect(redirect_url)
 
         headers = rows[0]
         data_rows = rows[1:]
@@ -1375,7 +1444,7 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         if state_id_idx is None or score_idx is None or status_idx is None:
             messages.error(request, "ستون‌های حیاتی 'شناسه وضعیت'، 'نمره نهایی مرحله' یا 'وضعیت ارزیابی' یافت نشدند.")
-            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+            return redirect(redirect_url)
 
         success_count = 0
         error_count = 0
@@ -1424,7 +1493,7 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
                         error_count += 1
                         continue
 
-                    if not state.is_accessible:
+                    if not (state.is_accessible or bypass_locks):
                         errors.append(f"ردیف {idx} ({state.application.candidate}): این مرحله قفل یا در دسترس نیست.")
                         error_count += 1
                         continue
@@ -1450,14 +1519,14 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
                     success_count += 1
         except Exception as ex:
             messages.error(request, f"خطا در حین تراکنش بروزرسانی نمرات: {str(ex)}")
-            return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+            return redirect(redirect_url)
 
         if success_count > 0:
             messages.success(request, f"نمرات تعداد {success_count} متقاضی با موفقیت از فایل اکسل بروزرسانی شد.")
         if error_count > 0:
             messages.error(request, f"بروزرسانی تعداد {error_count} ردیف با خطا مواجه شد:<br>" + "<br>".join(errors[:10]))
 
-        return redirect(f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}")
+        return redirect(redirect_url)
 
 
 class ManageStageInterviewersView(LoginRequiredMixin, RoleRequiredMixin, View):
@@ -1746,11 +1815,14 @@ class AssessmentCenterSheetView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'score_obj': comp_scores.get(c.id)
             })
 
+        bypass_locks = request.GET.get('bypass_locks') == '1'
+
         return render(request, 'candidates/partials/assessment_center_sheet.html', {
             'state': state,
             'comp_data': comp_data,
             'iscore': iscore,
             'source': request.GET.get('source'),
+            'bypass_locks': bypass_locks,
         })
 
     def post(self, request, pk):
@@ -1758,6 +1830,7 @@ class AssessmentCenterSheetView(LoginRequiredMixin, RoleRequiredMixin, View):
         from apps.accounts.permissions import check_stage_access
         
         state = get_object_or_404(ApplicationStageState, pk=pk, is_deleted=False)
+        bypass_locks = request.POST.get('bypass_locks') == '1'
         
         # Enforce role-based stage type check
         if not check_stage_access(request.user, state.stage):
@@ -1812,11 +1885,99 @@ class AssessmentCenterSheetView(LoginRequiredMixin, RoleRequiredMixin, View):
         if source == 'score_entry':
             return render(request, 'candidates/partials/score_entry_row.html', {
                 'state': state,
+                'bypass_locks': bypass_locks,
             })
 
         return render(request, 'candidates/partials/interviewer_score_row_saved.html', {
             'state': state,
             'iscore': iscore,
+        })
+
+
+class InterviewScoresPanelView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR
+    ]
+
+    def get(self, request, pk):
+        from .models import ExternalInterviewerScore, JobDefaultInterviewer
+        state = get_object_or_404(ApplicationStageState, pk=pk, is_deleted=False)
+        
+        if state.stage.stage_type != 'INTERVIEW':
+            raise PermissionDenied("این پنل فقط برای مراحل مصاحبه در دسترس است.")
+            
+        external_scores = state.external_interviewer_scores.filter(is_deleted=False)
+        bypass_locks = request.GET.get('bypass_locks') == '1'
+
+        # اگه هنوز نمره‌ای ثبت نشده، مصاحبه‌گران پیش‌فرض شغل را برای پیش‌پر کردن فرم لود کن
+        default_interviewers = []
+        if not external_scores.exists():
+            default_interviewers = list(
+                JobDefaultInterviewer.objects.filter(
+                    job=state.application.job,
+                    is_deleted=False
+                ).order_by('id')
+            )
+        
+        return render(request, 'candidates/partials/interview_scores_panel.html', {
+            'state': state,
+            'external_scores': external_scores,
+            'bypass_locks': bypass_locks,
+            'default_interviewers': default_interviewers,
+        })
+
+    def post(self, request, pk):
+        from .models import ExternalInterviewerScore
+        from django.db import transaction
+        
+        state = get_object_or_404(ApplicationStageState, pk=pk, is_deleted=False)
+        bypass_locks = request.POST.get('bypass_locks') == '1'
+        
+        if state.stage.stage_type != 'INTERVIEW':
+            raise PermissionDenied("این پنل فقط برای مراحل مصاحبه در دسترس است.")
+
+        names = request.POST.getlist('interviewer_name[]')
+        scores = request.POST.getlist('score[]')
+        weights = request.POST.getlist('weight[]')
+        notes = request.POST.getlist('notes[]')
+
+        with transaction.atomic():
+            state.external_interviewer_scores.filter(is_deleted=False).update(is_deleted=True)
+            
+            for i in range(len(names)):
+                name = names[i].strip()
+                if not name:
+                    continue
+                
+                try:
+                    score_val = float(scores[i])
+                except (ValueError, IndexError):
+                    score_val = 0.0
+                    
+                try:
+                    weight_val = int(weights[i])
+                    if weight_val < 1:
+                        weight_val = 100
+                except (ValueError, IndexError):
+                    weight_val = 100
+                    
+                notes_val = notes[i].strip() if i < len(notes) else ""
+                
+                ExternalInterviewerScore.objects.create(
+                    stage_state=state,
+                    interviewer_name=name,
+                    score=score_val,
+                    weight=weight_val,
+                    notes=notes_val
+                )
+            
+            state.save()
+
+        return render(request, 'candidates/partials/score_entry_row.html', {
+            'state': state,
+            'bypass_locks': bypass_locks,
         })
 
 
@@ -1880,7 +2041,8 @@ class JobOpportunityFinalRankingView(LoginRequiredMixin, RoleRequiredMixin, Deta
         data = super().get_context_data(**kwargs)
         apps = self.object.applications.filter(is_deleted=False).select_related('candidate')
         data['applications'] = apps.order_by('-final_score')
-        data['stages'] = self.object.stages.filter(is_deleted=False).order_by('sequence')
+        data['stages'] = self.object.stages.filter(is_deleted=False).exclude(weight=0).order_by('sequence')
+        data['all_stages'] = self.object.stages.filter(is_deleted=False).order_by('sequence')
         data['selected_count'] = apps.filter(status=JobApplication.STATUS_SELECTED).count()
         data['reserve_count'] = apps.filter(status=JobApplication.STATUS_RESERVE).count()
         data['rejected_count'] = apps.filter(status=JobApplication.STATUS_REJECTED).count()
@@ -1993,6 +2155,8 @@ class ExportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         eval_status = request.GET.get('eval_status', 'PENDING')
         show_failed_prior_val = request.GET.get('show_failed_prior')
         show_failed_prior = show_failed_prior_val in ['true', 'on', '1']
+        bypass_locks_val = request.GET.get('bypass_locks')
+        bypass_locks = bypass_locks_val in ['true', 'on', '1']
         
         if not job_id or not stage_id:
             return HttpResponse("شناسه فرصت شغلی و مرحله الزامی است.", status=400)
@@ -2000,9 +2164,13 @@ class ExportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
         stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
         
+        app_statuses = [JobApplication.STATUS_IN_PROGRESS]
+        if show_failed_prior or bypass_locks:
+            app_statuses.append(JobApplication.STATUS_REJECTED)
+            
         pending_states_qs = ApplicationStageState.objects.filter(
             application__job=job,
-            application__status=JobApplication.STATUS_IN_PROGRESS,
+            application__status__in=app_statuses,
             application__is_deleted=False,
             stage=stage,
             is_deleted=False
@@ -2179,7 +2347,7 @@ class ExportJobFinalRankingExcelView(LoginRequiredMixin, RoleRequiredMixin, View
         from apps.candidates.models import JobApplication, ApplicationStageState
         job = get_object_or_404(JobOpportunity, pk=pk, is_deleted=False)
         apps = job.applications.filter(is_deleted=False).select_related('candidate').order_by('-final_score')
-        stages = job.stages.filter(is_deleted=False).order_by('sequence')
+        stages = job.stages.filter(is_deleted=False).exclude(weight=0).order_by('sequence')
 
         headers = ["رتبه", "نام", "نام خانوادگی", "کد ملی", "شماره پرسنلی", "امتیاز نهایی وزنی"]
         for stage in stages:
@@ -2522,4 +2690,761 @@ class CandidateTranscriptPrintView(LoginRequiredMixin, RoleRequiredMixin, View):
             'stage_states': stage_states,
         }
         return render(request, 'candidates/candidate_transcript_print.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Component 1: Stage Rollback — برآورد مرحله
+# ─────────────────────────────────────────────────────────────────────────────
+
+class StageRollbackView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    برگرداندن متقاضی به مرحله قبل (یا هر مرحله مشخص‌شده) جهت ورود مجدد نمرات.
+    وضعیت مرحله به PENDING برمی‌گردد؛ نمرات خارجی قبلی پاک می‌شوند.
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+    ]
+
+    def post(self, request, app_id, stage_id):
+        from .models import ExternalInterviewerScore
+
+        app = get_object_or_404(
+            JobApplication, pk=app_id, is_deleted=False
+        )
+        target_stage = get_object_or_404(
+            JobOpportunityStage, pk=stage_id, job=app.job, is_deleted=False
+        )
+        stage_state = get_object_or_404(
+            ApplicationStageState,
+            application=app,
+            stage=target_stage,
+            is_deleted=False
+        )
+
+        bypass_locks = request.POST.get('bypass_locks') == '1' or request.POST.get('bypass_locks') == 'on'
+
+        with transaction.atomic():
+            # 1. برگرداندن مرحله فعلی متقاضی
+            app.current_stage = target_stage
+            app.save(update_fields=['current_stage'])
+
+            # 2. اگه وضعیت نهایی درخواست رد شده بود، به in_progress برگردان
+            if app.status == JobApplication.STATUS_REJECTED:
+                app.status = JobApplication.STATUS_IN_PROGRESS
+                app.save(update_fields=['status'])
+
+            # 3. ریست وضعیت مرحله به PENDING و پاکسازی نمره
+            stage_state.status = ApplicationStageState.STATUS_PENDING
+            stage_state.score = 0.0
+            stage_state.is_conditional_pass = False
+            stage_state.save(update_fields=['status', 'score', 'is_conditional_pass'])
+
+            # 4. حذف نمرات خارجی قبلی این مرحله (soft-delete)
+            ExternalInterviewerScore.objects.filter(
+                stage_state=stage_state,
+                is_deleted=False
+            ).update(is_deleted=True)
+
+        return render(request, 'candidates/partials/score_entry_row.html', {
+            'state': stage_state,
+            'bypass_locks': bypass_locks,
+        })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Component 2: مصاحبه‌گران پیش‌فرض فرصت شغلی
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ManageJobDefaultInterviewersView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    HTMX view: لیست مصاحبه‌گران پیش‌فرض یک فرصت شغلی را مدیریت می‌کند.
+    GET  → قالب مودال با فرم و جدول.
+    POST → ذخیره مصاحبه‌گران پیش‌فرض (حذف قبلی‌ها و ایجاد مجدد).
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+    ]
+
+    def get(self, request, job_id):
+        from .models import JobDefaultInterviewer
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        interviewers = JobDefaultInterviewer.objects.filter(
+            job=job, is_deleted=False
+        ).order_by('id')
+        return render(request, 'candidates/partials/manage_default_interviewers.html', {
+            'job': job,
+            'interviewers': interviewers,
+        })
+
+    def post(self, request, job_id):
+        from .models import JobDefaultInterviewer
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+
+        names = request.POST.getlist('interviewer_name[]')
+        weights = request.POST.getlist('weight[]')
+
+        with transaction.atomic():
+            # نرم‌حذف همه مصاحبه‌گران قبلی
+            JobDefaultInterviewer.objects.filter(job=job, is_deleted=False).update(is_deleted=True)
+
+            for i, name in enumerate(names):
+                name = name.strip()
+                if not name:
+                    continue
+                try:
+                    weight_val = int(weights[i])
+                    if weight_val < 1:
+                        weight_val = 100
+                except (ValueError, IndexError):
+                    weight_val = 100
+
+                JobDefaultInterviewer.objects.create(
+                    job=job,
+                    interviewer_name=name,
+                    weight=weight_val
+                )
+
+        interviewers = JobDefaultInterviewer.objects.filter(
+            job=job, is_deleted=False
+        ).order_by('id')
+        return render(request, 'candidates/partials/manage_default_interviewers.html', {
+            'job': job,
+            'interviewers': interviewers,
+            'saved': True,
+        })
+
+    def delete(self, request, job_id):
+        """حذف یک مصاحبه‌گر منفرد (با job_id و interviewer pk در query string)"""
+        from .models import JobDefaultInterviewer
+        interviewer_pk = request.GET.get('pk')
+        if interviewer_pk:
+            JobDefaultInterviewer.objects.filter(
+                pk=interviewer_pk, job_id=job_id, is_deleted=False
+            ).update(is_deleted=True)
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        interviewers = JobDefaultInterviewer.objects.filter(
+            job=job, is_deleted=False
+        ).order_by('id')
+        return render(request, 'candidates/partials/manage_default_interviewers.html', {
+            'job': job,
+            'interviewers': interviewers,
+        })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Component 3: ورود سریع نمرات گروهی مصاحبه‌گران — Bulk Interview Scores
+# ─────────────────────────────────────────────────────────────────────────────
+
+class BulkInterviewScoresView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    GET  → جدول ماتریسی (متقاضی × مصاحبه‌گران پیش‌فرض) برای ورود سریع نمرات.
+    POST → ذخیره همه نمرات به‌عنوان ExternalInterviewerScore و محاسبه مجدد score هر state.
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+    ]
+
+    def _get_stage_states(self, job, stage):
+        from django.db.models import Exists, OuterRef
+        prior_failed_subquery = ApplicationStageState.objects.filter(
+            application=OuterRef('application'),
+            stage__sequence__lt=OuterRef('stage__sequence'),
+            status=ApplicationStageState.STATUS_FAILED,
+            is_conditional_pass=False,
+            is_deleted=False
+        )
+        return ApplicationStageState.objects.filter(
+            application__job=job,
+            application__status=JobApplication.STATUS_IN_PROGRESS,
+            application__is_deleted=False,
+            stage=stage,
+            is_deleted=False,
+        ).annotate(
+            has_failed_prior=Exists(prior_failed_subquery)
+        ).filter(has_failed_prior=False).select_related(
+            'application__candidate'
+        ).order_by('application__candidate__last_name')
+
+    def get(self, request):
+        from .models import JobDefaultInterviewer
+        job_id = request.GET.get('job_id')
+        stage_id = request.GET.get('stage_id')
+
+        if not job_id or not stage_id:
+            return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+                'error': 'ابتدا یک فرصت شغلی و مرحله انتخاب کنید.'
+            })
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, job=job, is_deleted=False)
+
+        if stage.stage_type != 'INTERVIEW':
+            return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+                'error': 'ورود سریع نمرات فقط برای مراحل مصاحبه در دسترس است.'
+            })
+
+        default_interviewers = JobDefaultInterviewer.objects.filter(
+            job=job, is_deleted=False
+        ).order_by('id')
+
+        stage_states = self._get_stage_states(job, stage)
+
+        # برای هر state، نمرات خارجی موجود را بارگذاری کن
+        for state in stage_states:
+            existing = {
+                es.interviewer_name: es
+                for es in state.external_interviewer_scores.filter(is_deleted=False)
+            }
+            state.interviewer_cells = [
+                {
+                    'interviewer': iv,
+                    'existing_score': existing.get(iv.interviewer_name),
+                }
+                for iv in default_interviewers
+            ]
+
+        return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+            'job': job,
+            'stage': stage,
+            'default_interviewers': default_interviewers,
+            'stage_states': stage_states,
+        })
+
+    def post(self, request):
+        from .models import JobDefaultInterviewer, ExternalInterviewerScore
+        job_id = request.POST.get('job_id')
+        stage_id = request.POST.get('stage_id')
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, job=job, is_deleted=False)
+        default_interviewers = JobDefaultInterviewer.objects.filter(
+            job=job, is_deleted=False
+        ).order_by('id')
+        stage_states = self._get_stage_states(job, stage)
+
+        with transaction.atomic():
+            for state in stage_states:
+                has_score = False
+                for iv in default_interviewers:
+                    field_key = f'score_{state.pk}_{iv.pk}'
+                    raw = request.POST.get(field_key, '').strip()
+                    if raw == '':
+                        continue
+                    try:
+                        score_val = float(raw)
+                    except ValueError:
+                        continue
+
+                    has_score = True
+                    # upsert: به‌روزرسانی یا ایجاد
+                    es_obj = ExternalInterviewerScore.objects.filter(
+                        stage_state=state,
+                        interviewer_name=iv.interviewer_name,
+                        is_deleted=False
+                    ).first()
+                    if es_obj:
+                        es_obj.score = score_val
+                        es_obj.weight = iv.weight
+                        es_obj.save(update_fields=['score', 'weight'])
+                    else:
+                        ExternalInterviewerScore.objects.create(
+                            stage_state=state,
+                            interviewer_name=iv.interviewer_name,
+                            score=score_val,
+                            weight=iv.weight
+                        )
+
+                if has_score:
+                    state.save()
+
+        return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+            'job': job,
+            'stage': stage,
+            'default_interviewers': default_interviewers,
+            'stage_states': self._get_stage_states(job, stage),
+            'saved': True,
+            '_reload_list': True,
+        })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Excel Import/Export for Interview Scores
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _normalize_number(raw):
+    """تبدیل اعداد فارسی/عربی به لاتین و تبدیل به float"""
+    if raw is None:
+        return None
+    raw = str(raw).strip()
+    # جدول تبدیل: ۰-۹ (فارسی U+06F0-U+06F9) و ٠-٩ (عربی U+0660-U+0669)
+    for persian, arabic, western in zip(
+        '۰۱۲۳۴۵۶۷۸۹', '٠١٢٣٤٥٦٧٨٩', '0123456789'
+    ):
+        raw = raw.replace(persian, western).replace(arabic, western)
+    # پاکسازی کاما فارسی/عربی
+    raw = raw.replace('٫', '.').replace('،', '').replace(',', '')
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+class DownloadInterviewScoresTemplateView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    دانلود قالب اکسل برای ورود نمرات مصاحبه‌گران.
+    ستون‌ها: کد ملی | نام و نام خانوادگی | [مصاحبه‌گر ۱] | [مصاحبه‌گر ۲] | ...
+    سطرها: متقاضیان فعال مرحله انتخاب‌شده.
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+    ]
+
+    def get(self, request):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        from django.http import HttpResponse
+        from .models import JobDefaultInterviewer
+
+        job_id = request.GET.get('job_id')
+        stage_id = request.GET.get('stage_id')
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, job=job, is_deleted=False)
+
+        default_interviewers = list(
+            JobDefaultInterviewer.objects.filter(job=job, is_deleted=False).order_by('id')
+        )
+
+        # واکشی متقاضیان فعال (مشابه BulkInterviewScoresView)
+        from django.db.models import Exists, OuterRef
+        prior_failed_subquery = ApplicationStageState.objects.filter(
+            application=OuterRef('application'),
+            stage__sequence__lt=OuterRef('stage__sequence'),
+            status=ApplicationStageState.STATUS_FAILED,
+            is_conditional_pass=False,
+            is_deleted=False
+        )
+        stage_states = ApplicationStageState.objects.filter(
+            application__job=job,
+            application__status=JobApplication.STATUS_IN_PROGRESS,
+            application__is_deleted=False,
+            stage=stage,
+            is_deleted=False,
+        ).annotate(
+            has_failed_prior=Exists(prior_failed_subquery)
+        ).filter(has_failed_prior=False).select_related(
+            'application__candidate'
+        ).order_by('application__candidate__last_name')
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "نمرات مصاحبه"
+        ws.sheet_view.rightToLeft = True
+
+        # استایل هدر
+        header_fill = PatternFill(start_color='1E40AF', end_color='1E40AF', fill_type='solid')
+        interviewer_fill = PatternFill(start_color='2563EB', end_color='2563EB', fill_type='solid')
+        header_font = Font(name='Calibri', bold=True, color='FFFFFF', size=11)
+        center = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        right = Alignment(horizontal='right', vertical='center')
+        thin = Border(
+            left=Side(style='thin', color='CBD5E1'),
+            right=Side(style='thin', color='CBD5E1'),
+            top=Side(style='thin', color='CBD5E1'),
+            bottom=Side(style='thin', color='CBD5E1'),
+        )
+
+        # سطر اول — توضیح
+        ws.merge_cells(f'A1:{get_column_letter(3 + len(default_interviewers))}1')
+        desc_cell = ws['A1']
+        desc_cell.value = f'قالب ورود نمرات مصاحبه | فرصت شغلی: {job.title} | مرحله: {stage.name} | ستون‌های آبی را ویرایش نکنید. فقط نمرات (۰-۱۰۰) وارد کنید.'
+        desc_cell.font = Font(name='Calibri', bold=True, color='1E3A5F', size=10)
+        desc_cell.alignment = right
+        ws.row_dimensions[1].height = 28
+
+        # سطر هدر — ردیف ۲
+        headers = ['کد ملی', 'نام و نام خانوادگی', 'وضعیت فعلی']
+        for iv in default_interviewers:
+            headers.append(f'{iv.interviewer_name}\n(وزن: {iv.weight}%)')
+
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws.cell(row=2, column=col_idx, value=header)
+            cell.font = header_font
+            if col_idx <= 3:
+                cell.fill = header_fill
+            else:
+                cell.fill = interviewer_fill
+            cell.alignment = center
+            cell.border = thin
+
+        ws.row_dimensions[2].height = 36
+
+        # سطرهای داده
+        status_map = {
+            ApplicationStageState.STATUS_PENDING: 'در انتظار',
+            ApplicationStageState.STATUS_COMPLETED: 'قبول',
+            ApplicationStageState.STATUS_FAILED: 'مردود',
+        }
+        row_fill_even = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
+        row_fill_odd = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
+
+        for row_idx, state in enumerate(stage_states, start=3):
+            candidate = state.application.candidate
+            existing = {
+                es.interviewer_name: es.score
+                for es in state.external_interviewer_scores.filter(is_deleted=False)
+            }
+
+            row_fill = row_fill_even if row_idx % 2 == 0 else row_fill_odd
+
+            data = [
+                candidate.national_id,
+                f'{candidate.first_name} {candidate.last_name}',
+                status_map.get(state.status, state.status),
+            ]
+            for iv in default_interviewers:
+                data.append(existing.get(iv.interviewer_name, ''))
+
+            for col_idx, value in enumerate(data, start=1):
+                cell = ws.cell(row=row_idx, column=col_idx, value=value)
+                cell.border = thin
+                cell.fill = row_fill
+                if col_idx <= 3:
+                    cell.alignment = right
+                    cell.font = Font(name='Calibri', size=10)
+                    if col_idx == 1:  # کد ملی — قفل
+                        cell.font = Font(name='Calibri', size=10, color='374151')
+                else:
+                    cell.alignment = center
+                    cell.number_format = '0.00'
+
+        # عرض ستون‌ها
+        ws.column_dimensions['A'].width = 16
+        ws.column_dimensions['B'].width = 22
+        ws.column_dimensions['C'].width = 12
+        for i in range(len(default_interviewers)):
+            col_letter = get_column_letter(4 + i)
+            ws.column_dimensions[col_letter].width = 14
+
+        # یادداشت پایین
+        note_row = len(list(stage_states)) + 3
+        ws.merge_cells(f'A{note_row}:{get_column_letter(3 + len(default_interviewers))}{note_row}')
+        note_cell = ws[f'A{note_row}']
+        note_cell.value = '📌 راهنما: فقط ستون‌های آبی رنگ (نمرات) را ویرایش کنید. کد ملی را تغییر ندهید. اعداد فارسی نیز قابل قبول است.'
+        note_cell.font = Font(name='Calibri', italic=True, color='6B7280', size=9)
+        note_cell.alignment = right
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="interview_scores_{job.code}_{stage.name}.xlsx"'
+        wb.save(response)
+        return response
+
+
+class ImportInterviewScoresExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    آپلود فایل اکسل نمرات مصاحبه‌گران و ذخیره ExternalInterviewerScore ها.
+    - ستون اول: کد ملی (برای تطابق)
+    - ستون‌های ۴ به بعد: نمرات مصاحبه‌گران (مطابق قالب دانلود شده)
+    - اعداد فارسی/عربی به‌صورت خودکار تبدیل می‌شوند
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+    ]
+
+    def post(self, request):
+        import openpyxl
+        from .models import JobDefaultInterviewer, ExternalInterviewerScore
+
+        job_id = request.POST.get('job_id')
+        stage_id = request.POST.get('stage_id')
+        excel_file = request.FILES.get('excel_file')
+
+        if not excel_file:
+            return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+                'error': 'فایل اکسل انتخاب نشده است.'
+            })
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, job=job, is_deleted=False)
+        default_interviewers = list(
+            JobDefaultInterviewer.objects.filter(job=job, is_deleted=False).order_by('id')
+        )
+
+        try:
+            wb = openpyxl.load_workbook(excel_file, data_only=True)
+            ws = wb.active
+        except Exception as e:
+            return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+                'error': f'خطا در باز کردن فایل اکسل: {e}'
+            })
+
+        # خواندن هدر (ردیف ۲ در قالب ما) و شناسایی ستون‌های مصاحبه‌گران
+        header_row = None
+        for row in ws.iter_rows(min_row=2, max_row=3):
+            if row[0].value and 'کد ملی' in str(row[0].value):
+                header_row = [cell.value for cell in row]
+                header_row_idx = row[0].row
+                break
+
+        if header_row is None:
+            return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+                'error': 'فرمت فایل اکسل معتبر نیست. لطفاً از قالب دانلود شده استفاده کنید.'
+            })
+
+        # نگاشت: نام مصاحبه‌گر → شماره ستون (0-indexed)
+        interviewer_col_map = {}
+        for iv in default_interviewers:
+            for col_idx, header in enumerate(header_row):
+                if header and iv.interviewer_name in str(header):
+                    interviewer_col_map[iv.interviewer_name] = col_idx
+                    break
+
+        saved_count = 0
+        error_rows = []
+
+        with transaction.atomic():
+            for row in ws.iter_rows(min_row=header_row_idx + 1, values_only=True):
+                if not row[0]:  # ردیف خالی
+                    continue
+                national_id = str(row[0]).strip()
+                # تبدیل اعداد فارسی در کد ملی هم
+                national_id = str(_normalize_number(national_id) or national_id).replace('.0', '')
+
+                # پیدا کردن متقاضی
+                from apps.candidates.models import Candidate as CandidateModel
+                candidate = CandidateModel.objects.filter(
+                    national_id=national_id, is_deleted=False
+                ).first()
+                if not candidate:
+                    error_rows.append(f'کد ملی پیدا نشد: {national_id}')
+                    continue
+
+                state = ApplicationStageState.objects.filter(
+                    application__job=job,
+                    application__candidate=candidate,
+                    stage=stage,
+                    is_deleted=False,
+                ).first()
+                if not state:
+                    error_rows.append(f'رکورد مرحله برای {national_id} پیدا نشد')
+                    continue
+
+                has_score = False
+                for iv in default_interviewers:
+                    col_idx = interviewer_col_map.get(iv.interviewer_name)
+                    if col_idx is None or col_idx >= len(row):
+                        continue
+                    raw_val = row[col_idx]
+                    score_val = _normalize_number(raw_val)
+                    if score_val is None:
+                        continue
+                    # clamp
+                    score_val = max(0.0, min(100.0, score_val))
+                    has_score = True
+
+                    es_obj = ExternalInterviewerScore.objects.filter(
+                        stage_state=state,
+                        interviewer_name=iv.interviewer_name,
+                        is_deleted=False
+                    ).first()
+                    if es_obj:
+                        es_obj.score = score_val
+                        es_obj.weight = iv.weight
+                        es_obj.save(update_fields=['score', 'weight'])
+                    else:
+                        ExternalInterviewerScore.objects.create(
+                            stage_state=state,
+                            interviewer_name=iv.interviewer_name,
+                            score=score_val,
+                            weight=iv.weight
+                        )
+
+                if has_score:
+                    state.save()
+                    saved_count += 1
+
+        # بازگشت جدول به‌روز شده
+        from django.db.models import Exists, OuterRef
+        prior_failed_subquery = ApplicationStageState.objects.filter(
+            application=OuterRef('application'),
+            stage__sequence__lt=OuterRef('stage__sequence'),
+            status=ApplicationStageState.STATUS_FAILED,
+            is_conditional_pass=False,
+            is_deleted=False
+        )
+        stage_states = ApplicationStageState.objects.filter(
+            application__job=job,
+            application__status=JobApplication.STATUS_IN_PROGRESS,
+            application__is_deleted=False,
+            stage=stage,
+            is_deleted=False,
+        ).annotate(
+            has_failed_prior=Exists(prior_failed_subquery)
+        ).filter(has_failed_prior=False).select_related(
+            'application__candidate'
+        ).order_by('application__candidate__last_name')
+
+        for state in stage_states:
+            existing = {
+                es.interviewer_name: es
+                for es in state.external_interviewer_scores.filter(is_deleted=False)
+            }
+            state.interviewer_cells = [
+                {'interviewer': iv, 'existing_score': existing.get(iv.interviewer_name)}
+                for iv in default_interviewers
+            ]
+
+        return render(request, 'candidates/partials/bulk_interview_scores_panel.html', {
+            'job': job,
+            'stage': stage,
+            'default_interviewers': default_interviewers,
+            'stage_states': stage_states,
+            'saved': True,
+            'import_summary': {
+                'saved_count': saved_count,
+                'error_rows': error_rows,
+            },
+        })
+
+
+class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
+    """
+    نمایش شناسنامه جامع فرصت شغلی (گزارش آماری و فرآیند جذب متقاضیان)
+    امکان چاپ به عنوان PDF
+    """
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get(self, request, pk):
+        from django.db.models import Count, Q, Min, Max, Avg, Exists, OuterRef
+        from django.utils import timezone
+        from apps.jobs.models import JobOpportunity, JobOpportunityStage
+        from apps.candidates.models import JobApplication, ApplicationStageState
+        
+        job = get_object_or_404(JobOpportunity, pk=pk, is_deleted=False)
+        stages = list(job.stages.filter(is_deleted=False).order_by('sequence'))
+        applications = job.applications.filter(is_deleted=False)
+        
+        # ۱. اطلاعات و آمارهای ثبت‌نامی و وضعیت‌ها
+        total_registered = applications.count()
+        status_counts = applications.aggregate(
+            selected=Count('id', filter=Q(status='SELECTED')),
+            reserve=Count('id', filter=Q(status='RESERVE')),
+            inprogress=Count('id', filter=Q(status='IN_PROGRESS')),
+            rejected=Count('id', filter=Q(status='REJECTED')),
+        )
+        
+        # محاسبه روزهای سپری‌شده (مدت زمان جذب)
+        start_date = job.start_date or job.created_at.date()
+        if job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED] and job.end_date:
+            end_date = job.end_date
+        elif job.status in [JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]:
+            end_date = job.updated_at.date()
+        else:
+            end_date = timezone.now().date()
+        
+        duration_days = (end_date - start_date).days
+        if duration_days < 0:
+            duration_days = 0
+
+        # ۲. محاسبه جزئیات و آمار تفکیکی مراحل
+        stage_details = []
+        for stage in stages:
+            # بررسی برنامه‌ریزی جذب (JobStagePlan)
+            stage_plan = None
+            if hasattr(job, 'recruitment_plan') and job.recruitment_plan:
+                stage_plan = stage.planning_states.filter(is_deleted=False).first()
+            
+            # پیدا کردن متقاضیانی که به این مرحله رسیده‌اند (یعنی در مراحل قبل رد نشده‌اند)
+            prior_failed_subquery = ApplicationStageState.objects.filter(
+                application=OuterRef('application'),
+                stage__sequence__lt=stage.sequence,
+                status=ApplicationStageState.STATUS_FAILED,
+                is_conditional_pass=False,
+                is_deleted=False
+            )
+            stage_states = ApplicationStageState.objects.filter(
+                application__job=job,
+                application__is_deleted=False,
+                stage=stage,
+                is_deleted=False
+            ).annotate(
+                has_failed_prior=Exists(prior_failed_subquery)
+            ).filter(has_failed_prior=False)
+            
+            total_entered = stage_states.count()
+            passed = stage_states.filter(status=ApplicationStageState.STATUS_COMPLETED).count()
+            failed = stage_states.filter(status=ApplicationStageState.STATUS_FAILED).count()
+            pending = stage_states.filter(status=ApplicationStageState.STATUS_PENDING).count()
+            
+            # تاریخ واقعی اولین و آخرین ارزیابی
+            evaluated_states = stage_states.filter(
+                status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED]
+            )
+            eval_dates = evaluated_states.aggregate(min_date=Min('evaluation_date'), max_date=Max('evaluation_date'))
+            actual_start = eval_dates['min_date']
+            actual_end = eval_dates['max_date']
+            
+            # نمره‌ها
+            scores = evaluated_states.aggregate(
+                min_score=Min('score'),
+                max_score=Max('score'),
+                avg_score=Avg('score')
+            )
+            
+            stage_details.append({
+                'stage': stage,
+                'plan': stage_plan,
+                'total_entered': total_entered,
+                'passed': passed,
+                'failed': failed,
+                'pending': pending,
+                'actual_start': actual_start,
+                'actual_end': actual_end,
+                'min_score': scores['min_score'],
+                'max_score': scores['max_score'],
+                'avg_score': scores['avg_score'],
+            })
+
+        # ۳. متقاضیان پذیرفته‌شده نهایی
+        selected_applications = applications.filter(status='SELECTED').select_related('candidate').order_by('-final_score')
+        for app in selected_applications:
+            # سوابق تحصیلی بالاترین مقطع
+            edu = app.candidate.education.filter(is_deleted=False).order_by('-graduation_year').first()
+            app.highest_education = edu
+            # آخرین سابقه کاری
+            exp = app.candidate.experience.filter(is_deleted=False).order_by('-start_date').first()
+            app.latest_experience = exp
+
+        context = {
+            'job': job,
+            'total_registered': total_registered,
+            'status_counts': status_counts,
+            'duration_days': duration_days,
+            'start_date': start_date,
+            'end_date': end_date,
+            'stage_details': stage_details,
+            'selected_applications': selected_applications,
+            'print_date': timezone.now().date(),
+        }
+        return render(request, 'jobs/job_report.html', context)
 

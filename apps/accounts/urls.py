@@ -4,7 +4,8 @@ from .views import (
     UserUpdateView, UserDeleteView, AuditLogListView,
     SystemBackupView, DownloadBackupView, RestoreBackupView,
     SystemUpdateCheckView, SystemUpdateRunView, SystemHealthCheckView, SystemRestartView,
-    SMSPanelDashboardView, JobStagesOptionsView, SMSCandidatesPreviewView, SMSExportExcelView
+    SMSPanelDashboardView, JobStagesOptionsView, SMSCandidatesPreviewView, SMSExportExcelView,
+    ExportUnitStatsExcelView
 )
 
 urlpatterns = [
@@ -26,5 +27,6 @@ urlpatterns = [
     path('sms-panel/stages/', JobStagesOptionsView.as_view(), name='sms_panel_stages'),
     path('sms-panel/preview/', SMSCandidatesPreviewView.as_view(), name='sms_panel_preview'),
     path('sms-panel/export/', SMSExportExcelView.as_view(), name='sms_panel_export'),
+    path('dashboard/export-unit-stats/', ExportUnitStatsExcelView.as_view(), name='export_unit_stats'),
 ]
 

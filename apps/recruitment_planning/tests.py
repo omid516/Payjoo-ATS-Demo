@@ -339,4 +339,41 @@ class RecruitmentPlanningTests(TestCase):
         self.assertContains(response, 'تاریخ‌های شروع پیشنهادی')
         self.assertContains(response, 'پایش ظرفیت تفصیلی ۶ ماهه')
 
+    def test_manual_overrides_and_exact_day_cascade(self):
+        """تست اختصاص تاریخ‌های دستی و تغییر نوع به روز دقیق و اثر آبشاری آن"""
+        start_date = datetime.date(2026, 6, 8) # 1405/03/18
+        
+        # Test default calculation: EXAM and INTERVIEW should be exact (is_exact=True), SCREENING is range
+        schedule = calculate_recruitment_schedule(self.job1, start_date)
+        
+        screening_plan = next(s for s in schedule if s['stage_type'] == 'SCREENING')
+        exam_plan = next(s for s in schedule if s['stage_type'] == 'EXAM')
+        
+        self.assertFalse(screening_plan['is_exact'])
+        self.assertTrue(exam_plan['is_exact'])
+        
+        # EXAM is exact, so planned_start_date should be equal to planned_end_date
+        self.assertEqual(exam_plan['planned_start_date'], exam_plan['planned_end_date'])
+        
+        # Let's perform an override:
+        # Override screening stage to be exact day on 1405/03/18 (2026-06-08)
+        overrides = {
+            self.stage_template_1.id: {
+                'is_exact': True,
+                'planned_start_date': datetime.date(2026, 6, 8),
+                'planned_end_date': datetime.date(2026, 6, 8),
+            }
+        }
+        
+        schedule_overridden = calculate_recruitment_schedule(self.job1, start_date, overrides=overrides)
+        scr_plan_overridden = next(s for s in schedule_overridden if s['stage'].id == self.stage_template_1.id)
+        
+        self.assertTrue(scr_plan_overridden['is_exact'])
+        self.assertEqual(scr_plan_overridden['planned_start_date'], datetime.date(2026, 6, 8))
+        self.assertEqual(scr_plan_overridden['planned_end_date'], datetime.date(2026, 6, 8))
+        
+        # The subsequent EXAM stage should cascade starting from the next working day after 2026-06-08 (which is 2026-06-09)
+        ex_plan_overridden = next(s for s in schedule_overridden if s['stage'].id == self.stage_template_2.id)
+        self.assertEqual(ex_plan_overridden['planned_start_date'], datetime.date(2026, 6, 9))
+
 

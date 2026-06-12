@@ -54,6 +54,7 @@ class JobOpportunity(SoftDeleteModel):
     STATUS_FINAL_SELECTION = 'FINAL_SELECTION'
     STATUS_CLOSED = 'CLOSED'
     STATUS_CANCELLED = 'CANCELLED'
+    STATUS_SUSPENDED = 'SUSPENDED'
 
     STATUS_CHOICES = [
         (STATUS_RECEIVED, 'دریافت شده'),
@@ -68,6 +69,7 @@ class JobOpportunity(SoftDeleteModel):
         (STATUS_FINAL_SELECTION, 'انتخاب نهایی'),
         (STATUS_CLOSED, 'اتمام یافته'),
         (STATUS_CANCELLED, 'لغو شده'),
+        (STATUS_SUSPENDED, 'توقف موقت'),
     ]
 
     RECRUITMENT_TYPE_CHOICES = [
@@ -179,6 +181,8 @@ class JobOpportunity(SoftDeleteModel):
         return None
 
     def update_status(self):
+        if self.status in [self.STATUS_CANCELLED, self.STATUS_SUSPENDED]:
+            return
         # 1. Check if any candidate is SELECTED (قبول نهایی)
         if self.applications.filter(status='SELECTED', is_deleted=False).exists():
             if self.status != self.STATUS_CLOSED:
@@ -274,6 +278,61 @@ class JobOpportunityStage(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.name} - {self.job.title} (وزن: {self.weight}٪)"
+
+    @property
+    def is_completed(self):
+        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+        if not stages:
+            return False
+            
+        try:
+            idx = stages.index(self)
+        except ValueError:
+            return False
+            
+        # Check if anyone (active or inactive) has reached this stage
+        reached_candidates = []
+        all_apps = self.job.applications.filter(is_deleted=False)
+        
+        if idx == 0:
+            # Everyone reaches the first stage
+            reached_candidates = list(all_apps)
+        else:
+            prev_stage = stages[idx - 1]
+            # Reached if they completed the previous stage
+            from apps.candidates.models import ApplicationStageState
+            completed_prev = set(ApplicationStageState.objects.filter(
+                stage=prev_stage,
+                status=ApplicationStageState.STATUS_COMPLETED,
+                is_deleted=False
+            ).values_list('application_id', flat=True)) | set(ApplicationStageState.objects.filter(
+                stage=prev_stage,
+                is_conditional_pass=True,
+                is_deleted=False
+            ).values_list('application_id', flat=True))
+            reached_candidates = [app for app in all_apps if app.id in completed_prev]
+            
+        if not reached_candidates:
+            return False
+            
+        # Check if there are any active candidates who are in this or prior stages
+        active_apps = self.job.applications.filter(status='IN_PROGRESS', is_deleted=False)
+        for app in active_apps:
+            from apps.candidates.models import ApplicationStageState
+            prior_failed = ApplicationStageState.objects.filter(
+                application=app,
+                stage__sequence__lt=self.sequence,
+                status=ApplicationStageState.STATUS_FAILED,
+                is_conditional_pass=False,
+                is_deleted=False
+            ).exists()
+            if not prior_failed:
+                state = app.stage_states.filter(stage=self, is_deleted=False).first()
+                if not state or state.status == ApplicationStageState.STATUS_PENDING:
+                    return False
+                    
+        return True
+
 
 
 class JobStageInterviewer(SoftDeleteModel):

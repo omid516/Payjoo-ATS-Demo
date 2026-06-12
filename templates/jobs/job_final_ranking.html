@@ -84,6 +84,22 @@
             box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
         }
     }
+    .screening-failed-row td {
+        opacity: 0.45;
+        color: #64748b !important;
+    }
+    .screening-failed-row td:not(:first-child):not(:last-child) {
+        text-decoration: line-through;
+        text-decoration-color: rgba(220, 38, 38, 0.6) !important;
+    }
+    .screening-failed-row td select, 
+    .screening-failed-row td input, 
+    .screening-failed-row td button, 
+    .screening-failed-row td .btn,
+    .screening-failed-row td .badge {
+        text-decoration: none !important;
+        display: inline-block;
+    }
 </style>
 {% endblock %}
 
@@ -227,7 +243,10 @@
                 </thead>
                 <tbody>
                     {% for app in applications %}
-                    <tr class="candidate-row" data-app-id="{{ app.id }}" data-status="{{ app.status }}">
+                    {% with screening_stage=all_stages|first %}
+                    {% with scr_state=app|get_stage_state:screening_stage %}
+                    {% with eff_status=app.effective_status %}
+                    <tr class="candidate-row {% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %}" data-app-id="{{ app.id }}" data-status="{{ app.status }}">
                         <td class="ps-4 text-center">
                             <div class="d-flex justify-content-center">
                                 {% if forloop.counter == 1 %}
@@ -242,23 +261,28 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            {% if app.status == 'IN_PROGRESS' %}
+                            {% if eff_status == 'IN_PROGRESS' %}
                             <input type="checkbox" name="application_ids" value="{{ app.id }}" form="ranking-action-form" class="app-checkbox form-check-input">
                             {% else %}
                             <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-bold text-secondary text-decoration-none hover-text-primary">
-                                {{ app.candidate.first_name }} {{ app.candidate.last_name }}
-                            </a>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-bold text-secondary text-decoration-none hover-text-primary">
+                                    {{ app.candidate.first_name }} {{ app.candidate.last_name }}
+                                </a>
+                                {% if scr_state and scr_state.status == 'FAILED' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1.5 py-0.5 rounded text-xxs font-semibold">مردود در غربالگری</span>
+                                {% endif %}
+                            </div>
                             <div class="text-muted text-xs mt-0.5">کد ملی: {{ app.candidate.national_id }}</div>
                             {% if app.candidate.personnel_number %}
                             <div class="text-primary font-semibold text-xxs mt-0.5">شماره پرسنلی: {{ app.candidate.personnel_number }}</div>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="score-badge font-bold">{{ app.final_score }}</span>
+                            <span class="score-badge font-bold">{{ app.final_score|floatformat:1 }}</span>
                         </td>
                         
                         {% for stage in stages %}
@@ -266,7 +290,7 @@
                                 <td class="text-center font-semibold">
                                     {% if state %}
                                         {% if state.status == 'COMPLETED' %}
-                                            <span class="text-secondary" style="font-size: 14px;">{{ state.score }}</span>
+                                            <span class="text-secondary" style="font-size: 14px;">{{ state.score|floatformat:1 }}</span>
                                         {% else %}
                                             <span class="text-muted text-xs">در حال ارزیابی</span>
                                         {% endif %}
@@ -279,18 +303,21 @@
                         
                         <td class="pe-4 text-center">
                             <div id="status-badge-{{ app.id }}">
-                                {% if app.status == 'IN_PROGRESS' %}
+                                {% if eff_status == 'IN_PROGRESS' %}
                                     <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded text-xs">در حال ارزیابی</span>
-                                {% elif app.status == 'SELECTED' %}
+                                {% elif eff_status == 'SELECTED' %}
                                     <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded text-xs font-bold pulse-animation">قبول نهایی</span>
-                                {% elif app.status == 'RESERVE' %}
+                                {% elif eff_status == 'RESERVE' %}
                                     <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">ذخیره</span>
-                                {% elif app.status == 'REJECTED' %}
+                                {% elif eff_status == 'REJECTED' %}
                                     <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded text-xs">مردود شده</span>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
                     {% empty %}
                     <tr>
                         <td colspan="{{ stages.count|add:6 }}" class="text-center py-5 text-muted">

@@ -79,6 +79,41 @@ class CandidateModuleTests(TestCase):
         self.assertEqual(edu.graduation_year, 1402)
         self.assertEqual(exp.job_title, 'توسعه‌دهنده پایتون')
 
+    def test_stage_dates_and_intervals(self):
+        """تست ویژگی‌های فاصله زمانی و تاریخ انجام ارزیابی بین مراحل"""
+        candidate = Candidate.objects.create(
+            first_name='فرید',
+            last_name='فرهمند',
+            email='farid@example.com',
+            phone_number='09129999999',
+            national_id='9999999999'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        
+        # Verify stage states are created
+        states = list(app.stage_states.all().order_by('stage__sequence'))
+        self.assertEqual(len(states), 2)
+        
+        state1, state2 = states[0], states[1]
+        
+        # 1. Initially (PENDING), interval should be None
+        self.assertIsNone(state1.prev_stage_state)
+        self.assertIsNone(state2.days_since_prev_stage)
+        
+        # 2. Complete both stages with distinct dates
+        state1.status = ApplicationStageState.STATUS_COMPLETED
+        state1.evaluation_date = date(2026, 6, 1)
+        state1.save()
+        
+        state2.status = ApplicationStageState.STATUS_COMPLETED
+        state2.evaluation_date = date(2026, 6, 6) # 5 days later
+        state2.save()
+        
+        # Refresh and verify
+        state2.refresh_from_db()
+        self.assertEqual(state2.prev_stage_state, state1)
+        self.assertEqual(state2.days_since_prev_stage, 5)
+
     def test_national_id_validation_form(self):
         """تست اعتبارسنجی یکتا بودن و فرمت ۱۰ رقمی کد ملی متقاضی در فرم"""
         # Create an existing candidate
@@ -2059,5 +2094,163 @@ class CandidateModuleTests(TestCase):
         self.assertTrue(state1.is_conditional_pass)
         self.assertEqual(state1.status, 'FAILED')
         self.assertEqual(app.current_stage, stages[1])
+
+    def test_score_bypass_locks_regular_post(self):
+        """تست ثبت نمره در مرحله قفل شده با استفاده از قابلیت ثبت آزاد (بای‌پس)"""
+        self.client.login(username='recruiter_user', password='password123')
+        
+        # Create a candidate and application
+        candidate = Candidate.objects.create(
+            first_name='بای‌پس',
+            last_name='تست',
+            email='bypass@example.com',
+            phone_number='09121112255',
+            national_id='1111112255'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+        
+        # Stage 1 and Stage 2
+        state1 = app.stage_states.get(stage=stages[0])
+        state2 = app.stage_states.get(stage=stages[1])
+        
+        # Stage 2 is currently locked (state1 is not completed, and state2.is_accessible is False)
+        self.assertFalse(state2.is_accessible)
+        
+        # 1. Post score to stage 2 WITHOUT bypass_locks -> should NOT save
+        bulk_url = reverse('candidate_score_entry')
+        post_data_no_bypass = {
+            'job_id': self.job.id,
+            f'score_{state2.id}': '85.0',
+            f'status_{state2.id}': 'COMPLETED',
+            f'notes_{state2.id}': 'تست بدون بای‌پس',
+        }
+        response = self.client.post(bulk_url, post_data_no_bypass)
+        state2.refresh_from_db()
+        self.assertNotEqual(state2.score, 85.0)
+        
+        # 2. Post score to stage 2 WITH bypass_locks -> should save successfully
+        post_data_with_bypass = post_data_no_bypass.copy()
+        post_data_with_bypass['bypass_locks'] = 'true'
+        response = self.client.post(bulk_url, post_data_with_bypass)
+        self.assertEqual(response.status_code, 200)
+        
+        state2.refresh_from_db()
+        self.assertEqual(state2.score, 85.0)
+        self.assertEqual(state2.status, 'COMPLETED')
+
+    def test_score_bypass_locks_excel_import(self):
+        """تست بارگذاری نمرات از طریق فایل اکسل برای مرحله قفل شده با و بدون بای‌پس"""
+        import io
+        import openpyxl
+        
+        self.client.login(username='recruiter_user', password='password123')
+        
+        candidate = Candidate.objects.create(
+            first_name='اکسل',
+            last_name='بای‌پس',
+            email='excel.bypass@example.com',
+            phone_number='09121112266',
+            national_id='1111112266'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+        
+        # Stage 2 is locked
+        state2 = app.stage_states.get(stage=stages[1])
+        self.assertFalse(state2.is_accessible)
+        
+        # Create an in-memory excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["شناسه وضعیت", "نام متقاضی", "نمره نهایی مرحله", "وضعیت ارزیابی", "توضیحات و یادداشت ارزیاب"])
+        ws.append([state2.id, f"{candidate.first_name} {candidate.last_name}", 92.5, "قبول شده در این مرحله", "تست اکسل"])
+        
+        excel_file = io.BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+        excel_file.name = 'test_scores.xlsx'
+        
+        # 1. Post excel WITHOUT bypass_locks
+        url = reverse('score_entry_import_excel')
+        response = self.client.post(url, {
+            'job_id': self.job.id,
+            'stage_id': stages[1].id,
+            'excel_file': excel_file,
+            'bypass_locks': 'false'
+        })
+        state2.refresh_from_db()
+        self.assertNotEqual(state2.score, 92.5)
+        
+        # Reset excel file stream for another read
+        excel_file.seek(0)
+        
+        # 2. Post excel WITH bypass_locks
+        response = self.client.post(url, {
+            'job_id': self.job.id,
+            'stage_id': stages[1].id,
+            'excel_file': excel_file,
+            'bypass_locks': 'true'
+        })
+        state2.refresh_from_db()
+        self.assertEqual(state2.score, 92.5)
+        self.assertEqual(state2.status, 'COMPLETED')
+
+    def test_external_interviewer_scores_panel(self):
+        """تست پنل ورود دستی نمرات مصاحبه‌گران بدون یوزر و محاسبه میانگین وزنی"""
+        self.client.login(username='recruiter_user', password='password123')
+        
+        # Create a candidate and application
+        candidate = Candidate.objects.create(
+            first_name='پوریا',
+            last_name='احمدی',
+            email='p.ahmadi@example.com',
+            phone_number='09121112277',
+            national_id='1111112277'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
+        
+        stage1 = stages[0]
+        stage1.stage_type = 'INTERVIEW'
+        stage1.save()
+        
+        state1 = app.stage_states.get(stage=stage1)
+        
+        # 1. GET panel page
+        url = reverse('interview_scores_panel', kwargs={'pk': state1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'کاربرگ نمرات مصاحبه‌گران')
+        
+        # 2. POST panel data with 2 interviewers
+        post_data = {
+            'interviewer_name[]': ['مصاحبه‌گر اول', 'مصاحبه‌گر دوم'],
+            'score[]': ['80.0', '95.0'],
+            'weight[]': ['2', '1'],
+            'notes[]': ['یادداشت اول', 'یادداشت دوم'],
+            'bypass_locks': '1'
+        }
+        response = self.client.post(url, post_data)
+        self.assertEqual(response.status_code, 200)
+        
+        # Verify db recalculation
+        state1.refresh_from_db()
+        self.assertEqual(state1.score, 85.00)
+        self.assertEqual(state1.status, 'COMPLETED')
+        
+        # Verify external scores records
+        ext_scores = state1.external_interviewer_scores.filter(is_deleted=False)
+        self.assertEqual(ext_scores.count(), 2)
+        score1 = ext_scores.get(interviewer_name='مصاحبه‌گر اول')
+        self.assertEqual(score1.score, 80.0)
+        self.assertEqual(score1.weight, 2)
+        self.assertEqual(score1.notes, 'یادداشت اول')
+        
+        # 3. Verify GET panel again returns the saved scores
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'مصاحبه‌گر اول')
+        self.assertContains(response, 'مصاحبه‌گر دوم')
 
 

@@ -53,7 +53,7 @@
                                 <small class="text-muted d-block text-xxs mt-1">{{ state.application.job.title }}</small>
                             </td>
                             <td class="text-center font-bold text-secondary">
-                                {{ state.score }}
+                                {{ state.score|floatformat:1 }}
                             </td>
                             <td class="text-center text-muted text-xs">
                                 {{ state.stage.passing_score }}

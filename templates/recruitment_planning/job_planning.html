@@ -42,19 +42,19 @@
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- ستون تنظیمات و دریافت اطلاعات -->
-    <div class="col-lg-4">
-        <div class="card planning-card border-0 p-4 shadow-xs">
-            <h5 class="font-bold text-secondary mb-3">تنظیم تاریخ شروع</h5>
-            
-            <form hx-post="{% url 'job_planning' job.id %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" 
-                  hx-target="#schedule-preview-container" 
-                  hx-trigger="submit, change delay:400ms from:#start_date" 
-                  class="m-0" 
-                  id="planning-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" id="form-action" value="preview">
+<form hx-post="{% url 'job_planning' job.id %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" 
+      hx-target="#schedule-preview-container" 
+      hx-trigger="change delay:400ms, submit" 
+      class="m-0" 
+      id="planning-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="form-action" value="preview">
+
+    <div class="row g-4">
+        <!-- ستون تنظیمات و دریافت اطلاعات -->
+        <div class="col-lg-4">
+            <div class="card planning-card border-0 p-4 shadow-xs">
+                <h5 class="font-bold text-secondary mb-3">تنظیم تاریخ شروع</h5>
                 
                 <div class="mb-4">
                     <label class="form-label font-semibold text-xs text-secondary mb-2">تاریخ شروع فرآیند استخدام:</label>
@@ -114,29 +114,29 @@
                     </svg>
                     تایید و ثبت نهایی برنامه‌ریزی
                 </button>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <!-- ستون پیش‌نمایش تقویم زمانبندی -->
-    <div class="col-lg-8">
-        <div class="card planning-card border-0 p-4 shadow-xs h-100">
-            <h5 class="font-bold text-secondary mb-4">پیش‌نمایش زمانبندی و تحلیل ظرفیت مراحل</h5>
-            
-            <div id="schedule-preview-container">
-                <!-- بارگذاری خودکار پیش‌نمایش در لود اولیه با HTMX -->
-                <div class="d-flex flex-column align-items-center justify-content-center py-5 h-100" 
-                     hx-post="{% url 'job_planning' job.id %}" 
-                     hx-vals='{"action": "preview", "start_date": "{% if plan %}{{ plan.start_date|to_jalali }}{% else %}{{ today_jalali }}{% endif %}"}' 
-                     hx-trigger="load" 
-                     hx-target="#schedule-preview-container">
-                    <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
-                    <span class="text-xs text-muted">در حال شبیه‌سازی و تولید زمانبندی پیشنهادی...</span>
+        <!-- ستون پیش‌نمایش تقویم زمانبندی -->
+        <div class="col-lg-8">
+            <div class="card planning-card border-0 p-4 shadow-xs h-100">
+                <h5 class="font-bold text-secondary mb-4">پیش‌نمایش زمانبندی و تحلیل ظرفیت مراحل</h5>
+                
+                <div id="schedule-preview-container">
+                    <!-- بارگذاری خودکار پیش‌نمایش در لود اولیه با HTMX -->
+                    <div class="d-flex flex-column align-items-center justify-content-center py-5 h-100" 
+                         hx-post="{% url 'job_planning' job.id %}" 
+                         hx-vals='{"action": "preview", "start_date": "{% if plan %}{{ plan.start_date|to_jalali }}{% else %}{{ today_jalali }}{% endif %}"}' 
+                         hx-trigger="load" 
+                         hx-target="#schedule-preview-container">
+                        <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                        <span class="text-xs text-muted">در حال شبیه‌سازی و تولید زمانبندی پیشنهادی...</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</form>
 
 <div class="row mt-4">
     <div class="col-12" id="suggestions-container"></div>
@@ -166,6 +166,44 @@
         $(document).on('click', '#bd-root-start_date', function() {
             setTimeout(function() {
                 const input = document.getElementById('start_date');
+                if (input) {
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }, 50);
+        });
+
+        // Initialize datepickers for steps in schedule preview
+        function initializeDatepickers() {
+            $('.stage-datepicker').each(function() {
+                const id = $(this).attr('id');
+                if (!$(this).data('kama-init')) {
+                    kamaDatepicker(id, {
+                        buttonsColor: '#0052cc',
+                        markToday: true,
+                        gotoToday: true,
+                        twodigit: true,
+                        closeAfterSelect: true,
+                        nextButtonIcon: '>',
+                        previousButtonIcon: '<'
+                    });
+                    $(this).data('kama-init', true);
+                }
+            });
+        }
+
+        // Initialize on HTMX load/swap
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail.target.id === 'schedule-preview-container') {
+                initializeDatepickers();
+            }
+        });
+
+        // Handle dynamically created datepicker click selections to fire HTMX submit
+        $(document).on('click', '[id^="bd-root-date_"]', function() {
+            const rootId = $(this).attr('id');
+            const inputId = rootId.replace('bd-root-', '');
+            setTimeout(function() {
+                const input = document.getElementById(inputId);
                 if (input) {
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 }

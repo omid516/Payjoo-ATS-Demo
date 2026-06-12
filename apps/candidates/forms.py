@@ -144,7 +144,7 @@ class JobApplicationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # فقط فرصت‌های شغلی فعال و غیر مختومه نمایش داده شوند
         self.fields['job'].queryset = JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED]
+            status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         )
 
 

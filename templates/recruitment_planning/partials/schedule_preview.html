@@ -49,10 +49,63 @@
                 {% endif %}
             </div>
             
+            {% if item.is_past %}
             <div class="d-flex justify-content-between align-items-center text-xs text-secondary mb-1">
-                <span>بازه زمانبندی ارزیابی:</span>
-                <span class="font-bold {% if item.is_past %}text-muted{% else %}text-dark{% endif %}">{{ item.planned_start_date|to_jalali }} تا {{ item.planned_end_date|to_jalali }}</span>
+                <span>بازه زمانبندی ارزیابی (ثابت):</span>
+                <span class="font-bold text-muted">{{ item.planned_start_date|to_jalali }} تا {{ item.planned_end_date|to_jalali }}</span>
             </div>
+            {% else %}
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-2 pt-2 border-top border-secondary border-opacity-10">
+                <!-- روز دقیق toggle -->
+                <div class="form-check form-switch m-0 d-flex align-items-center gap-1">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           role="switch" 
+                           name="is_exact_{{ item.stage.id }}" 
+                           id="is_exact_{{ item.stage.id }}" 
+                           value="1" 
+                           {% if item.is_exact %}checked{% endif %}>
+                    <label class="form-check-label text-xxs font-bold text-secondary" style="user-select: none;" for="is_exact_{{ item.stage.id }}">روز دقیق ارزیابی</label>
+                </div>
+                
+                <!-- فیلدهای تاریخ -->
+                <div class="d-flex align-items-center gap-2">
+                    {% if item.is_exact %}
+                    <div class="d-flex align-items-center gap-1.5">
+                        <label class="text-xxs text-muted">تاریخ:</label>
+                        <input type="text" 
+                               name="start_date_{{ item.stage.id }}" 
+                               id="date_start_{{ item.stage.id }}" 
+                               value="{{ item.planned_start_date|to_jalali }}" 
+                               class="form-control form-control-sm text-center font-bold stage-datepicker" 
+                               style="width: 105px; border-radius: 6px; font-size: 11px; padding: 0.25rem 0.5rem; background-color: #fff;"
+                               autocomplete="off">
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center gap-1.5">
+                        <label class="text-xxs text-muted">شروع:</label>
+                        <input type="text" 
+                               name="start_date_{{ item.stage.id }}" 
+                               id="date_start_{{ item.stage.id }}" 
+                               value="{{ item.planned_start_date|to_jalali }}" 
+                               class="form-control form-control-sm text-center font-bold stage-datepicker" 
+                               style="width: 105px; border-radius: 6px; font-size: 11px; padding: 0.25rem 0.5rem; background-color: #fff;"
+                               autocomplete="off">
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <label class="text-xxs text-muted">پایان:</label>
+                        <input type="text" 
+                               name="end_date_{{ item.stage.id }}" 
+                               id="date_end_{{ item.stage.id }}" 
+                               value="{{ item.planned_end_date|to_jalali }}" 
+                               class="form-control form-control-sm text-center font-bold stage-datepicker" 
+                               style="width: 105px; border-radius: 6px; font-size: 11px; padding: 0.25rem 0.5rem; background-color: #fff;"
+                               autocomplete="off">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
             
             {% if item.capacity_shifted %}
             <div class="alert alert-warning border-0 p-2 rounded d-flex align-items-center gap-2 mt-2 mb-0" style="background-color: #fffbeb;">

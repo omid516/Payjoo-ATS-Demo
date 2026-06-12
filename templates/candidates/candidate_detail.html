@@ -252,7 +252,7 @@
                                     <span class="text-muted">شروع ارزیابی</span>
                                     {% endif %}
                                 </td>
-                                <td class="font-bold text-secondary">{{ app.final_score }}</td>
+                                <td class="font-bold text-secondary">{{ app.final_score|floatformat:1 }}</td>
                                 <td>
                                     {% if app.status == 'IN_PROGRESS' %}
                                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">در حال ارزیابی</span>

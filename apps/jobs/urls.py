@@ -10,7 +10,8 @@ from .views import (
     WorkflowTemplateDeleteView,
     ExportJobsExcelView,
     WorkflowStagesPreviewView,
-    JobOpportunityPrintDocView
+    JobOpportunityPrintDocView,
+    JobOpportunityBulkStatusView
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path('<int:pk>/delete/', JobOpportunityDeleteView.as_view(), name='job_delete'),
     path('<int:pk>/print/', JobOpportunityPrintDocView.as_view(), name='job_print_doc'),
     path('export/excel/', ExportJobsExcelView.as_view(), name='job_export_excel'),
+    path('bulk-status-update/', JobOpportunityBulkStatusView.as_view(), name='job_bulk_status_update'),
     
     path('workflows/', WorkflowTemplateListView.as_view(), name='workflow_list'),
     path('workflows/add/', WorkflowTemplateCreateView.as_view(), name='workflow_add'),

@@ -134,9 +134,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # ۱. آمارهای کلی
         total_jobs = JobOpportunity.objects.filter(is_deleted=False).count()
-        active_jobs = JobOpportunity.objects.filter(is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+        active_jobs = JobOpportunity.objects.filter(is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
         total_candidates = Candidate.objects.filter(is_deleted=False).count()
-        in_progress_apps = JobApplication.objects.filter(status='IN_PROGRESS', is_deleted=False).exclude(job__status__in=['CLOSED', 'CANCELLED']).count()
+        in_progress_apps = JobApplication.objects.filter(status='IN_PROGRESS', is_deleted=False).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
         selected_candidates = JobApplication.objects.filter(status='SELECTED', is_deleted=False).count()
         
         data.update({
@@ -173,7 +173,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         pending_counts = JobApplication.objects.filter(
             status='IN_PROGRESS',
             is_deleted=False,
-        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).values(
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).values(
             'job__status'
         ).annotate(count=Count('id'))
 
@@ -200,7 +200,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ).select_related('application__job', 'stage')
         if not include_closed:
             completed_states_qs = completed_states_qs.exclude(
-                application__job__status__in=['CLOSED', 'CANCELLED']
+                application__job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
             )
 
         stage_times = {}
@@ -257,6 +257,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     'count': 0
                 })
         data['avg_stage_days'] = avg_stage_days
+        
+        # یافتن گلوگاه اصلی فرآیند (مرحله با بیشترین میانگین روز حضور متقاضی)
+        bottleneck_stage = max((s for s in avg_stage_days if s['avg_days'] > 0), key=lambda x: x['avg_days'], default=None)
+        data['bottleneck_stage'] = bottleneck_stage
+
 
         # ۵. شناسایی متقاضیان تاخیردار (بر اساس SLA تعریف شده برای هر مرحله)
         from apps.recruitment_planning.models import JobStagePlan, StageTypeConfiguration
@@ -266,7 +271,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         in_progress_apps = JobApplication.objects.filter(
             status='IN_PROGRESS',
             is_deleted=False
-        ).exclude(job__status__in=['CLOSED', 'CANCELLED']).select_related('candidate', 'job')
+        ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).select_related('candidate', 'job')
         
         for app in in_progress_apps:
             job = app.job
@@ -335,6 +340,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         delayed_candidates.sort(key=lambda x: x['overdue_days'], reverse=True)
         data['delayed_candidates_count'] = len(delayed_candidates)
         data['delayed_candidates'] = delayed_candidates[:5] # نمایش حداکثر ۵ مورد بحرانی‌تر
+        
+        # محاسبه نرخ انحراف از SLA
+        in_progress_count = in_progress_apps.count()
+        sla_violation_rate = round((len(delayed_candidates) / in_progress_count) * 100, 1) if in_progress_count > 0 else 0
+        data['sla_violation_rate'] = sla_violation_rate
+
 
         # ۶. لاگ فعالیت‌های اخیر سیستم
         data['recent_activities'] = AuditLog.objects.all().select_related('user').order_by('-timestamp')[:5]
@@ -352,16 +363,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # آمار دپارتمان‌ها
         departments = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=['CLOSED', 'CANCELLED']
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).values_list('department', flat=True).order_by().distinct())
         dept_stats = []
         for dept in departments:
             if not dept:
                 continue
-            total_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            total_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
             dept_apps = JobApplication.objects.filter(
                 job__department=dept, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
             counts = build_stage_counts(dept_apps, STAGE_TYPE_ORDER)
             dept_row = {
                 'department': dept,
@@ -375,16 +386,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # آمار واحدها
         units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=['CLOSED', 'CANCELLED']
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
         unit_stats = []
         for unit in units:
             if not unit:
                 continue
-            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
             unit_apps = JobApplication.objects.filter(
                 job__unit=unit, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
             counts = build_stage_counts(unit_apps, STAGE_TYPE_ORDER)
             unit_row = {
                 'unit': unit,
@@ -398,16 +409,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # آمار رده‌های شغلی
         categories = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
-            status__in=['CLOSED', 'CANCELLED']
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).exclude(job_category='').exclude(job_category=None).values_list('job_category', flat=True).order_by().distinct())
         category_stats = []
         for cat in categories:
             if not cat:
                 continue
-            total_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED']).count()
+            total_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
             cat_apps = JobApplication.objects.filter(
                 job__job_category=cat, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED'])
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
             counts = build_stage_counts(cat_apps, STAGE_TYPE_ORDER)
             cat_row = {
                 'job_category': cat,
@@ -452,7 +463,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             is_deleted=False
         ).exclude(job_category='').exclude(job_category=None).values('job_category').annotate(
             total=DCount('id'),
-            active=DCount('id', filter=Q(status__in=['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT', 'REGISTRATION_CLOSED', 'PUBLISHED']))
+            active=DCount('id', filter=~Q(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']))
         ).order_by('job_category')
         data['category_job_counts'] = list(category_job_counts)
 
@@ -508,6 +519,52 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             [u for u in data['unit_stats'] if u['total_candidates'] > 0],
             key=lambda x: x['total_candidates'], reverse=True
         )
+
+        # ۱. نفرات با بیشترین درخواست شرکت در آزمون (نامزدهای با بیشترین اپلیکیشن)
+        top_applicants = Candidate.objects.filter(is_deleted=False).annotate(
+            app_count=Count('applications', filter=Q(applications__is_deleted=False))
+        ).order_by('-app_count')[:5]
+        data['top_applicants'] = top_applicants
+
+        # ۲. برترین متقاضیان بر اساس نمره ارزیابی (نامزدهای ممتاز)
+        top_talents = JobApplication.objects.filter(
+            is_deleted=False, 
+            final_score__gt=0
+        ).select_related('candidate', 'job').order_by('-final_score')[:5]
+        data['top_talents'] = top_talents
+
+        # ۳. توزیع مقاطع تحصیلی متقاضیان
+        from apps.candidates.models import CandidateEducation
+        edu_counts = CandidateEducation.objects.filter(is_deleted=False).values('degree').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        edu_map = {
+            'ASSOCIATE': 'کاردانی',
+            'BACHELOR': 'کارشناسی',
+            'MASTER': 'کارشناسی ارشد',
+            'PHD': 'دکتری'
+        }
+        education_stats = []
+        for ec in edu_counts:
+            education_stats.append({
+                'label': edu_map.get(ec['degree'], ec['degree']),
+                'count': ec['count']
+            })
+        data['education_stats'] = education_stats
+
+        # ۴. تحلیل نرخ موفقیت و وضعیت کل درخواست‌ها
+        app_status_dist = []
+        total_apps = JobApplication.objects.filter(is_deleted=False).count()
+        for stat_key, stat_label in JobApplication.STATUS_CHOICES:
+            count = JobApplication.objects.filter(status=stat_key, is_deleted=False).count()
+            percentage = round((count / total_apps) * 100, 1) if total_apps > 0 else 0
+            app_status_dist.append({
+                'label': stat_label,
+                'count': count,
+                'percentage': percentage,
+                'key': stat_key
+            })
+        data['app_status_dist'] = app_status_dist
 
         return data
 
@@ -1418,6 +1475,73 @@ class SMSExportExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         response['Content-Disposition'] = 'attachment; filename="sms_export.xlsx"'
         wb.save(response)
         return response
+
+
+class ExportUnitStatsExcelView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        from apps.jobs.models import JobOpportunity
+        from apps.candidates.models import JobApplication
+        from django.db.models import Count
+        from apps.core.utils import export_to_excel_response
+        
+        STAGE_TYPE_LABELS = {
+            'EXAM':      'آزمون کتبی',
+            'INTERVIEW': 'مصاحبه حضوری',
+            'SKILL_TEST':'آزمون مهارتی',
+            'ASSESSMENT':'کانون ارزیابی',
+        }
+        STAGE_TYPE_ORDER = ['EXAM', 'INTERVIEW', 'SKILL_TEST', 'ASSESSMENT']
+        
+        # Fetching units
+        units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
+        
+        unit_stats = []
+        for unit in units:
+            if not unit:
+                continue
+            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
+            unit_apps = JobApplication.objects.filter(
+                job__unit=unit, status='IN_PROGRESS', is_deleted=False
+            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
+            
+            # build_stage_counts equivalent
+            rows = unit_apps.values('job__status').annotate(cnt=Count('id'))
+            counts = {row['job__status']: row['cnt'] for row in rows}
+            
+            unit_row = {
+                'unit': unit,
+                'active_jobs': total_jobs_unit,
+                'stages': {STAGE_TYPE_LABELS.get(st, st): counts.get(st, 0) for st in STAGE_TYPE_ORDER},
+                'total_candidates': sum(counts.get(st, 0) for st in STAGE_TYPE_ORDER),
+            }
+            unit_stats.append(unit_row)
+            
+        unit_stats = sorted(
+            [u for u in unit_stats if u['total_candidates'] > 0],
+            key=lambda x: x['total_candidates'], reverse=True
+        )
+        
+        headers = ["واحد سازمانی", "فرصت‌های فعال"]
+        for st_name in STAGE_TYPE_ORDER:
+            headers.append(STAGE_TYPE_LABELS.get(st_name))
+        headers.append("کل فعال")
+        
+        rows = []
+        for u in unit_stats:
+            row = [
+                u['unit'],
+                u['active_jobs']
+            ]
+            for st_name in STAGE_TYPE_ORDER:
+                lbl = STAGE_TYPE_LABELS.get(st_name)
+                row.append(u['stages'].get(lbl, 0))
+            row.append(f"{u['total_candidates']} نفر")
+            rows.append(row)
+            
+        return export_to_excel_response("توزیع_متقاضیان_واحد_سازمانی.xlsx", headers, rows)
+
 
 
 

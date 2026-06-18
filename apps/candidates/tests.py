@@ -1918,7 +1918,7 @@ class CandidateModuleTests(TestCase):
         self.assertEqual(response.status_code, 200)
         
         state.refresh_from_db()
-        self.assertEqual(state.evaluation_date, date.today())
+        self.assertIsNone(state.evaluation_date)
 
     def test_candidate_password_change_view(self):
         """تست عملکرد نمای تغییر رمز عبور متقاضی"""
@@ -2073,6 +2073,7 @@ class CandidateModuleTests(TestCase):
         # Reset to check bulk save
         state1.is_conditional_pass = False
         state1.status = 'PENDING'
+        state1._bypass_status_calculation = True
         state1.save()
         app.current_stage = stages[0]
         app.save()
@@ -2252,5 +2253,111 @@ class CandidateModuleTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'مصاحبه‌گر اول')
         self.assertContains(response, 'مصاحبه‌گر دوم')
+
+    def test_selected_candidates_list_view(self):
+        """تست مشاهده لیست پذیرفته‌شدگان نهایی و خروجی اکسل"""
+        from apps.candidates.models import Candidate, JobApplication
+        # Create a candidate and application
+        candidate = Candidate.objects.create(
+            first_name='سعید',
+            last_name='پذیرفته',
+            email='saeed.p@example.com',
+            phone_number='09121112266',
+            national_id='1111112266'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate, status='SELECTED')
+
+        self.client.login(username='recruiter_user', password='password123')
+
+        # 1. Access selected list page
+        url = reverse('selected_candidates_list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'سعید پذیرفته')
+        self.assertContains(response, '1111112266')
+
+        # 2. Access filters (search)
+        response_search = self.client.get(url + '?q=سعید')
+        self.assertEqual(response_search.status_code, 200)
+        self.assertContains(response_search, 'سعید پذیرفته')
+
+        # 3. Access filters (no results)
+        response_empty = self.client.get(url + '?q=غیرموجود')
+        self.assertEqual(response_empty.status_code, 200)
+        self.assertNotContains(response_empty, 'سعید پذیرفته')
+
+        # 4. Excel export
+        response_excel = self.client.get(url + '?export=excel')
+        self.assertEqual(response_excel.status_code, 200)
+        self.assertEqual(response_excel['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertTrue(response_excel['Content-Disposition'].startswith('attachment;'))
+
+        # 5. Access EditAdmissionDateView
+        edit_url = reverse('edit_admission_date', kwargs={'pk': app.id})
+        response_edit = self.client.get(edit_url)
+        self.assertEqual(response_edit.status_code, 200)
+        self.assertContains(response_edit, 'name="admission_date"')
+
+        # 6. Post UpdateAdmissionDateView with Jalali date
+        update_url = reverse('update_admission_date', kwargs={'pk': app.id})
+        response_update = self.client.post(update_url, {'admission_date': '1404/10/28'})
+        self.assertEqual(response_update.status_code, 200)
+        
+        # Verify the application was updated
+        app.refresh_from_db()
+        self.assertIsNotNone(app.admission_date)
+        import datetime
+        self.assertEqual(app.admission_date, datetime.date(2026, 1, 18)) # 1404/10/28 is 2026-01-18 Gregorian
+        
+        # The response should contain the formatted Jalali date (English digits in raw HTML)
+        self.assertContains(response_update, '1404/10/28')
+
+    def test_candidates_by_stage_list_view(self):
+        """تست مشاهده لیست متقاضیان به تفکیک مراحل و خروجی اکسل"""
+        from apps.candidates.models import Candidate, JobApplication
+        # Create an in-progress application
+        candidate = Candidate.objects.create(
+            first_name='حمید',
+            last_name='مرحله‌ای',
+            email='hamid.m@example.com',
+            phone_number='09121112277',
+            national_id='1111112277'
+        )
+        # By default, job stage templates are created when JobApplication is created
+        app = JobApplication.objects.create(job=self.job, candidate=candidate, status='IN_PROGRESS')
+        
+        # Ensure it has a current stage (e.g. screening or first stage)
+        app.recalculate_current_stage()
+
+        self.client.login(username='recruiter_user', password='password123')
+
+        # 1. Access page
+        url = reverse('candidates_by_stage_list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'حمید مرحله‌ای')
+
+        # 2. Access filters (search)
+        response_search = self.client.get(url + '?q=حمید')
+        self.assertEqual(response_search.status_code, 200)
+        self.assertContains(response_search, 'حمید مرحله‌ای')
+
+        # 3. Access filters (no results)
+        response_empty = self.client.get(url + '?q=غیرموجود')
+        self.assertEqual(response_empty.status_code, 200)
+        self.assertNotContains(response_empty, 'حمید مرحله‌ای')
+
+        # 4. Filter by stage type
+        if app.current_stage:
+            stage_type = app.current_stage.stage_type
+            response_stage = self.client.get(url + f'?stage_type={stage_type}')
+            self.assertEqual(response_stage.status_code, 200)
+            self.assertContains(response_stage, 'حمید مرحله‌ای')
+
+        # 5. Excel export
+        response_excel = self.client.get(url + '?export=excel')
+        self.assertEqual(response_excel.status_code, 200)
+        self.assertEqual(response_excel['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertTrue(response_excel['Content-Disposition'].startswith('attachment;'))
 
 

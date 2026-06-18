@@ -1,0 +1,33 @@
+{% load jalali_tags %}
+<td id="admission-date-cell-{{ app.id }}" class="p-1 align-middle bg-light" style="min-width: 150px;">
+    <form hx-post="{% url 'update_admission_date' app.id %}" hx-target="#admission-date-cell-{{ app.id }}" hx-swap="outerHTML" class="m-0 d-flex gap-1 align-items-center">
+        {% csrf_token %}
+        <input type="text" name="admission_date" id="admission_date_{{ app.id }}" 
+               value="{% if app.admission_date %}{{ app.admission_date|to_jalali }}{% endif %}" 
+               placeholder="تاریخ پذیرش" 
+               class="form-control form-control-sm text-center jalali-datepicker-input text-xs" 
+               style="font-size: 11px; padding: 2px 4px; border-radius: 6px; max-width: 90px;" 
+               autocomplete="off" required>
+        <div class="d-flex flex-column gap-0.5">
+            <button type="submit" class="btn btn-xxs btn-primary py-0.5 px-1" style="font-size: 9px; line-height: 1;">ثبت</button>
+            <button type="button" class="btn btn-xxs btn-outline-secondary py-0.5 px-1" 
+                    hx-get="{% url 'update_admission_date' app.id %}" 
+                    hx-target="#admission-date-cell-{{ app.id }}" 
+                    hx-swap="outerHTML" 
+                    style="font-size: 9px; line-height: 1;">لغو</button>
+        </div>
+    </form>
+    <script>
+        if (typeof kamaDatepicker !== 'undefined') {
+            kamaDatepicker("admission_date_{{ app.id }}", {
+                buttonsColor: '#0052cc',
+                markToday: true,
+                gotoToday: true,
+                twodigit: true,
+                closeAfterSelect: true,
+                nextButtonIcon: '>',
+                previousButtonIcon: '<'
+            });
+        }
+    </script>
+</td>

@@ -41,8 +41,20 @@ def parse_date_safely(val):
 
     # تبدیل به رشته و نرمال‌سازی اعداد
     date_str = normalize_persian_digits(val).strip()
+    if date_str.endswith(".0"):
+        date_str = date_str[:-2]
     if not date_str or date_str.lower() in ['none', 'null', '']:
         return None
+
+    # بررسی اگر تاریخ شمسی عددی ۸ رقمی باشد
+    if date_str.isdigit() and len(date_str) == 8:
+        year = int(date_str[:4])
+        month = int(date_str[4:6])
+        day = int(date_str[6:8])
+        try:
+            return jdatetime.date(year, month, day).togregorian()
+        except ValueError:
+            return None
 
     # بررسی اگر شبیه به تاریخ اکسل عددی باشد
     if date_str.isdigit() and len(date_str) in [4, 5]:
@@ -721,4 +733,700 @@ def execute_final_import(import_session, conflict_strategy, user):
     log_info("فرآیند ایمپورت سوابق تاریخی جذب با موفقیت به پایان رسید.")
     import_session.status = 'COMPLETED'
     import_session.save(update_fields=['status'])
+
+
+@transaction.atomic
+def import_fixed_template_excel(excel_file, user):
+    """
+    درون‌ریزی فایل اکسل قالب ثابت (سوابق جذب تاریخی)
+    پشتیبانی از ۱فایل با شیت‌های: جدول وضعیت، ثبت نام، غربالگری، کتبی، مهارتی، مصاحبه، کانون، قبولی نهایی
+    """
+    from django.contrib.auth.models import User
+    from apps.accounts.models import UserProfile
+    from apps.jobs.models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate
+    from apps.candidates.models import Candidate, JobApplication, ApplicationStageState
+    from apps.core.models import AuditLog
+    import openpyxl
+    import datetime
+
+    stats = {
+        'jobs_created': 0,
+        'jobs_updated': 0,
+        'candidates_created': 0,
+        'candidates_updated': 0,
+        'stages_populated': 0,
+        'applications_processed': 0,
+        'absent_count': 0,
+        'warnings': [],
+    }
+
+    # بارگذاری فایل اکسل
+    wb = openpyxl.load_workbook(excel_file, data_only=True)
+    sheet_names = wb.sheetnames
+
+    # توابع کمکی محلی
+    def clean_excel_code(val):
+        if val is None:
+            return ""
+        val_str = str(val).strip()
+        if val_str.endswith(".0"):
+            return val_str[:-2]
+        return val_str
+
+    def clean_str_number(val):
+        if val is None:
+            return ""
+        s = normalize_persian_digits(val).strip()
+        if s.endswith('.0'):
+            s = s[:-2]
+        s = ''.join(c for c in s if c.isdigit())
+        return s
+
+    def map_job_status(status_str):
+        if not status_str:
+            return JobOpportunity.STATUS_RECEIVED
+        s = str(status_str).strip()
+        if s == '**':
+            return JobOpportunity.STATUS_CLOSED
+        if s == '***':
+            return JobOpportunity.STATUS_CANCELLED
+        if any(kw in s for kw in ["لغو"]):
+            return JobOpportunity.STATUS_CANCELLED
+        if any(kw in s for kw in ["توقف"]):
+            return JobOpportunity.STATUS_SUSPENDED
+        if any(kw in s for kw in ["غربالگری"]):
+            return JobOpportunity.STATUS_SCREENING
+        if any(kw in s for kw in ["کتبی"]):
+            return JobOpportunity.STATUS_EXAM
+        if any(kw in s for kw in ["مهارتی", "عملی"]):
+            return JobOpportunity.STATUS_SKILL_TEST
+        if any(kw in s for kw in ["مصاحبه"]):
+            return JobOpportunity.STATUS_INTERVIEW
+        if any(kw in s for kw in ["کانون"]):
+            return JobOpportunity.STATUS_ASSESSMENT
+        if any(kw in s for kw in ["پایان", "خاتمه"]):
+            return JobOpportunity.STATUS_CLOSED
+        return JobOpportunity.STATUS_RECEIVED
+
+    def get_stage_status(result_val, score, passing_score):
+        if not result_val:
+            return ApplicationStageState.STATUS_COMPLETED if score >= passing_score else ApplicationStageState.STATUS_FAILED
+        
+        res_str = str(result_val).strip()
+        res_str = res_str.replace('ي', 'ی').replace('ك', 'ک').replace('\u200c', '').strip()
+        
+        if "غایب" in res_str:
+            return ApplicationStageState.STATUS_FAILED
+        if any(kw in res_str for kw in ["غیرمجاز", "غیر مجاز", "مردود", "رد"]):
+            return ApplicationStageState.STATUS_FAILED
+        if any(kw in res_str for kw in ["مجاز", "قبول", "تایید"]):
+            return ApplicationStageState.STATUS_COMPLETED
+            
+        return ApplicationStageState.STATUS_COMPLETED if score >= passing_score else ApplicationStageState.STATUS_FAILED
+
+    def parse_score(val):
+        if val is None:
+            return 0.0
+        val_str = normalize_persian_digits(val).strip()
+        if val_str in ['*', '-', '?', '.', '#n/a', 'N/A', '', 'None', 'null']:
+            return 0.0
+        try:
+            return float(val_str)
+        except ValueError:
+            return 0.0
+
+    def get_cell_by_header(row, headers, header_name):
+        if header_name in headers:
+            return row[headers.index(header_name)]
+        return None
+
+    def get_or_create_workflow_template(pattern_name):
+        if not pattern_name:
+            return None
+        name = f"الگوی خودکار - {pattern_name}"
+        wf = WorkflowTemplate.all_objects.filter(name=name).first()
+        if wf:
+            if wf.is_deleted:
+                wf.is_deleted = False
+                wf.deleted_at = None
+                wf.save()
+            return wf
+            
+        wf = WorkflowTemplate.objects.create(name=name, description="ایجاد شده خودکار توسط سیستم ایمپورت سوابق قالب ثابت")
+        # Split pattern by +
+        parts = [p.strip() for p in pattern_name.split('+') if p.strip()]
+        if not any(p in ['غربالگری', 'غربال'] for p in parts):
+            parts.insert(0, 'غربالگری')
+        
+        non_screening_parts = [p for p in parts if p not in ['غربالگری', 'غربال']]
+        m = len(non_screening_parts)
+        
+        def map_type(p):
+            p_clean = p.lower()
+            if any(kw in p_clean for kw in ['غربالگری', 'غربال']):
+                return 'SCREENING'
+            elif any(kw in p_clean for kw in ['کتبی', 'آزمون کتبی', 'آزمون', 'exam', 'test']):
+                return 'EXAM'
+            elif any(kw in p_clean for kw in ['مهارتی', 'آزمون مهارتی', 'عملی', 'skill_test']):
+                return 'SKILL_TEST'
+            elif any(kw in p_clean for kw in ['مصاحبه', 'interview']):
+                return 'INTERVIEW'
+            elif any(kw in p_clean for kw in ['کانون', 'ارزیابی', 'assessment', 'سنتر', 'competency', 'کانون ارزیابی']):
+                return 'ASSESSMENT'
+            else:
+                return 'OTHER'
+        
+        for idx, part in enumerate(parts, start=1):
+            st_type = map_type(part)
+            if st_type == 'SCREENING':
+                weight = 0
+            else:
+                try:
+                    p_idx = non_screening_parts.index(part)
+                    if p_idx == m - 1:
+                        weight = 100 - (100 // m) * (m - 1)
+                    else:
+                        weight = 100 // m
+                except ValueError:
+                    weight = 0
+            
+            WorkflowStageTemplate.objects.create(
+                workflow=wf,
+                name=part,
+                default_weight=weight,
+                sequence=idx,
+                stage_type=st_type
+            )
+        return wf
+
+    job_stage_dates = {}
+    processed_app_ids = set()
+
+    # ۱. پردازش جدول وضعیت (Jobs master)
+    if 'جدول وضعیت' in sheet_names:
+        ws = wb['جدول وضعیت']
+        rows = list(ws.iter_rows(values_only=True))
+        if len(rows) > 1:
+            headers = [str(h).strip() if h is not None else "" for h in rows[0]]
+            for row_idx, row in enumerate(rows[1:], start=2):
+                if not any(cell is not None for cell in row):
+                    continue
+                
+                job_code = clean_excel_code(get_cell_by_header(row, headers, "کد"))
+                if not job_code:
+                    continue
+                
+                title = str(get_cell_by_header(row, headers, "عنوان پست") or "").strip()
+                department = str(get_cell_by_header(row, headers, "واحد متقاضی") or "").strip()
+                unit = department
+                
+                raw_category = str(get_cell_by_header(row, headers, "رده شغلی") or "").strip()
+                job_category = None
+                category_choices = [c[0] for c in JobOpportunity.CATEGORY_CHOICES]
+                for choice in category_choices:
+                    if choice.replace(' ', '').replace('\u200c', '') == raw_category.replace(' ', '').replace('\u200c', ''):
+                        job_category = choice
+                        break
+                if not job_category and raw_category:
+                    if "اپراتور" in raw_category:
+                        job_category = "اپراتور - تعمیرکار"
+                    elif "مسئول" in raw_category:
+                        if "کارشناس" in raw_category:
+                            job_category = "کارشناس مسئول"
+                        else:
+                            job_category = "کاردان مسئول"
+                    elif "کارشناس" in raw_category:
+                        if "مدیریت" in raw_category:
+                            job_category = "کارشناس مدیریت"
+                        else:
+                            job_category = "کارشناس"
+                    elif "کاردان" in raw_category:
+                        job_category = "کاردان"
+                
+                headcount_val = get_cell_by_header(row, headers, "تعداد مورد نیاز")
+                try:
+                    headcount = int(float(str(headcount_val).strip())) if headcount_val is not None else 1
+                except (ValueError, TypeError):
+                    headcount = 1
+                
+                start_date_val = get_cell_by_header(row, headers, "شروع ثبت‌نام")
+                start_date = parse_date_safely(start_date_val)
+                if not start_date:
+                    start_date = datetime.date.today()
+                
+                raw_status = get_cell_by_header(row, headers, "آخرین مرحله")
+                job_status = map_job_status(raw_status)
+                
+                workflow_pattern = str(get_cell_by_header(row, headers, "مسیر پیشنهادی (عنوان)") or "").strip()
+                description = str(get_cell_by_header(row, headers, "توضیحات") or "").strip()
+                
+                # ثبت تاریخ مراحل جهت استفاده بعدی در شیت‌ها
+                job_stage_dates[job_code] = {}
+                for st_type, header_key in [('SCREENING', 'پایان غربالگری'), ('EXAM', 'آزمون کتبی'), ('SKILL_TEST', 'آزمون مهارتی'), ('INTERVIEW', 'مصاحبه'), ('ASSESSMENT', 'معرفی به کانون')]:
+                    date_val = get_cell_by_header(row, headers, header_key)
+                    if date_val:
+                        parsed_dt = parse_date_safely(date_val)
+                        if parsed_dt:
+                            job_stage_dates[job_code][st_type] = parsed_dt
+                
+                wf_template = None
+                if workflow_pattern:
+                    wf_template = get_or_create_workflow_template(workflow_pattern)
+                
+                job = JobOpportunity.all_objects.filter(code=job_code).first()
+                if job:
+                    if job.is_deleted:
+                        job.is_deleted = False
+                        job.deleted_at = None
+                    job.title = title or job.title
+                    job.department = department or job.department
+                    job.unit = unit or job.unit
+                    job.headcount = headcount
+                    if job_category:
+                        job.job_category = job_category
+                    job.start_date = start_date
+                    job.status = job_status
+                    if description:
+                        job.description = description
+                    if not job.workflow:
+                        job.workflow = wf_template
+                    job.save()
+                    stats['jobs_updated'] += 1
+                else:
+                    job = JobOpportunity.objects.create(
+                        code=job_code,
+                        request_number=job_code,
+                        title=title or f"شغل {job_code}",
+                        department=department,
+                        unit=unit,
+                        headcount=headcount,
+                        job_category=job_category or "کارشناس",
+                        start_date=start_date,
+                        status=job_status,
+                        workflow=wf_template,
+                        assigned_recruiter=user,
+                        source=JobOpportunity.SOURCE_IMPORT,
+                        description=description or f"فرصت شغلی ایمپورت شده تاریخی از اکسل. الگو: {workflow_pattern}"
+                    )
+                    stats['jobs_created'] += 1
+
+    # ۲. پردازش ثبت نام
+    if 'ثبت نام' in sheet_names:
+        ws = wb['ثبت نام']
+        rows = list(ws.iter_rows(values_only=True))
+        if len(rows) > 1:
+            headers = [str(h).strip() if h is not None else "" for h in rows[0]]
+            for row_idx, row in enumerate(rows[1:], start=2):
+                if not any(cell is not None for cell in row):
+                    continue
+                
+                job_code = clean_excel_code(get_cell_by_header(row, headers, "ExamCode"))
+                national_id = clean_str_number(get_cell_by_header(row, headers, "NationCode"))
+                
+                if not job_code or not national_id:
+                    key_val = str(get_cell_by_header(row, headers, "Key") or "").strip()
+                    if key_val and len(key_val) > 10:
+                        national_id = clean_str_number(key_val[-10:])
+                        job_code = clean_excel_code(key_val[:-10])
+                
+                if not job_code or not national_id:
+                    stats['warnings'].append(f"ردیف ناقص در شیت ثبت نام (ردیف {row_idx})")
+                    continue
+                
+                job = JobOpportunity.objects.filter(code=job_code).first()
+                if not job:
+                    stats['warnings'].append(f"شغل با کد {job_code} یافت نشد (ردیف {row_idx} شیت ثبت نام)")
+                    continue
+                
+                first_name = str(get_cell_by_header(row, headers, "نام") or "").strip()
+                last_name = str(get_cell_by_header(row, headers, "نام خانوادگی") or "").strip()
+                phone_number = clean_str_number(get_cell_by_header(row, headers, "شماره همراه"))
+                
+                if len(national_id) < 10:
+                    stats['warnings'].append(f"کد ملی کوتاه است (ردیف {row_idx} شیت ثبت نام): {national_id}")
+                
+                candidate = Candidate.all_objects.filter(national_id=national_id).first()
+                if candidate:
+                    if candidate.is_deleted:
+                        candidate.is_deleted = False
+                        candidate.deleted_at = None
+                    candidate.first_name = first_name or candidate.first_name
+                    candidate.last_name = last_name or candidate.last_name
+                    if phone_number:
+                        candidate.phone_number = phone_number
+                    candidate.save()
+                    stats['candidates_updated'] += 1
+                else:
+                    username = national_id
+                    password_phone = phone_number
+                    if password_phone and not password_phone.startswith('0'):
+                        password_phone = '0' + password_phone
+                    
+                    user_obj = User.objects.filter(username=username).first()
+                    if not user_obj:
+                        user_obj = User.objects.create_user(username=username, password=password_phone or '123456')
+                    
+                    user_profile, _ = UserProfile.objects.get_or_create(user=user_obj)
+                    user_profile.role = UserProfile.ROLE_CANDIDATE
+                    if phone_number:
+                        user_profile.phone_number = phone_number
+                    user_profile.save()
+                    
+                    candidate = Candidate.objects.create(
+                        user=user_obj,
+                        first_name=first_name,
+                        last_name=last_name,
+                        national_id=national_id,
+                        phone_number=phone_number
+                    )
+                    stats['candidates_created'] += 1
+                
+                application = JobApplication.all_objects.filter(job=job, candidate=candidate).first()
+                if application:
+                    if application.is_deleted:
+                        application.is_deleted = False
+                        application.deleted_at = None
+                    application.status = JobApplication.STATUS_IN_PROGRESS
+                    application._bypass_stage_recalculation = True
+                    application._bypass_screening_auto_fail = True
+                    application.save()
+                    stats['applications_processed'] += 1
+                else:
+                    application = JobApplication.objects.create(
+                        job=job,
+                        candidate=candidate,
+                        status=JobApplication.STATUS_IN_PROGRESS
+                    )
+                    stats['applications_processed'] += 1
+                
+                processed_app_ids.add(application.id)
+
+    # ۳. پردازش شیت‌های مراحل
+    stage_sheets_config = {
+        'غربالگری': {
+            'stage_type': 'SCREENING',
+            'score_col': None,
+            'result_col': 'Result',
+            'notes_cols': ['EXP', 'Description', 'توضیحات'],
+        },
+        'کتبی': {
+            'stage_type': 'EXAM',
+            'score_col': 'ScoreW',
+            'result_col': 'Result1',
+            'notes_cols': ['توضیحات'],
+        },
+        'مهارتی': {
+            'stage_type': 'SKILL_TEST',
+            'score_col': 'ScoreS',
+            'result_col': 'Result2',
+            'notes_cols': ['توضیحات'],
+        },
+        'مصاحبه': {
+            'stage_type': 'INTERVIEW',
+            'score_col': 'ScoreI',
+            'result_col': 'Result3',
+            'notes_cols': ['توضیحات'],
+        },
+        'کانون': {
+            'stage_type': 'ASSESSMENT',
+            'score_col': 'ScoreAC',
+            'result_col': 'Result4',
+            'notes_cols': ['توضیحات'],
+        }
+    }
+
+    for sheet_name, config in stage_sheets_config.items():
+        if sheet_name in sheet_names:
+            ws = wb[sheet_name]
+            rows = list(ws.iter_rows(values_only=True))
+            if len(rows) > 1:
+                headers = [str(h).strip() if h is not None else "" for h in rows[0]]
+                for row_idx, row in enumerate(rows[1:], start=2):
+                    if not any(cell is not None for cell in row):
+                        continue
+                    
+                    job_code = clean_excel_code(get_cell_by_header(row, headers, "ExamCode"))
+                    national_id = clean_str_number(get_cell_by_header(row, headers, "NationCode"))
+                    
+                    if not job_code or not national_id:
+                        key_val = str(get_cell_by_header(row, headers, "Key") or "").strip()
+                        if key_val and len(key_val) > 10:
+                            national_id = clean_str_number(key_val[-10:])
+                            job_code = clean_excel_code(key_val[:-10])
+                    
+                    if not job_code or not national_id:
+                        continue
+                    
+                    job = JobOpportunity.objects.filter(code=job_code).first()
+                    candidate = Candidate.objects.filter(national_id=national_id).first()
+                    
+                    if not job or not candidate:
+                        stats['warnings'].append(f"رکورد یتیم در شیت {sheet_name}: کدملی {national_id} برای شغل {job_code} (ردیف {row_idx})")
+                        continue
+                    
+                    application = JobApplication.all_objects.filter(job=job, candidate=candidate).first()
+                    if not application:
+                        stats['warnings'].append(f"درخواست متناظر یافت نشد برای شیت {sheet_name} ردیف {row_idx}")
+                        continue
+                    
+                    stage = job.stages.filter(stage_type=config['stage_type'], is_deleted=False).first()
+                    if not stage:
+                        stage = job.stages.filter(name__icontains=sheet_name, is_deleted=False).first()
+                    
+                    if not stage:
+                        stats['warnings'].append(f"مرحله {sheet_name} برای شغل {job_code} تعریف نشده است (ردیف {row_idx})")
+                        continue
+                    
+                    stage_state = ApplicationStageState.all_objects.filter(
+                        application=application,
+                        stage=stage
+                    ).first()
+                    if stage_state:
+                        if stage_state.is_deleted:
+                            stage_state.is_deleted = False
+                            stage_state.deleted_at = None
+                    else:
+                        stage_state = ApplicationStageState(
+                            application=application,
+                            stage=stage
+                        )
+                    
+                    result_val = get_cell_by_header(row, headers, config['result_col'])
+                    score_val = get_cell_by_header(row, headers, config['score_col']) if config['score_col'] else None
+                    score = parse_score(score_val)
+                    
+                    notes_val = ""
+                    for n_col in config['notes_cols']:
+                        v = get_cell_by_header(row, headers, n_col)
+                        if v is not None:
+                            notes_val = str(v).strip()
+                            break
+                    
+                    is_absent = False
+                    if result_val and "غایب" in str(result_val):
+                        is_absent = True
+                    
+                    if is_absent:
+                        stage_state.status = ApplicationStageState.STATUS_FAILED
+                        stage_state.score = 0.0
+                        stage_state.notes = f"غایب در {stage.name}"
+                        stats['absent_count'] += 1
+                    else:
+                        status = get_stage_status(result_val, score, stage.passing_score)
+                        stage_state.status = status
+                        stage_state.score = score
+                        if notes_val:
+                            stage_state.notes = notes_val
+                    
+                    # تاریخ ارزیابی
+                    eval_date = None
+                    for h in headers:
+                        if "تاریخ" in h or "date" in h.lower():
+                            date_val = get_cell_by_header(row, headers, h)
+                            eval_date = parse_date_safely(date_val)
+                            if eval_date:
+                                break
+                    
+                    if not eval_date:
+                        eval_date = job_stage_dates.get(job_code, {}).get(config['stage_type'])
+                    if not eval_date:
+                        eval_date = job.start_date
+                    
+                    stage_state.evaluation_date = eval_date or datetime.date.today()
+                    stage_state.evaluator = user
+                    stage_state._bypass_status_calculation = True
+                    stage_state.save()
+                    
+                    stats['stages_populated'] += 1
+                    processed_app_ids.add(application.id)
+
+    # ۴. قبولی نهایی
+    if 'قبولی نهایی' in sheet_names:
+        ws = wb['قبولی نهایی']
+        rows = list(ws.iter_rows(values_only=True))
+        if len(rows) > 1:
+            headers = [str(h).strip() if h is not None else "" for h in rows[0]]
+            for row_idx, row in enumerate(rows[1:], start=2):
+                if not any(cell is not None for cell in row):
+                    continue
+                job_code = clean_excel_code(get_cell_by_header(row, headers, "ExamCode"))
+                national_id = clean_str_number(get_cell_by_header(row, headers, "NationCode"))
+                if not job_code or not national_id:
+                    key_val = str(get_cell_by_header(row, headers, "key") or get_cell_by_header(row, headers, "Key") or "").strip()
+                    if key_val and len(key_val) > 10:
+                        national_id = clean_str_number(key_val[-10:])
+                        job_code = clean_excel_code(key_val[:-10])
+                
+                if not job_code or not national_id:
+                    continue
+                
+                app = JobApplication.objects.filter(job__code=job_code, candidate__national_id=national_id).first()
+                if app:
+                    app.status = JobApplication.STATUS_SELECTED
+                    app._bypass_stage_recalculation = True
+                    app._bypass_screening_auto_fail = True
+                    app.save()
+                    processed_app_ids.add(app.id)
+
+    # ۵. فرآیند بازمحاسبه پس از ایمپورت
+    for app_id in processed_app_ids:
+        app = JobApplication.objects.get(id=app_id)
+        job = app.job
+        stages = list(job.stages.filter(is_deleted=False).order_by('sequence'))
+        if not stages:
+            continue
+        
+        # ۱. پاس‌کردن خودکار مراحل قبل
+        stage_states = {state.stage_id: state for state in app.stage_states.filter(is_deleted=False)}
+        active_states = [state for state in stage_states.values() if state.status != ApplicationStageState.STATUS_PENDING]
+        
+        if active_states:
+            max_active_seq = max(state.stage.sequence for state in active_states)
+            for stage in stages:
+                if stage.sequence < max_active_seq:
+                    ps_state = stage_states.get(stage.id)
+                    if not ps_state:
+                        ps_state = ApplicationStageState.all_objects.filter(application=app, stage=stage).first()
+                        if ps_state:
+                            if ps_state.is_deleted:
+                                ps_state.is_deleted = False
+                                ps_state.deleted_at = None
+                        else:
+                            ps_state = ApplicationStageState(application=app, stage=stage)
+                    if ps_state.status == ApplicationStageState.STATUS_PENDING or not ps_state.pk:
+                        ps_state.status = ApplicationStageState.STATUS_COMPLETED
+                        ps_state.score = stage.passing_score
+                        ps_state.evaluation_date = job.start_date or datetime.date.today()
+                        ps_state.evaluator = user
+                        ps_state._bypass_status_calculation = True
+                        ps_state.save()
+                        stage_states[stage.id] = ps_state
+                        stats['stages_populated'] += 1
+        
+        # ۲. منطق غربالگری پیش‌فرض و نام نویسی بدون ارزیابی بعدی
+        first_stage = stages[0]
+        if first_stage.stage_type == 'SCREENING' or 'غربالگری' in first_stage.name:
+            scr_state = stage_states.get(first_stage.id)
+            if not scr_state:
+                scr_state = ApplicationStageState.all_objects.filter(application=app, stage=first_stage).first()
+                if scr_state:
+                    if scr_state.is_deleted:
+                        scr_state.is_deleted = False
+                        scr_state.deleted_at = None
+                        scr_state._bypass_status_calculation = True
+                        scr_state.save()
+                else:
+                    scr_state = ApplicationStageState.objects.create(
+                        application=app,
+                        stage=first_stage,
+                        status=ApplicationStageState.STATUS_PENDING,
+                        score=0.0
+                    )
+                stage_states[first_stage.id] = scr_state
+            
+            if scr_state.status == ApplicationStageState.STATUS_PENDING:
+                past_screening_statuses = [
+                    JobOpportunity.STATUS_EXAM,
+                    JobOpportunity.STATUS_SKILL_TEST,
+                    JobOpportunity.STATUS_INTERVIEW,
+                    JobOpportunity.STATUS_ASSESSMENT,
+                    JobOpportunity.STATUS_FINAL_SELECTION,
+                    JobOpportunity.STATUS_CLOSED,
+                    JobOpportunity.STATUS_CANCELLED,
+                    JobOpportunity.STATUS_SUSPENDED
+                ]
+                if job.status in past_screening_statuses:
+                    has_subsequent_eval = False
+                    for state in stage_states.values():
+                        if state.stage.sequence > first_stage.sequence:
+                            if state.status != ApplicationStageState.STATUS_PENDING or state.score > 0.0:
+                                has_subsequent_eval = True
+                                break
+                    
+                    should_fail = True
+                    if job.status == JobOpportunity.STATUS_EXAM:
+                        other_has_scores = ApplicationStageState.objects.filter(
+                            application__job=job,
+                            stage__sequence__gt=first_stage.sequence,
+                            is_deleted=False
+                        ).exclude(
+                            score=0.0,
+                            status=ApplicationStageState.STATUS_PENDING
+                        ).exists()
+                        if not other_has_scores:
+                            should_fail = False
+                    
+                    if has_subsequent_eval:
+                        scr_state.status = ApplicationStageState.STATUS_COMPLETED
+                        scr_state.score = first_stage.passing_score
+                        scr_state.evaluation_date = job.start_date or datetime.date.today()
+                        scr_state.evaluator = user
+                        scr_state._bypass_status_calculation = True
+                        scr_state.save()
+                    elif should_fail:
+                        scr_state.status = ApplicationStageState.STATUS_FAILED
+                        scr_state.score = 0.0
+                        scr_state.evaluation_date = job.start_date or datetime.date.today()
+                        scr_state.evaluator = user
+                        scr_state._bypass_status_calculation = True
+                        scr_state.save()
+                        
+                        if app.status != JobApplication.STATUS_REJECTED:
+                            app.status = JobApplication.STATUS_REJECTED
+                            app._bypass_stage_recalculation = True
+                            app._bypass_screening_auto_fail = True
+                            app.save()
+                else:
+                    scr_state.status = ApplicationStageState.STATUS_COMPLETED
+                    scr_state.score = first_stage.passing_score
+                    scr_state.evaluation_date = job.start_date or datetime.date.today()
+                    scr_state.evaluator = user
+                    scr_state._bypass_status_calculation = True
+                    scr_state.save()
+
+        # ۳. محاسبه نمره کل و وضعیت نهایی درخواست
+        has_failed_stage = app.stage_states.filter(status=ApplicationStageState.STATUS_FAILED, is_deleted=False).exists()
+        total_weighted_score = 0.0
+        states = app.stage_states.filter(is_deleted=False)
+        for state in states:
+            total_weighted_score += (state.score * state.stage.weight) / 100.0
+        
+        app.final_score = round(total_weighted_score, 2)
+        if app.status != JobApplication.STATUS_SELECTED:
+            if has_failed_stage:
+                app.status = JobApplication.STATUS_REJECTED
+            else:
+                app.status = JobApplication.STATUS_IN_PROGRESS
+        
+        app.recalculate_current_stage(save=False)
+        app._bypass_stage_recalculation = True
+        app._bypass_screening_auto_fail = True
+        app.save()
+
+    # ۶. بروزرسانی وضعیت فرصت‌های شغلی
+    processed_job_ids = set(app.job_id for app in JobApplication.objects.filter(id__in=processed_app_ids))
+    for job_id in processed_job_ids:
+        job = JobOpportunity.objects.get(id=job_id)
+        job.update_status()
+
+    # ثبت در لاگ حسابرسی (AuditLog)
+    AuditLog.objects.create(
+        user=user,
+        action_type=AuditLog.ACTION_CREATE,
+        model_name="ImportSession",
+        object_id=str(getattr(excel_file, 'name', 'fixed_template')),
+        changes={
+            'action': 'Fixed Template Excel Import',
+            'jobs_created': stats['jobs_created'],
+            'jobs_updated': stats['jobs_updated'],
+            'candidates_created': stats['candidates_created'],
+            'candidates_updated': stats['candidates_updated'],
+            'applications_processed': stats['applications_processed'],
+            'absent_count': stats['absent_count'],
+            'stages_populated': stats['stages_populated']
+        }
+    )
+
+    return stats
+
 

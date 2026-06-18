@@ -30,7 +30,7 @@
                 </span>
             </div>
         {% else %}
-            {% if state.is_accessible and not is_job_closed_or_cancelled %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
                 <input type="number" 
                        name="score_{{ state.id }}" 
                        value="{{ state.score|floatformat:1 }}" 
@@ -45,7 +45,7 @@
                        value="{{ state.score|floatformat:1 }}" 
                        class="form-control form-control-sm text-center font-bold bg-light" 
                        style="border-radius: 6px; font-size: 13px; opacity: 0.65;" 
-                       title="{% if state.has_failed_prior_stages %}این متقاضی در مراحل قبلی مردود شده است.{% else %}این مرحله برای این متقاضی هنوز فعال نشده است (مراحل قبل ناتمام است).{% endif %}"
+                       title="{% if state.stage.is_completed %}این مرحله تکمیل شده است.{% elif state.has_failed_prior_stages %}این متقاضی در مراحل قبلی مردود شده است.{% else %}این مرحله برای این متقاضی هنوز فعال نشده است (مراحل قبل ناتمام است).{% endif %}"
                        disabled>
             {% endif %}
         {% endif %}
@@ -60,7 +60,7 @@
                     {% if state.is_conditional_pass %}
                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 rounded text-xxs font-semibold d-block mt-1" style="font-size: 9px;">قبول ارفاقی / مشروط</span>
                     {% endif %}
-                    {% if state.is_accessible and not is_job_closed_or_cancelled %}
+                    {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
                         <div class="mt-1.5 d-flex align-items-center justify-content-center gap-1">
                             <input type="checkbox" name="is_conditional_pass_{{ state.id }}" id="is_conditional_pass_{{ state.id }}" class="form-check-input" {% if state.is_conditional_pass %}checked{% endif %} style="width: 12px; height: 12px; margin: 0;">
                             <label for="is_conditional_pass_{{ state.id }}" class="text-danger text-xxs font-semibold cursor-pointer mb-0" style="font-size: 9px; line-height: 1;">ارجاع مشروط</label>
@@ -75,7 +75,7 @@
                 {% endif %}
             </div>
         {% else %}
-            {% if state.is_accessible and not is_job_closed_or_cancelled %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
                 <select name="status_{{ state.id }}" class="form-select form-select-sm font-semibold mb-1" style="border-radius: 6px; font-size: 12px;">
                     <option value="PENDING" {% if state.status == 'PENDING' %}selected{% endif %}>در انتظار ارزیابی</option>
                     <option value="COMPLETED" {% if state.status == 'COMPLETED' %}selected{% endif %}>قبول شده در این مرحله</option>
@@ -87,7 +87,9 @@
                 </div>
             {% else %}
                 <select class="form-select form-select-sm font-semibold bg-light text-muted" style="border-radius: 6px; font-size: 12px; opacity: 0.65;" disabled>
-                    {% if state.has_failed_prior_stages %}
+                    {% if state.stage.is_completed %}
+                        <option value="{{ state.status }}" selected>قفل شده (مرحله تکمیل شده)</option>
+                    {% elif state.has_failed_prior_stages %}
                         <option value="FAILED" selected>مردود (در مراحل قبلی)</option>
                     {% else %}
                         <option value="PENDING" selected>قفل شده (مراحل قبلی ناتمام)</option>
@@ -97,7 +99,7 @@
         {% endif %}
     </td>
     <td>
-        {% if state.is_accessible and not is_job_closed_or_cancelled %}
+        {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
             <input type="text" 
                    name="date_{{ state.id }}" 
                    id="date_{{ state.id }}" 
@@ -112,6 +114,7 @@
                    placeholder="-" 
                    class="form-control form-control-sm text-center bg-light text-xs mx-auto" 
                    style="border-radius: 6px; max-width: 110px; opacity: 0.65;" 
+                   title="{% if state.stage.is_completed %}این مرحله تکمیل شده است.{% endif %}"
                    disabled>
         {% endif %}
     </td>
@@ -119,7 +122,7 @@
         {% if state.stage.competencies.exists %}
             <div class="d-flex align-items-center justify-content-between gap-3">
                 <small class="text-muted text-xxs text-truncate" style="max-width: 320px;" title="{{ state.notes }}">{{ state.notes|default:"بدون یادداشت عمومی" }}</small>
-                {% if state.is_accessible and not is_job_closed_or_cancelled %}
+                {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
                     <button type="button" 
                             hx-get="{% url 'candidate_assessment_sheet' state.id %}?source=score_entry" 
                             hx-target="#assessment-modal-content"
@@ -130,11 +133,11 @@
                         📊 ورود نمرات کانون
                     </button>
                 {% else %}
-                    <span class="text-muted text-xxs bg-light px-2 py-1 rounded">{% if state.has_failed_prior_stages %}مردود{% else %}قفل شده{% endif %}</span>
+                    <span class="text-muted text-xxs bg-light px-2 py-1 rounded">{% if state.stage.is_completed %}تکمیل شده{% elif state.has_failed_prior_stages %}مردود{% else %}قفل شده{% endif %}</span>
                 {% endif %}
             </div>
         {% else %}
-            {% if state.is_accessible and not is_job_closed_or_cancelled %}
+            {% if state.is_accessible and not is_job_closed_or_cancelled and not state.stage.is_completed or state.is_accessible and not is_job_closed_or_cancelled and bypass_locks %}
                 <input type="text" 
                        name="notes_{{ state.id }}" 
                        value="{{ state.notes|default:'' }}" 
@@ -144,7 +147,7 @@
             {% else %}
                 <input type="text" 
                        value="{{ state.notes|default:'' }}" 
-                       placeholder="{% if state.has_failed_prior_stages %}مردود در مراحل قبلی...{% else %}قفل شده (مراحل قبلی ناتمام)...{% endif %}" 
+                       placeholder="{% if state.stage.is_completed %}مرحله تکمیل شده است...{% elif state.has_failed_prior_stages %}مردود در مراحل قبلی...{% else %}قفل شده (مراحل قبلی ناتمام)...{% endif %}" 
                        class="form-control form-control-sm text-muted bg-light" 
                        style="border-radius: 6px; font-size: 11px; opacity: 0.65;" 
                        disabled>

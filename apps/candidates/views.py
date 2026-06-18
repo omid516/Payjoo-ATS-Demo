@@ -461,7 +461,7 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
         data = super().get_context_data(**kwargs)
         stages = self.object.stages.filter(is_deleted=False).prefetch_related('interviewers__user').order_by('sequence')
         data['stages'] = stages
-        data['table_stages'] = stages.exclude(weight=0)
+        data['table_stages'] = stages.filter(models.Q(weight__gt=0) | models.Q(stage_type='SCREENING')).order_by('sequence')
         
         stages_list = list(stages)
         first_stage = stages_list[0] if stages_list and ('غربالگری' in stages_list[0].name or stages_list[0].stage_type == 'SCREENING') else None
@@ -514,13 +514,32 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
         return data
 
 
+class ToggleStageCompletionView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def post(self, request, stage_id):
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+        status = request.GET.get('status')
+        if status == 'completed':
+            stage.is_manually_completed = True
+        elif status == 'pending':
+            stage.is_manually_completed = False
+        elif status == 'auto':
+            stage.is_manually_completed = None
+        stage.save()
+        
+        response = HttpResponse()
+        response['HX-Refresh'] = 'true'
+        return response
+
+
 class EditApplicationStageStateView(LoginRequiredMixin, RoleRequiredMixin, View):
     allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
 
     def get(self, request, pk):
         state = get_object_or_404(ApplicationStageState, pk=pk)
-        if not state.is_accessible:
-            return HttpResponse("این مرحله هنوز برای متقاضی فعال نشده است و مراحل قبلی باید تکمیل شوند.", status=400)
+        if not state.is_accessible and not (request.GET.get('bypass_locks') == 'true'):
+            return HttpResponse("مرحله ارزیابی برای این متقاضی هنوز قابل دسترسی نیست.", status=400)
         return render(request, 'candidates/partials/stage_state_edit.html', {'state': state})
 
 
@@ -529,13 +548,12 @@ class UpdateApplicationStageStateView(LoginRequiredMixin, RoleRequiredMixin, Vie
 
     def post(self, request, pk):
         state = get_object_or_404(ApplicationStageState, pk=pk)
-        if not state.is_accessible:
-            return HttpResponse("این مرحله هنوز برای متقاضی فعال نشده است و مراحل قبلی باید تکمیل شوند.", status=400)
         
         score_val = request.POST.get('score', '0')
         status_val = request.POST.get('status', ApplicationStageState.STATUS_PENDING)
         notes_val = request.POST.get('notes', '')
         is_conditional_pass_val = request.POST.get('is_conditional_pass') == 'true' or request.POST.get('is_conditional_pass') == 'on'
+        date_val = request.POST.get('date', '').strip()
 
         try:
             state.score = float(score_val)
@@ -546,6 +564,14 @@ class UpdateApplicationStageStateView(LoginRequiredMixin, RoleRequiredMixin, Vie
         state.notes = notes_val
         state.is_conditional_pass = is_conditional_pass_val
         state.evaluator = request.user
+
+        if date_val:
+            state.evaluation_date = parse_jalali_date(date_val)
+        else:
+            state.evaluation_date = None
+
+        state._bypass_stage_score_calculation = True
+        state.is_manually_edited = True
         state.save()
 
         source = request.POST.get('source')
@@ -1084,7 +1110,10 @@ def parse_jalali_date(val):
         return None
     try:
         import jdatetime
-        parts = [int(p) for p in val.strip().split('/')]
+        val_str = str(val).strip()
+        for fa, en in zip('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789'):
+            val_str = val_str.replace(fa, en)
+        parts = [int(p) for p in val_str.split('/')]
         if len(parts) == 3:
             return jdatetime.date(parts[0], parts[1], parts[2]).togregorian()
     except Exception:
@@ -1276,7 +1305,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 with transaction.atomic():
                     for sid in state_ids:
                         state = ApplicationStageState.objects.filter(pk=sid, is_deleted=False).first()
-                        if state and (state.is_accessible or bypass_locks):
+                        if state and (bypass_locks or (state.is_accessible and not state.stage.is_completed)):
                             score_val = request.POST.get(f'score_{sid}', '0')
                             status_val = request.POST.get(f'status_{sid}', ApplicationStageState.STATUS_PENDING)
                             notes_val = request.POST.get(f'notes_{sid}', '')
@@ -1298,6 +1327,8 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                             else:
                                 state.evaluation_date = None
                                 
+                            state._bypass_stage_score_calculation = True
+                            state.is_manually_edited = True
                             state.save()
 
             if selected_stage:
@@ -3371,8 +3402,8 @@ class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
         for stage in stages:
             # بررسی برنامه‌ریزی جذب (JobStagePlan)
             stage_plan = None
-            if hasattr(job, 'recruitment_plan') and job.recruitment_plan:
-                stage_plan = stage.planning_states.filter(is_deleted=False).first()
+            if hasattr(job, 'recruitment_plan') and job.recruitment_plan and not job.recruitment_plan.is_deleted:
+                stage_plan = stage.planning_states.filter(plan=job.recruitment_plan, is_deleted=False).first()
             
             # پیدا کردن متقاضیانی که به این مرحله رسیده‌اند (یعنی در مراحل قبل رد نشده‌اند)
             prior_failed_subquery = ApplicationStageState.objects.filter(
@@ -3403,6 +3434,12 @@ class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
             eval_dates = evaluated_states.aggregate(min_date=Min('evaluation_date'), max_date=Max('evaluation_date'))
             actual_start = eval_dates['min_date']
             actual_end = eval_dates['max_date']
+            
+            # Fallback to stage plan dates if evaluation_date is not set on state objects
+            if not actual_start and stage_plan:
+                actual_start = stage_plan.planned_start_date
+            if not actual_end and stage_plan:
+                actual_end = stage_plan.planned_end_date
             
             # نمره‌ها
             scores = evaluated_states.aggregate(
@@ -3447,4 +3484,365 @@ class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
             'print_date': timezone.now().date(),
         }
         return render(request, 'jobs/job_report.html', context)
+
+
+class DataIntegrityDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
+    template_name = 'candidates/data_integrity.html'
+    allowed_roles = [UserProfile.ROLE_ADMIN]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.candidates.integrity_engine import IntegrityScanner
+        from apps.core.models import AuditLog
+        
+        force_refresh = self.request.GET.get('refresh') == '1'
+        scan_results = IntegrityScanner.run_scan(force=force_refresh)
+        
+        # Fetch recent log entries for candidate integrity models
+        recent_actions = AuditLog.objects.filter(
+            model_name__in=['jobapplication', 'applicationstagestate', 'applicationstagestate_bulk']
+        ).select_related('user').order_by('-timestamp')[:10]
+        
+        context.update({
+            'scan_results': scan_results,
+            'recent_actions': recent_actions,
+        })
+        return context
+
+
+class ResolveDiscrepancyView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN]
+
+    def post(self, request):
+        from apps.candidates.integrity_engine import IntegrityScanner
+        from apps.core.models import AuditLog
+        
+        issue_code = request.POST.get('issue_code')
+        entity_id = request.POST.get('entity_id')
+        action_key = request.POST.get('action_key')
+        choice_val = request.POST.get('choice')
+        
+        success, msg = IntegrityScanner.resolve_issue(
+            issue_code=issue_code,
+            entity_id=entity_id,
+            action_key=action_key,
+            choice_val=choice_val,
+            user=request.user
+        )
+        
+        if request.headers.get('HX-Request'):
+            results = IntegrityScanner.run_scan(force=False)
+            response_content = f"""
+            <div class="alert alert-success border-success border-opacity-25 bg-success bg-opacity-10 text-success text-xs py-2 px-3 rounded d-flex align-items-center gap-1.5 mb-0" style="display: inline-flex !important;">
+                <span>✓ {msg}</span>
+            </div>
+            <span id="integrity-total-count" hx-swap-oob="true">{results['total_count']}</span>
+            <span id="integrity-clean-pct" hx-swap-oob="true">{results['clean_percentage']}%</span>
+            """
+            
+            # Fetch recent actions to update OOB
+            recent_actions = AuditLog.objects.filter(
+                model_name__in=['jobapplication', 'applicationstagestate', 'applicationstagestate_bulk']
+            ).select_related('user').order_by('-timestamp')[:10]
+            
+            log_rows_html = ""
+            for log in recent_actions:
+                user_name = log.user.get_full_name() if log.user and log.user.get_full_name() else (log.user.username if log.user else 'سیستم')
+                log_rows_html += f"""
+                <tr id="action-log-row-{log.id}">
+                    <td class="ps-3 text-xs">{log.timestamp.strftime('%Y/%m/%d %H:%M')}</td>
+                    <td class="text-xs">{user_name}</td>
+                    <td class="text-xs font-semibold">{log.get_action_type_display()}</td>
+                    <td class="text-xs">{log.model_name} (ID: {log.object_id})</td>
+                    <td class="pe-3 text-end">
+                        <button class="btn btn-outline-danger btn-xxs" hx-post="/candidates/data-integrity/undo/{log.id}/" hx-target="#action-log-row-{log.id}" hx-swap="outerHTML">بازگردانی (Undo)</button>
+                    </td>
+                </tr>
+                """
+            
+            response_content += f"""
+            <tbody id="integrity-actions-body" hx-swap-oob="true">
+                {log_rows_html}
+            </tbody>
+            """
+            return HttpResponse(response_content)
+            
+        return redirect('data_integrity_dashboard')
+
+
+class UndoIntegrityActionView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN]
+
+    def post(self, request, log_id):
+        from apps.candidates.integrity_engine import undo_audit_log_action, IntegrityScanner
+        success, msg = undo_audit_log_action(log_id)
+        
+        if request.headers.get('HX-Request'):
+            if success:
+                results = IntegrityScanner.run_scan(force=True)
+                response_content = f"""
+                <tr class="animate__animated animate__fadeOut" style="animation-duration: 0.5s;">
+                    <td colspan="5" class="text-center py-2 bg-danger bg-opacity-10 text-danger text-xs font-semibold">
+                        {msg}
+                    </td>
+                </tr>
+                <span id="integrity-total-count" hx-swap-oob="true">{results['total_count']}</span>
+                <span id="integrity-clean-pct" hx-swap-oob="true">{results['clean_percentage']}%</span>
+                """
+                return HttpResponse(response_content)
+            else:
+                return HttpResponse(f"<td colspan='5' class='text-center py-2 text-danger text-xs'>{msg}</td>", status=400)
+                
+        return redirect('data_integrity_dashboard')
+
+
+class SelectedCandidatesListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = JobApplication
+    template_name = 'candidates/selected_candidates_list.html'
+    context_object_name = 'applications'
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+    paginate_by = 15
+
+    def get_queryset(self):
+        from django.db.models import Q
+        queryset = JobApplication.objects.filter(
+            status=JobApplication.STATUS_SELECTED,
+            is_deleted=False
+        ).select_related('candidate', 'job').order_by(
+            models.F('admission_date').desc(nulls_last=True),
+            '-updated_at'
+        )
+
+        # 1. Search Query
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(candidate__first_name__icontains=q) |
+                Q(candidate__last_name__icontains=q) |
+                Q(candidate__national_id__icontains=q) |
+                Q(job__title__icontains=q) |
+                Q(job__code__icontains=q)
+            )
+
+        # 2. Job Opportunity Filter
+        job_id = self.request.GET.get('job_opportunity', '').strip()
+        if job_id:
+            queryset = queryset.filter(job_id=job_id)
+
+        # 3. Department Filter
+        dept = self.request.GET.get('department', '').strip()
+        if dept:
+            queryset = queryset.filter(job__department=dept)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('export') == 'excel':
+            from apps.core.utils import export_to_excel_response
+            from apps.core.templatetags.jalali_tags import to_jalali
+            queryset = self.get_queryset()
+            
+            headers = [
+                "نام و نام خانوادگی",
+                "کد ملی",
+                "شماره تماس",
+                "ایمیل",
+                "کد فرصت شغلی",
+                "عنوان فرصت شغلی",
+                "دپارتمان / بخش",
+                "واحد سازمانی",
+                "امتیاز کل ارزیابی",
+                "تاریخ پذیرش نهایی"
+            ]
+            
+            rows = []
+            for app in queryset:
+                rows.append([
+                    f"{app.candidate.first_name} {app.candidate.last_name}",
+                    app.candidate.national_id,
+                    app.candidate.phone_number,
+                    app.candidate.email,
+                    app.job.code,
+                    app.job.title,
+                    app.job.department or "-",
+                    app.job.unit or "-",
+                    f"{app.final_score}%" if app.final_score is not None else "-",
+                    to_jalali(app.admission_date) if app.admission_date else "-"
+                ])
+                
+            return export_to_excel_response("لیست_پذیرفته_شدگان_نهایی.xlsx", headers, rows)
+            
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.jobs.models import JobOpportunity
+        
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['selected_job_id'] = self.request.GET.get('job_opportunity', '').strip()
+        context['selected_dept'] = self.request.GET.get('department', '').strip()
+        
+        # Unique active jobs and departments for filters
+        context['jobs'] = JobOpportunity.objects.filter(is_deleted=False).order_by('title')
+        context['departments'] = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            department=''
+        ).exclude(department=None).values_list('department', flat=True).distinct().order_by('department')
+        
+        # Calculate selected candidates jobs and host departments count
+        context['recruited_jobs_count'] = JobOpportunity.objects.filter(
+            applications__status=JobApplication.STATUS_SELECTED,
+            applications__is_deleted=False,
+            is_deleted=False
+        ).distinct().count()
+        
+        context['recruited_depts_count'] = JobOpportunity.objects.filter(
+            applications__status=JobApplication.STATUS_SELECTED,
+            applications__is_deleted=False,
+            is_deleted=False
+        ).exclude(
+            department=''
+        ).exclude(
+            department=None
+        ).values('department').distinct().count()
+        
+        return context
+
+
+class EditAdmissionDateView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, pk):
+        app = get_object_or_404(JobApplication, pk=pk, is_deleted=False)
+        return render(request, 'candidates/partials/admission_date_edit.html', {'app': app})
+
+
+class UpdateAdmissionDateView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def post(self, request, pk):
+        app = get_object_or_404(JobApplication, pk=pk, is_deleted=False)
+        date_val = request.POST.get('admission_date', '').strip()
+        
+        if date_val:
+            app.admission_date = parse_jalali_date(date_val)
+        else:
+            app.admission_date = None
+            
+        app.save(update_fields=['admission_date'])
+        return render(request, 'candidates/partials/admission_date_view.html', {'app': app})
+
+    def get(self, request, pk):
+        # Fallback to standard view if GET is called (e.g. for cancel/discard action)
+        app = get_object_or_404(JobApplication, pk=pk, is_deleted=False)
+        return render(request, 'candidates/partials/admission_date_view.html', {'app': app})
+
+
+class CandidatesByStageListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = JobApplication
+    template_name = 'candidates/candidates_by_stage_list.html'
+    context_object_name = 'applications'
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+    paginate_by = 15
+
+    def get_queryset(self):
+        from django.db.models import Q
+        queryset = JobApplication.objects.filter(
+            status=JobApplication.STATUS_IN_PROGRESS,
+            is_deleted=False
+        ).select_related('candidate', 'job', 'current_stage').order_by('-updated_at')
+
+        # 1. Search Query
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(candidate__first_name__icontains=q) |
+                Q(candidate__last_name__icontains=q) |
+                Q(candidate__national_id__icontains=q) |
+                Q(job__title__icontains=q) |
+                Q(job__code__icontains=q)
+            )
+
+        # 2. Job Opportunity Filter
+        job_id = self.request.GET.get('job_opportunity', '').strip()
+        if job_id:
+            queryset = queryset.filter(job_id=job_id)
+
+        # 3. Department Filter
+        dept = self.request.GET.get('department', '').strip()
+        if dept:
+            queryset = queryset.filter(job__department=dept)
+
+        # 4. Stage Type Filter
+        stage_type = self.request.GET.get('stage_type', '').strip()
+        if stage_type:
+            queryset = queryset.filter(current_stage__stage_type=stage_type)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('export') == 'excel':
+            from apps.core.utils import export_to_excel_response
+            from apps.core.templatetags.jalali_tags import to_jalali
+            queryset = self.get_queryset()
+            
+            headers = [
+                "نام و نام خانوادگی",
+                "کد ملی",
+                "شماره تماس",
+                "ایمیل",
+                "کد فرصت شغلی",
+                "عنوان فرصت شغلی",
+                "دپارتمان / بخش",
+                "مرحله ارزیابی جاری",
+                "امتیاز کل ارزیابی",
+                "آخرین فعالیت"
+            ]
+            
+            rows = []
+            for app in queryset:
+                rows.append([
+                    f"{app.candidate.first_name} {app.candidate.last_name}",
+                    app.candidate.national_id,
+                    app.candidate.phone_number,
+                    app.candidate.email,
+                    app.job.code,
+                    app.job.title,
+                    app.job.department or "-",
+                    app.current_stage.name if app.current_stage else "شروع ارزیابی",
+                    f"{app.final_score}%" if app.final_score is not None else "-",
+                    to_jalali(app.updated_at) if app.updated_at else "-"
+                ])
+                
+            return export_to_excel_response("متقاضیان_به_تفکیک_مراحل_ارزیابی.xlsx", headers, rows)
+            
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.jobs.models import JobOpportunity
+        from apps.jobs.models import STAGE_TYPE_CHOICES
+        
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['selected_job_id'] = self.request.GET.get('job_opportunity', '').strip()
+        context['selected_dept'] = self.request.GET.get('department', '').strip()
+        context['selected_stage_type'] = self.request.GET.get('stage_type', '').strip()
+        
+        # Unique active jobs, departments, and stage types
+        context['jobs'] = JobOpportunity.objects.filter(is_deleted=False).order_by('title')
+        context['departments'] = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            department=''
+        ).exclude(department=None).values_list('department', flat=True).distinct().order_by('department')
+        context['stage_types'] = STAGE_TYPE_CHOICES
+        
+        # Calculate stats for the summary cards
+        active_apps = JobApplication.objects.filter(status=JobApplication.STATUS_IN_PROGRESS, is_deleted=False)
+        context['total_in_progress'] = active_apps.count()
+        context['screening_count'] = active_apps.filter(current_stage__stage_type='SCREENING').count()
+        context['exam_count'] = active_apps.filter(current_stage__stage_type='EXAM').count()
+        context['skill_count'] = active_apps.filter(current_stage__stage_type='SKILL_TEST').count()
+        context['interview_count'] = active_apps.filter(current_stage__stage_type='INTERVIEW').count()
+        context['assessment_count'] = active_apps.filter(current_stage__stage_type='ASSESSMENT').count()
+        
+        return context
+
 

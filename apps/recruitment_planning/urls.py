@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     PlanningDashboardView, JobPlanningView, PlanningConfigView, ExportPlanningExcelView,
     PlanningCalendarView, ExportWeeklyAgendaExcelView, WeeklyAgendaPrintView, JobPlanningSuggestionsView,
-    SlaDelaysDashboardView, OverlapMonitorView
+    SlaDelaysDashboardView, OverlapMonitorView, EditJobStagePlanView, ViewJobStagePlanView
 )
 
 urlpatterns = [
@@ -16,4 +16,6 @@ urlpatterns = [
     path('export/weekly/', ExportWeeklyAgendaExcelView.as_view(), name='planning_agenda_export_excel'),
     path('agenda/print/', WeeklyAgendaPrintView.as_view(), name='planning_agenda_print'),
     path('conflicts/', OverlapMonitorView.as_view(), name='planning_conflicts'),
+    path('job/<int:job_id>/stage/<int:stage_id>/edit-plan/', EditJobStagePlanView.as_view(), name='edit_job_stage_plan'),
+    path('job/<int:job_id>/stage/<int:stage_id>/view-plan/', ViewJobStagePlanView.as_view(), name='view_job_stage_plan'),
 ]

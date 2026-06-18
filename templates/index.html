@@ -84,8 +84,8 @@
             </div>
         </a>
     </div>
-    <div class="col-6 col-md-3">
-        <a href="{% url 'candidate_list' %}?view=candidates" class="text-decoration-none">
+    <div class="col-md-3 col-6">
+        <a href="{% url 'candidates_by_stage_list' %}" class="text-decoration-none">
             <div class="card premium-card kpi-card p-3 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="text-muted text-xs font-semibold">متقاضیان در ارزیابی</span>
@@ -97,14 +97,16 @@
         </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card premium-card kpi-card p-3 bg-white h-100">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="text-muted text-xs font-semibold">پذیرفته‌شده نهایی</span>
-                <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2 py-1 font-bold">قبول</span>
+        <a href="{% url 'selected_candidates_list' %}" class="text-decoration-none">
+            <div class="card premium-card kpi-card p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted text-xs font-semibold">پذیرفته‌شده نهایی</span>
+                    <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2 py-1 font-bold">قبول</span>
+                </div>
+                <div class="fs-3 font-bold text-success mb-0">{{ selected_candidates }}</div>
+                <div class="text-muted text-xxs mt-1">⌀ {{ avg_job_finalization_days }} روز برای بستن هر فرصت</div>
             </div>
-            <div class="fs-3 font-bold text-success mb-0">{{ selected_candidates }}</div>
-            <div class="text-muted text-xxs mt-1">⌀ {{ avg_job_finalization_days }} روز برای بستن هر فرصت</div>
-        </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
         <a href="{% url 'sla_delays_dashboard' %}" class="text-decoration-none h-100 d-block">

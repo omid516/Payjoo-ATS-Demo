@@ -44,11 +44,16 @@ def clean_phone_number(val):
 
 
 def find_col_idx(headers, keywords):
-    """یافتن ایندکس ستون بر اساس کلمات کلیدی"""
-    for i, h in enumerate(headers):
-        h_lower = str(h).strip().lower()
-        for kw in keywords:
-            if kw.lower() in h_lower:
+    """یافتن ایندکس ستون بر اساس کلمات کلیدی (اولویت اول: تطابق دقیق، اولویت دوم: تطابق جزئی)"""
+    # اولویت اول: تطابق دقیق
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if str(h).strip().lower() == kw.lower():
+                return i
+    # اولویت دوم: تطابق جزئی
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if kw.lower() in str(h).strip().lower():
                 return i
     return None
 
@@ -166,8 +171,8 @@ class Command(BaseCommand):
             style = self.style.SUCCESS if idx is not None else self.style.WARNING
             self.stdout.write(f'  {symbol} {label}: {style(col_name)}')
 
-        if any(col_map[f] is None for f in ['exam_code', 'national_id', 'first_name', 'last_name', 'phone_number']):
-            raise CommandError('برخی از ستون‌های حیاتی متقاضیان (کد ملی، نام، نام خانوادگی، همراه یا کد آزمون) یافت نشد.')
+        if col_map['exam_code'] is None or col_map['national_id'] is None:
+            raise CommandError('ستون‌های حیاتی متقاضیان (کد ملی یا شماره آزمون) یافت نشد.')
 
         self.stdout.write('')
 
@@ -210,10 +215,23 @@ class Command(BaseCommand):
             raw_result = get_cell(row, 'result')
 
             exam_code = normalize_digits(raw_exam_code).strip() if raw_exam_code is not None else ''
-            national_id = normalize_digits(raw_national_id).zfill(10) if raw_national_id is not None else ''
+            
+            national_id = normalize_digits(raw_national_id).strip() if raw_national_id is not None else ''
+            if national_id and len(national_id) < 10 and national_id.isdigit():
+                national_id = national_id.zfill(10)
+
             first_name = str(raw_first_name).strip() if raw_first_name is not None else ''
+            if not first_name:
+                first_name = 'متقاضی'
+
             last_name = str(raw_last_name).strip() if raw_last_name is not None else ''
-            phone_number = clean_phone_number(raw_phone_number)
+            if not last_name:
+                last_name = f'کد ملی {national_id}'
+
+            phone_number = clean_phone_number(raw_phone_number) if raw_phone_number is not None else ''
+            if not phone_number:
+                phone_number = '09000000000'
+
             result = str(raw_result).strip() if raw_result is not None else ''
 
             # اعتبارسنجی‌های پایه
@@ -222,9 +240,6 @@ class Command(BaseCommand):
                 continue
             if not exam_code:
                 stats['warnings'].append(f'ردیف {row_num}: شماره آزمون خالی است — نادیده گرفته شد')
-                continue
-            if not first_name or not last_name:
-                stats['warnings'].append(f'ردیف {row_num} (کد ملی: {national_id}): نام یا نام خانوادگی خالی است — نادیده گرفته شد')
                 continue
 
             # پیدا کردن فرصت شغلی

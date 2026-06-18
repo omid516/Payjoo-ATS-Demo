@@ -1,7 +1,13 @@
 {% load jalali_tags %}
-{% if state.is_accessible %}
-<td id="stage-state-{{ state.id }}" hx-get="{% url 'edit_stage_state' state.id %}" hx-trigger="click" class="text-center p-3 cursor-pointer hover-bg-light {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10{% elif state.status == 'FAILED' and not state.is_conditional_pass %}bg-danger bg-opacity-10{% elif state.is_conditional_pass %}bg-warning bg-opacity-10{% endif %}" style="min-width: 130px; transition: background 0.15s;"
-    title="{% if state.evaluator %}ثبت‌کننده: {{ state.evaluator.get_full_name|default:state.evaluator.username }} در {{ state.updated_at|to_jalali }}&#10;{% endif %}{% if state.interviewer_scores.all %}نمرات مصاحبه‌گران:&#10;{% for iscore in state.interviewer_scores.all %}- {{ iscore.interviewer.get_full_name|default:iscore.interviewer.username }}: {{ iscore.score }} ({{ iscore.get_status_display }}){% if iscore.competency_scores.all %} (شایستگی‌ها: {% for cs in iscore.competency_scores.all %}{{ cs.competency.name }}={{ cs.score }}{% if not forloop.last %}، {% endif %}{% endfor %}){% endif %} در {{ iscore.updated_at|to_jalali }}{% if iscore.notes %} [{{ iscore.notes }}]{% endif %}&#10;{% endfor %}{% endif %}{% if state.notes %}یادداشت عمومی: {{ state.notes }}{% endif %}">
+<td id="stage-state-{{ state.id }}" 
+    hx-get="{% url 'edit_stage_state' state.id %}" 
+    hx-trigger="click" 
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="text-center p-3 cursor-pointer hover-bg-light {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10{% elif state.status == 'FAILED' and not state.is_conditional_pass %}bg-danger bg-opacity-10{% elif state.is_conditional_pass %}bg-warning bg-opacity-10{% elif not state.is_accessible %}bg-light bg-opacity-50{% endif %}" 
+    style="min-width: 130px; transition: background 0.15s;"
+    title="{% if state.evaluator %}ثبت‌کننده: {{ state.evaluator.get_full_name|default:state.evaluator.username }} در {{ state.updated_at|to_jalali }}&#10;{% endif %}{% if state.interviewer_scores.all %}نمرات مصاحبه‌گران:&#10;{% for iscore in state.interviewer_scores.all %}- {{ iscore.interviewer.get_full_name|default:iscore.interviewer.username }}: {{ iscore.score }} ({{ iscore.get_status_display }}){% if iscore.competency_scores.all %} (شایستگی‌ها: {% for cs in iscore.competency_scores.all %}{{ cs.competency.name }}={{ cs.score }}{% if not forloop.last %}، {% endif %}{% endfor %}){% endif %} در {{ iscore.updated_at|to_jalali }}{% if iscore.notes %} [{{ iscore.notes }}]{% endif %}&#10;{% endfor %}{% endif %}{% if state.notes %}یادداشت عمومی: {{ state.notes }}{% endif %}{% if not state.is_accessible %}&#10;(این مرحله در روال عادی قفل است اما می‌توانید آن را ویرایش کنید){% endif %}">
+    
     <div class="font-bold text-secondary mb-1">
         {% if state.status == 'PENDING' %}
             <span class="text-muted">-</span>
@@ -9,9 +15,18 @@
             {{ state.score|floatformat:1 }}
         {% endif %}
     </div>
+    
     <div class="text-xs">
         {% if state.status == 'PENDING' %}
-            <span class="text-muted text-xs">در انتظار</span>
+            <span class="text-muted text-xs">
+                {% if state.has_failed_prior_stages %}
+                    <span class="text-danger">⚠️ مردود در قبل</span>
+                {% elif not state.is_accessible %}
+                    <span class="text-muted">🔒 در انتظار (قفل)</span>
+                {% else %}
+                    در انتظار
+                {% endif %}
+            </span>
         {% elif state.status == 'COMPLETED' %}
             <span class="text-success font-semibold">قبول</span>
         {% elif state.status == 'FAILED' %}
@@ -25,7 +40,11 @@
     
     {% if state.status != 'PENDING' %}
     <div class="text-xxs text-muted mt-1" style="font-size: 10px;" title="تاریخ انجام ارزیابی">
-        📅 {% if state.evaluation_date %}{{ state.evaluation_date|to_jalali }}{% else %}{{ state.updated_at.date|to_jalali }}{% endif %}
+        {% if state.actual_evaluation_date %}
+            📅 {{ state.actual_evaluation_date|to_jalali }}
+        {% else %}
+            <span class="text-danger">📅 بدون تاریخ</span>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -36,11 +55,13 @@
         </span>
     </div>
     {% endif %}
+    
     {% if state.score_discrepancy_alert %}
     <div class="mt-1">
         <span class="badge bg-danger text-white px-1.5 py-0.5 rounded" style="font-size: 9px;" title="تفاوت نمره مصاحبه‌گران بیش از ۲۰ نمره است!">⚠️ مغایرت نمره</span>
     </div>
     {% endif %}
+    
     {% if state.notes %}
     <div class="text-muted text-xxs mt-1 border-top border-slate-light pt-1 text-truncate mx-auto" style="max-width: 110px; font-size: 10px;" title="{{ state.notes }}">
         {{ state.notes }}
@@ -54,15 +75,3 @@
     </span>
     {% endif %}
 </td>
-{% else %}
-<td id="stage-state-{{ state.id }}" class="text-center p-3 bg-light text-muted" style="min-width: 130px; opacity: 0.5;" title="{% if state.has_failed_prior_stages %}مردود در مراحل قبلی{% else %}ابتدا باید مراحل قبلی تکمیل و تایید شوند.{% endif %}">
-    <div class="mb-1">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="d-inline-block align-middle text-secondary opacity-50">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-        </svg>
-    </div>
-    <span class="text-xxs {% if state.has_failed_prior_stages %}text-danger font-semibold{% else %}text-muted{% endif %}">
-        {% if state.has_failed_prior_stages %}مردود در مراحل قبل{% else %}قفل شده{% endif %}
-    </span>
-</td>
-{% endif %}

@@ -1,0 +1,25 @@
+{% load jalali_tags %}
+<div id="stage-plan-container-{{ stage.id }}" class="mt-2 pt-2 border-top border-slate-light text-center">
+    <span class="text-xxs text-muted d-block">تاریخ برنامه‌ریزی / انجام:</span>
+    {% if stage_plan %}
+        <span class="font-semibold text-secondary" style="font-size: 11px;">
+            {{ stage_plan.planned_start_date|to_jalali }} تا {{ stage_plan.planned_end_date|to_jalali }}
+        </span>
+        <span class="text-xxs text-muted d-block mt-0.5">({{ stage_plan.sla_days }} روز SLA)</span>
+    {% elif stage.actual_start_date and stage.actual_end_date %}
+        <span class="font-semibold text-success" style="font-size: 11px;">
+            {{ stage.actual_start_date|to_jalali }} تا {{ stage.actual_end_date|to_jalali }}
+        </span>
+        <span class="text-xxs text-muted d-block mt-0.5">(واقعی)</span>
+    {% else %}
+        <span class="text-xxs text-muted d-block text-slate-light mb-1">بدون برنامه زمان‌بندی</span>
+    {% endif %}
+    
+    <button class="btn btn-xs btn-outline-secondary py-0.5 px-2 mt-1.5"
+            style="font-size: 9px;"
+            hx-get="{% url 'edit_job_stage_plan' job.id stage.id %}"
+            hx-target="#stage-plan-container-{{ stage.id }}"
+            hx-swap="outerHTML">
+        ✏️ ویرایش تاریخ
+    </button>
+</div>

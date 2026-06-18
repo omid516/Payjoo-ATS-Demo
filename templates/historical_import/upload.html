@@ -100,48 +100,164 @@
 </div>
 {% endif %}
 
-<div class="card premium-card col-lg-8 mx-auto">
-    <div class="card-body p-5">
-        <form method="post" enctype="multipart/form-data" id="uploadForm">
-            {% csrf_token %}
-            
-            <div class="upload-area p-5 text-center mb-4" id="dropArea">
-                <input type="file" name="excel_file" id="fileInput" class="d-none" accept=".xlsx, .xls">
-                
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-primary mb-3">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                </svg>
-                
-                <h5 class="font-semibold text-secondary mb-2">کشیدن و رها کردن فایل اکسل</h5>
-                <p class="text-muted text-sm mb-4">یا برای انتخاب فایل از روی کامپیوتر کلیک کنید</p>
-                <span class="badge bg-light text-secondary border px-3 py-2" id="fileNameBadge" style="display: none;"></span>
-                
-                <button type="button" class="btn btn-outline-primary btn-sm px-4" id="selectBtn">انتخاب فایل</button>
-            </div>
+<div class="col-lg-9 mx-auto">
+    <!-- Tab Controls -->
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-1.5 rounded-3 border shadow-xs" id="importTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active font-semibold py-2.5 d-flex align-items-center justify-content-center gap-2" id="fixed-tab" data-bs-toggle="pill" data-bs-target="#fixed-import" type="button" role="tab" style="border-radius: 6px;">
+                <span>⚡ درون‌ریزی مستقیم با قالب ثابت (توصیه شده)</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link font-semibold py-2.5 d-flex align-items-center justify-content-center gap-2" id="dynamic-tab" data-bs-toggle="pill" data-bs-target="#dynamic-import" type="button" role="tab" style="border-radius: 6px;">
+                <span>⚙️ درون‌ریزی پویا با نگاشت دلخواه (پیشرفته)</span>
+            </button>
+        </li>
+    </ul>
 
-            <!-- Guidelines -->
-            <div class="bg-light rounded p-3 mb-4 text-xs text-secondary border">
-                <h6 class="font-semibold text-dark mb-2">📋 راهنمای ساختار اکسل سوابق:</h6>
-                <ul class="mb-0 ps-3">
-                    <li class="mb-1">شیت آخر (وضعیت) شیت اصلی است که هر ردیف آن یک فرصت شغلی (Job Opportunity) می‌باشد.</li>
-                    <li class="mb-1">ستون آخر شیت اصلی باید حاوی «الگوی استخدام» (مانند "کتبی + مصاحبه + کانون") جهت تفکیک مراحل باشد.</li>
-                    <li class="mb-1">شیت‌های دیگر به تفکیک مراحل نام‌گذاری شده و شامل لیست افراد پذیرفته‌شده در آن مراحل می‌باشند.</li>
-                    <li>ستون کد یا شماره فرصت شغلی در شیت‌ها ملاک ارتباط داده‌های مراحل با شیت وضعیت خواهد بود.</li>
-                </ul>
+    <!-- Tab Contents -->
+    <div class="tab-content" id="importTabContent">
+        <!-- Tab 1: Fixed Template Import -->
+        <div class="tab-pane fade show active" id="fixed-import" role="tabpanel">
+            <div class="card premium-card border-slate shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4 bg-light bg-opacity-50 p-4 rounded-3 border border-slate-light">
+                        <h6 class="font-bold text-secondary mb-2">درون‌ریزی از طریق قالب ثابت استاندارد</h6>
+                        <p class="text-muted text-xs mb-3">ابتدا فایل قالب اکسل را دانلود کرده، داده‌های خود را دقیقاً در شیت‌های مربوطه کپی کنید و سپس فایل نهایی را آپلود نمایید.</p>
+                        <a href="{% url 'download_fixed_template' %}" class="btn btn-sm btn-success font-semibold px-4 py-2 mt-1">
+                            📥 دانلود فایل قالب اکسل استاندارد (.xlsx)
+                        </a>
+                    </div>
+                    
+                    <form method="post" action="{% url 'fixed_template_import' %}" enctype="multipart/form-data" id="fixedForm">
+                        {% csrf_token %}
+                        <div class="upload-area p-5 text-center mb-4" id="fixedDropArea" style="border: 2px dashed #10b981;">
+                            <input type="file" name="excel_file" id="fixedFileInput" class="d-none" accept=".xlsx, .xls">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="text-success mb-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                            </svg>
+                            <h6 class="font-semibold text-secondary mb-1">کشیدن و رها کردن فایل اکسل پر شده</h6>
+                            <p class="text-muted text-xxs mb-3">یا برای انتخاب فایل از روی کامپیوتر کلیک کنید</p>
+                            <span class="badge bg-light text-secondary border px-3 py-2 mb-2" id="fixedFileNameBadge" style="display: none;"></span>
+                            <button type="button" class="btn btn-outline-success btn-xs px-3 py-1.5" id="fixedSelectBtn">انتخاب فایل</button>
+                        </div>
+                        
+                        <!-- Fixed Guidelines -->
+                        <div class="bg-light rounded p-3 mb-4 text-xs text-secondary border border-slate-light">
+                            <h6 class="font-semibold text-dark mb-1.5">📋 راهنمای استفاده از قالب ثابت:</h6>
+                            <ul class="mb-0 ps-3">
+                                <li class="mb-1">شیت‌های **فرصت‌های شغلی** و **ثبت نام** الزامی هستند و فیلدهای شناسه (کد شغل و کدملی) در تمامی شیت‌ها باید مطابقت داشته باشند.</li>
+                                <li class="mb-1">شیت‌های ارزیابی (غربالگری، کتبی، مهارتی، مصاحبه و کانون) و شیت قبول شدگان اختیاری هستند؛ در صورت وجود اطلاعات، نمرات و نتایج ثبت می‌گردند.</li>
+                                <li>پشتیبانی کامل از زبان و ارقام فارسی تعبیه شده است.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success px-5 py-2.5 font-medium" id="fixedSubmitBtn" disabled>
+                                ⚡ شروع درون‌ریزی مستقیم داده‌ها
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
+        </div>
 
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary-custom px-5 py-2.5 font-medium" id="submitBtn" disabled>
-                    <span id="btnText">بارگذاری و شروع تحلیل فایل</span>
-                    <span id="btnSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
-                </button>
+        <!-- Tab 2: Dynamic Mapping Import -->
+        <div class="tab-pane fade" id="dynamic-import" role="tabpanel">
+            <div class="card premium-card border-slate shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <div class="upload-area p-5 text-center mb-4" id="dropArea">
+                            <input type="file" name="excel_file" id="fileInput" class="d-none" accept=".xlsx, .xls">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="text-primary mb-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                            </svg>
+                            <h6 class="font-semibold text-secondary mb-1">کشیدن و رها کردن فایل اکسل سوابق</h6>
+                            <p class="text-muted text-xxs mb-3">یا برای انتخاب فایل از روی کامپیوتر کلیک کنید</p>
+                            <span class="badge bg-light text-secondary border px-3 py-2 mb-2" id="fileNameBadge" style="display: none;"></span>
+                            <button type="button" class="btn btn-outline-primary btn-xs px-3 py-1.5" id="selectBtn">انتخاب فایل</button>
+                        </div>
+                        
+                        <div class="bg-light rounded p-3 mb-4 text-xs text-secondary border border-slate-light">
+                            <h6 class="font-semibold text-dark mb-1.5">📋 راهنمای ساختار اکسل سوابق:</h6>
+                            <ul class="mb-0 ps-3">
+                                <li class="mb-1">پس از آپلود، در مرحله بعد می‌توانید ستون‌های فایل اکسل را به متغیرهای متناظر سیستم متصل کنید.</li>
+                                <li class="mb-1">شیت انتهایی شیت اصلی (فرصت‌های شغلی) و بقیه شیت‌ها مراحل ارزیابی هستند.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-5 py-2.5 font-medium" id="submitBtn" disabled>
+                                <span id="btnText">بارگذاری و شروع تحلیل فایل</span>
+                                <span id="btnSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
-    </div>
+</div>
+
+<div class="text-center mt-5 mb-4">
+    <a href="{% url 'reset_database' %}" class="text-muted text-xxs" style="opacity: 0.15; text-decoration: none; cursor: default; font-size: 0.7rem;" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=0.15">🔧 تنظیمات پیشرفته سیستم (ریست دیتابیس)</a>
 </div>
 
 {% block extra_js %}
 <script>
+    // Tab 1 (Fixed) Form controls
+    const fixedDropArea = document.getElementById('fixedDropArea');
+    const fixedFileInput = document.getElementById('fixedFileInput');
+    const fixedSelectBtn = document.getElementById('fixedSelectBtn');
+    const fixedFileNameBadge = document.getElementById('fixedFileNameBadge');
+    const fixedSubmitBtn = document.getElementById('fixedSubmitBtn');
+    const fixedForm = document.getElementById('fixedForm');
+
+    fixedSelectBtn.addEventListener('click', () => fixedFileInput.click());
+    fixedDropArea.addEventListener('click', (e) => {
+        if(e.target !== fixedSelectBtn) fixedFileInput.click();
+    });
+
+    fixedFileInput.addEventListener('change', handleFixedFile);
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fixedDropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            fixedDropArea.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        fixedDropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            fixedDropArea.classList.remove('dragover');
+        }, false);
+    });
+
+    fixedDropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            fixedFileInput.files = files;
+            handleFixedFile();
+        }
+    });
+
+    function handleFixedFile() {
+        const file = fixedFileInput.files[0];
+        if (file) {
+            fixedFileNameBadge.innerText = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            fixedFileNameBadge.style.display = 'inline-block';
+            fixedSubmitBtn.removeAttribute('disabled');
+        }
+    }
+
+    fixedForm.addEventListener('submit', () => {
+        fixedSubmitBtn.setAttribute('disabled', 'true');
+        fixedSubmitBtn.innerHTML = '⚡ در حال درون‌ریزی مستقیم و پردازش اطلاعات... <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>';
+    });
+
+
+    // Tab 2 (Dynamic) Form controls
     const dropArea = document.getElementById('dropArea');
     const fileInput = document.getElementById('fileInput');
     const selectBtn = document.getElementById('selectBtn');
@@ -151,16 +267,13 @@
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
 
-    // Click trigger
     selectBtn.addEventListener('click', () => fileInput.click());
     dropArea.addEventListener('click', (e) => {
         if(e.target !== selectBtn) fileInput.click();
     });
 
-    // File change handler
     fileInput.addEventListener('change', handleFile);
 
-    // Drag and Drop events
     ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, (e) => {
             e.preventDefault();

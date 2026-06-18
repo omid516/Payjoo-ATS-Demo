@@ -1158,5 +1158,128 @@ class OverlapMonitorView(LoginRequiredMixin, RoleRequiredMixin, View):
         return render(request, 'recruitment_planning/conflicts.html', context)
 
 
+class EditJobStagePlanView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, job_id, stage_id):
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+        stage_plan = None
+        if hasattr(job, 'recruitment_plan') and job.recruitment_plan and not job.recruitment_plan.is_deleted:
+            stage_plan = job.recruitment_plan.stage_plans.filter(stage=stage, is_deleted=False).first()
+        
+        context = {
+            'job': job,
+            'stage': stage,
+            'stage_plan': stage_plan,
+        }
+        return render(request, 'recruitment_planning/partials/stage_plan_edit.html', context)
+
+    def post(self, request, job_id, stage_id):
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+        
+        start_date_str = request.POST.get('planned_start_date', '').strip()
+        end_date_str = request.POST.get('planned_end_date', '').strip()
+        
+        start_date = parse_jalali_to_gregorian(start_date_str)
+        end_date = parse_jalali_to_gregorian(end_date_str)
+        
+        if not start_date or not end_date:
+            return HttpResponse('<div class="text-danger text-xxs font-bold mt-1">فرمت تاریخ نامعتبر است.</div>', status=400)
+            
+        if start_date > end_date:
+            return HttpResponse('<div class="text-danger text-xxs font-bold mt-1">تاریخ شروع باید قبل از پایان باشد.</div>', status=400)
+            
+        with transaction.atomic():
+            # Create/Retrieve JobRecruitmentPlan
+            plan = JobRecruitmentPlan.all_objects.filter(job=job).first()
+            if plan:
+                if plan.is_deleted:
+                    plan.is_deleted = False
+                    plan.status = JobRecruitmentPlan.STATUS_ACTIVE
+                    plan.save()
+            else:
+                plan = JobRecruitmentPlan.objects.create(
+                    job=job,
+                    start_date=start_date,
+                    predicted_end_date=end_date,
+                    status=JobRecruitmentPlan.STATUS_ACTIVE
+                )
+            
+            # Create/Retrieve JobStagePlan
+            stage_plan = JobStagePlan.all_objects.filter(plan=plan, stage=stage).first()
+            
+            # Calculate sla_days based on working days between start_date and end_date
+            holidays_set = set(Holiday.objects.filter(is_deleted=False).values_list('date', flat=True))
+            current = start_date
+            working_days = 0
+            while current < end_date:
+                current += datetime.timedelta(days=1)
+                if current.weekday() == 4 or current in holidays_set:
+                    continue
+                working_days += 1
+            
+            if stage_plan:
+                stage_plan.planned_start_date = start_date
+                stage_plan.planned_end_date = end_date
+                stage_plan.sla_days = working_days
+                stage_plan.is_deleted = False
+                stage_plan.save()
+            else:
+                stage_plan = JobStagePlan.objects.create(
+                    plan=plan,
+                    stage=stage,
+                    stage_type=stage.stage_type or 'OTHER',
+                    planned_start_date=start_date,
+                    planned_end_date=end_date,
+                    sla_days=working_days
+                )
+            
+            # Proactively update candidate evaluation dates for consistency (excluding manually edited ones)
+            states_to_update = ApplicationStageState.objects.filter(
+                application__job=job,
+                stage=stage,
+                is_manually_edited=False,
+                is_deleted=False
+            )
+            if states_to_update.exists():
+                states_to_update.update(evaluation_date=end_date)
+
+            # Update plan's overall start_date and predicted_end_date
+            all_sps = plan.stage_plans.filter(is_deleted=False)
+            if all_sps.exists():
+                min_start = min(sp.planned_start_date for sp in all_sps)
+                max_end = max(sp.planned_end_date for sp in all_sps)
+                plan.start_date = min_start
+                plan.predicted_end_date = max_end
+                plan.save()
+                
+        context = {
+            'job': job,
+            'stage': stage,
+            'stage_plan': stage_plan,
+        }
+        return render(request, 'recruitment_planning/partials/stage_plan_view.html', context)
+
+
+class ViewJobStagePlanView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, job_id, stage_id):
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
+        stage_plan = None
+        if hasattr(job, 'recruitment_plan') and job.recruitment_plan and not job.recruitment_plan.is_deleted:
+            stage_plan = job.recruitment_plan.stage_plans.filter(stage=stage, is_deleted=False).first()
+            
+        context = {
+            'job': job,
+            'stage': stage,
+            'stage_plan': stage_plan,
+        }
+        return render(request, 'recruitment_planning/partials/stage_plan_view.html', context)
+
+
 
 

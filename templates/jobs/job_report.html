@@ -262,7 +262,13 @@
             </tr>
             <tr>
                 <th>کارشناس جذب مسئول</th>
-                <td>{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username|default:"-" }}</td>
+                <td>
+                    {% if job.assigned_recruiter %}
+                        {{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <th>الگوی فرآیند</th>
                 <td>{{ job.workflow.name|default:"تخصیص دستی" }}</td>
                 <th>وضعیت فرصت شغلی</th>
@@ -448,7 +454,13 @@
         <div class="col-4">
             <div class="signature-box">
                 <span class="signature-title">کارشناس تامین سرمایه انسانی</span>
-                <span class="text-xs text-muted" style="margin-top: -10px;">{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username|default:"-" }}</span>
+                <span class="text-xs text-muted" style="margin-top: -10px;">
+                    {% if job.assigned_recruiter %}
+                        {{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
                 <span class="signature-note">امضا و تاریخ</span>
             </div>
         </div>

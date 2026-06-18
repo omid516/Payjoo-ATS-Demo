@@ -1,0 +1,67 @@
+{% load jalali_tags %}
+<div id="stage-plan-container-{{ stage.id }}" class="mt-2 pt-2 border-top border-slate-light text-center" style="max-width: 250px; margin: 0 auto;">
+    <form hx-post="{% url 'edit_job_stage_plan' job.id stage.id %}" 
+          hx-target="#stage-plan-container-{{ stage.id }}" 
+          hx-swap="outerHTML" 
+          class="m-0 text-start">
+        
+        <div class="mb-1">
+            <label class="text-muted text-xxs d-block mb-0.5" style="font-size: 9px;">تاریخ شروع</label>
+            <input type="text" 
+                   name="planned_start_date" 
+                   id="plan_start_{{ stage.id }}" 
+                   value="{% if stage_plan %}{{ stage_plan.planned_start_date|to_jalali }}{% endif %}" 
+                   placeholder="شروع" 
+                   class="form-control form-control-sm text-center jalali-datepicker-input text-xs" 
+                   style="font-size: 11px; padding: 2px 4px; border-radius: 6px;" 
+                   autocomplete="off" 
+                   required>
+        </div>
+        
+        <div class="mb-1.5">
+            <label class="text-muted text-xxs d-block mb-0.5" style="font-size: 9px;">تاریخ پایان</label>
+            <input type="text" 
+                   name="planned_end_date" 
+                   id="plan_end_{{ stage.id }}" 
+                   value="{% if stage_plan %}{{ stage_plan.planned_end_date|to_jalali }}{% endif %}" 
+                   placeholder="پایان" 
+                   class="form-control form-control-sm text-center jalali-datepicker-input text-xs" 
+                   style="font-size: 11px; padding: 2px 4px; border-radius: 6px;" 
+                   autocomplete="off" 
+                   required>
+        </div>
+
+        <div class="d-flex gap-1 justify-content-center mt-2">
+            <button type="submit" class="btn btn-xs btn-primary py-0.5 px-2" style="font-size: 9px;">ثبت</button>
+            <button type="button" 
+                    class="btn btn-xs btn-outline-secondary py-0.5 px-2" 
+                    hx-get="{% url 'view_job_stage_plan' job.id stage.id %}" 
+                    hx-target="#stage-plan-container-{{ stage.id }}" 
+                    hx-swap="outerHTML" 
+                    style="font-size: 9px;">لغو</button>
+        </div>
+    </form>
+    
+    <script>
+        if (typeof kamaDatepicker !== 'undefined') {
+            kamaDatepicker("plan_start_{{ stage.id }}", {
+                buttonsColor: '#0052cc',
+                markToday: true,
+                gotoToday: true,
+                twodigit: true,
+                closeAfterSelect: true,
+                nextButtonIcon: '>',
+                previousButtonIcon: '<'
+            });
+            kamaDatepicker("plan_end_{{ stage.id }}", {
+                buttonsColor: '#0052cc',
+                markToday: true,
+                gotoToday: true,
+                twodigit: true,
+                closeAfterSelect: true,
+                nextButtonIcon: '>',
+                previousButtonIcon: '<'
+            });
+        }
+    </script>
+</div>

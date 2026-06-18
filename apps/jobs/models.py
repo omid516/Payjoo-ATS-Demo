@@ -239,11 +239,21 @@ class JobOpportunity(SoftDeleteModel):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        update_fields = kwargs.get('update_fields')
+        workflow_changed = False
+        if not is_new and (update_fields is None or 'workflow' in update_fields):
+            old_instance = JobOpportunity.objects.filter(pk=self.pk).first()
+            if old_instance and self.workflow != old_instance.workflow:
+                workflow_changed = True
+
         super().save(*args, **kwargs)
         
-        # اگر فرصت شغلی جدید باشد و الگوی فرآیند انتخاب شده باشد، مراحل پیش‌فرض از روی الگو کپی می‌شوند
-        if is_new and self.workflow:
-            stage_templates = self.workflow.stages.all().order_by('sequence')
+        if workflow_changed:
+            self.stages.filter(is_deleted=False).update(is_deleted=True)
+            
+        # اگر فرصت شغلی جدید باشد یا الگوی فرآیند تغییر کرده باشد یا هیچ مرحله فعالی نداشته باشد و الگوی فرآیند انتخاب شده باشد، مراحل پیش‌فرض از روی الگو کپی می‌شوند
+        if self.workflow and (is_new or workflow_changed or not self.stages.filter(is_deleted=False).exists()):
+            stage_templates = self.workflow.stages.filter(is_deleted=False).order_by('sequence')
             for st in stage_templates:
                 JobOpportunityStage.objects.create(
                     job=self,
@@ -270,6 +280,7 @@ class JobOpportunityStage(SoftDeleteModel):
     sequence = models.PositiveIntegerField(default=1, verbose_name="ترتیب")
     passing_score = models.FloatField(default=60.0, verbose_name="کف نمره قبولی")
     stage_type = models.CharField(max_length=20, choices=STAGE_TYPE_CHOICES, default='OTHER', verbose_name="نوع مرحله")
+    is_manually_completed = models.BooleanField(null=True, blank=True, default=None, verbose_name="وضعیت تکمیل دستی")
 
     class Meta:
         verbose_name = "مرحله ارزیابی فرصت شغلی"
@@ -280,58 +291,42 @@ class JobOpportunityStage(SoftDeleteModel):
         return f"{self.name} - {self.job.title} (وزن: {self.weight}٪)"
 
     @property
+    def actual_start_date(self):
+        from apps.candidates.models import ApplicationStageState
+        from django.db.models import Min
+        return ApplicationStageState.objects.filter(
+            stage=self,
+            is_deleted=False,
+            evaluation_date__isnull=False
+        ).aggregate(min_date=Min('evaluation_date'))['min_date']
+
+    @property
+    def actual_end_date(self):
+        from apps.candidates.models import ApplicationStageState
+        from django.db.models import Max
+        return ApplicationStageState.objects.filter(
+            stage=self,
+            is_deleted=False,
+            evaluation_date__isnull=False
+        ).aggregate(max_date=Max('evaluation_date'))['max_date']
+
+    @property
     def is_completed(self):
-        stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
-        if not stages:
+        if self.is_manually_completed is not None:
+            return self.is_manually_completed
+
+        from apps.candidates.models import ApplicationStageState
+        reached_states = [
+            state for state in ApplicationStageState.objects.filter(
+                stage=self,
+                is_deleted=False,
+                application__is_deleted=False
+            ).select_related('application')
+            if state.is_accessible
+        ]
+        if not reached_states:
             return False
-            
-        try:
-            idx = stages.index(self)
-        except ValueError:
-            return False
-            
-        # Check if anyone (active or inactive) has reached this stage
-        reached_candidates = []
-        all_apps = self.job.applications.filter(is_deleted=False)
-        
-        if idx == 0:
-            # Everyone reaches the first stage
-            reached_candidates = list(all_apps)
-        else:
-            prev_stage = stages[idx - 1]
-            # Reached if they completed the previous stage
-            from apps.candidates.models import ApplicationStageState
-            completed_prev = set(ApplicationStageState.objects.filter(
-                stage=prev_stage,
-                status=ApplicationStageState.STATUS_COMPLETED,
-                is_deleted=False
-            ).values_list('application_id', flat=True)) | set(ApplicationStageState.objects.filter(
-                stage=prev_stage,
-                is_conditional_pass=True,
-                is_deleted=False
-            ).values_list('application_id', flat=True))
-            reached_candidates = [app for app in all_apps if app.id in completed_prev]
-            
-        if not reached_candidates:
-            return False
-            
-        # Check if there are any active candidates who are in this or prior stages
-        active_apps = self.job.applications.filter(status='IN_PROGRESS', is_deleted=False)
-        for app in active_apps:
-            from apps.candidates.models import ApplicationStageState
-            prior_failed = ApplicationStageState.objects.filter(
-                application=app,
-                stage__sequence__lt=self.sequence,
-                status=ApplicationStageState.STATUS_FAILED,
-                is_conditional_pass=False,
-                is_deleted=False
-            ).exists()
-            if not prior_failed:
-                state = app.stage_states.filter(stage=self, is_deleted=False).first()
-                if not state or state.status == ApplicationStageState.STATUS_PENDING:
-                    return False
-                    
-        return True
+        return not any(state.status == ApplicationStageState.STATUS_PENDING for state in reached_states)
 
 
 

@@ -109,6 +109,7 @@ class JobApplication(SoftDeleteModel):
     current_stage = models.ForeignKey(JobOpportunityStage, on_delete=models.SET_NULL, null=True, blank=True, related_name='active_applications', verbose_name="مرحله فعلی ارزیابی")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_IN_PROGRESS, verbose_name="وضعیت نهایی درخواست")
     final_score = models.FloatField(default=0.0, verbose_name="امتیاز کل محاسبه شده")
+    admission_date = models.DateField(null=True, blank=True, verbose_name="تاریخ پذیرش نهایی")
 
     @property
     def effective_status(self):
@@ -175,7 +176,12 @@ class JobApplication(SoftDeleteModel):
         
         # پیش‌محاسبه مرحله جاری قبل از ذخیره اولیه
         if not getattr(self, '_bypass_stage_recalculation', False):
-            if not is_new:
+            import sys
+            is_importing = getattr(self, '_bypass_screening_auto_fail', False) or any(
+                'import_historical' in arg or 'update_historical' in arg or 'fix_missing' in arg 
+                for arg in sys.argv
+            )
+            if not is_new and not is_importing:
                 # Check if this application is rejected or the job has moved past screening,
                 # meaning they failed screening if they have no scores in subsequent stages.
                 # Also, if they have no scores, they are no longer in progress, so we should reject them.
@@ -235,12 +241,9 @@ class JobApplication(SoftDeleteModel):
                             
                             if subsequent_states.exists() and all_pending_zero:
                                 scr_state = self.stage_states.filter(stage=first_stage, is_deleted=False).first()
-                                if scr_state and scr_state.status != 'FAILED':
+                                if scr_state and scr_state.status != 'FAILED' and scr_state.status != 'COMPLETED':
                                     scr_state.status = 'FAILED'
-                                    if not scr_state.evaluation_date:
-                                        import datetime
-                                        scr_state.evaluation_date = datetime.date.today()
-                                    super(ApplicationStageState, scr_state).save(update_fields=['status', 'evaluation_date'])
+                                    super(ApplicationStageState, scr_state).save(update_fields=['status'])
                                     
                                     # clear cached relation to force refetch
                                     if 'stage_states' in self.__dict__:
@@ -311,6 +314,7 @@ class ApplicationStageState(SoftDeleteModel):
     score_discrepancy_alert = models.BooleanField(default=False, verbose_name="هشدار اختلاف فاحش نمرات")
     is_conditional_pass = models.BooleanField(default=False, verbose_name="قبول ارفاقی / ارجاع مشروط")
     evaluation_date = models.DateField(null=True, blank=True, verbose_name="تاریخ ارزیابی")
+    is_manually_edited = models.BooleanField(default=False, verbose_name="ویرایش شده به صورت دستی")
 
     class Meta:
         verbose_name = "وضعیت مرحله ارزیابی متقاضی"
@@ -348,6 +352,22 @@ class ApplicationStageState(SoftDeleteModel):
         ).order_by('-stage__sequence').first()
 
     @property
+    def actual_evaluation_date(self):
+        if self.evaluation_date:
+            return self.evaluation_date
+        
+        from apps.recruitment_planning.models import JobStagePlan
+        stage_plan = JobStagePlan.objects.filter(
+            plan__job=self.application.job,
+            stage=self.stage,
+            is_deleted=False
+        ).first()
+        if stage_plan and stage_plan.planned_end_date:
+            return stage_plan.planned_end_date
+            
+        return None
+
+    @property
     def days_since_prev_stage(self):
         if self.status == self.STATUS_PENDING:
             return None
@@ -355,8 +375,8 @@ class ApplicationStageState(SoftDeleteModel):
         if not prev or prev.status == self.STATUS_PENDING:
             return None
         
-        curr_date = self.evaluation_date or (self.updated_at.date() if self.updated_at else None)
-        prev_date = prev.evaluation_date or (prev.updated_at.date() if prev.updated_at else None)
+        curr_date = self.actual_evaluation_date
+        prev_date = prev.actual_evaluation_date
         
         if curr_date and prev_date:
             return (curr_date - prev_date).days
@@ -364,7 +384,10 @@ class ApplicationStageState(SoftDeleteModel):
 
     def save(self, *args, **kwargs):
         # Calculate score and status based on individual interviewer scores (assigned, external or competency)
-        if self.pk:
+        # Skip this for screening stages as they do not have numeric scores
+        if self.stage.stage_type == 'SCREENING':
+            pass
+        elif self.pk and not getattr(self, '_bypass_status_calculation', False) and not getattr(self, '_bypass_stage_score_calculation', False):
             external_scores = self.external_interviewer_scores.filter(is_deleted=False)
             if external_scores.exists():
                 total_weight = sum(es.weight for es in external_scores)
@@ -425,46 +448,43 @@ class ApplicationStageState(SoftDeleteModel):
                             else:
                                 self.status = self.STATUS_FAILED
 
-        # Default evaluation_date to today if status is COMPLETED or FAILED and evaluation_date is not set
-        if self.status in [self.STATUS_COMPLETED, self.STATUS_FAILED] and not self.evaluation_date:
-            from datetime import date as dt_date
-            self.evaluation_date = dt_date.today()
-
         super().save(*args, **kwargs)
         
         # Calculate final weighted score for the application
-        app = self.application
-        update_fields = ['final_score']
-        
-        # 1. Update application status based on stage status
-        if self.status == self.STATUS_FAILED and not self.is_conditional_pass:
-            if app.status != JobApplication.STATUS_REJECTED:
-                app.status = JobApplication.STATUS_REJECTED
-                update_fields.append('status')
-        elif (self.status == self.STATUS_COMPLETED or self.is_conditional_pass) and app.status == JobApplication.STATUS_REJECTED:
-            # Revert to IN_PROGRESS if no other stages are failed
-            other_failed = app.stage_states.filter(
-                status=self.STATUS_FAILED,
-                is_conditional_pass=False,
-                is_deleted=False
-            ).exclude(pk=self.pk).exists()
-            if not other_failed:
-                app.status = JobApplication.STATUS_IN_PROGRESS
-                update_fields.append('status')
+        # این بلاک هم مثل بلاک بالا باید bypass شود تا در ایمپورت تاریخچه وضعیت app به‌هم نریزد
+        if not getattr(self, '_bypass_status_calculation', False):
+            app = self.application
+            update_fields = ['final_score']
+            
+            # 1. Update application status based on stage status
+            if self.status == self.STATUS_FAILED and not self.is_conditional_pass:
+                if app.status != JobApplication.STATUS_REJECTED:
+                    app.status = JobApplication.STATUS_REJECTED
+                    update_fields.append('status')
+            elif (self.status == self.STATUS_COMPLETED or self.is_conditional_pass) and app.status == JobApplication.STATUS_REJECTED:
+                # Revert to IN_PROGRESS if no other stages are failed
+                other_failed = app.stage_states.filter(
+                    status=self.STATUS_FAILED,
+                    is_conditional_pass=False,
+                    is_deleted=False
+                ).exclude(pk=self.pk).exists()
+                if not other_failed:
+                    app.status = JobApplication.STATUS_IN_PROGRESS
+                    update_fields.append('status')
 
-        # 2. Recalculate current_stage of the application
-        app.recalculate_current_stage(save=False)
-        if 'current_stage' not in update_fields:
-            update_fields.append('current_stage')
+            # 2. Recalculate current_stage of the application
+            app.recalculate_current_stage(save=False)
+            if 'current_stage' not in update_fields:
+                update_fields.append('current_stage')
 
-        total_weighted_score = 0.0
-        # Get all active stage states
-        states = app.stage_states.filter(is_deleted=False)
-        for state in states:
-            # We multiply score by the weight of the stage (which is in stage.weight)
-            total_weighted_score += (state.score * state.stage.weight) / 100.0
-        app.final_score = round(total_weighted_score, 2)
-        app.save(update_fields=update_fields)
+            total_weighted_score = 0.0
+            # Get all active stage states
+            states = app.stage_states.filter(is_deleted=False)
+            for state in states:
+                # We multiply score by the weight of the stage (which is in stage.weight)
+                total_weighted_score += (state.score * state.stage.weight) / 100.0
+            app.final_score = round(total_weighted_score, 2)
+            app.save(update_fields=update_fields)
 
 
 class CandidateLanguage(SoftDeleteModel):

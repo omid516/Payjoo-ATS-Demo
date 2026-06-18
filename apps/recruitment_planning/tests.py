@@ -227,11 +227,11 @@ class RecruitmentPlanningTests(TestCase):
         self.client.login(username='admin_planning', password='testpassword123')
         
         # Save a plan so that we have events scheduled for the next week
-        # (Start date: 1405/03/18 which corresponds to 2026-06-08)
+        next_week_date = jdatetime.date.today() + jdatetime.timedelta(days=2)
         planning_url = reverse('job_planning', kwargs={'job_id': self.job1.id})
         post_data = {
             'action': 'save',
-            'start_date': '1405/03/18'
+            'start_date': next_week_date.strftime('%Y/%m/%d')
         }
         self.client.post(planning_url, post_data)
         
@@ -375,5 +375,61 @@ class RecruitmentPlanningTests(TestCase):
         # The subsequent EXAM stage should cascade starting from the next working day after 2026-06-08 (which is 2026-06-09)
         ex_plan_overridden = next(s for s in schedule_overridden if s['stage'].id == self.stage_template_2.id)
         self.assertEqual(ex_plan_overridden['planned_start_date'], datetime.date(2026, 6, 9))
+
+    def test_edit_job_stage_plan_views(self):
+        """تست نمایش و ویرایش دستی تاریخ برنامه‌ریزی یک مرحله از طریق وب"""
+        self.client.login(username='admin_planning', password='testpassword123')
+        
+        # Ensure job stages exist
+        job_stage_1 = self.job1.stages.get(sequence=1)
+
+        # 1. GET request to edit page (should return template)
+        url = reverse('edit_job_stage_plan', kwargs={'job_id': self.job1.id, 'stage_id': job_stage_1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'تاریخ شروع')
+        self.assertContains(response, 'تاریخ پایان')
+
+        # 2. POST request to save new dates (using Persian digits)
+        # 1405/03/10 (2026-05-31) to 1405/03/20 (2026-06-10)
+        post_data = {
+            'planned_start_date': '۱۴۰۵/۰۳/۱۰',
+            'planned_end_date': '۱۴۰۵/۰۳/۲۰'
+        }
+        response = self.client.post(url, post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '1405/03/10')
+        self.assertContains(response, '1405/03/20')
+
+        # Check DB updates
+        plan = JobRecruitmentPlan.objects.get(job=self.job1)
+        self.assertEqual(plan.start_date, datetime.date(2026, 5, 31))
+        self.assertEqual(plan.predicted_end_date, datetime.date(2026, 6, 10))
+
+        stage_plan = JobStagePlan.objects.get(plan=plan, stage=job_stage_1)
+        self.assertEqual(stage_plan.planned_start_date, datetime.date(2026, 5, 31))
+        self.assertEqual(stage_plan.planned_end_date, datetime.date(2026, 6, 10))
+        # sla_days calculation (working days): 
+        # 2026-05-31 (Sun) to 2026-06-10 (Wed)
+        # Holidays: none registered except the Friday (June 5)
+        # Friday June 5 is skipped.
+        # Total calendar days: 10
+        # Total working days = 10 - 1 (Friday June 5) = 9 working days.
+        self.assertEqual(stage_plan.sla_days, 9)
+
+        # 3. View mode check
+        view_url = reverse('view_job_stage_plan', kwargs={'job_id': self.job1.id, 'stage_id': job_stage_1.id})
+        response = self.client.get(view_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '1405/03/10')
+
+        # 4. Error case validation (invalid dates or start > end)
+        post_data_invalid = {
+            'planned_start_date': '۱۴۰۵/۰۳/۲۰',
+            'planned_end_date': '۱۴۰۵/۰۳/۱۰'
+        }
+        response = self.client.post(url, post_data_invalid)
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, 'تاریخ شروع باید قبل از پایان باشد', status_code=400)
 
 

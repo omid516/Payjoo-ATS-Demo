@@ -7,6 +7,7 @@ from .views import (
     CandidateDeleteView,
     JobApplicationCreateView,
     JobOpportunityPipelineView,
+    ToggleStageCompletionView,
     EditApplicationStageStateView,
     UpdateApplicationStageStateView,
     ViewApplicationStageStateView,
@@ -54,10 +55,18 @@ from .views import (
     DownloadInterviewScoresTemplateView,
     ImportInterviewScoresExcelView,
     JobOpportunityReportView,
+    DataIntegrityDashboardView,
+    ResolveDiscrepancyView,
+    UndoIntegrityActionView,
+    SelectedCandidatesListView,
+    EditAdmissionDateView,
+    UpdateAdmissionDateView,
+    CandidatesByStageListView,
 )
 
 urlpatterns = [
     path('', CandidateListView.as_view(), name='candidate_list'),
+    path('selected/', SelectedCandidatesListView.as_view(), name='selected_candidates_list'),
     path('add/', CandidateCreateView.as_view(), name='candidate_add'),
     path('export/excel/', ExportCandidatesExcelView.as_view(), name='candidate_export_excel'),
     path('import/excel/', ImportCandidatesView.as_view(), name='candidate_import_excel'),
@@ -90,6 +99,7 @@ urlpatterns = [
     path('opportunity/<int:pk>/ranking/export/excel/', ExportJobFinalRankingExcelView.as_view(), name='job_ranking_export_excel'),
     path('opportunity/<int:job_id>/pipeline/bulk-status/', BulkUpdateApplicationStatusView.as_view(), name='bulk_update_application_status'),
     path('opportunity/<int:job_id>/pipeline/bulk-advance/', BulkAdvanceStageView.as_view(), name='bulk_advance_stage'),
+    path('opportunity/stage/<int:stage_id>/toggle-completion/', ToggleStageCompletionView.as_view(), name='toggle_stage_completion'),
     path('stage-state/<int:pk>/edit/', EditApplicationStageStateView.as_view(), name='edit_stage_state'),
     path('stage-state/<int:pk>/update/', UpdateApplicationStageStateView.as_view(), name='update_stage_state'),
     path('stage-state/<int:pk>/view/', ViewApplicationStageStateView.as_view(), name='view_stage_state'),
@@ -120,4 +130,12 @@ urlpatterns = [
     path('certificate/update/', CandidateCertificateUpdateView.as_view(), name='candidate_certificate_update'),
     path('apply/<int:pk>/', CandidateApplyDirectView.as_view(), name='candidate_apply_direct'),
     path('password/change/', CandidatePasswordChangeView.as_view(), name='candidate_password_change'),
+    
+    path('data-integrity/', DataIntegrityDashboardView.as_view(), name='data_integrity_dashboard'),
+    path('data-integrity/resolve/', ResolveDiscrepancyView.as_view(), name='resolve_discrepancy'),
+    path('data-integrity/undo/<int:log_id>/', UndoIntegrityActionView.as_view(), name='undo_integrity_action'),
+    
+    path('application/<int:pk>/edit-admission-date/', EditAdmissionDateView.as_view(), name='edit_admission_date'),
+    path('application/<int:pk>/update-admission-date/', UpdateAdmissionDateView.as_view(), name='update_admission_date'),
+    path('by-stage/', CandidatesByStageListView.as_view(), name='candidates_by_stage_list'),
 ]

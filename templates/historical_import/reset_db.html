@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}پاکسازی و ریست دیتابیس{% endblock %}
+
+{% block extra_head %}
+<style>
+    .reset-card {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.05);
+    }
+    .danger-accent {
+        border-top: 4px solid #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="font-semibold text-danger mb-1">🔧 تنظیمات پیشرفته سیستم - پاکسازی دیتابیس</h3>
+    <p class="text-muted text-sm m-0">امکان حذف کامل و غیرقابل بازگشت تمام اطلاعات مربوط به متقاضیان، آزمون‌ها و مشاغل برای مصارف تست.</p>
+</div>
+
+<div class="col-lg-6 mx-auto">
+    <div class="card reset-card danger-accent shadow-sm">
+        <div class="card-body p-4">
+            {% if success %}
+                <div class="text-center py-4">
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle d-inline-flex mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h5 class="font-bold text-success mb-2">دیتابیس با موفقیت پاکسازی شد!</h5>
+                    <p class="text-muted text-xs mb-4">تمامی داده‌های کاندیداها، مشاغل، فرآیندها و سوابق از سیستم حذف شدند.</p>
+                    <a href="{% url 'import_upload' %}" class="btn btn-outline-primary px-4 font-semibold">
+                        بازگشت به صفحه بارگذاری فایل اکسل
+                    </a>
+                </div>
+            {% else %}
+                <div class="alert alert-danger border-0 d-flex gap-3 mb-4 rounded-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-danger flex-shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div class="text-xs text-danger">
+                        <strong class="d-block mb-1">هشدار بسیار مهم:</strong>
+                        عملیات ریست دیتابیس تمامی مشاغل، متقاضیان، درخواست‌های همکاری، نمرات مراحل ارزیابی، زمان‌بندی‌ها، الگوها و لاگ‌های حسابرسی را برای همیشه پاک می‌کند. این عملیات به هیچ‌وجه قابل بازگشت نیست.
+                    </div>
+                </div>
+
+                {% if error %}
+                    <div class="alert alert-warning text-xs mb-4" role="alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
+
+                <form method="post" id="resetForm" onsubmit="return handleFinalSubmit(event)">
+                    {% csrf_token %}
+                    
+                    <!-- Confirmation Step 1: Checkbox -->
+                    <div class="form-check mb-4 bg-light p-3 rounded border border-slate-light" style="padding-right: 2.5rem;">
+                        <input class="form-check-input" type="checkbox" id="understandCheck" required>
+                        <label class="form-check-label text-xs font-semibold text-secondary" for="understandCheck">
+                            من تأثیرات مخرب این عملیات را درک می‌کنم و می‌دانم که تمامی رکوردهای فعلی دیتابیس پاک خواهند شد.
+                        </label>
+                    </div>
+
+                    <!-- Confirmation Step 2: TextInput -->
+                    <div class="mb-4">
+                        <label for="confirmText" class="form-label text-xs font-bold text-secondary mb-2">
+                            لطفاً عبارت <code class="bg-danger bg-opacity-10 text-danger px-2 py-0.5 rounded font-mono">RESET DATABASE</code> را دقیقاً در کادر زیر وارد کنید:
+                        </label>
+                        <input type="text" class="form-control text-center font-mono font-bold" id="confirmText" name="confirm_text" autocomplete="off" placeholder="عبارت را وارد کنید...">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top border-slate-light">
+                        <a href="{% url 'import_upload' %}" class="btn btn-light px-4 font-semibold text-xs">
+                            لغو و بازگشت
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 font-bold text-xs" id="resetBtn" disabled>
+                            💥 اجرای عملیات پاکسازی کامل دیتابیس
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const understandCheck = document.getElementById('understandCheck');
+    const confirmInput = document.getElementById('confirmText');
+    const resetBtn = document.getElementById('resetBtn');
+
+    if (understandCheck && confirmInput && resetBtn) {
+        function validateResetForm() {
+            const isChecked = understandCheck.checked;
+            const textMatches = confirmInput.value.trim() === 'RESET DATABASE';
+            
+            if (isChecked && textMatches) {
+                resetBtn.removeAttribute('disabled');
+            } else {
+                resetBtn.setAttribute('disabled', 'true');
+            }
+        }
+
+        understandCheck.addEventListener('change', validateResetForm);
+        confirmInput.addEventListener('input', validateResetForm);
+    }
+
+    function handleFinalSubmit(event) {
+        // First JS Prompt
+        const confirm1 = confirm("⚠️ آیا واقعاً می‌خواهید تمام اطلاعات تستی دیتابیس را پاک کنید؟");
+        if (!confirm1) {
+            event.preventDefault();
+            return false;
+        }
+
+        // Second JS Prompt
+        const confirm2 = confirm("🚨 توجه: تمامی کاندیداها و سوابق ثبت‌نام به طور فیزیکی و دائمی حذف خواهند شد و فقط حساب کارشناسان و ادمین‌ها باقی می‌ماند. آیا مطمئنید که می‌خواهید ادامه دهید؟");
+        if (!confirm2) {
+            event.preventDefault();
+            return false;
+        }
+        
+        resetBtn.setAttribute('disabled', 'true');
+        resetBtn.innerHTML = 'در حال پاکسازی کل دیتابیس... <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>';
+        return true;
+    }
+</script>
+{% endblock %}
+{% endblock %}

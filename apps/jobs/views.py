@@ -188,6 +188,13 @@ class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView
     def form_valid(self, form):
         context = self.get_context_data()
         stages = context['stages']
+        
+        # If a workflow template is selected, we automatically copy its default stages and skip formset
+        if form.cleaned_data.get('workflow'):
+            self.object = form.save()
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())
+
         if stages.is_valid():
             self.object = form.save()
             stages.instance = self.object
@@ -224,8 +231,32 @@ class JobOpportunityUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView
         return data
 
     def form_valid(self, form):
+        # Check if workflow has changed
+        workflow_changed = False
+        if self.object and self.object.pk:
+            old_instance = JobOpportunity.objects.filter(pk=self.object.pk).first()
+            if old_instance and form.cleaned_data.get('workflow') != old_instance.workflow:
+                workflow_changed = True
+
         context = self.get_context_data()
         stages = context['stages']
+        
+        # If workflow has changed, bypass formset validation, save parent (JobOpportunity.save will recreate stages)
+        if workflow_changed:
+            self.object = form.save()
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())
+
+        # If workflow has not changed, but the job has no stages and a workflow is selected,
+        # copy template stages automatically.
+        workflow = form.cleaned_data.get('workflow')
+        has_no_stages = not self.object.stages.filter(is_deleted=False).exists()
+        if workflow and has_no_stages:
+            self.object = form.save()
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())
+
+        # Otherwise validate and save formset normally
         if stages.is_valid():
             self.object = form.save()
             stages.instance = self.object

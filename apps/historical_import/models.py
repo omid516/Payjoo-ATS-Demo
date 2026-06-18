@@ -36,6 +36,17 @@ class StagingJobOpportunity(models.Model):
     status = models.CharField(max_length=100, null=True, blank=True, verbose_name="وضعیت")
     start_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ شروع")
     workflow_pattern = models.CharField(max_length=255, null=True, blank=True, verbose_name="الگوی استخدام")
+    unit = models.CharField(max_length=255, null=True, blank=True, verbose_name="واحد سازمانی")
+    job_category = models.CharField(max_length=255, null=True, blank=True, verbose_name="رده شغلی")
+    notes = models.TextField(null=True, blank=True, verbose_name="یادداشت‌های داخلی")
+    description = models.TextField(null=True, blank=True, verbose_name="شرح شغل")
+    
+    # Step implementation dates from status sheet
+    screening_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ غربالگری")
+    exam_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ آزمون کتبی")
+    skill_test_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ آزمون مهارتی")
+    interview_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ مصاحبه")
+    assessment_date_str = models.CharField(max_length=100, null=True, blank=True, verbose_name="تاریخ کانون ارزیابی")
     
     # Store all columns dynamically to allow custom logic/debugging
     raw_data = models.JSONField(default=dict, verbose_name="داده‌های خام")

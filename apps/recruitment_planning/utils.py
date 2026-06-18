@@ -13,7 +13,10 @@ def parse_jalali_to_gregorian(val):
     if not val:
         return None
     try:
-        parts = [int(p) for p in val.strip().split('/')]
+        val_str = str(val).strip()
+        for fa, en in zip('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789'):
+            val_str = val_str.replace(fa, en)
+        parts = [int(p) for p in val_str.split('/')]
         if len(parts) == 3:
             return jdatetime.date(parts[0], parts[1], parts[2]).togregorian()
     except Exception:

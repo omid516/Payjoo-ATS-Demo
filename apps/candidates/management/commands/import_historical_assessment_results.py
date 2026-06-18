@@ -28,11 +28,16 @@ def normalize_digits(s):
 
 
 def find_col_idx(headers, keywords):
-    """یافتن ایندکس ستون بر اساس کلمات کلیدی"""
-    for i, h in enumerate(headers):
-        h_lower = str(h).strip().lower()
-        for kw in keywords:
-            if kw.lower() in h_lower:
+    """یافتن ایندکس ستون بر اساس کلمات کلیدی (اولویت اول: تطابق دقیق، اولویت دوم: تطابق جزئی)"""
+    # اولویت اول: تطابق دقیق
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if str(h).strip().lower() == kw.lower():
+                return i
+    # اولویت دوم: تطابق جزئی
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if kw.lower() in str(h).strip().lower():
                 return i
     return None
 
@@ -178,7 +183,11 @@ class Command(BaseCommand):
             raw_cscore = get_cell(row, 'cscore')
             raw_result = get_cell(row, 'result')
 
-            national_id = normalize_digits(raw_national_id).zfill(10) if raw_national_id is not None else ''
+            national_id = normalize_digits(raw_national_id).strip() if raw_national_id is not None else ''
+            if national_id.endswith('.0'):
+                national_id = national_id[:-2]
+            if national_id and len(national_id) < 10 and national_id.isdigit():
+                national_id = national_id.zfill(10)
             result_str = str(raw_result).strip() if raw_result is not None else ''
 
             if not national_id or len(national_id) != 10 or not national_id.isdigit():

@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+{% block title %}پایش سلامت داده‌ها و رفع مغایرت‌ها{% endblock %}
+
+{% block extra_head %}
+<style>
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 41, 59, 0.05);
+    }
+    .btn-xxs {
+        font-size: 10px;
+        padding: 2.5px 6px;
+        border-radius: 4px;
+    }
+    .hover-primary:hover {
+        color: #0d6efd !important;
+        text-decoration: underline !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-end flex-wrap gap-3">
+    <div>
+        <h3 class="font-semibold text-secondary mb-1">
+            📊 داشبورد سلامت داده‌ها و رفع مغایرت‌ها
+        </h3>
+        <p class="text-muted text-sm m-0">پایش هوشمند و رفع تضادهای نمرات، وضعیت‌ها، و تاریخ‌های ثبت شده در سامانه ارزیابی</p>
+    </div>
+    <div>
+        <a href="?refresh=1" class="btn btn-primary font-semibold shadow-xs d-flex align-items-center gap-1.5 py-2 px-3">
+            <span>🔄 اجرای مجدد اسکن</span>
+        </a>
+    </div>
+</div>
+
+<!-- Key Health Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="metric-card p-4">
+            <span class="text-xs font-semibold text-muted d-block mb-1">کل مغایرت‌های فعال</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span id="integrity-total-count" class="font-bold text-secondary fs-3">{{ scan_results.total_count }}</span>
+                <span class="text-xs text-danger">مورد فعال</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4">
+            <span class="text-xs font-semibold text-muted d-block mb-1">مغایرت‌های سیستم و ایمپورت</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="font-bold text-warning fs-3">{{ scan_results.import_issues|length }}</span>
+                <span class="text-xs text-muted">مورد</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4">
+            <span class="text-xs font-semibold text-muted d-block mb-1">مغایرت‌های ورود اطلاعات ارزیابان</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="font-bold text-info fs-3">{{ scan_results.user_issues|length }}</span>
+                <span class="text-xs text-muted">مورد</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 border-success bg-success bg-opacity-5">
+            <span class="text-xs font-semibold text-success d-block mb-1">شاخص سلامت داده‌ها</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span id="integrity-clean-pct" class="font-bold text-success fs-3">{{ scan_results.clean_percentage }}%</span>
+                <span class="text-xs text-muted">بدون تضاد</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main Scan Worklist -->
+    <div class="col-lg-8">
+        <div class="card premium-card">
+            <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <ul class="nav nav-tabs card-header-tabs border-0 gap-1" id="integrityTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active font-semibold text-xs py-2 px-3.5 border-0 rounded-3" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-pane" type="button" role="tab" aria-controls="import-pane" aria-selected="true">
+                            📁 مغایرت‌های سیستم و ایمپورت ({{ scan_results.import_issues|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link font-semibold text-xs py-2 px-3.5 border-0 rounded-3" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-pane" type="button" role="tab" aria-controls="user-pane" aria-selected="false">
+                            👤 مغایرت‌های ورود اطلاعات ارزیابان ({{ scan_results.user_issues|length }})
+                        </button>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-1.5">
+                    <select id="issue-filter" class="form-select form-select-sm text-xxs py-1 border-slate" style="width: auto; min-width: 220px; border-radius: 6px;">
+                        <option value="all">🔍 همه انواع مغایرت‌ها</option>
+                        <option value="missing_stages">مراحل ارزیابی گم‌شده (missing_stages)</option>
+                        <option value="status_sync_failed">نقص وضعیت در متقاضیان مردود (status_sync_failed)</option>
+                        <option value="cutoff_contradiction">تناقض نمره و قبولی مرحله (cutoff_contradiction)</option>
+                        <option value="score_variance">مغایرت فاحش نمرات ارزیابان (score_variance)</option>
+                        <option value="date_anomaly">تناقض در تاریخ مراحل استخدام (date_anomaly)</option>
+                        <option value="status_sync_completed">نقص وضعیت در متقاضیان قبول شده (status_sync_completed)</option>
+                        <option value="completed_no_date">رکوردهای ارزیابی تکمیل‌شده بدون تاریخ (completed_no_date)</option>
+                        <option value="stage_completed_no_date">مراحل تکمیل‌شده بدون برنامه زمان‌بندی (stage_completed_no_date)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="tab-content" id="integrityTabContent">
+                    <!-- Tab 1: Import issues -->
+                    <div class="tab-pane fade show active" id="import-pane" role="tabpanel" aria-labelledby="import-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3" style="width: 200px;">متقاضی / فرصت شغلی</th>
+                                        <th>شرح تضاد و مغایرت</th>
+                                        <th class="pe-3 text-end" style="width: 280px;">اقدام و رفع تضاد</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for issue in scan_results.import_issues %}
+                                    <tr id="issue-row-{{ issue.id }}" data-issue-code="{{ issue.code }}">
+                                        <td class="ps-3">
+                                            <div class="font-semibold text-xs">
+                                                {% if issue.candidate_id %}
+                                                    <a href="{% url 'candidate_detail' issue.candidate_id %}" class="text-secondary text-decoration-none hover-primary">
+                                                        👤 {{ issue.candidate_name }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">📋 کل مرحله (بدون متقاضی خاص)</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-muted text-xxs mt-0.5">
+                                                <a href="{% url 'job_pipeline' issue.job_id %}" class="text-muted text-decoration-none hover-primary">
+                                                    💼 {{ issue.job_title }} ({% if issue.job_code %}کد: {{ issue.job_code }}{% else %}بدون کد{% endif %})
+                                                </a>
+                                            </div>
+                                            {% if issue.national_id %}
+                                                <div class="text-muted text-xxs mt-0.5">کد ملی: {{ issue.national_id }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 text-xxs px-2.5 py-1 mb-1 font-semibold">
+                                                {{ issue.code }}
+                                            </span>
+                                            <div class="text-xs text-secondary mt-1 font-medium">{{ issue.details }}</div>
+                                        </td>
+                                        <td class="pe-3 text-end">
+                                            <div id="resolve-banner-{{ issue.id }}">
+                                                {% if issue.is_auto_fixable %}
+                                                    <form hx-post="{% url 'resolve_discrepancy' %}" hx-target="#resolve-banner-{{ issue.id }}" hx-swap="outerHTML" class="m-0">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="issue_code" value="{{ issue.code }}">
+                                                        <input type="hidden" name="entity_id" value="{{ issue.entity_id }}">
+                                                        <input type="hidden" name="action_key" value="{{ issue.actions.0.key }}">
+                                                        <button type="submit" class="btn btn-warning btn-xxs font-semibold">
+                                                            ⚡ {{ issue.actions.0.label }}
+                                                        </button>
+                                                    </form>
+                                                {% elif issue.actions.0.type == 'flag' %}
+                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded text-xxs font-medium">
+                                                        🔍 فقط ویرایش دستی در پایپلاین
+                                                    </span>
+                                                {% elif issue.actions.0.type == 'suggestion' %}
+                                                    <form hx-post="{% url 'resolve_discrepancy' %}" hx-target="#resolve-banner-{{ issue.id }}" hx-swap="outerHTML" class="m-0 text-start">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="issue_code" value="{{ issue.code }}">
+                                                        <input type="hidden" name="entity_id" value="{{ issue.entity_id }}">
+                                                        <input type="hidden" name="action_key" value="{{ issue.actions.0.key }}">
+                                                        
+                                                        <div class="mb-1.5">
+                                                            <select name="choice" class="form-select form-select-sm text-xxs py-1 px-2 border-slate w-100" required>
+                                                                <option value="" disabled selected>انتخاب روش رفع...</option>
+                                                                {% for choice in issue.actions.0.choices %}
+                                                                    <option value="{{ choice.value }}">{{ choice.label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary btn-xxs font-semibold">ثبت تصمیم دستی</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted text-xs">
+                                            🎉 عالی است! هیچ مغایرت سیستمی یا وارداتی در سامانه یافت نشد.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 2: User entry issues -->
+                    <div class="tab-pane fade" id="user-pane" role="tabpanel" aria-labelledby="user-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3" style="width: 200px;">متقاضی / فرصت شغلی</th>
+                                        <th>شرح تضاد و مغایرت</th>
+                                        <th class="pe-3 text-end" style="width: 280px;">اقدام و رفع تضاد</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for issue in scan_results.user_issues %}
+                                    <tr id="issue-row-{{ issue.id }}" data-issue-code="{{ issue.code }}">
+                                        <td class="ps-3">
+                                            <div class="font-semibold text-xs">
+                                                {% if issue.candidate_id %}
+                                                    <a href="{% url 'candidate_detail' issue.candidate_id %}" class="text-secondary text-decoration-none hover-primary">
+                                                        👤 {{ issue.candidate_name }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">📋 کل مرحله (بدون متقاضی خاص)</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-muted text-xxs mt-0.5">
+                                                <a href="{% url 'job_pipeline' issue.job_id %}" class="text-muted text-decoration-none hover-primary">
+                                                    💼 {{ issue.job_title }} ({% if issue.job_code %}کد: {{ issue.job_code }}{% else %}بدون کد{% endif %})
+                                                </a>
+                                            </div>
+                                            {% if issue.national_id %}
+                                                <div class="text-muted text-xxs mt-0.5">کد ملی: {{ issue.national_id }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-10 text-xxs px-2.5 py-1 mb-1 font-semibold">
+                                                {{ issue.code }}
+                                            </span>
+                                            <div class="text-xs text-secondary mt-1 font-medium">{{ issue.details }}</div>
+                                        </td>
+                                        <td class="pe-3 text-end">
+                                            <div id="resolve-banner-{{ issue.id }}">
+                                                {% if issue.is_auto_fixable %}
+                                                    <form hx-post="{% url 'resolve_discrepancy' %}" hx-target="#resolve-banner-{{ issue.id }}" hx-swap="outerHTML" class="m-0">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="issue_code" value="{{ issue.code }}">
+                                                        <input type="hidden" name="entity_id" value="{{ issue.entity_id }}">
+                                                        <input type="hidden" name="action_key" value="{{ issue.actions.0.key }}">
+                                                        <button type="submit" class="btn btn-warning btn-xxs font-semibold">
+                                                            ⚡ {{ issue.actions.0.label }}
+                                                        </button>
+                                                    </form>
+                                                {% elif issue.actions.0.type == 'flag' %}
+                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded text-xxs font-medium">
+                                                        🔍 فقط ویرایش دستی در پایپلاین
+                                                    </span>
+                                                {% elif issue.actions.0.type == 'suggestion' %}
+                                                    <form hx-post="{% url 'resolve_discrepancy' %}" hx-target="#resolve-banner-{{ issue.id }}" hx-swap="outerHTML" class="m-0 text-start">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="issue_code" value="{{ issue.code }}">
+                                                        <input type="hidden" name="entity_id" value="{{ issue.entity_id }}">
+                                                        <input type="hidden" name="action_key" value="{{ issue.actions.0.key }}">
+                                                        
+                                                        <div class="mb-1.5">
+                                                            <select name="choice" class="form-select form-select-sm text-xxs py-1 px-2 border-slate w-100" required>
+                                                                <option value="" disabled selected>انتخاب روش رفع...</option>
+                                                                {% for choice in issue.actions.0.choices %}
+                                                                    <option value="{{ choice.value }}">{{ choice.label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary btn-xxs font-semibold">ثبت تصمیم دستی</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted text-xs">
+                                            🎉 عالی است! هیچ مغایرت یا اشتباه نمره‌دهی توسط کاربران در سیستم وجود ندارد.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Undo / Action Logs Pane -->
+    <div class="col-lg-4">
+        <div class="card premium-card h-100">
+            <div class="card-header bg-white border-bottom border-slate py-3">
+                <h6 class="font-semibold text-secondary m-0">⚙️ لاگ فعالیت‌ها و لغو تغییرات (Undo)</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 text-xs" style="width: 105px;">زمان</th>
+                                <th class="text-xs">کاربر</th>
+                                <th class="text-xs">عملیات</th>
+                                <th class="pe-3 text-end text-xs" style="width: 85px;">لغو</th>
+                            </tr>
+                        </thead>
+                        <tbody id="integrity-actions-body">
+                            {% for log in recent_actions %}
+                            <tr id="action-log-row-{{ log.id }}">
+                                <td class="ps-3 text-xxs text-muted">{{ log.timestamp|to_jalali }}</td>
+                                <td class="text-xxs font-medium">
+                                    {% if log.user %}
+                                        {{ log.user.get_full_name|default:log.user.username }}
+                                    {% else %}
+                                        سیستم
+                                    {% endif %}
+                                </td>
+                                <td class="text-xxs">
+                                    <span class="font-semibold text-secondary">{{ log.get_action_type_display }}</span>
+                                    <div class="text-muted mt-0.5" style="font-size: 8px;">{{ log.model_name }} (ID: {{ log.object_id }})</div>
+                                </td>
+                                <td class="pe-3 text-end">
+                                    <button class="btn btn-outline-danger btn-xxs py-0.5 px-1.5" style="font-size: 8px;"
+                                            hx-post="{% url 'undo_integrity_action' log.id %}" 
+                                            hx-target="#action-log-row-{{ log.id }}" 
+                                            hx-swap="outerHTML">
+                                        بازگردانی
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted text-xxs">هنوز هیچ تغییری در لاگ ثبت نشده است.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('issue-filter').addEventListener('change', function() {
+        const filterVal = this.value;
+        const rows = document.querySelectorAll('tr[id^="issue-row-"]');
+        rows.forEach(row => {
+            const issueCode = row.getAttribute('data-issue-code');
+            if (filterVal === 'all' || issueCode === filterVal) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

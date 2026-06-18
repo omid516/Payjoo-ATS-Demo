@@ -3,7 +3,12 @@
 {% block title %}پایپلاین ارزیابی: {{ job.title }}{% endblock %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
 <style>
+    #bd-root-bulk_eval_date, [id^="bd-root-date_"] {
+        font-family: 'Vazirmatn', sans-serif !important;
+        z-index: 9999 !important;
+    }
     .stepper-container {
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
@@ -110,19 +115,7 @@
                         <span class="text-xs text-muted d-block mb-2">وزن مرحله: {{ stage.weight }}٪</span>
 
                         {% with sp=stage_plans|get_item:stage.id %}
-                            {% if sp %}
-                                <div class="mt-2 pt-2 border-top border-slate-light text-center">
-                                    <span class="text-xxs text-muted d-block">تاریخ برنامه‌ریزی:</span>
-                                    <span class="font-semibold text-secondary" style="font-size: 11px;">
-                                        {{ sp.planned_start_date|to_jalali }} تا {{ sp.planned_end_date|to_jalali }}
-                                    </span>
-                                    <span class="text-xxs text-muted d-block mt-0.5">({{ sp.sla_days }} روز SLA)</span>
-                                </div>
-                            {% else %}
-                                <div class="mt-2 pt-2 border-top border-slate-light text-center">
-                                    <span class="text-xxs text-muted d-block text-slate-light">بدون برنامه زمان‌بندی</span>
-                                </div>
-                            {% endif %}
+                            {% include "recruitment_planning/partials/stage_plan_view.html" with stage=stage stage_plan=sp %}
                         {% endwith %}
                         
                         {% if stage.interviewers.all %}
@@ -136,6 +129,34 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                    </div>
+                    
+                    <!-- Manual completion toggle controls -->
+                    <div class="mt-2 pt-2 border-top border-slate-light text-center w-100">
+                        <span class="text-xxs text-muted d-block mb-1">وضعیت مرحله:</span>
+                        <div class="btn-group btn-group-xs w-100 mb-2" role="group">
+                            <button type="button" 
+                                    class="btn btn-xs {% if stage.is_manually_completed == True %}btn-success{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
+                                    hx-post="{% url 'toggle_stage_completion' stage.id %}?status=completed"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    title="تکمیل دستی">
+                                تکمیل
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-xs {% if stage.is_manually_completed == False %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
+                                    hx-post="{% url 'toggle_stage_completion' stage.id %}?status=pending"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    title="در انتظار دستی">
+                                انتظار
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-xs {% if stage.is_manually_completed is None %}btn-info text-white{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
+                                    hx-post="{% url 'toggle_stage_completion' stage.id %}?status=auto"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    title="سیستمی (خودکار)">
+                                خودکار
+                            </button>
+                        </div>
                     </div>
                     
                     <button class="btn btn-xs btn-outline-primary w-100 mt-2" 
@@ -461,4 +482,9 @@
         });
     });
 </script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.js"></script>
 {% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}ورود اطلاعات موفقیت‌آمیز{% endblock %}
+
+{% block content %}
+<div class="mb-4 text-center">
+    <div class="display-1 text-success mb-3">🎉</div>
+    <h3 class="font-semibold text-secondary mb-1">درون‌ریزی موفقیت‌آمیز اطلاعات</h3>
+    <p class="text-muted text-sm">تمامی اطلاعات فایل اکسل قالب ثابت با موفقیت در پایگاه داده اصلی ذخیره شد.</p>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <div class="col-md-8">
+        <!-- Statistics Card -->
+        <div class="card premium-card mb-4 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="font-semibold text-secondary m-0">📊 آمار درون‌ریزی اطلاعات</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 text-center justify-content-center">
+                    <div class="col-6 col-md border-end">
+                        <div class="display-6 font-bold text-primary">{{ stats.jobs_created|add:stats.jobs_updated }}</div>
+                        <span class="text-xs text-muted">کل مشاغل</span>
+                        <div class="text-xxs text-secondary mt-1">({{ stats.jobs_created }} جدید، {{ stats.jobs_updated }} ویرایش)</div>
+                    </div>
+                    <div class="col-6 col-md border-end">
+                        <div class="display-6 font-bold text-success">{{ stats.candidates_created|add:stats.candidates_updated }}</div>
+                        <span class="text-xs text-muted">کل متقاضیان</span>
+                        <div class="text-xxs text-secondary mt-1">({{ stats.candidates_created }} جدید، {{ stats.candidates_updated }} ویرایش)</div>
+                    </div>
+                    <div class="col-6 col-md border-end">
+                        <div class="display-6 font-bold text-info">{{ stats.applications_processed }}</div>
+                        <span class="text-xs text-muted">درخواست‌های متقاضیان</span>
+                    </div>
+                    <div class="col-6 col-md border-end">
+                        <div class="display-6 font-bold text-warning">{{ stats.stages_populated }}</div>
+                        <span class="text-xs text-muted">نمرات و مراحل ثبت شده</span>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="display-6 font-bold text-danger">{{ stats.absent_count }}</div>
+                        <span class="text-xs text-muted">تعداد غایبین</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warnings Card -->
+        {% if stats.warnings %}
+        <div class="card premium-card mb-4 border-warning border-opacity-50 bg-warning bg-opacity-5">
+            <div class="card-header border-bottom border-warning border-opacity-25 py-3">
+                <h6 class="font-semibold text-warning m-0">⚠️ هشدارهای ثبت شده در حین پردازش</h6>
+            </div>
+            <div class="card-body p-3" style="max-height: 250px; overflow-y: auto;">
+                <ul class="mb-0 text-sm text-secondary ps-3">
+                    {% for warn in stats.warnings %}
+                        <li class="mb-1.5">{{ warn }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4 d-flex justify-content-center gap-3">
+            <a href="{% url 'job_list' %}" class="btn btn-primary px-4 py-2">💼 ورود به مدیریت مشاغل</a>
+            <a href="{% url 'import_upload' %}" class="btn btn-outline-secondary px-4 py-2">📥 آپلود فایل جدید</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+
+{% block title %}پایش متقاضیان به تفکیک مراحل | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }
+    .accent-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-xs {
+        padding: 0.2rem 0.5rem;
+        font-size: 11px;
+        border-radius: 4px;
+    }
+    .progress-thin {
+        height: 6px;
+        border-radius: 3px;
+    }
+    .hover-row {
+        transition: background-color 0.15s ease;
+    }
+    .hover-row:hover {
+        background-color: #f8fafc;
+    }
+    .stage-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- هدر صفحه -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <nav aria-label="breadcrumb" class="mb-1">
+            <ol class="breadcrumb mb-0 text-xs">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">میز کار</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">پایش متقاضیان به تفکیک مراحل</li>
+            </ol>
+        </nav>
+        <h1 class="h3 font-bold text-secondary mb-1" id="page-title">پایش متقاضیان به تفکیک مراحل ارزیابی</h1>
+        <p class="text-muted text-sm m-0">لیست تمامی متقاضیان در جریان ارزیابی فعال با امکان تفکیک و رصد مرحله فعلی</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a id="excel-export-btn" href="?export=excel&q={{ q }}&job_opportunity={{ selected_job_id }}&department={{ selected_dept }}&stage_type={{ selected_stage_type }}" class="btn btn-sm btn-success d-flex align-items-center gap-1.5 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
+                <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+            خروجی اکسل (Excel)
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary font-semibold">بازگشت به داشبورد</a>
+    </div>
+</div>
+
+<!-- آمارهای عددی بالای صفحه -->
+<div class="row g-2 mb-4">
+    <!-- کل متقاضیان فعال -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-warning bg-opacity-10 text-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">کل در حال ارزیابی</h6>
+                    <h5 class="font-bold text-warning m-0" id="total-selected-kpi">{{ total_in_progress }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- غربالگری -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-info bg-opacity-10 text-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3.75a6 6 0 0 0-5.98 6.496A5.25 5.25 0 0 0 6.75 20.25H18a4.5 4.5 0 0 0 2.206-8.423 3.75 3.75 0 0 0-5.026-5.07c-.151-.03-.306-.046-.464-.046h-.014A6 6 0 0 0 10.5 3.75Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">غربالگری</h6>
+                    <h5 class="font-bold text-info m-0" id="screening-kpi">{{ screening_count }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- آزمون کتبی -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-primary bg-opacity-10 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">آزمون کتبی</h6>
+                    <h5 class="font-bold text-primary m-0" id="exam-kpi">{{ exam_count }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- آزمون مهارتی -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-secondary bg-opacity-10 text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a2.25 2.25 0 0 1-3.182-3.182l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091.58.07 1.17-.14 1.743L12 9" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">آزمون مهارتی</h6>
+                    <h5 class="font-bold text-secondary m-0" id="skill-kpi">{{ skill_count }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مصاحبه حضوری -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-success bg-opacity-10 text-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.3.025-.603.04-.907.045m0-8.621a21.003 21.003 0 0 1-8.118-2.628L8.625 5.6c-.328-.154-.702-.2-.107-.15m11.832 3.061c.07.28.107.575.107.879v4.286c0 .878-.607 1.637-1.47 1.787m0-6.952c-.672-.047-1.353-.082-2.039-.104m0 7.056c.15.003.3.004.45.004h.15c.677 0 1.347-.035 2.007-.104m-2.157-6.952a26.35 26.35 0 0 0-7.39-.413M7.5 9.043v8.286c0 .878.607 1.637 1.47 1.787m0-10.073A26.35 26.35 0 0 1 15 8.25m-7.5 9.073c-.672-.047-1.353-.082-2.039-.104m0-6.952A26.35 26.35 0 0 0 12 9.75M4.5 10.511c-.884.284-1.5 1.128-1.5 2.097v4.286c0 1.136.847 2.1 1.98 2.193.3.025.603.04.907.045m0-8.621a21.003 21.003 0 0 0 8.118-2.628L15.375 5.6c.328-.154.702-.2.107-.15m-11.832 3.061c-.07.28-.107.575-.107.879v4.286c0 .878.607 1.637 1.47 1.787m0-6.952c.672-.047 1.353-.082 2.039-.104m0 7.056c-.15.003-.3.004-.45.004h-.15c-.677 0-1.347-.035-2.007-.104M3 3h18v18H3V3Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">مصاحبه حضوری</h6>
+                    <h5 class="font-bold text-success m-0" id="interview-kpi">{{ interview_count }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- کانون ارزیابی -->
+    <div class="col-6 col-md-2">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-3 d-flex align-items-center gap-2">
+                <div class="accent-icon bg-danger bg-opacity-10 text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">کانون ارزیابی</h6>
+                    <h5 class="font-bold text-danger m-0" id="assessment-kpi">{{ assessment_count }} نفر</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card premium-card mb-4" id="filters-card">
+    <div class="card-body p-3">
+        <form method="get" action="" id="filter-form">
+            <div class="row g-2 align-items-center">
+                <!-- جستجوی متنی -->
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
+                            </svg>
+                        </span>
+                        <input type="text" name="q" id="search-input" value="{{ q }}" class="form-control border-start-0 ps-0 text-sm" placeholder="جستجو نام، کدملی، کدشغل...">
+                    </div>
+                </div>
+                
+                <!-- فیلتر مرحله ارزیابی -->
+                <div class="col-md-3">
+                    <select name="stage_type" id="stage-select" class="form-select text-sm">
+                        <option value="">-- فیلتر مرحله ارزیابی --</option>
+                        {% for type_code, type_label in stage_types %}
+                            <option value="{{ type_code }}" {% if selected_stage_type == type_code %}selected{% endif %}>{{ type_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- فیلتر فرصت شغلی -->
+                <div class="col-md-2">
+                    <select name="job_opportunity" id="job-select" class="form-select text-sm">
+                        <option value="">-- فیلتر فرصت شغلی --</option>
+                        {% for job in jobs %}
+                            <option value="{{ job.id }}" {% if selected_job_id|stringformat:"s" == job.id|stringformat:"s" %}selected{% endif %}>{{ job.title }} ({{ job.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- فیلتر دپارتمان -->
+                <div class="col-md-2">
+                    <select name="department" id="dept-select" class="form-select text-sm">
+                        <option value="">-- فیلتر دپارتمان --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept }}" {% if selected_dept == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- دکمه‌ها -->
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" id="submit-filter-btn" class="btn btn-primary-custom flex-grow-1 font-semibold text-sm">اعمال</button>
+                    <a href="{% url 'candidates_by_stage_list' %}" id="reset-filter-btn" class="btn btn-outline-secondary font-semibold text-sm" title="پاک کردن فیلترها">✖</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- جدول لیست متقاضیان -->
+<div class="card premium-card" id="list-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="selected-table">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">نام و نام خانوادگی</th>
+                        <th>کد ملی</th>
+                        <th>اطلاعات تماس</th>
+                        <th>فرصت شغلی</th>
+                        <th>دپارتمان / واحد</th>
+                        <th>مرحله ارزیابی جاری</th>
+                        <th class="text-center">امتیاز کل</th>
+                        <th>آخرین فعالیت</th>
+                        <th class="pe-4 text-end">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr id="app-row-{{ app.id }}" class="hover-row">
+                        <!-- نام -->
+                        <td class="ps-4">
+                            <a href="{% url 'candidate_detail' app.candidate.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary">
+                                {{ app.candidate.first_name }} {{ app.candidate.last_name }}
+                            </a>
+                        </td>
+                        
+                        <!-- کد ملی -->
+                        <td class="font-medium text-muted">{{ app.candidate.national_id }}</td>
+                        
+                        <!-- تماس -->
+                        <td>
+                            <div class="text-xs font-semibold">{{ app.candidate.phone_number }}</div>
+                            <div class="text-muted text-xxs mt-0.5">{{ app.candidate.email|default:"-" }}</div>
+                        </td>
+                        
+                        <!-- فرصت شغلی -->
+                        <td>
+                            <a href="{% url 'job_pipeline' app.job.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary text-sm d-block">
+                                {{ app.job.title }}
+                            </a>
+                            <span class="badge bg-primary bg-opacity-10 text-primary font-semibold text-xxs mt-1">کد شغل: {{ app.job.code }}</span>
+                        </td>
+                        
+                        <!-- دپارتمان -->
+                        <td class="text-xs text-muted">
+                            <div class="font-medium">{{ app.job.department|default:"-" }}</div>
+                            <div class="text-xxs mt-0.5">{{ app.job.unit|default:"-" }}</div>
+                        </td>
+                        
+                        <!-- مرحله جاری ارزیابی -->
+                        <td>
+                            {% if app.current_stage %}
+                                <span class="stage-badge 
+                                    {% if app.current_stage.stage_type == 'SCREENING' %}bg-info bg-opacity-10 text-info
+                                    {% elif app.current_stage.stage_type == 'EXAM' %}bg-primary bg-opacity-10 text-primary
+                                    {% elif app.current_stage.stage_type == 'SKILL_TEST' %}bg-secondary bg-opacity-10 text-secondary
+                                    {% elif app.current_stage.stage_type == 'INTERVIEW' %}bg-success bg-opacity-10 text-success
+                                    {% elif app.current_stage.stage_type == 'ASSESSMENT' %}bg-danger bg-opacity-10 text-danger
+                                    {% else %}bg-light text-secondary{% endif %}">
+                                    {{ app.current_stage.name }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-muted">شروع فرآیند</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- امتیاز کل -->
+                        <td class="text-center">
+                            {% if app.final_score %}
+                                <div class="font-bold text-primary text-xs">{{ app.final_score }}٪</div>
+                                <div class="progress progress-thin mt-1" style="width: 60px; margin: 0 auto;">
+                                    <div class="progress-bar bg-primary" style="width: {{ app.final_score }}%"></div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- آخرین فعالیت -->
+                        <td class="text-xs font-medium text-muted">
+                            {{ app.updated_at|to_jalali }}
+                        </td>
+                        
+                        <!-- عملیات -->
+                        <td class="pe-4 text-end">
+                            <div class="d-flex gap-1 justify-content-end">
+                                <a href="{% url 'job_pipeline' app.job.id %}" class="btn btn-xs btn-outline-primary font-semibold">پایپلاین ارزیابی</a>
+                                <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info font-semibold">مشاهده پرونده</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted text-xs">
+                            هیچ کاندیدایی در حال ارزیابی با مشخصات وارد شده یافت نشد.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-top border-slate py-3 d-flex justify-content-between align-items-center" id="pagination-footer">
+            <div class="text-xs text-muted">
+                نمایش {{ page_obj.start_index }} تا {{ page_obj.end_index }} از {{ paginator.count }} متقاضی در حال ارزیابی
+            </div>
+            <nav aria-label="Candidates by Stage Pagination">
+                <ul class="pagination pagination-sm mb-0 gap-1">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=1 %}" aria-label="First">
+                                «
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=page_obj.previous_page_number %}" aria-label="Previous">
+                                ‹
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link bg-primary border-primary text-white rounded px-2.5 py-1.5 font-bold">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=num %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=page_obj.next_page_number %}" aria-label="Next">
+                                ›
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=paginator.num_pages %}" aria-label="Last">
+                                »
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- تبدیل ارقام به فارسی -->
+<script>
+    const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    function toPersianDigits(str) {
+        if (str === null || str === undefined) return '';
+        return str.toString().replace(/[0-9]/g, w => PERSIAN_DIGITS[+w]);
+    }
+
+    function convertDigitsToPersian(element) {
+        if (!element) return;
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            const parent = node.parentNode;
+            if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.closest('.no-persian-digit')) {
+                continue;
+            }
+            node.nodeValue = toPersianDigits(node.nodeValue);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const listCard = document.getElementById('list-card');
+        if (listCard) {
+            convertDigitsToPersian(listCard);
+        }
+        const kpis = document.querySelectorAll('[id$="-kpi"]');
+        kpis.forEach(el => convertDigitsToPersian(el));
+    });
+</script>
+{% endblock %}

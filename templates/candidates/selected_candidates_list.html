@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+
+{% block title %}پذیرفته‌شدگان نهایی | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }
+    .accent-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-xs {
+        padding: 0.2rem 0.5rem;
+        font-size: 11px;
+        border-radius: 4px;
+    }
+    .progress-thin {
+        height: 6px;
+        border-radius: 3px;
+    }
+    .hover-row {
+        transition: background-color 0.15s ease;
+    }
+    .hover-row:hover {
+        background-color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- هدر صفحه -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <nav aria-label="breadcrumb" class="mb-1">
+            <ol class="breadcrumb mb-0 text-xs">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">میز کار</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">پذیرفته‌شدگان نهایی</li>
+            </ol>
+        </nav>
+        <h1 class="h3 font-bold text-secondary mb-1" id="page-title">لیست پذیرفته‌شدگان نهایی</h1>
+        <p class="text-muted text-sm m-0">لیست تمامی متقاضیانی که ارزیابی‌های خود را با موفقیت پشت سر گذاشته و پذیرش نهایی شده‌اند</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a id="excel-export-btn" href="?export=excel&q={{ q }}&job_opportunity={{ selected_job_id }}&department={{ selected_dept }}" class="btn btn-sm btn-success d-flex align-items-center gap-1.5 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
+                <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+            خروجی اکسل (Excel)
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary font-semibold">بازگشت به داشبورد</a>
+    </div>
+</div>
+
+<!-- آمارهای کوچک بالای صفحه -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="accent-icon bg-success bg-opacity-10 text-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xs mb-1 font-medium">تعداد پذیرفته‌شدگان نهایی</h6>
+                    <h3 class="font-bold text-success m-0" id="total-selected-kpi">{{ paginator.count }} نفر</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="accent-icon bg-primary bg-opacity-10 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xs mb-1 font-medium">تنوع فرصت‌های شغلی جذب‌شده</h6>
+                    <h3 class="font-bold text-primary m-0" id="jobs-count-kpi">{{ recruited_jobs_count }} ردیف</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card glass-card h-100 border-0">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="accent-icon bg-info bg-opacity-10 text-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12v18H3V3Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="text-muted text-xs mb-1 font-medium">تعداد دپارتمان‌های میزبان</h6>
+                    <h3 class="font-bold text-info m-0" id="depts-count-kpi">{{ recruited_depts_count }} دپارتمان</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card premium-card mb-4" id="filters-card">
+    <div class="card-body p-3">
+        <form method="get" action="" id="filter-form">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
+                            </svg>
+                        </span>
+                        <input type="text" name="q" id="search-input" value="{{ q }}" class="form-control border-start-0 ps-0 text-sm" placeholder="جستجو بر اساس نام، کدملی، کدشغل یا عنوان...">
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <select name="job_opportunity" id="job-select" class="form-select text-sm">
+                        <option value="">-- فیلتر فرصت شغلی --</option>
+                        {% for job in jobs %}
+                            <option value="{{ job.id }}" {% if selected_job_id|stringformat:"s" == job.id|stringformat:"s" %}selected{% endif %}>{{ job.title }} ({{ job.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <select name="department" id="dept-select" class="form-select text-sm">
+                        <option value="">-- فیلتر دپارتمان --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept }}" {% if selected_dept == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" id="submit-filter-btn" class="btn btn-primary-custom flex-grow-1 font-semibold text-sm">اعمال</button>
+                    <a href="{% url 'selected_candidates_list' %}" id="reset-filter-btn" class="btn btn-outline-secondary font-semibold text-sm" title="پاک کردن فیلترها">✖</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- جدول لیست پذیرفته شدگان -->
+<div class="card premium-card" id="list-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="selected-table">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">نام و نام خانوادگی</th>
+                        <th>کد ملی</th>
+                        <th>اطلاعات تماس</th>
+                        <th>فرصت شغلی</th>
+                        <th>دپارتمان / واحد</th>
+                        <th class="text-center">امتیاز کل</th>
+                        <th>تاریخ پذیرش</th>
+                        <th class="pe-4 text-end">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr id="app-row-{{ app.id }}" class="hover-row">
+                        <td class="ps-4">
+                            <a href="{% url 'candidate_detail' app.candidate.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary">
+                                {{ app.candidate.first_name }} {{ app.candidate.last_name }}
+                            </a>
+                        </td>
+                        <td class="font-medium text-muted">{{ app.candidate.national_id }}</td>
+                        <td>
+                            <div class="text-xs font-semibold">{{ app.candidate.phone_number }}</div>
+                            <div class="text-muted text-xxs mt-0.5">{{ app.candidate.email|default:"-" }}</div>
+                        </td>
+                        <td>
+                            <a href="{% url 'job_pipeline' app.job.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary text-sm d-block">
+                                {{ app.job.title }}
+                            </a>
+                            <span class="badge bg-primary bg-opacity-10 text-primary font-semibold text-xxs mt-1">کد شغل: {{ app.job.code }}</span>
+                        </td>
+                        <td class="text-xs text-muted">
+                            <div class="font-medium">{{ app.job.department|default:"-" }}</div>
+                            <div class="text-xxs mt-0.5">{{ app.job.unit|default:"-" }}</div>
+                        </td>
+                        <td class="text-center">
+                            {% if app.final_score %}
+                                <div class="font-bold text-success text-xs">{{ app.final_score }}٪</div>
+                                <div class="progress progress-thin mt-1" style="width: 60px; margin: 0 auto;">
+                                    <div class="progress-bar bg-success" style="width: {{ app.final_score }}%"></div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        {% include "candidates/partials/admission_date_view.html" %}
+                        <td class="pe-4 text-end">
+                            <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info font-semibold">مشاهده پرونده</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted text-xs">
+                            هیچ کاندیدای پذیرفته‌شده‌ای با مشخصات وارد شده یافت نشد.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-top border-slate py-3 d-flex justify-content-between align-items-center" id="pagination-footer">
+            <div class="text-xs text-muted">
+                نمایش {{ page_obj.start_index }} تا {{ page_obj.end_index }} از {{ paginator.count }} پذیرفته‌شده نهایی
+            </div>
+            <nav aria-label="Selected Candidates Pagination">
+                <ul class="pagination pagination-sm mb-0 gap-1">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=1 %}" aria-label="First">
+                                «
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=page_obj.previous_page_number %}" aria-label="Previous">
+                                ‹
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link bg-success border-success text-white rounded px-2.5 py-1.5 font-bold">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=num %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=page_obj.next_page_number %}" aria-label="Next">
+                                ›
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link border-slate rounded px-2.5 py-1.5 font-semibold text-secondary hover-bg-light" href="?{% param_replace page=paginator.num_pages %}" aria-label="Last">
+                                »
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.js"></script>
+
+<!-- تبدیل ارقام به فارسی -->
+<script>
+    const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    function toPersianDigits(str) {
+        if (str === null || str === undefined) return '';
+        return str.toString().replace(/[0-9]/g, w => PERSIAN_DIGITS[+w]);
+    }
+
+    function convertDigitsToPersian(element) {
+        if (!element) return;
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            const parent = node.parentNode;
+            if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.closest('.no-persian-digit')) {
+                continue;
+            }
+            node.nodeValue = toPersianDigits(node.nodeValue);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const listCard = document.getElementById('list-card');
+        if (listCard) {
+            convertDigitsToPersian(listCard);
+        }
+        const kpis = document.querySelectorAll('[id$="-kpi"]');
+        kpis.forEach(el => convertDigitsToPersian(el));
+    });
+</script>
+{% endblock %}

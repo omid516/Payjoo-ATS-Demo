@@ -284,6 +284,87 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response_with_plan, '1405/03/18') # 2026-06-08 is 1405-03-18
         self.assertContains(response_with_plan, '1405/03/23') # 2026-06-13 is 1405-03-23
 
+    def test_job_opportunity_empty_stages_assigned_workflow(self):
+        """تست اختصاص مراحل پیش‌فرض به فرصت شغلی ویرایش شده که فاقد مرحله بوده است"""
+        # Create job opportunity with NO workflow template
+        job = JobOpportunity.objects.create(
+            request_number='REQ-TEST-001',
+            title='برنامه‌نویس بک‌اند',
+            code='BE-1402',
+            department='فناوری',
+            description='طراح وب'
+        )
+        self.assertEqual(job.stages.count(), 0)
+
+        # Assign workflow template to the job and save
+        job.workflow = self.workflow
+        job.save()
+
+        # Check if workflow stages are replicated
+        self.assertEqual(job.stages.filter(is_deleted=False).count(), 2)
+
+    def test_job_opportunity_update_workflow_template(self):
+        """تست بروزرسانی الگوی فرآیند فرصت شغلی در نمای ویرایش و بازنشانی صحیح مراحل"""
+        # Create standard workflow
+        another_workflow = WorkflowTemplate.objects.create(
+            name='فرآیند جایگزین',
+            description='یک مرحله مصاحبه'
+        )
+        WorkflowStageTemplate.objects.create(
+            workflow=another_workflow,
+            name='مصاحبه مدیر عامل',
+            default_weight=100,
+            sequence=1
+        )
+
+        job = JobOpportunity.objects.create(
+            request_number='REQ-TEST-002',
+            title='کارشناس سیستم',
+            code='SYS-1402',
+            department='فناوری',
+            workflow=self.workflow,
+            description='ادمین شبکه'
+        )
+        self.assertEqual(job.stages.filter(is_deleted=False).count(), 2)
+
+        self.client.login(username='recruiter_test', password='password123')
+        
+        # Post request to change workflow template to another_workflow
+        url = reverse('job_edit', kwargs={'pk': job.pk})
+        form_data = {
+            'request_number': 'REQ-TEST-002',
+            'title': 'کارشناس سیستم',
+            'code': 'SYS-1402',
+            'department': 'فناوری',
+            'workflow': another_workflow.id,
+            'headcount': 1,
+            'recruitment_type': 'EXTERNAL',
+            'status': 'PLANNING',
+            'stages-TOTAL_FORMS': '2',
+            'stages-INITIAL_FORMS': '2',
+            'stages-MIN_NUM_FORMS': '0',
+            'stages-MAX_NUM_FORMS': '1000',
+            # Old stages in the formset (simulated from HTML rendering)
+            'stages-0-id': job.stages.all()[0].id,
+            'stages-0-name': 'آزمون کتبی',
+            'stages-0-weight': '40',
+            'stages-0-sequence': '1',
+            'stages-1-id': job.stages.all()[1].id,
+            'stages-1-name': 'مصاحبه حضوری',
+            'stages-1-weight': '60',
+            'stages-1-sequence': '2',
+        }
+        
+        response = self.client.post(url, form_data)
+        self.assertEqual(response.status_code, 302)
+
+        # Verify stages are reset and updated to the new template's stage (مصاحبه مدیر عامل)
+        job.refresh_from_db()
+        self.assertEqual(job.workflow, another_workflow)
+        active_stages = job.stages.filter(is_deleted=False)
+        self.assertEqual(active_stages.count(), 1)
+        self.assertEqual(active_stages[0].name, 'مصاحبه مدیر عامل')
+
 
 class JobOpportunityReportTests(TestCase):
     def setUp(self):
@@ -336,6 +417,20 @@ class JobOpportunityReportTests(TestCase):
         self.assertEqual(response.context['total_registered'], 2)
         self.assertEqual(response.context['status_counts']['selected'], 1)
         self.assertEqual(response.context['status_counts']['inprogress'], 1)
+
+    def test_job_opportunity_report_no_assigned_recruiter(self):
+        """تست مشاهده شناسنامه فرصت شغلی زمانی که کارشناس جذب مسئول مشخص نشده است (None)"""
+        self.job.assigned_recruiter = None
+        self.job.save()
+        
+        self.client.login(username='report_recruiter', password='password123')
+        url = reverse('job_opportunity_report', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/job_report.html')
+        self.assertContains(response, 'مهندس صنایع')
+        # Checks that the null recruiter is rendered as "-"
+        self.assertContains(response, '-')
 
 
 class JobOpportunityBulkStatusTests(TestCase):

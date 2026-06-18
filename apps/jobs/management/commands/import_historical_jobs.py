@@ -51,25 +51,31 @@ STATUS_KEYWORD_MAP = [
     (['دریافت', 'در انتظار', 'ثبت درخواست'],                                   'RECEIVED'),
 ]
 
-# ستون‌های تاریخ مراحل: (کلید‌های جستجو در هدر, stage_type, نام نمایشی)
-# اولویت: ستون‌هایی که حاوی «میلادی» هستند (تاریخ واقعی، نه اعداد آماری)
-DATE_STAGE_COLUMNS = [
-    (['شروع ثبت‌نام میلادی', 'شروع ثبت نام میلادی', 'ثبت نام میلادی', 'registration'],       'SCREENING',   'ثبت‌نام'),
-    (['آزمون کتبی میلادی', 'کتبی میلادی'],                                                     'EXAM',        'آزمون کتبی'),
-    (['آزمون مهارتی میلادی', 'مهارتی میلادی'],                                                  'EXAM',        'آزمون مهارتی'),
-    (['مصاحبه میلادی'],                                                                          'INTERVIEW',   'مصاحبه'),
-    (['معرفی به کانون میلادی', 'کانون میلادی', 'assessment center'],                            'ASSESSMENT',  'کانون ارزیابی'),
-    (['اعلام نتیجه کانون میلادی', 'اعلام نتیجه نهایی میلادی', 'اعلام نتیجه میلادی', 'result'], 'OTHER',       'اعلام نتیجه'),
-]
+# نگاشت کلیدهای تاریخ به کلمات جستجوی هدر
+DATE_COLUMN_KEYS = {
+    'start_reg':        ['شروع ثبت‌نام', 'شروع ثبت نام'],
+    'end_reg':          ['پایان ثبت‌نام', 'پایان ثبت نام'],
+    'end_screening':    ['پایان غربالگری'],
+    'exam':             ['آزمون کتبی'],
+    'exam_result':      ['اعلام نتایج کتبی', 'نتایج کتبی'],
+    'skill':            ['آزمون مهارتی'],
+    'interview':        ['مصاحبه'],
+    'kanoon_intro':     ['معرفی به کانون'],
+    'kanoon_result':    ['اعلام نتیجه کانون'],
+    'final_result':     ['اعلام نتیجه نهایی'],
+}
 
 # ستون‌های فیلدهای اصلی: (کلید‌های جستجو, نام متغیر داخلی)
 JOB_FIELD_KEYS = {
-    'job_code':         ['کد فرصت', 'کد شغل', 'کد پست', 'کد', 'code', 'شماره فرصت'],
+    'job_code':         ['کد', 'کد فرصت', 'کد شغل', 'کد پست', 'code', 'شماره فرصت'],
     'title':            ['عنوان پست', 'عنوان شغل', 'عنوان', 'title', 'شغل'],
     'unit':             ['واحد متقاضی', 'واحد', 'دپارتمان', 'department', 'بخش'],
     'headcount':        ['تعداد مورد نیاز', 'تعداد', 'ظرفیت', 'headcount'],
     'current_status':   ['آخرین مرحله', 'وضعیت فعلی', 'وضعیت', 'status'],
-    'workflow_pattern': ['مسیر پیشنهادی', 'الگوی استخدام', 'الگو', 'فرآیند', 'workflow', 'pattern'],
+    'workflow_pattern': ['مسیر پیشنهادی (عنوان)', 'مسیر پیشنهادی', 'الگوی استخدام', 'الگو', 'فرآیند', 'workflow', 'pattern'],
+    'request_number':   ['شماره نامه درخواست', 'شماره نامه', 'نامه درخواست'],
+    'job_category':     ['رده شغلی', 'رده', 'category'],
+    'notes':            ['توضیحات', 'یادداشت', 'notes', 'description'],
 }
 
 
@@ -94,9 +100,28 @@ def parse_jalali_date(val):
     if isinstance(val, (datetime.date, datetime.datetime)):
         return val.date() if isinstance(val, datetime.datetime) else val
 
-    s = normalize_digits(val).strip()
-    if not s or s.lower() in ('none', 'null', '-', ''):
+    if isinstance(val, (int, float)):
+        try:
+            s = str(int(val))
+        except Exception:
+            s = str(val)
+    else:
+        s = str(val).strip()
+
+    s = normalize_digits(s).strip()
+    if not s or s.lower() in ('none', 'null', '-', '', '*'):
         return None
+
+    # فرمت YYYYMMDD بدون جداکننده (مانند 14040710)
+    if s.isdigit() and len(s) == 8:
+        y = int(s[0:4])
+        mo = int(s[4:6])
+        d = int(s[6:8])
+        if 1300 <= y <= 1500 and 1 <= mo <= 12 and 1 <= d <= 31:
+            try:
+                return jdatetime.date(y, mo, d).togregorian()
+            except Exception:
+                pass
 
     # سریال عددی اکسل
     if s.isdigit() and len(s) in (4, 5):
@@ -142,10 +167,15 @@ def map_status(raw_val):
 
 def find_col_idx(headers, keywords):
     """یافتن ایندکس ستون بر اساس کلمات کلیدی (اولین تطابق)"""
-    for i, h in enumerate(headers):
-        h_lower = str(h).strip().lower()
-        for kw in keywords:
-            if kw.lower() in h_lower:
+    # اولویت اول: تطابق دقیق
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if str(h).strip().lower() == kw.lower():
+                return i
+    # اولویت دوم: تطابق جزئی (پیش‌فرض قبلی)
+    for kw in keywords:
+        for i, h in enumerate(headers):
+            if kw.lower() in str(h).strip().lower():
                 return i
     return None
 
@@ -372,15 +402,15 @@ class Command(BaseCommand):
             self.stdout.write(f'  {symbol} {label}: {style(col_name)}')
 
         # --- تشخیص ستون‌های تاریخ مراحل ---
-        date_col_map = []  # list of (stage_name, stage_type, col_idx)
+        date_col_map = {}  # key -> col_idx
         self.stdout.write('\nستون‌های تاریخ مراحل:')
-        for keywords, stage_type, stage_name in DATE_STAGE_COLUMNS:
+        for key, keywords in DATE_COLUMN_KEYS.items():
             idx = find_col_idx(headers, keywords)
             if idx is not None:
-                date_col_map.append((stage_name, stage_type, idx))
-                self.stdout.write(f'  ✓ {stage_name}: {self.style.SUCCESS(f"{chr(34)}{headers[idx]}{chr(34)}")}')
+                date_col_map[key] = idx
+                self.stdout.write(f'  ✓ {key}: {self.style.SUCCESS(f"{chr(34)}{headers[idx]}{chr(34)}")}')
             else:
-                self.stdout.write(f'  - {stage_name}: {self.style.WARNING("— یافت نشد")}')
+                self.stdout.write(f'  - {key}: {self.style.WARNING("— یافت نشد")}')
 
         self.stdout.write('')
 
@@ -458,22 +488,68 @@ class Command(BaseCommand):
             # وضعیت
             mapped_status = map_status(raw_status)
 
-            # خواندن تاریخ‌های مراحل
+            # خواندن تاریخ‌های مراحل و بررسی خطاهای پارسینگ
+            for key, idx in date_col_map.items():
+                if idx < len(row) and row[idx] is not None:
+                    val_str = str(row[idx]).strip()
+                    if val_str and val_str not in ('*', '-', 'None', 'null'):
+                        parsed = parse_jalali_date(row[idx])
+                        if not parsed:
+                            stats['warnings'].append(
+                                f'ردیف {row_num} ({job_code}): تاریخ ستون "{key}" = "{row[idx]}" قابل تبدیل نیست'
+                            )
+
+            def get_date_by_key(key):
+                idx = date_col_map.get(key)
+                if idx is not None and idx < len(row) and row[idx] is not None:
+                    return parse_jalali_date(row[idx])
+                return None
+
             stages_dates_raw = []
-            for stage_name, stage_type, col_idx in date_col_map:
-                if col_idx < len(row):
-                    parsed = parse_jalali_date(row[col_idx])
-                    if parsed:
-                        stages_dates_raw.append((stage_name, stage_type, parsed, parsed))
-                    elif row[col_idx]:
-                        stats['warnings'].append(
-                            f'ردیف {row_num} ({job_code}): تاریخ "{stage_name}" = "{row[col_idx]}" قابل تبدیل نیست'
-                        )
+
+            # Screening stage
+            s_start = get_date_by_key('start_reg')
+            s_end = get_date_by_key('end_screening') or get_date_by_key('end_reg')
+            if s_start or s_end:
+                s_start = s_start or s_end
+                s_end = s_end or s_start
+                stages_dates_raw.append(('غربالگری', 'SCREENING', s_start, s_end))
+
+            # Exam stage
+            e_start = get_date_by_key('exam')
+            e_end = get_date_by_key('exam_result')
+            if e_start or e_end:
+                e_start = e_start or e_end
+                e_end = e_end or e_start
+                stages_dates_raw.append(('آزمون کتبی', 'EXAM', e_start, e_end))
+
+            # Skill test stage
+            sk_start = get_date_by_key('skill')
+            if sk_start:
+                stages_dates_raw.append(('آزمون مهارتی', 'SKILL_TEST', sk_start, sk_start))
+
+            # Interview stage
+            i_start = get_date_by_key('interview')
+            if i_start:
+                stages_dates_raw.append(('مصاحبه', 'INTERVIEW', i_start, i_start))
+
+            # Assessment stage
+            a_start = get_date_by_key('kanoon_intro')
+            a_end = get_date_by_key('kanoon_result')
+            if a_start or a_end:
+                a_start = a_start or a_end
+                a_end = a_end or a_start
+                stages_dates_raw.append(('کانون ارزیابی', 'ASSESSMENT', a_start, a_end))
 
             # محاسبه تاریخ شروع و پایان از مراحل
-            all_dates = [sd[2] for sd in stages_dates_raw if sd[2]]
-            plan_start = min(all_dates) if all_dates else datetime.date.today()
-            plan_end = max(all_dates) if all_dates else datetime.date.today()
+            all_dates = []
+            for sd in stages_dates_raw:
+                if sd[2]: all_dates.append(sd[2])
+                if sd[3]: all_dates.append(sd[3])
+
+            session_date = parse_jalali_date(row[8]) if len(row) > 8 and row[8] is not None else None
+            plan_start = min(all_dates) if all_dates else (session_date or datetime.date.today())
+            plan_end = max(all_dates) if all_dates else (session_date or datetime.date.today())
 
             # بررسی تکراری بودن
             existing = None
@@ -513,20 +589,56 @@ class Command(BaseCommand):
                 stats['jobs_created'] += 1
                 continue
 
+            # خواندن فیلدهای جدید
+            raw_req_num = get_cell(row, 'request_number')
+            req_num_clean = str(raw_req_num).strip() if raw_req_num is not None else ''
+            if req_num_clean and req_num_clean not in ('None', 'null', '', '-'):
+                request_number = f"{req_num_clean} ({job_code})"
+                if len(request_number) > 50:
+                    space_left = 50 - len(f" ({job_code})")
+                    request_number = f"{req_num_clean[:space_left]} ({job_code})"
+            else:
+                request_number = job_code
+
+            raw_category = get_cell(row, 'job_category')
+            job_category = None
+            if raw_category is not None:
+                cat_val = str(raw_category).strip()
+                if 'کارشناس مسئول' in cat_val:
+                    job_category = 'کارشناس مسئول'
+                elif 'کارشناس مدیریت' in cat_val:
+                    job_category = 'کارشناس مدیریت'
+                elif 'کارشناس' in cat_val:
+                    job_category = 'کارشناس'
+                elif 'کاردان مسئول' in cat_val:
+                    job_category = 'کاردان مسئول'
+                elif 'کاردان' in cat_val or 'تکنسین' in cat_val:
+                    job_category = 'کاردان'
+                elif 'اپراتور' in cat_val or 'تعمیرکار' in cat_val:
+                    job_category = 'اپراتور - تعمیرکار'
+                else:
+                    job_category = cat_val
+
+            raw_notes = get_cell(row, 'notes')
+            notes = str(raw_notes).strip() if raw_notes is not None else ''
+
             # ایجاد فرصت شغلی
             job = JobOpportunity.objects.create(
                 code=job_code,
-                request_number=job_code,  # استفاده از کد به عنوان شماره درخواست
+                request_number=request_number,
                 title=title,
                 department=unit,
                 unit=unit,
+                job_category=job_category,
                 headcount=headcount,
                 workflow=wf_obj,
                 status=mapped_status,
                 source=JobOpportunity.SOURCE_IMPORT,
-                description='',          # اختیاری — در فایل اکسل موجود نیست
-                requirements='',         # اختیاری — در فایل اکسل موجود نیست
+                description='',
+                requirements='',
                 start_date=plan_start,
+                end_date=plan_end,
+                notes=notes,
             )
             stats['jobs_created'] += 1
 

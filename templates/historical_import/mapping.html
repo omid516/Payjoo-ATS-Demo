@@ -146,15 +146,33 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-semibold text-xs">واحد متقاضی / دپارتمان</label>
-                    <select name="department_col" class="form-select auto-select" data-keywords="بخش,دپارتمان,واحد,متقاضی">
+                    <label class="form-label font-semibold text-xs">دپارتمان / بخش</label>
+                    <select name="department_col" class="form-select auto-select" data-keywords="بخش,دپارتمان">
                         <option value="">-- انتخاب ستون --</option>
                         {% for header in summary.main_headers %}
                         <option value="{{ header }}">{{ header }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
+                    <label class="form-label font-semibold text-xs">واحد متقاضی (سازمانی)</label>
+                    <select name="unit_col" class="form-select auto-select" data-keywords="واحد,واحد متقاضی,متقاضی">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label font-semibold text-xs">رده شغلی</label>
+                    <select name="job_category_col" class="form-select auto-select" data-keywords="رده,رده شغلی">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label font-semibold text-xs">تعداد مورد نیاز (ظرفیت جذب)</label>
                     <select name="headcount_col" class="form-select auto-select" data-keywords="تعداد,ظرفیت,مورد نیاز">
                         <option value="">-- انتخاب ستون --</option>
@@ -163,7 +181,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label font-semibold text-xs">وضعیت فعلی شغل</label>
                     <select name="status_col" class="form-select auto-select" data-keywords="وضعیت">
                         <option value="">-- انتخاب ستون --</option>
@@ -172,7 +190,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label font-semibold text-xs">تاریخ شروع فرآیند</label>
                     <select name="start_date_col" class="form-select auto-select" data-keywords="تاریخ شروع,شروع,ثبت">
                         <option value="">-- انتخاب ستون --</option>
@@ -181,12 +199,80 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label font-semibold text-xs">الگوی استخدام (Workflow) <span class="text-danger">*</span></label>
                     <select name="workflow_pattern_col" id="workflowPatternColSelect" class="form-select auto-select" data-keywords="الگو,فرآیند,استخدام,مسیر" required>
                         <option value="">-- انتخاب ستون --</option>
                         {% for header in summary.main_headers %}
                         <option value="{{ header }}" {% if header == summary.workflow_col %}selected{% endif %}>{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label font-semibold text-xs">توضیحات (شرح شغل)</label>
+                    <select name="description_col" class="form-select auto-select" data-keywords="توضیحات">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label font-semibold text-xs">شماره نامه معرفی / درخواست</label>
+                    <select name="referral_letter_col" class="form-select auto-select" data-keywords="شماره نامه,نامه معرفی,نامه اعلام نتیجه,نامه,درخواست">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            <h6 class="font-semibold text-secondary mb-3">📅 نگاشت تاریخ‌های اجرای مراحل فرآیند (از شیت وضعیت)</h6>
+            <div class="row g-3">
+                <div class="col-md-2.4 col-sm-6">
+                    <label class="form-label font-semibold text-xs">تاریخ پایان غربالگری</label>
+                    <select name="screening_date_col" class="form-select auto-select" data-keywords="پایان غربالگری,غربالگری">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2.4 col-sm-6">
+                    <label class="form-label font-semibold text-xs">تاریخ آزمون کتبی</label>
+                    <select name="exam_date_col" class="form-select auto-select" data-keywords="آزمون کتبی,کتبی">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2.4 col-sm-6">
+                    <label class="form-label font-semibold text-xs">تاریخ آزمون مهارتی</label>
+                    <select name="skill_test_date_col" class="form-select auto-select" data-keywords="آزمون مهارتی,مهارتی">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2.4 col-sm-6">
+                    <label class="form-label font-semibold text-xs">تاریخ مصاحبه حضوری</label>
+                    <select name="interview_date_col" class="form-select auto-select" data-keywords="مصاحبه,جلسه مصاحبه">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2.4 col-sm-6">
+                    <label class="form-label font-semibold text-xs">تاریخ کانون ارزیابی</label>
+                    <select name="assessment_date_col" class="form-select auto-select" data-keywords="کانون,کانون ارزیابی,ارزیابی,اعلام نتیجه کانون">
+                        <option value="">-- انتخاب ستون --</option>
+                        {% for header in summary.main_headers %}
+                        <option value="{{ header }}">{{ header }}</option>
                         {% endfor %}
                     </select>
                 </div>

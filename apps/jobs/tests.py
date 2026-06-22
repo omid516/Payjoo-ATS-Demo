@@ -5,7 +5,10 @@ from django.urls import reverse
 from datetime import date, datetime
 import jdatetime
 
-from apps.jobs.models import WorkflowTemplate, WorkflowStageTemplate, JobOpportunity, JobOpportunityStage
+from apps.jobs.models import (
+    WorkflowTemplate, WorkflowStageTemplate, JobOpportunity, JobOpportunityStage,
+    CentralCompetency, JobOpportunityCompetency
+)
 from apps.jobs.forms import JobOpportunityFormSet, JobOpportunityForm
 from apps.core.templatetags.jalali_tags import to_jalali
 
@@ -32,6 +35,20 @@ class JobOpportunityAndWorkflowTests(TestCase):
             name='مصاحبه حضوری',
             default_weight=60,
             sequence=2
+        )
+
+        # Create CentralCompetency records for validation in form-based tests
+        CentralCompetency.objects.create(
+            post_code='DEVOPS-01', post_title='DevOps', code='KN_DEV_01', title='DevOps Knowledge',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی', importance=1, level=2
+        )
+        CentralCompetency.objects.create(
+            post_code='AI-02', post_title='AI', code='KN_AI_02', title='AI Knowledge',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی', importance=1, level=2
+        )
+        CentralCompetency.objects.create(
+            post_code='SYS-1402', post_title='System Specialist', code='KN_SYS_1402', title='System Knowledge',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی', importance=1, level=2
         )
 
     def test_workflow_template_creation(self):
@@ -708,6 +725,486 @@ class JobOpportunityDeletionAndReuseTests(TestCase):
         # Candidate should NOT be deleted because they have active application to Job2
         candidate.refresh_from_db()
         self.assertFalse(candidate.is_deleted)
+
+
+class CompetencyEngineTests(TestCase):
+    def setUp(self):
+        # Create a user and log them in
+        self.user = User.objects.create_superuser(username='admin_user', password='password123')
+        self.client.login(username='admin_user', password='password123')
+
+        # Create central competencies for tests
+        self.cc1 = CentralCompetency.objects.create(
+            post_code='8526', post_title='ریخته گری', code='KNHS0003', title='HSE',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+        self.cc2 = CentralCompetency.objects.create(
+            post_code='8526', post_title='ریخته گری', code='SKHS0001', title='مهارت HSE',
+            competency_type='SK', category_raw='SK- مهارت', cluster_raw='2-فنی',
+            importance=2, level=2
+        )
+        self.cc3 = CentralCompetency.objects.create(
+            post_code='8526', post_title='ریخته گری', code='GEHS0001', title='رفتار HSE',
+            competency_type='GE', category_raw='GE-رفتاری', cluster_raw='3-عمومی',
+            importance=3, level=1
+        )
+
+        # Create a job opportunity
+        self.job = JobOpportunity.objects.create(
+            request_number='REQ-COMP-01', title='کارشناس متالورژی', code='8526', department='تولید'
+        )
+
+    def test_calculate_assessment_plan_math(self):
+        """تست ریاضی موتور ارزیابی و رعایت محدودیت‌های وزنی مراحل"""
+        from apps.jobs.utils import calculate_assessment_plan
+        
+        # Test competency model mocks or real selected instances
+        jc1 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc1, code=self.cc1.code, title=self.cc1.title,
+            competency_type=self.cc1.competency_type, importance=self.cc1.importance, level=self.cc1.level
+        )
+        jc2 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc2, code=self.cc2.code, title=self.cc2.title,
+            competency_type=self.cc2.competency_type, importance=self.cc2.importance, level=self.cc2.level
+        )
+        jc3 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc3, code=self.cc3.code, title=self.cc3.title,
+            competency_type=self.cc3.competency_type, importance=self.cc3.importance, level=self.cc3.level
+        )
+        
+        res = calculate_assessment_plan([jc1, jc2, jc3])
+        stages = res['stages']
+        
+        # Verify that weights sum to exactly 100%
+        total_weight = sum(s['weight'] for s in stages.values())
+        self.assertEqual(total_weight, 100)
+        
+        # Verify constraints are applied
+        # EXAM (min 20, max 50)
+        # SKILL_TEST (min 20, max 40)
+        # INTERVIEW (min 10, max 25)
+        # ASSESSMENT (min 15, max 40)
+        if 'EXAM' in stages:
+            self.assertTrue(20 <= stages['EXAM']['weight'] <= 50)
+        if 'SKILL_TEST' in stages:
+            self.assertTrue(20 <= stages['SKILL_TEST']['weight'] <= 40)
+        if 'INTERVIEW' in stages:
+            self.assertTrue(10 <= stages['INTERVIEW']['weight'] <= 25)
+        if 'ASSESSMENT' in stages:
+            self.assertTrue(15 <= stages['ASSESSMENT']['weight'] <= 40)
+
+    def test_excel_import_logic(self):
+        """تست همگام‌سازی و ایمپورت اکسل شایستگی‌ها"""
+        import tempfile
+        import openpyxl
+        from apps.jobs.utils import parse_competencies_excel
+
+        # Create a mock Excel sheet
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = 'Result'
+            
+            headers = [
+                'کد پست', 'پست', 'کد شایستگی', 'کد شایستگی قدیم', 'شایستگی',
+                'نوع شایستگی', 'طبقه', 'خوشه', 'شایستگی از تاریخ', 'شایستگی تا تاریخ',
+                'اهمیت شایستگی', 'سطح شایستگی', 'کد مدیریت', 'مدیریت',
+                'کد معاونت', 'معاونت', 'کد قسمت', 'قسمت', 'کد مرکز هزینه', 'مرکز هزینه'
+            ]
+            ws.append(headers)
+            
+            row1 = [
+                '8526', 'ریخته گری مداوم', 'KNHS0003', 'KN0065', 'نظام مدیریت HSE',
+                '1- شایستگی شغل', 'KN- دانش', '3-عمومی', '1400/07/20', '1500/12/29',
+                '1- محوری', '3- تسلط', '17', 'ریخته گری', '360', 'بهره برداری',
+                'MPC/5', 'دفتر MPC', '2917', 'برنامه ریزی'
+            ]
+            row2 = [
+                '9000', 'پست جدید', 'SKTECH01', 'SK0200', 'جوشکاری تخصصی',
+                '2-شایستگی پست', 'SK- مهارت', '2-فنی', '1400/07/20', '1500/12/29',
+                '2- تکلیف محور', '2- توانایی', '17', 'فنی', '360', 'بهره برداری',
+                'MPC/5', 'دفتر فنی', '2918', 'تعمیرات'
+            ]
+            ws.append(row1)
+            ws.append(row2)
+            
+            wb.save(tmp.name)
+            tmp_path = tmp.name
+
+        try:
+            # Import mock Excel
+            stats = parse_competencies_excel(tmp_path)
+            
+            # Check import stats
+            # In setUp we created 3 competencies:
+            # - (8526, KNHS0003) -> updated (was created in setup, exists in excel)
+            # - (8526, SKHS0001) -> deleted (setup, doesn't exist in excel)
+            # - (8526, GEHS0001) -> deleted (setup, doesn't exist in excel)
+            # - (9000, SKTECH01) -> created (new in excel)
+            self.assertEqual(stats['created'], 1)
+            self.assertEqual(stats['updated'], 1)
+            self.assertEqual(stats['deleted'], 2)
+            
+            # Verify database rows
+            self.assertEqual(CentralCompetency.objects.filter(is_deleted=False).count(), 2)
+            self.assertEqual(CentralCompetency.objects.filter(post_code='9000', code='SKTECH01').count(), 1)
+        finally:
+            import os
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def test_job_competency_config_views(self):
+        """تست ویوی تخصیص شایستگی‌ها به فرصت شغلی"""
+        # Load config page
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/job_competency_config.html')
+
+        # 1. Test search posts dynamic GET action
+        search_response = self.client.get(url, {'action': 'search_posts', 'q': '8526'})
+        self.assertEqual(search_response.status_code, 200)
+        import json
+        res_data = json.loads(search_response.content)
+        self.assertIn('items', res_data)
+        # Ensure our cc1/cc2 post code '8526' is in the results
+        post_codes = [item['post_code'] for item in res_data['items']]
+        self.assertIn('8526', post_codes)
+
+        # 2. Test load post competencies action
+        load_response = self.client.post(url, {'action': 'load_post_comps', 'post_code': '8526'})
+        self.assertEqual(load_response.status_code, 200)
+        self.assertTemplateUsed(load_response, 'jobs/partials/post_competencies_list.html')
+        self.assertContains(load_response, self.cc1.title)
+        self.assertContains(load_response, self.cc2.title)
+
+        # 3. Test preview competencies action
+        preview_response = self.client.post(url, {
+            'action': 'preview',
+            'selected_competencies': f"{self.cc1.id},{self.cc2.id}"
+        })
+        self.assertEqual(preview_response.status_code, 200)
+        self.assertTemplateUsed(preview_response, 'jobs/partials/competency_preview_table.html')
+        self.assertContains(preview_response, 'آزمون کتبی')
+        self.assertContains(preview_response, 'آزمون مهارتی')
+
+        # 4. Select competencies KNHS0003 and SKHS0001
+        data = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id, self.cc2.id]
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302) # Redirects to job list
+
+        # Verify job stages and competencies are created
+        self.job.refresh_from_db()
+        self.assertEqual(self.job.stages.filter(is_deleted=False).count(), 3)
+        # Stages created: EXAM, SKILL_TEST, INTERVIEW (because SK requires both skills test and interview)
+        stage_names = set(s.stage_type for s in self.job.stages.filter(is_deleted=False))
+        self.assertEqual(stage_names, {'EXAM', 'SKILL_TEST', 'INTERVIEW'})
+        
+        # Verify AssessmentPlan printable page
+        print_url = reverse('job_assessment_plan_print', kwargs={'job_id': self.job.id})
+        print_response = self.client.get(print_url)
+        self.assertEqual(print_response.status_code, 200)
+        self.assertTemplateUsed(print_response, 'jobs/assessment_plan_print.html')
+
+    def test_custom_weights_and_validation(self):
+        """تست اختصاص اوزان سفارشی و اعتبارسنجی محدودیت‌ها"""
+        from apps.jobs.utils import calculate_assessment_plan
+        
+        # 1. Test valid custom weights
+        # cc1 (KN) and cc2 (SK) are active. Active stages: EXAM, SKILL_TEST, INTERVIEW.
+        # Limits: EXAM (20-50), SKILL_TEST (20-40), INTERVIEW (10-25).
+        # We set: EXAM=40, SKILL_TEST=35, INTERVIEW=25. Sum=100.
+        custom_weights = {
+            'EXAM': 40,
+            'SKILL_TEST': 35,
+            'INTERVIEW': 25
+        }
+        res = calculate_assessment_plan([self.cc1, self.cc2], custom_weights=custom_weights)
+        self.assertEqual(len(res['errors']), 0)
+        self.assertEqual(res['stages']['EXAM']['weight'], 40)
+        self.assertEqual(res['stages']['SKILL_TEST']['weight'], 35)
+        self.assertEqual(res['stages']['INTERVIEW']['weight'], 25)
+        
+        # 2. Test invalid weights (violating min/max limits)
+        # EXAM=10 (less than 20), SKILL_TEST=40, INTERVIEW=50 (more than 25)
+        custom_weights_invalid = {
+            'EXAM': 10,
+            'SKILL_TEST': 40,
+            'INTERVIEW': 50
+        }
+        res_invalid = calculate_assessment_plan([self.cc1, self.cc2], custom_weights=custom_weights_invalid)
+        self.assertGreater(len(res_invalid['errors']), 0)
+        self.assertTrue(any("کمتر از ۲۰" in err or "کمتر از 20" in err for err in res_invalid['errors']))
+        self.assertTrue(any("بیشتر از ۲۵" in err or "بیشتر از 25" in err for err in res_invalid['errors']))
+        
+        # 3. Test sum != 100
+        custom_weights_sum = {
+            'EXAM': 30,
+            'SKILL_TEST': 30,
+            'INTERVIEW': 20
+        } # sum = 80
+        res_sum = calculate_assessment_plan([self.cc1, self.cc2], custom_weights=custom_weights_sum)
+        self.assertIn("مجموع اوزان مراحل ارزیابی باید دقیقاً ۱۰۰٪ باشد. (مجموع فعلی: 80٪)", res_sum['errors'])
+
+    def test_workflow_template_recommendation_and_save(self):
+        """تست پیشنهاد الگوی فرآیند استخدام منطبق و ثبت آن روی فرصت شغلی"""
+        from apps.jobs.models import WorkflowTemplate, WorkflowStageTemplate
+        from apps.jobs.utils import suggest_workflow_templates
+        
+        # Create a test workflow template that perfectly matches {'EXAM', 'INTERVIEW', 'SKILL_TEST'}
+        workflow = WorkflowTemplate.objects.create(name="الگوی تست کتبی+مهارتی+مصاحبه")
+        WorkflowStageTemplate.objects.create(workflow=workflow, name="کتبی", stage_type='EXAM', sequence=1)
+        WorkflowStageTemplate.objects.create(workflow=workflow, name="مهارتی", stage_type='SKILL_TEST', sequence=2)
+        WorkflowStageTemplate.objects.create(workflow=workflow, name="مصاحبه", stage_type='INTERVIEW', sequence=3)
+        
+        # Suggest templates based on active stages
+        active_stages = ['EXAM', 'SKILL_TEST', 'INTERVIEW']
+        suggestions = suggest_workflow_templates(active_stages)
+        
+        # The created workflow template should be a perfect match (100% match)
+        perf_matches = [s for s in suggestions if s['template'].id == workflow.id]
+        self.assertEqual(len(perf_matches), 1)
+        self.assertEqual(perf_matches[0]['match_percentage'], 100)
+        self.assertTrue(perf_matches[0]['is_perfect_match'])
+        
+        # Save config with custom weights and selected workflow template
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        data = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id, self.cc2.id],
+            'stage_weight_EXAM': 40,
+            'stage_weight_SKILL_TEST': 35,
+            'stage_weight_INTERVIEW': 25,
+            'workflow_template_id': workflow.id
+        }
+        response = self.client.post(url, data)
+        
+        self.job.refresh_from_db()
+        self.assertEqual(response.status_code, 302) # Success redirect
+        
+        # Verify job stages weights and workflow template assignment
+        self.assertEqual(self.job.workflow.id, workflow.id)
+        self.assertEqual(self.job.stages.get(stage_type='EXAM').weight, 40)
+        self.assertEqual(self.job.stages.get(stage_type='SKILL_TEST').weight, 35)
+        self.assertEqual(self.job.stages.get(stage_type='INTERVIEW').weight, 25)
+
+    def test_custom_passing_scores_validation_and_persistence(self):
+        """تست تعیین حد نصاب‌های سفارشی و صحت ذخیره‌سازی در پایگاه داده"""
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        
+        # 1. Validation error: Out of bounds (e.g. 120 or -10)
+        data_invalid = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id, self.cc2.id],
+            'stage_weight_EXAM': 40,
+            'stage_weight_SKILL_TEST': 35,
+            'stage_weight_INTERVIEW': 25,
+            'stage_passing_score_EXAM': 120,
+            'stage_passing_score_SKILL_TEST': 70,
+            'stage_passing_score_INTERVIEW': -10
+        }
+        response_invalid = self.client.post(url, data_invalid)
+        self.assertEqual(response_invalid.status_code, 200)
+        self.assertContains(response_invalid, "باید بین ۰ و ۱۰۰ باشد")
+
+        # 2. Valid scenario: correct weights and passing scores
+        data_valid = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id, self.cc2.id],
+            'stage_weight_EXAM': 40,
+            'stage_weight_SKILL_TEST': 35,
+            'stage_weight_INTERVIEW': 25,
+            'stage_passing_score_EXAM': 75,
+            'stage_passing_score_SKILL_TEST': 80,
+            'stage_passing_score_INTERVIEW': 65
+        }
+        response_valid = self.client.post(url, data_valid)
+        self.assertEqual(response_valid.status_code, 302)
+        
+        # Verify db stages values
+        self.job.refresh_from_db()
+        exam_stage = self.job.stages.get(stage_type='EXAM')
+        skill_stage = self.job.stages.get(stage_type='SKILL_TEST')
+        interview_stage = self.job.stages.get(stage_type='INTERVIEW')
+        
+        self.assertEqual(int(exam_stage.passing_score), 75)
+        self.assertEqual(int(skill_stage.passing_score), 80)
+        self.assertEqual(int(interview_stage.passing_score), 65)
+
+    def test_job_opportunity_creation_redirects_to_config(self):
+        """تست اینکه پس از ایجاد فرصت شغلی جدید، کاربر به صفحه پیکربندی شایستگی‌ها هدایت می‌شود"""
+        # Create a new central competency with unique post code 8527
+        CentralCompetency.objects.create(
+            post_code='8527', post_title='ریخته گری ۲', code='KNHS0004', title='HSE 2',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+        
+        form_data = {
+            'request_number': 'REQ-REDIRECT-001',
+            'title': 'شغل تستی ریدایرکت',
+            'code': '8527',
+            'department': 'فناوری اطلاعات',
+            'unit': 'فناوری',
+            'job_category': 'کارشناس',
+            'headcount': 2,
+            'recruitment_type': 'EXTERNAL',
+            'status': 'PLANNING',
+            'stages-TOTAL_FORMS': '0',
+            'stages-INITIAL_FORMS': '0',
+            'stages-MIN_NUM_FORMS': '0',
+            'stages-MAX_NUM_FORMS': '1000',
+        }
+        url = reverse('job_add')
+        response = self.client.post(url, form_data)
+        
+        new_job = JobOpportunity.objects.get(request_number='REQ-REDIRECT-001')
+        expected_redirect_url = reverse('job_competency_config', kwargs={'job_id': new_job.id})
+        self.assertRedirects(response, expected_redirect_url)
+
+    def test_post_detail_api_auto_populates_fields(self):
+        """تست گرفتن اطلاعات پست سازمانی برای پرکردن خودکار فرم شغل"""
+        # Create a central competency with management/section metadata
+        CentralCompetency.objects.create(
+            post_code='8528',
+            post_title='کارشناس مسئول ریخته گری',
+            code='KNHS0005',
+            title='HSE 3',
+            competency_type='KN',
+            category_raw='KN- دانش',
+            cluster_raw='3-عمومی',
+            importance=1,
+            level=3,
+            management_name='تولید فولاد',
+            section_name='بخش ذوب'
+        )
+
+        url = reverse('post_detail_api') + '?post_code=8528'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+        import json
+        data = json.loads(response.content)
+        self.assertEqual(data['title'], 'کارشناس مسئول ریخته گری')
+        self.assertEqual(data['department'], 'تولید فولاد')
+        self.assertEqual(data['unit'], 'بخش ذوب')
+        self.assertEqual(data['job_category'], 'کارشناس مسئول')
+
+    def test_custom_competencies_preview(self):
+        """تست پیش‌نمایش زنده محاسبات با افزودن شایستگی‌های دستی"""
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        
+        # We will send a manual competency of type 'ST' (Styles & Values)
+        # ST type: triggers Assessment Center stage if importance is 1 or 2.
+        import json
+        custom_comp = {
+            'title': 'ارزش سازمانی پیجو',
+            'competency_type': 'ST',
+            'importance': 1,
+            'level': 3
+        }
+        
+        preview_response = self.client.post(url, {
+            'action': 'preview',
+            'selected_competencies': f"{self.cc1.id}",
+            'custom_competencies': [json.dumps(custom_comp)]
+        })
+        
+        self.assertEqual(preview_response.status_code, 200)
+        self.assertTemplateUsed(preview_response, 'jobs/partials/competency_preview_table.html')
+        self.assertContains(preview_response, 'آزمون کتبی')
+        self.assertContains(preview_response, 'کانون ارزیابی')
+
+    def test_custom_competencies_persistence(self):
+        """تست ذخیره‌سازی صحیح شایستگی‌های دستی در دیتابیس با فلگ is_custom=True"""
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        import json
+        custom_comp = {
+            'title': 'مهارت برنامه نویسی پایتون دستی',
+            'competency_type': 'SK',
+            'importance': 2,
+            'level': 2
+        }
+        
+        data = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id],
+            'custom_competencies': [json.dumps(custom_comp)]
+        }
+        
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        
+        # Verify from database
+        self.job.refresh_from_db()
+        selected = self.job.selected_competencies.filter(is_deleted=False)
+        self.assertEqual(selected.count(), 2)
+        
+        custom_db = selected.filter(is_custom=True).first()
+        self.assertIsNotNone(custom_db)
+        self.assertEqual(custom_db.title, 'مهارت برنامه نویسی پایتون دستی')
+        self.assertEqual(custom_db.competency_type, 'SK')
+        self.assertEqual(custom_db.importance, 2)
+        self.assertEqual(custom_db.level, 2)
+        self.assertTrue(custom_db.is_custom)
+
+    def test_custom_competencies_report_view_and_csv(self):
+        """تست صفحه گزارش شایستگی‌های دستی و صحت خروجی CSV"""
+        # Create a custom competency for test
+        custom_jc = JobOpportunityCompetency.objects.create(
+            job=self.job,
+            code='MANUAL-TEST-123',
+            title='شایستگی تست دستی گزارش',
+            competency_type='GE',
+            importance=1,
+            level=3,
+            is_custom=True
+        )
+        
+        url = reverse('custom_competencies_report')
+        
+        # 1. HTML view rendering
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/custom_competencies_report.html')
+        self.assertContains(response, 'شایستگی تست دستی گزارش')
+        
+        # 2. Filtering by query search 'تست دستی'
+        response_filtered = self.client.get(url, {'q': 'تست دستی'})
+        self.assertEqual(response_filtered.status_code, 200)
+        self.assertContains(response_filtered, 'شایستگی تست دستی گزارش')
+        
+        response_empty = self.client.get(url, {'q': 'غیرموجود'})
+        self.assertEqual(response_empty.status_code, 200)
+        self.assertNotContains(response_empty, 'شایستگی تست دستی گزارش')
+        
+        # 3. CSV export download
+        csv_response = self.client.get(url + '?export=csv')
+        self.assertEqual(csv_response.status_code, 200)
+        self.assertEqual(csv_response['Content-Type'], 'text/csv; charset=utf-8-sig')
+        self.assertTrue(csv_response['Content-Disposition'].startswith('attachment; filename='))
+        
+        # Decode response content and check headers and values
+        content_str = csv_response.content.decode('utf-8-sig')
+        self.assertIn('عنوان شایستگی', content_str)
+        self.assertIn('شایستگی تست دستی گزارش', content_str)
+
+        # 4. Role restriction test (Department user should be forbidden)
+        self.client.logout()
+        dept_user = User.objects.create_user(username='dept_user', password='password123')
+        from apps.accounts.models import UserProfile
+        dept_user.profile.role = UserProfile.ROLE_DEPARTMENT_USER
+        dept_user.profile.save()
+        self.client.login(username='dept_user', password='password123')
+        
+        forbidden_response = self.client.get(url)
+        self.assertEqual(forbidden_response.status_code, 403)
+
+
 
 
 

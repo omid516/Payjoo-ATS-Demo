@@ -4,6 +4,8 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
+from django.db import transaction
+from django.utils import timezone
 
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.accounts.models import UserProfile
@@ -198,7 +200,7 @@ class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView
 
     def get_success_url(self):
         from django.urls import reverse
-        return reverse('job_planning', kwargs={'job_id': self.object.pk}) + '?next=print_doc'
+        return reverse('job_competency_config', kwargs={'job_id': self.object.pk})
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -240,7 +242,7 @@ class JobOpportunityUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView
 
     def get_success_url(self):
         from django.urls import reverse
-        return reverse('job_print_doc', kwargs={'pk': self.object.pk})
+        return reverse('job_competency_config', kwargs={'job_id': self.object.pk})
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -517,6 +519,11 @@ class JobOpportunityPrintDocView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
     def get_queryset(self):
         return JobOpportunity.objects.filter(is_deleted=False).prefetch_related('stages', 'stages__interviewers__user')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['selected_competencies'] = self.object.selected_competencies.filter(is_deleted=False)
+        return context
+
 
 class JobOpportunityBulkStatusView(LoginRequiredMixin, RoleRequiredMixin, View):
     allowed_roles = [
@@ -573,3 +580,827 @@ class JobOpportunityBulkStatusView(LoginRequiredMixin, RoleRequiredMixin, View):
                 messages.info(request, "وضعیت فرصت‌های شغلی مورد نظر از قبل با وضعیت انتخابی یکسان بود.")
                 
         return redirect('job_list')
+
+
+# Competency-Based Assessment Views
+
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.db.models import Q, Count, Avg
+from django.views.generic import TemplateView, DetailView
+from django.core.files.storage import FileSystemStorage
+import os
+
+from .models import CentralCompetency, JobOpportunityCompetency, JobOpportunity, JobOpportunityStage, AssessmentCompetency
+from .utils import parse_competencies_excel, calculate_assessment_plan, normalize_persian_digits
+
+
+class CentralCompetencyUploadView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+    template_name = 'jobs/competency_upload.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        if 'competency_file' not in request.FILES:
+            messages.error(request, "لطفاً یک فایل اکسل انتخاب کنید.")
+            return render(request, self.template_name)
+
+        excel_file = request.FILES['competency_file']
+        if not excel_file.name.endswith(('.xlsx', '.xls')):
+            messages.error(request, "فرمت فایل باید اکسل (.xlsx, .xls) باشد.")
+            return render(request, self.template_name)
+
+        # Save temporarily
+        fs = FileSystemStorage(location=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../scratch'))
+        filename = fs.save(excel_file.name, excel_file)
+        file_path = fs.path(filename)
+
+        try:
+            stats = parse_competencies_excel(file_path)
+            msg = (f"بانک شایستگی‌ها با موفقیت به‌روزرسانی شد. "
+                   f"جدید: {stats['created']} | ویرایش شده: {stats['updated']} | "
+                   f"حذف شده: {stats['deleted']} | نادیده گرفته شده: {stats['skipped']}")
+            messages.success(request, msg)
+            return redirect('competency_list')
+        except Exception as e:
+            messages.error(request, f"خطا در پردازش فایل اکسل: {str(e)}")
+            return render(request, self.template_name)
+        finally:
+            # Cleanup temp file
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+
+class CentralCompetencyListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = CentralCompetency
+    template_name = 'jobs/competency_list.html'
+    context_object_name = 'competencies'
+    paginate_by = 25
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_queryset(self):
+        queryset = CentralCompetency.objects.filter(is_deleted=False)
+        
+        # Search query
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            q_norm = normalize_persian_digits(q)
+            queryset = queryset.filter(
+                Q(code__icontains=q) | 
+                Q(code__icontains=q_norm) |
+                Q(post_code__icontains=q) |
+                Q(post_code__icontains=q_norm) |
+                Q(title__icontains=q) |
+                Q(post_title__icontains=q)
+            )
+
+        # Filters
+        comp_type = self.request.GET.get('competency_type', '').strip()
+        if comp_type:
+            queryset = queryset.filter(competency_type=comp_type)
+
+        importance = self.request.GET.get('importance', '').strip()
+        if importance:
+            queryset = queryset.filter(importance=importance)
+
+        level = self.request.GET.get('level', '').strip()
+        if level:
+            queryset = queryset.filter(level=level)
+
+        return queryset.order_by('post_code', 'code')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['competency_type'] = self.request.GET.get('competency_type', '').strip()
+        context['importance'] = self.request.GET.get('importance', '').strip()
+        context['level'] = self.request.GET.get('level', '').strip()
+        
+        # Type display choices mapping
+        context['type_choices'] = [
+            ('KN', 'دانش (KN)'),
+            ('SK', 'مهارت (SK)'),
+            ('AB', 'توانایی (AB)'),
+            ('GE', 'رفتاری (GE)'),
+            ('ST', 'ارزش‌ها و سبک‌ها (ST)'),
+            ('PR', 'گردشکار (PR)'),
+            ('CQ', 'گواهینامه و صلاحیت (CQ)'),
+            ('IN', 'علایق حرفه‌ای (IN)'),
+        ]
+        context['importance_choices'] = [
+            ('1', '۱ - محوری'),
+            ('2', '۲ - تکلیف محور'),
+            ('3', '۳ - حداقلی'),
+        ]
+        context['level_choices'] = [
+            ('1', '۱ - آشنایی'),
+            ('2', '۲ - توانایی'),
+            ('3', '۳ - تسلط'),
+        ]
+        return context
+
+
+class RecruitmentPatternDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
+    template_name = 'jobs/recruitment_patterns.html'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Total counts
+        total_comps = CentralCompetency.objects.filter(is_deleted=False).count()
+        context['total_count'] = total_comps
+        
+        # Distribution by Type
+        type_dist = (
+            CentralCompetency.objects.filter(is_deleted=False)
+            .values('competency_type')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        context['type_distribution'] = type_dist
+        
+        # Unique Posts Count
+        unique_posts_count = (
+            CentralCompetency.objects.filter(is_deleted=False)
+            .values('post_code')
+            .distinct()
+            .count()
+        )
+        context['unique_posts_count'] = unique_posts_count
+        
+        # Fetch some sample post patterns
+        # Group by post code, select top posts by competency count
+        top_posts = (
+            CentralCompetency.objects.filter(is_deleted=False)
+            .values('post_code', 'post_title')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:8]
+        )
+        
+        post_patterns = []
+        for post in top_posts:
+            post_code = post['post_code']
+            post_title = post['post_title']
+            
+            # Fetch competencies for this post
+            comps = CentralCompetency.objects.filter(post_code=post_code, is_deleted=False)
+            
+            # Use calculate_assessment_plan helper
+            # Need to mock the JobOpportunityCompetency models for calculate_assessment_plan
+            class MockComp:
+                def __init__(self, c):
+                    self.code = c.code
+                    self.title = c.title
+                    self.competency_type = c.competency_type
+                    self.importance = c.importance
+                    self.level = c.level
+                    
+            mock_comps = [MockComp(c) for c in comps]
+            plan = calculate_assessment_plan(mock_comps)
+            
+            post_patterns.append({
+                'post_code': post_code,
+                'post_title': post_title,
+                'competencies_count': post['count'],
+                'plan': plan['stages']
+            })
+            
+        context['post_patterns'] = post_patterns
+        return context
+
+
+class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+    template_name = 'jobs/job_competency_config.html'
+
+    def get_job(self, job_id):
+        return get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+
+    def get(self, request, job_id):
+        job = self.get_job(job_id)
+        
+        # 1. Handle remote search request for posts
+        action = request.GET.get('action', '').strip()
+        if action == 'search_posts':
+            q = request.GET.get('q', '').strip()
+            
+            # Fetch matching unique posts
+            from django.db.models import Q, Count
+            posts_query = CentralCompetency.objects.filter(is_deleted=False)
+            if q:
+                posts_query = posts_query.filter(
+                    Q(post_code__icontains=q) | Q(post_title__icontains=q)
+                )
+            
+            # Group by post_code and count the number of competencies
+            unique_posts = (
+                posts_query.values('post_code', 'post_title')
+                .annotate(count=Count('id'))
+                .order_by('post_code')[:50]
+            )
+            
+            items = []
+            for p in unique_posts:
+                title = p['post_title'] or 'بدون عنوان'
+                items.append({
+                    'post_code': p['post_code'],
+                    'display_name': f"{p['post_code']} - {title} ({p['count']} شایستگی)"
+                })
+                
+            import json
+            return HttpResponse(json.dumps({'items': items}), content_type='application/json')
+
+        # 2. Render configuration page
+        selected_comps = job.selected_competencies.filter(is_deleted=False)
+        central_selected = selected_comps.filter(is_custom=False)
+        custom_selected = selected_comps.filter(is_custom=True)
+        custom_comps_list = []
+        for c in custom_selected:
+            custom_comps_list.append({
+                'title': c.title,
+                'competency_type': c.competency_type,
+                'importance': c.importance,
+                'level': c.level
+            })
+        selected_codes = set(c.code for c in central_selected)
+        
+        # Try to find a default post from the database by matching the job code or search in competencies
+        suggested_post = None
+        suggested_post_title = None
+        suggested_post_count = 0
+        
+        if job.code:
+            # Check if there are competencies in the bank for this post code
+            post_exists = CentralCompetency.objects.filter(post_code=job.code, is_deleted=False).exists()
+            if post_exists:
+                suggested_post = job.code
+                
+        # If not, find the first post code of already selected competencies
+        if not suggested_post and selected_comps.exists():
+            first_comp = selected_comps.first()
+            if first_comp.central_competency:
+                suggested_post = first_comp.central_competency.post_code
+                
+        if suggested_post:
+            comps_for_suggested = CentralCompetency.objects.filter(post_code=suggested_post, is_deleted=False)
+            if comps_for_suggested.exists():
+                suggested_post_title = comps_for_suggested.first().post_title
+                suggested_post_count = comps_for_suggested.count()
+
+        # Fetch existing saved weights and passing scores if they exist
+        db_stages = job.stages.filter(is_deleted=False)
+        custom_weights = None
+        custom_passing_scores = None
+        if db_stages.exists():
+            custom_weights = {}
+            custom_passing_scores = {}
+            for stage in db_stages:
+                if stage.stage_type in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                    custom_weights[stage.stage_type] = stage.weight
+                    custom_passing_scores[stage.stage_type] = int(stage.passing_score)
+
+        # Get suggested workflows based on current selection
+        plan_res = calculate_assessment_plan(
+            selected_comps,
+            custom_weights=custom_weights,
+            custom_passing_scores=custom_passing_scores
+        )
+        active_stage_keys = list(plan_res['stages'].keys())
+        from .utils import suggest_workflow_templates
+        suggested_workflows = suggest_workflow_templates(active_stage_keys)
+        selected_workflow_id = job.workflow.id if job.workflow else None
+
+        context = {
+            'job': job,
+            'selected_competencies': central_selected,
+            'selected_codes': selected_codes,
+            'custom_competencies_list': custom_comps_list,
+            'suggested_post': suggested_post,
+            'suggested_post_title': suggested_post_title,
+            'suggested_post_count': suggested_post_count,
+            'calculated_plan': plan_res['stages'],
+            'suggested_workflows': suggested_workflows,
+            'selected_workflow_id': selected_workflow_id
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, job_id):
+        job = self.get_job(job_id)
+        action = request.POST.get('action', '').strip()
+
+        def get_clean_ids(key):
+            vals = request.POST.getlist(key)
+            if len(vals) == 1 and ',' in vals[0]:
+                vals = vals[0].split(',')
+            elif len(vals) == 1 and vals[0].startswith('[') and vals[0].endswith(']'):
+                import json
+                try:
+                    vals = json.loads(vals[0])
+                except Exception:
+                    pass
+            return [int(v) for v in vals if str(v).strip().isdigit() or isinstance(v, int)]
+
+        # HTMX partial renders (Live Preview)
+        if action == 'preview':
+            comp_ids = get_clean_ids('selected_competencies')
+            # Fetch details from CentralCompetency
+            comps = CentralCompetency.objects.filter(id__in=comp_ids, is_deleted=False)
+            
+            # Fetch custom weights
+            custom_weights = {}
+            for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                val = request.POST.get(f'stage_weight_{key}')
+                if val is not None and val.strip() != '':
+                    custom_weights[key] = val
+
+            # Fetch custom passing scores
+            custom_passing_scores = {}
+            for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                val = request.POST.get(f'stage_passing_score_{key}')
+                if val is not None and val.strip() != '':
+                    custom_passing_scores[key] = val
+            
+            selected_workflow_id = request.POST.get('workflow_template_id')
+            
+            # Parse manual/custom competencies
+            custom_comps_raw = request.POST.getlist('custom_competencies')
+            custom_comps_parsed = []
+            for cc_json in custom_comps_raw:
+                try:
+                    import json
+                    cc_data = json.loads(cc_json)
+                    custom_comps_parsed.append(cc_data)
+                except Exception:
+                    pass
+
+            # Temporary list for calculation
+            class TempComp:
+                def __init__(self, title, competency_type, importance, level, code="CUSTOM"):
+                    self.code = code
+                    self.title = title
+                    self.competency_type = competency_type
+                    self.importance = int(importance)
+                    self.level = int(level)
+            
+            temp_comps = [
+                TempComp(c.title, c.competency_type, c.importance, c.level, c.code)
+                for c in comps
+            ]
+            for cc in custom_comps_parsed:
+                temp_comps.append(
+                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'])
+                )
+
+            plan_res = calculate_assessment_plan(
+                temp_comps,
+                custom_weights=custom_weights,
+                custom_passing_scores=custom_passing_scores
+            )
+            
+            active_stage_keys = list(plan_res['stages'].keys())
+            from .utils import suggest_workflow_templates
+            suggested_workflows = suggest_workflow_templates(active_stage_keys)
+            
+            context = {
+                'job': job,
+                'calculated_plan': plan_res['stages'],
+                'errors': plan_res.get('errors', []),
+                'suggested_workflows': suggested_workflows,
+                'selected_workflow_id': selected_workflow_id
+            }
+            # Renders only the preview table part
+            return render(request, 'jobs/partials/competency_preview_table.html', context)
+
+        elif action == 'load_post_comps':
+            # HTMX call to load competencies of a selected post
+            post_code = request.POST.get('post_code', '').strip()
+            comps = CentralCompetency.objects.filter(post_code=post_code, is_deleted=False)
+            selected_comps = job.selected_competencies.filter(is_deleted=False)
+            selected_codes = set(c.code for c in selected_comps)
+            
+            context = {
+                'post_competencies': comps,
+                'selected_codes': selected_codes
+            }
+            return render(request, 'jobs/partials/post_competencies_list.html', context)
+
+        elif action == 'save':
+            from django.contrib import messages
+            comp_ids = get_clean_ids('selected_competencies')
+            
+            # Fetch custom weights
+            custom_weights = {}
+            for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                val = request.POST.get(f'stage_weight_{key}')
+                if val is not None and val.strip() != '':
+                    custom_weights[key] = val
+
+            # Fetch custom passing scores
+            custom_passing_scores = {}
+            for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                val = request.POST.get(f'stage_passing_score_{key}')
+                if val is not None and val.strip() != '':
+                    custom_passing_scores[key] = val
+                    
+            # 1. First validate selection using calculate_assessment_plan (before writing to DB)
+            central_comps = CentralCompetency.objects.filter(id__in=comp_ids, is_deleted=False)
+            
+            # Parse manual/custom competencies
+            custom_comps_raw = request.POST.getlist('custom_competencies')
+            custom_comps_parsed = []
+            for cc_json in custom_comps_raw:
+                try:
+                    import json
+                    cc_data = json.loads(cc_json)
+                    custom_comps_parsed.append(cc_data)
+                except Exception:
+                    pass
+
+            class TempComp:
+                def __init__(self, title, competency_type, importance, level, code="CUSTOM"):
+                    self.code = code
+                    self.title = title
+                    self.competency_type = competency_type
+                    self.importance = int(importance)
+                    self.level = int(level)
+            
+            temp_comps = [
+                TempComp(c.title, c.competency_type, c.importance, c.level, c.code)
+                for c in central_comps
+            ]
+            for cc in custom_comps_parsed:
+                temp_comps.append(
+                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'])
+                )
+
+            plan_res = calculate_assessment_plan(
+                temp_comps,
+                custom_weights=custom_weights,
+                custom_passing_scores=custom_passing_scores
+            )
+            stages_data = plan_res['stages']
+            
+            # Check for validation errors
+            if plan_res.get('errors') or not stages_data:
+                errors = plan_res.get('errors', [])
+                if not stages_data and not errors:
+                    errors.append("هیچ شایستگی مناسبی برای سنجش انتخاب نشده است. لطفاً حداقل یک شایستگی با نوع KN، SK، AB، GE یا ST انتخاب کنید.")
+                
+                # Retrieve matching suggested workflows for the error screen
+                from .utils import suggest_workflow_templates
+                active_stage_keys = list(stages_data.keys())
+                suggested_workflows = suggest_workflow_templates(active_stage_keys)
+                
+                # Prepare suggested post context
+                suggested_post = request.POST.get('post_code', '').strip()
+                suggested_post_title = None
+                suggested_post_count = 0
+                if suggested_post:
+                    comps_for_suggested = CentralCompetency.objects.filter(post_code=suggested_post, is_deleted=False)
+                    if comps_for_suggested.exists():
+                        suggested_post_title = comps_for_suggested.first().post_title
+                        suggested_post_count = comps_for_suggested.count()
+                
+                context = {
+                    'job': job,
+                    'selected_competencies': central_comps,
+                    'selected_codes': set(cc.code for cc in central_comps),
+                    'custom_competencies_list': custom_comps_parsed,
+                    'suggested_post': suggested_post,
+                    'suggested_post_title': suggested_post_title,
+                    'suggested_post_count': suggested_post_count,
+                    'calculated_plan': stages_data,
+                    'errors': errors,
+                    'suggested_workflows': suggested_workflows,
+                    'selected_workflow_id': request.POST.get('workflow_template_id')
+                }
+                return render(request, self.template_name, context)
+
+            # 2. Validation passed! Now save to DB inside transaction
+            with transaction.atomic():
+                # Link selected workflow template to the job first (will trigger default stage copying if changed)
+                workflow_id = request.POST.get('workflow_template_id')
+                if workflow_id:
+                    from apps.jobs.models import WorkflowTemplate
+                    try:
+                        workflow = WorkflowTemplate.objects.get(id=workflow_id, is_deleted=False)
+                        job.workflow = workflow
+                    except WorkflowTemplate.DoesNotExist:
+                        pass
+                
+                # Change job status to PLANNING if it was RECEIVED
+                if job.status == JobOpportunity.STATUS_RECEIVED:
+                    job.status = JobOpportunity.STATUS_PLANNING
+                
+                job.save()
+
+                # Soft delete current job competencies
+                job.selected_competencies.filter(is_deleted=False).update(
+                    is_deleted=True,
+                    deleted_at=timezone.now()
+                )
+                
+                # Add newly selected competencies
+                new_selected_comps = []
+                for cc in central_comps:
+                    # Look for existing soft-deleted first
+                    jc = JobOpportunityCompetency.all_objects.filter(
+                        job=job,
+                        code=cc.code,
+                        central_competency=cc
+                    ).first()
+                    
+                    if jc:
+                        jc.is_deleted = False
+                        jc.deleted_at = None
+                        jc.title = cc.title
+                        jc.competency_type = cc.competency_type
+                        jc.importance = cc.importance
+                        jc.level = cc.level
+                        jc.is_custom = False
+                        jc.save()
+                    else:
+                        jc = JobOpportunityCompetency.objects.create(
+                            job=job,
+                            central_competency=cc,
+                            code=cc.code,
+                            title=cc.title,
+                            competency_type=cc.competency_type,
+                            importance=cc.importance,
+                            level=cc.level,
+                            is_custom=False
+                        )
+                    new_selected_comps.append(jc)
+
+                # Add manually created competencies
+                import uuid
+                for cc in custom_comps_parsed:
+                    custom_code = f"MANUAL-{uuid.uuid4().hex[:8]}"
+                    jc = JobOpportunityCompetency.objects.create(
+                        job=job,
+                        central_competency=None,
+                        code=custom_code,
+                        title=cc['title'],
+                        competency_type=cc['competency_type'],
+                        importance=cc['importance'],
+                        level=cc['level'],
+                        is_custom=True
+                    )
+                    new_selected_comps.append(jc)
+
+                # Now, soft delete current job stages (including any copied default stages from job.save())
+                job.stages.filter(is_deleted=False).update(
+                    is_deleted=True,
+                    deleted_at=timezone.now()
+                )
+
+                # Create new customized stages and assessment competencies
+                seq = 1
+                for key, s_info in stages_data.items():
+                    # Create the JobOpportunityStage
+                    stage = JobOpportunityStage.objects.create(
+                        job=job,
+                        name=s_info['name'],
+                        weight=s_info['weight'],
+                        sequence=seq,
+                        passing_score=s_info['passing_score'],
+                        stage_type=key
+                    )
+                    
+                    # Create AssessmentCompetency records under this stage
+                    for c_info in s_info['competencies']:
+                        AssessmentCompetency.objects.create(
+                            stage=stage,
+                            name=c_info['title'],
+                            weight=c_info['weight']
+                        )
+                    seq += 1
+
+            messages.success(request, "شایستگی‌های فرصت شغلی و سند Assessment Plan با موفقیت ثبت و الگوی فرآیند مربوطه اعمال گردید.")
+            return redirect('job_list')
+
+        messages.error(request, "عملیات نامعتبر است.")
+        return redirect('job_list')
+
+
+class JobAssessmentPlanPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
+    model = JobOpportunity
+    template_name = 'jobs/assessment_plan_print.html'
+    context_object_name = 'job'
+    pk_url_kwarg = 'job_id'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_queryset(self):
+        return JobOpportunity.objects.filter(is_deleted=False).prefetch_related('stages', 'stages__competencies')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Fetch the selected competencies snapshot to display
+        context['selected_competencies'] = self.object.selected_competencies.filter(is_deleted=False)
+        return context
+
+
+class SearchPostsApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def get(self, request):
+        q = request.GET.get('q', '').strip()
+        from django.db.models import Q, Count
+        posts_query = CentralCompetency.objects.filter(is_deleted=False)
+        if q:
+            posts_query = posts_query.filter(
+                Q(post_code__icontains=q) | Q(post_title__icontains=q)
+            )
+        
+        unique_posts = (
+            posts_query.values('post_code', 'post_title')
+            .annotate(count=Count('id'))
+            .order_by('post_code')[:50]
+        )
+        
+        items = []
+        for p in unique_posts:
+            title = p['post_title'] or 'بدون عنوان'
+            items.append({
+                'post_code': p['post_code'],
+                'display_name': f"{p['post_code']} - {title} ({p['count']} شایستگی)"
+            })
+            
+        import json
+        return HttpResponse(json.dumps({'items': items}), content_type='application/json')
+
+
+class SearchPostsDetailApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def get(self, request):
+        post_code = request.GET.get('post_code', '').strip()
+        from apps.jobs.models import CentralCompetency
+        comp = CentralCompetency.objects.filter(post_code=post_code, is_deleted=False).first()
+        if not comp:
+            import json
+            return HttpResponse(json.dumps({'error': 'Not found'}), status=404, content_type='application/json')
+        
+        # Map job category from post_title
+        title = comp.post_title or ''
+        job_category = ''
+        if 'کارشناس مدیریت' in title:
+            job_category = 'کارشناس مدیریت'
+        elif 'کارشناس مسئول' in title:
+            job_category = 'کارشناس مسئول'
+        elif 'کارشناس' in title:
+            job_category = 'کارشناس'
+        elif 'کاردان مسئول' in title:
+            job_category = 'کاردان مسئول'
+        elif 'کاردان' in title:
+            job_category = 'کاردان'
+        elif 'اپراتور' in title or 'تعمیرکار' in title:
+            job_category = 'اپراتور - تعمیرکار'
+            
+        data = {
+            'title': comp.post_title or '',
+            'department': comp.management_name or '',
+            'unit': comp.section_name or '',
+            'job_category': job_category
+        }
+        import json
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+import csv
+class CustomCompetenciesReportView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+    template_name = 'jobs/custom_competencies_report.html'
+    context_object_name = 'custom_competencies'
+
+    def get_queryset(self):
+        qs = JobOpportunityCompetency.objects.filter(
+            is_custom=True, 
+            is_deleted=False
+        ).select_related('job', 'job__assigned_recruiter').order_by('-created_at')
+        
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(title__icontains=q) | 
+                Q(job__title__icontains=q) | 
+                Q(job__code__icontains=q)
+            )
+            
+        comp_type = self.request.GET.get('competency_type', '').strip()
+        if comp_type:
+            qs = qs.filter(competency_type=comp_type)
+            
+        importance = self.request.GET.get('importance', '').strip()
+        if importance:
+            qs = qs.filter(importance=importance)
+            
+        level = self.request.GET.get('level', '').strip()
+        if level:
+            qs = qs.filter(level=level)
+            
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['competency_type'] = self.request.GET.get('competency_type', '').strip()
+        context['importance'] = self.request.GET.get('importance', '').strip()
+        context['level'] = self.request.GET.get('level', '').strip()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        # Handle CSV export action
+        if request.GET.get('export') == 'csv':
+            response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+            response['Content-Disposition'] = 'attachment; filename="custom_competencies_report.csv"'
+            
+            writer = csv.writer(response)
+            writer.writerow([
+                'ردیف', 'عنوان شایستگی', 'نوع شایستگی', 'سطح مورد نیاز',
+                'اهمیت', 'کد پست فرصت شغلی', 'فرصت شغلی مربوطه', 'کارشناس جذب', 'تاریخ ایجاد'
+            ])
+            
+            queryset = self.get_queryset()
+            
+            type_map = {
+                'KN': 'دانش',
+                'SK': 'مهارت',
+                'AB': 'توانایی',
+                'GE': 'رفتاری',
+                'ST': 'ارزش‌ها و سبک‌ها',
+                'PR': 'گردشکار و فرآیندها',
+                'CQ': 'گواهینامه‌ها و صلاحیت‌ها',
+                'IN': 'علایق حرفه‌ای'
+            }
+            imp_map = {1: 'محوری', 2: 'تکلیف محور', 3: 'حداقلی'}
+            lvl_map = {1: 'آشنایی', 2: 'توانایی', 3: 'تسلط'}
+            
+            for idx, c in enumerate(queryset, 1):
+                recruiter = c.job.assigned_recruiter
+                recruiter_name = recruiter.get_full_name() if recruiter else '-'
+                created_date = c.created_at.strftime('%Y-%m-%d')
+                writer.writerow([
+                    idx,
+                    c.title,
+                    type_map.get(c.competency_type, c.competency_type),
+                    lvl_map.get(c.level, c.level),
+                    imp_map.get(c.importance, c.importance),
+                    c.job.code,
+                    c.job.title,
+                    recruiter_name,
+                    created_date
+                ])
+            return response
+            
+        return super().get(request, *args, **kwargs)

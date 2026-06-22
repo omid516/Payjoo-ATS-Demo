@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}گزارش شایستگی‌های دستی | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .comp-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+    .filter-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(76, 201, 240, 0.05) 100%);
+        border: 1px solid rgba(67, 97, 238, 0.1);
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="font-bold text-secondary mb-1">📋 گزارش شایستگی‌های دستی و اختصاصی</h3>
+        <p class="text-muted text-sm m-0">لیست شایستگی‌هایی که به صورت اختصاصی و خارج از بانک مرجع برای ردیف‌های شغلی تعریف شده‌اند.</p>
+    </div>
+    <a href="?export=csv{% if q %}&q={{ q }}{% endif %}{% if competency_type %}&competency_type={{ competency_type }}{% endif %}{% if importance %}&importance={{ importance }}{% endif %}{% if level %}&level={{ level }}{% endif %}" 
+       class="btn btn-outline-success font-bold text-xs d-flex align-items-center gap-2 px-3 py-2" 
+       style="border-radius: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        دانلود خروجی CSV (جهت واحد تحلیل مشاغل)
+    </a>
+</div>
+
+<!-- خلاصه گزارش -->
+<div class="card summary-card border-0 p-3.5 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-primary bg-opacity-10 text-primary p-2.5 rounded-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+            </svg>
+        </div>
+        <div>
+            <span class="text-xs text-muted block mb-0.5 font-medium">تعداد کل شایستگی‌های ایجادشده به صورت دستی:</span>
+            <h4 class="font-black text-secondary m-0">{{ custom_competencies.count }} <span class="text-xs font-bold text-muted">مورد</span></h4>
+        </div>
+    </div>
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card filter-card border-0 p-4 mb-4">
+    <form method="get" class="m-0 row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label text-xs font-semibold text-secondary">جستجو:</label>
+            <input type="text" name="q" value="{{ q|default:'' }}" class="form-control text-xs" placeholder="عنوان شایستگی، کد پست، شغل..." style="border-radius: 6px;">
+        </div>
+        <div class="col-md-2.5 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">نوع شایستگی:</label>
+            <select name="competency_type" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                <option value="KN" {% if competency_type == 'KN' %}selected{% endif %}>دانش (Knowledge)</option>
+                <option value="SK" {% if competency_type == 'SK' %}selected{% endif %}>مهارت (Skill)</option>
+                <option value="AB" {% if competency_type == 'AB' %}selected{% endif %}>توانایی (Ability)</option>
+                <option value="GE" {% if competency_type == 'GE' %}selected{% endif %}>رفتاری (General/Behavioral)</option>
+                <option value="ST" {% if competency_type == 'ST' %}selected{% endif %}>ارزش‌ها و سبک‌ها (Styles & Values)</option>
+                <option value="PR" {% if competency_type == 'PR' %}selected{% endif %}>گردشکار و فرآیندها (Process)</option>
+                <option value="CQ" {% if competency_type == 'CQ' %}selected{% endif %}>گواهینامه‌ها و صلاحیت‌ها (Certification)</option>
+                <option value="IN" {% if competency_type == 'IN' %}selected{% endif %}>علایق حرفه‌ای (Interests)</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">اهمیت:</label>
+            <select name="importance" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                <option value="1" {% if importance == '1' %}selected{% endif %}>۱ - محوری</option>
+                <option value="2" {% if importance == '2' %}selected{% endif %}>۲ - تکلیف محور</option>
+                <option value="3" {% if importance == '3' %}selected{% endif %}>۳ - حداقلی</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">سطح تسلط:</label>
+            <select name="level" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                <option value="1" {% if level == '1' %}selected{% endif %}>۱ - آشنایی</option>
+                <option value="2" {% if level == '2' %}selected{% endif %}>۲ - توانایی</option>
+                <option value="3" {% if level == '3' %}selected{% endif %}>۳ - تسلط</option>
+            </select>
+        </div>
+        <div class="col-md-2.5 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary text-xs font-bold px-3 py-2 flex-grow-1" style="border-radius: 6px;"> اعمال فیلتر </button>
+            <a href="{% url 'custom_competencies_report' %}" class="btn btn-outline-secondary text-xs font-bold px-3 py-2" style="border-radius: 6px;">حذف فیلتر</a>
+        </div>
+    </form>
+</div>
+
+<!-- جدول شایستگی‌های دستی -->
+<div class="card comp-card border-0 p-4 shadow-xs">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle text-sm">
+            <thead>
+                <tr class="text-secondary">
+                    <th style="width: 5%;">ردیف</th>
+                    <th>عنوان شایستگی</th>
+                    <th style="width: 12%;" class="text-center">نوع</th>
+                    <th style="width: 10%;" class="text-center">اهمیت</th>
+                    <th style="width: 10%;" class="text-center">سطح</th>
+                    <th style="width: 12%;">کد پست فرصت</th>
+                    <th style="width: 18%;">فرصت شغلی مربوطه</th>
+                    <th style="width: 13%;">کارشناس جذب</th>
+                    <th style="width: 10%;">تاریخ ایجاد</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comp in custom_competencies %}
+                <tr>
+                    <td class="text-muted text-xs font-semibold">{{ forloop.counter }}</td>
+                    <td class="font-bold text-dark">
+                        {{ comp.title }}
+                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs ms-1" style="font-size: 9px;">دستی</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-xxs px-2 py-1 font-bold">
+                            {{ comp.get_competency_type_display }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if comp.importance == 1 %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger text-xxs px-2 py-1 font-bold">محوری</span>
+                        {% elif comp.importance == 2 %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning text-xxs px-2 py-1 font-bold">تکلیف محور</span>
+                        {% else %}
+                            <span class="badge bg-info bg-opacity-10 text-info text-xxs px-2 py-1 font-bold">حداقلی</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if comp.level == 3 %}
+                            <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2 py-1 font-bold">تسلط</span>
+                        {% elif comp.level == 2 %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary text-xxs px-2 py-1 font-bold">توانایی</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark text-xxs px-2 py-1 font-bold">آشنایی</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-semibold text-secondary text-xs">{{ comp.job.code }}</td>
+                    <td>
+                        <a href="{% url 'job_competency_config' comp.job.id %}" class="text-decoration-none font-semibold text-primary text-xs hover:underline">
+                            {{ comp.job.title }}
+                        </a>
+                    </td>
+                    <td class="text-muted text-xs font-semibold">{{ comp.job.assigned_recruiter.get_full_name|default:"-" }}</td>
+                    <td class="text-muted text-xxs font-bold">{{ comp.created_at|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-5">هیچ شایستگی دستی با شرایط فیلتر یافت نشد.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

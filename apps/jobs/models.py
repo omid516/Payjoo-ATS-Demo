@@ -372,3 +372,86 @@ class AssessmentCompetency(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.name} - {self.stage.name} (وزن: {self.weight}٪)"
+
+
+class CentralCompetency(SoftDeleteModel):
+    post_code = models.CharField(max_length=50, verbose_name="کد پست")
+    post_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="پست")
+    code = models.CharField(max_length=50, verbose_name="کد شایستگی")
+    old_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد شایستگی قدیم")
+    title = models.CharField(max_length=300, verbose_name="شایستگی")
+    competency_type = models.CharField(max_length=10, choices=[
+        ('KN', 'دانش (Knowledge)'),
+        ('SK', 'مهارت (Skill)'),
+        ('AB', 'توانایی (Ability)'),
+        ('GE', 'رفتاری (General/Behavioral)'),
+        ('ST', 'ارزش‌ها و سبک‌ها (Styles & Values)'),
+        ('PR', 'گردشکار و فرآیندها (Process)'),
+        ('CQ', 'گواهینامه‌ها و صلاحیت‌ها (Certification & Qualification)'),
+        ('IN', 'علایق حرفه‌ای (Interests)'),
+    ], verbose_name="نوع شایستگی")
+    category_raw = models.CharField(max_length=100, null=True, blank=True, verbose_name="طبقه")
+    cluster_raw = models.CharField(max_length=100, null=True, blank=True, verbose_name="خوشه")
+    importance = models.PositiveIntegerField(choices=[
+        (1, 'محوری'),
+        (2, 'تکلیف محور'),
+        (3, 'حداقلی'),
+    ], verbose_name="اهمیت شایستگی")
+    level = models.PositiveIntegerField(choices=[
+        (1, 'آشنایی'),
+        (2, 'توانایی'),
+        (3, 'تسلط'),
+    ], verbose_name="سطح شایستگی")
+    
+    management_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد مدیریت")
+    management_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="مدیریت")
+    vice_president_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد معاونت")
+    vice_president_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="معاونت")
+    section_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد قسمت")
+    section_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="قسمت")
+    cost_center_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد مرکز هزینه")
+    cost_center_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="مرکز هزینه")
+
+    class Meta:
+        verbose_name = "شایستگی مرجع"
+        verbose_name_plural = "بانک شایستگی‌های مرجع"
+        ordering = ['post_code', 'code']
+
+    def __str__(self):
+        return f"{self.title} ({self.code}) - پست {self.post_code}"
+
+
+class JobOpportunityCompetency(SoftDeleteModel):
+    job = models.ForeignKey(JobOpportunity, on_delete=models.CASCADE, related_name='selected_competencies', verbose_name="فرصت شغلی")
+    central_competency = models.ForeignKey(CentralCompetency, on_delete=models.SET_NULL, null=True, blank=True, related_name='job_links', verbose_name="شایستگی مرجع")
+    code = models.CharField(max_length=50, verbose_name="کد شایستگی")
+    title = models.CharField(max_length=300, verbose_name="شایستگی")
+    competency_type = models.CharField(max_length=10, choices=[
+        ('KN', 'دانش (Knowledge)'),
+        ('SK', 'مهارت (Skill)'),
+        ('AB', 'توانایی (Ability)'),
+        ('GE', 'رفتاری (General/Behavioral)'),
+        ('ST', 'ارزش‌ها و سبک‌ها (Styles & Values)'),
+        ('PR', 'گردشکار و فرآیندها (Process)'),
+        ('CQ', 'گواهینامه‌ها و صلاحیت‌ها (Certification & Qualification)'),
+        ('IN', 'علایق حرفه‌ای (Interests)'),
+    ], verbose_name="نوع شایستگی")
+    importance = models.PositiveIntegerField(choices=[
+        (1, 'محوری'),
+        (2, 'تکلیف محور'),
+        (3, 'حداقلی'),
+    ], verbose_name="اهمیت شایستگی")
+    level = models.PositiveIntegerField(choices=[
+        (1, 'آشنایی'),
+        (2, 'توانایی'),
+        (3, 'تسلط'),
+    ], verbose_name="سطح شایستگی")
+    is_custom = models.BooleanField(default=False, verbose_name="ایجاد دستی")
+
+    class Meta:
+        verbose_name = "شایستگی فرصت شغلی"
+        verbose_name_plural = "شایستگی‌های فرصت شغلی"
+        ordering = ['job', 'code']
+
+    def __str__(self):
+        return f"{self.title} ({self.code}) - {self.job.title}"

@@ -6,6 +6,11 @@ from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, Workf
 class JobOpportunityForm(forms.ModelForm):
     start_date = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control date-picker', 'placeholder': '۱۴۰۲/۰۱/۰۱'}))
     end_date = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control date-picker', 'placeholder': '۱۴۰۲/۱۲/۲۹'}))
+    code = forms.CharField(
+        required=True,
+        label="کد و عنوان پست سازمانی",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_code'})
+    )
 
     class Meta:
         model = JobOpportunity
@@ -17,7 +22,6 @@ class JobOpportunityForm(forms.ModelForm):
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: REQ-1402-001'}),
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: کارشناس ارشد برنامه‌نویسی Python'}),
-            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: PY-SR-01'}),
             'department': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: مهندسی نرم‌افزار'}),
             'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: بخش توسعه فرانت‌اند'}),
             'job_category': forms.Select(attrs={'class': 'form-select'}),
@@ -35,9 +39,22 @@ class JobOpportunityForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         from django.contrib.auth.models import User
         from apps.accounts.models import UserProfile
+        from apps.jobs.models import CentralCompetency
+        
         self.fields['assigned_recruiter'].queryset = User.objects.exclude(
             profile__role=UserProfile.ROLE_CANDIDATE
         ).order_by('first_name', 'username')
+
+        # Pre-populate code choices with the currently set post code
+        if self.instance and self.instance.pk and self.instance.code:
+            comps = CentralCompetency.objects.filter(post_code=self.instance.code, is_deleted=False)
+            title = comps.first().post_title if comps.exists() else 'بدون عنوان'
+            count = comps.count() if comps.exists() else 0
+            self.fields['code'].widget.choices = [
+                (self.instance.code, f"{self.instance.code} - {title} ({count} شایستگی)")
+            ]
+        else:
+            self.fields['code'].widget.choices = [('', '-- انتخاب پست از بانک شایستگی --')]
 
         if self.instance and self.instance.pk:
             import jdatetime
@@ -47,6 +64,13 @@ class JobOpportunityForm(forms.ModelForm):
             if self.instance.end_date:
                 jd = jdatetime.date.fromgregorian(date=self.instance.end_date)
                 self.initial['end_date'] = jd.strftime('%Y/%m/%d')
+
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        from apps.jobs.models import CentralCompetency
+        if not CentralCompetency.objects.filter(post_code=code, is_deleted=False).exists():
+            raise ValidationError("پست سازمانی انتخاب شده در بانک شایستگی‌ها وجود ندارد.")
+        return code
 
     def clean_start_date(self):
         val = self.cleaned_data.get('start_date')

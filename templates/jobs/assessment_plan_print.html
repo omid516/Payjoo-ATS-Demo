@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سند آزمون استخدامی | {{ job.title }}</title>
+    <title>سند Assessment Plan | {{ job.title }}</title>
     <!-- Bootstrap RTL 5.3.3 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
     <!-- Google Fonts / Vazirmatn -->
@@ -82,10 +82,10 @@
 
 <div class="container my-3 no-print text-center">
     <button onclick="window.print()" class="btn btn-primary px-4 py-2 font-semibold rounded-pill shadow-sm">
-        🖨️ چاپ و صدور برگه سند آزمون
+        🖨️ چاپ و صدور برگه Assessment Plan
     </button>
     <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2 font-semibold rounded-pill shadow-sm ms-2">
-        بازگشت به لیست
+        بازگشت به لیست مشاغل
     </a>
 </div>
 
@@ -97,8 +97,8 @@
             <span class="text-xs text-muted d-block mt-1">شناسه فرصت شغلی: {{ job.code }}</span>
         </div>
         <div class="text-end">
-            <h5 class="fw-bold text-dark m-0">سند آزمون استخدامی</h5>
-            <span class="text-xs text-muted d-block mt-1">جهت تایید نهایی ردیف و فرآیند ارزیابی</span>
+            <h5 class="fw-bold text-dark m-0">سند Assessment Plan (برنامه ارزیابی)</h5>
+            <span class="text-xs text-muted d-block mt-1">بر اساس موتور ارزیابی مبتنی بر شایستگی</span>
         </div>
     </div>
 
@@ -125,112 +125,91 @@
                 <td>{{ job.unit|default:"-" }}</td>
             </tr>
             <tr>
-                <th>ظرفیت جذب (تعداد)</th>
-                <td>{{ job.headcount }} نفر</td>
+                <th>کارشناس جذب مسئول</th>
+                <td>{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</td>
                 <th>نوع استخدام</th>
                 <td>{{ job.get_recruitment_type_display }}</td>
             </tr>
             <tr>
-                <th>کارشناس جذب مسئول</th>
-                <td>{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</td>
-                <th>الگوی فرآیند</th>
-                <td>{{ job.workflow.name|default:"تخصیص دستی" }}</td>
+                <th>الگوی فرآیند استخدام</th>
+                <td colspan="3">{{ job.workflow.name|default:"-" }}</td>
             </tr>
-            {% if job.recruitment_plan %}
-            <tr>
-                <th>تاریخ شروع جذب (برنامه‌ریزی)</th>
-                <td>{{ job.recruitment_plan.start_date|to_jalali }}</td>
-                <th>تاریخ پیش‌بینی پایان جذب</th>
-                <td>{{ job.recruitment_plan.predicted_end_date|to_jalali }}</td>
-            </tr>
-            {% endif %}
         </tbody>
     </table>
 
-    <!-- Job Description and Requirements -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <h6 class="fw-bold text-secondary mb-2">۲. شرح شغل (وظایف و مسئولیت‌ها)</h6>
-            <div class="p-3 bg-light rounded text-sm text-justify whitespace-pre-line" style="min-height: 80px; border: 1px solid #e2e8f0;">
-                {{ job.description }}
-            </div>
-        </div>
-        {% if job.requirements %}
-        <div class="col-12">
-            <h6 class="fw-bold text-secondary mb-2">۳. شرایط احراز (سوابق و شایستگی‌ها)</h6>
-            <div class="p-3 bg-light rounded text-sm text-justify whitespace-pre-line" style="min-height: 80px; border: 1px solid #e2e8f0;">
-                {{ job.requirements }}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Competencies List -->
-    <h6 class="fw-bold text-secondary mb-3">۴. شایستگی‌های منتخب ردیف استخدامی</h6>
-    <div class="d-flex flex-wrap gap-2 mb-4 p-3 bg-light rounded-3 border border-light">
-        {% for comp in selected_competencies %}
-            <span class="badge bg-white text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 font-semibold" style="font-size: 0.8rem; border-radius: 4px; font-weight: 500;">
-                {{ comp.title }}
-            </span>
-        {% empty %}
-            <span class="text-muted text-sm">هیچ شایستگی انتخاب نشده است.</span>
-        {% endfor %}
-    </div>
+    <!-- Competencies Snapshot -->
+    <h6 class="fw-bold text-secondary mb-3">۲. شایستگی‌های منتخب پست سازمانی</h6>
+    <table class="table table-bordered align-middle text-sm mb-4">
+        <thead class="table-light">
+            <tr>
+                <th>عنوان شایستگی</th>
+                <th style="width: 25%;" class="text-center">اهمیت</th>
+                <th style="width: 25%;" class="text-center">سطح تسلط</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comp in selected_competencies %}
+            <tr>
+                <td>{{ comp.title }}</td>
+                <td class="text-center">
+                    {% if comp.importance == 1 %}محوری
+                    {% elif comp.importance == 2 %}تکلیف محور
+                    {% else %}حداقلی{% endif %}
+                </td>
+                <td class="text-center">{{ comp.get_level_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">هیچ شایستگی ثبت نشده است.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <!-- Evaluation Stages -->
-    <h6 class="fw-bold text-secondary mb-3">۵. فرآیند ارزیابی و ضریب اوزان مراحل</h6>
+    <h6 class="fw-bold text-secondary mb-3">۳. فرآیند ارزیابی، حد نصاب‌ها و اوزان مراحل</h6>
     <table class="table table-bordered stage-table align-middle text-center text-sm mb-5">
         <thead>
             <tr>
                 <th style="width: 8%;">ردیف</th>
-                <th class="text-start">نام مرحله ارزیابی</th>
-                {% if job.recruitment_plan %}
-                <th style="width: 18%;">شروع برنامه‌ریزی</th>
-                <th style="width: 18%;">پایان برنامه‌ریزی</th>
-                <th style="width: 12%;">SLA (روز کاری)</th>
-                {% endif %}
-                <th style="width: 14%;">ضریب وزنی</th>
+                <th class="text-start">مرحلۀ ارزیابی</th>
+                <th style="width: 15%;">وزن مرحله</th>
+                <th>شایستگی‌های مورد ارزیابی در این مرحله</th>
+                <th style="width: 15%;">حد نصاب</th>
             </tr>
         </thead>
         <tbody>
             {% for stage in job.stages.all %}
             <tr>
                 <td>{{ stage.sequence }}</td>
+                <td class="text-start font-semibold">{{ stage.name }}</td>
+                <td class="font-bold text-primary">{{ stage.weight }}٪</td>
                 <td class="text-start">
-                    <div class="font-semibold">{{ stage.name }}</div>
-                    {% if stage.interviewers.all %}
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-top: 4px;">
-                        <span>مصاحبه‌گران: </span>
-                        {% for mapping in stage.interviewers.all %}
-                            {{ mapping.user.get_full_name|default:mapping.user.username }}{% if not forloop.last %}، {% endif %}
+                    <div class="d-flex flex-column gap-1">
+                        {% for comp in stage.competencies.all %}
+                        <div class="d-flex justify-content-between text-xs pb-1 border-bottom border-light">
+                            <span>{{ comp.name }}</span>
+                            <span class="text-muted font-bold">{{ comp.weight }}٪</span>
+                        </div>
+                        {% empty %}
+                        <span class="text-muted">-</span>
                         {% endfor %}
                     </div>
-                    {% endif %}
                 </td>
-                {% if job.recruitment_plan %}
-                {% with stage_plan=stage.planning_states.all.0 %}
-                <td>
-                    {{ stage_plan.planned_start_date|to_jalali|default:"-" }}
-                    {% if stage_plan.capacity_shifted %}
-                    <small class="text-warning d-block fw-bold" style="font-size: 9px; margin-top: 2px;">(جابجایی ظرفیت)</small>
-                    {% endif %}
-                </td>
-                <td>{{ stage_plan.planned_end_date|to_jalali|default:"-" }}</td>
-                <td>{{ stage_plan.sla_days|default:"-" }} روز</td>
-                {% endwith %}
-                {% endif %}
-                <td>{{ stage.weight }}٪</td>
+                <td class="font-bold text-success">{{ stage.passing_score|stringformat:".0f" }} / ۱۰۰</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="{% if job.recruitment_plan %}6{% else %}3{% endif %}" class="text-muted">هیچ مرحله ارزیابی ثبت نشده است.</td>
+                <td colspan="5" class="text-muted">فرآیند ارزیابی برای این شغل تولید نشده است.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
+
+
     <!-- Signature Area -->
-    <h6 class="fw-bold text-secondary mb-3">۶. گردش تاییدات و تایید نهایی مدیر ناحیه</h6>
+    <h6 class="fw-bold text-secondary mb-3">۴. گردش تاییدات و تایید نهایی مدیر ناحیه</h6>
     <div class="row g-3">
         <div class="col-4">
             <div class="signature-box">

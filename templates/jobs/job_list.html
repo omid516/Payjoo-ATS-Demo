@@ -401,6 +401,12 @@
                             <a href="{% url 'job_opportunity_report' job.id %}" target="_blank" class="btn btn-sm btn-outline-info me-1" title="شناسنامه فرصت شغلی (PDF)">📊</a>
                             <a href="{% url 'job_print_doc' job.id %}" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="چاپ سند آزمون">🖨️</a>
                             {% endif %}
+                            {% if user.profile.is_recruitment_staff or user.profile.role == 'ADMIN' or user.profile.role == 'JOB_CLASSIFICATION_USER' %}
+                            <a href="{% url 'job_competency_config' job.id %}" class="btn btn-sm btn-outline-primary me-1" title="تنظیم شایستگی‌ها و ارزیابی">⚙️ شایستگی‌ها</a>
+                            {% endif %}
+                            {% if job.selected_competencies.exists %}
+                            <a href="{% url 'job_assessment_plan_print' job.id %}" target="_blank" class="btn btn-sm btn-outline-success me-1" title="چاپ Assessment Plan">📄 Assessment Plan</a>
+                            {% endif %}
                             {% if user.profile.can_manage_jobs %}
                             <a href="{% url 'job_edit' job.id %}" class="btn btn-sm btn-outline-primary me-1">ویرایش</a>
                             <button hx-get="{% url 'job_delete_confirm' job.id %}" 

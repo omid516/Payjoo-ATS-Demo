@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}بانک شایستگی‌های مرجع سازمان | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .comp-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+    .filter-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="font-bold text-secondary mb-1">📋 بانک شایستگی‌های مرجع سازمان</h3>
+        <p class="text-muted text-sm m-0">مرجع شایستگی‌ها، سطوح و ضرایب اهمیت مورد نیاز برای پست‌های سازمانی.</p>
+    </div>
+    {% if user.profile.is_recruitment_staff %}
+    <a href="{% url 'competency_upload' %}" class="btn btn-primary font-bold text-xs d-flex align-items-center gap-2 px-3 py-2" style="border-radius: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        بارگذاری اکسل شایستگی
+    </a>
+    {% endif %}
+</div>
+
+<!-- فیلترها و جستجو -->
+<div class="card filter-card border-0 p-4 mb-4">
+    <form method="get" class="m-0 row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label text-xs font-semibold text-secondary">جستجو در بانک:</label>
+            <input type="text" name="q" value="{{ q }}" class="form-control text-xs" placeholder="عنوان شایستگی، کد شایستگی، کد پست..." style="border-radius: 6px;">
+        </div>
+        <div class="col-md-2.5 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">نوع شایستگی:</label>
+            <select name="competency_type" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                {% for code, label in type_choices %}
+                <option value="{{ code }}" {% if competency_type == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">اهمیت:</label>
+            <select name="importance" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                {% for code, label in importance_choices %}
+                <option value="{{ code }}" {% if importance == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <label class="form-label text-xs font-semibold text-secondary">سطح نیاز:</label>
+            <select name="level" class="form-select text-xs" style="border-radius: 6px;">
+                <option value="">همه موارد</option>
+                {% for code, label in level_choices %}
+                <option value="{{ code }}" {% if level == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2.5 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary text-xs font-bold px-3 py-2 flex-grow-1" style="border-radius: 6px;"> اعمال فیلتر </button>
+            <a href="{% url 'competency_list' %}" class="btn btn-outline-secondary text-xs font-bold px-3 py-2" style="border-radius: 6px;">حذف فیلتر</a>
+        </div>
+    </form>
+</div>
+
+<!-- جدول شایستگی‌ها -->
+<div class="card comp-card border-0 p-4 shadow-xs">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle text-sm">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">کد پست</th>
+                    <th style="width: 20%;">پست سازمانی</th>
+                    <th style="width: 12%;">کد شایستگی</th>
+                    <th>عنوان شایستگی</th>
+                    <th style="width: 10%;" class="text-center">نوع شایستگی</th>
+                    <th style="width: 12%;" class="text-center">اهمیت</th>
+                    <th style="width: 10%;" class="text-center">سطح</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comp in competencies %}
+                <tr>
+                    <td class="font-semibold text-secondary">{{ comp.post_code }}</td>
+                    <td class="text-muted text-xs">{{ comp.post_title|default:"-" }}</td>
+                    <td class="font-bold text-primary">{{ comp.code }}</td>
+                    <td class="font-semibold text-dark">{{ comp.title }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-xxs px-2.5 py-1.5 font-bold">
+                            {{ comp.get_competency_type_display }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if comp.importance == 1 %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger text-xxs px-2.5 py-1.5 font-bold">۱ - محوری</span>
+                        {% elif comp.importance == 2 %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning text-xxs px-2.5 py-1.5 font-bold">۲ - تکلیف محور</span>
+                        {% else %}
+                            <span class="badge bg-info bg-opacity-10 text-info text-xxs px-2.5 py-1.5 font-bold">۳ - حداقلی</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if comp.level == 3 %}
+                            <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2.5 py-1.5 font-bold">۳ - تسلط</span>
+                        {% elif comp.level == 2 %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary text-xxs px-2.5 py-1.5 font-bold">۲ - توانایی</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark text-xxs px-2.5 py-1.5 font-bold">۱ - آشنایی</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">هیچ شایستگی مطابق با شرایط جستجو یافت نشد.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- پیجینیشن -->
+    {% if is_paginated %}
+    <nav class="d-flex justify-content-center mt-4">
+        <ul class="pagination pagination-sm m-0">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if q %}&q={{ q }}{% endif %}{% if competency_type %}&competency_type={{ competency_type }}{% endif %}{% if importance %}&importance={{ importance }}{% endif %}{% if level %}&level={{ level }}{% endif %}">اولین</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if competency_type %}&competency_type={{ competency_type }}{% endif %}{% if importance %}&importance={{ importance }}{% endif %}{% if level %}&level={{ level }}{% endif %}">قبلی</a></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">صفحه {{ page_obj.number }} از {{ paginator.num_pages }}</span></li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if competency_type %}&competency_type={{ competency_type }}{% endif %}{% if importance %}&importance={{ importance }}{% endif %}{% if level %}&level={{ level }}{% endif %}">بعدی</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if competency_type %}&competency_type={{ competency_type }}{% endif %}{% if importance %}&importance={{ importance }}{% endif %}{% if level %}&level={{ level }}{% endif %}">آخرین</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

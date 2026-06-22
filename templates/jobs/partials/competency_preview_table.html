@@ -1,0 +1,129 @@
+{% if errors %}
+    <div class="alert alert-warning text-xs font-semibold" style="border-radius: 8px;">
+        {% for error in errors %}
+            <div>⚠️ {{ error }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="table-responsive">
+    <table class="table table-bordered align-middle text-center text-xs mb-0">
+        <thead>
+            <tr class="table-light text-secondary">
+                <th style="width: 8%;">ترتیب</th>
+                <th class="text-start">مرحله ارزیابی</th>
+                <th style="width: 20%;">وزن مرحله (٪)</th>
+                <th style="width: 25%;">شایستگی‌های تحت سنجش</th>
+                <th style="width: 15%;">حد نصاب</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stype, sdata in calculated_plan.items %}
+            <tr>
+                <td class="font-bold text-secondary">{{ forloop.counter }}</td>
+                <td class="text-start">
+                    <span class="font-bold text-dark d-block">
+                        {% if stype == 'EXAM' %}📝 آزمون کتبی
+                        {% elif stype == 'SKILL_TEST' %}⚙️ آزمون مهارتی
+                        {% elif stype == 'INTERVIEW' %}🗣️ مصاحبه تخصصی
+                        {% else %}🏢 کانون ارزیابی{% endif %}
+                    </span>
+                    <span class="text-xxs text-muted">ابزار پیش‌فرض سیستم</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center justify-content-center gap-1">
+                        <input type="number" 
+                               name="stage_weight_{{ stype }}" 
+                               value="{{ sdata.weight }}" 
+                               min="{{ sdata.min_limit }}" 
+                               max="{{ sdata.max_limit }}" 
+                               class="form-control form-control-sm text-center font-bold" 
+                               style="width: 65px; border-radius: 6px; font-size: 11px;"
+                               onchange="triggerPreviewUpdate();">
+                        <span class="text-xs font-semibold text-secondary">٪</span>
+                    </div>
+                    <span class="text-xxs text-muted d-block mt-1 font-semibold" style="font-size: 8.5px;">مجاز: {{ sdata.min_limit }}٪ تا {{ sdata.max_limit }}٪</span>
+                </td>
+                <td class="text-start">
+                    <div class="d-flex flex-column gap-1">
+                        {% for comp in sdata.competencies %}
+                        <div class="d-flex justify-content-between text-xxs border-bottom border-light pb-1">
+                            <span class="text-dark">{{ comp.title }}</span>
+                            <span class="text-muted font-bold">{{ comp.weight }}٪</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center justify-content-center gap-1">
+                        <input type="number" 
+                               name="stage_passing_score_{{ stype }}" 
+                               value="{{ sdata.passing_score }}" 
+                               min="0" 
+                               max="100" 
+                               class="form-control form-control-sm text-center font-bold" 
+                               style="width: 65px; border-radius: 6px; font-size: 11px;"
+                               onchange="triggerPreviewUpdate();">
+                        <span class="text-xs font-semibold text-secondary">٪</span>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">هیچ شایستگی مناسبی انتخاب نشده است. لطفاً حداقل یک شایستگی با نوع KN, SK, AB, GE یا ST را انتخاب کنید.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if calculated_plan %}
+<div class="mt-3 p-3 bg-light rounded d-flex justify-content-between align-items-center" style="border: 1px dashed #cbd5e1;">
+    <div class="text-xxs text-muted">
+        💡 **نکته:** مجموع کل اوزان مراحل دقیقاً باید برابر **۱۰۰٪** تنظیم شود و مقادیر در محدوده مجاز هر مرحله باشند.
+    </div>
+    <div class="text-xs font-bold text-secondary">
+        وضعیت: <span class="badge {% if errors %}bg-danger bg-opacity-10 text-danger{% else %}bg-success bg-opacity-10 text-success{% endif %}">{% if errors %}دارای خطا در اوزان{% else %}تایید شده{% endif %}</span>
+    </div>
+</div>
+
+<div class="mt-4 pt-4 border-top">
+    <h6 class="font-bold text-secondary mb-2">۳. پیشنهاد و انتخاب الگوی فرآیند استخدام</h6>
+    <p class="text-muted text-xxs mb-3">سیستم بر اساس مراحل فعال ارزیابی، الگوهای زیر را برای این فرصت شغلی پیشنهاد می‌کند:</p>
+    
+    <div class="d-flex flex-column gap-2 mb-2">
+        {% for item in suggested_workflows %}
+        <div class="p-3 bg-light bg-opacity-50 rounded-3 border d-flex justify-content-between align-items-center hover-shadow-xs" 
+             style="border-color: {% if item.is_perfect_match %}#22c55e{% else %}#e2e8f0{% endif %} !important; border-width: {% if item.is_perfect_match %}1.5px{% else %}1px{% endif %} !important;">
+            <div class="d-flex align-items-center gap-2.5">
+                <input class="form-check-input" 
+                       type="radio" 
+                       name="workflow_template_id" 
+                       value="{{ item.template.id }}" 
+                       id="workflow_{{ item.template.id }}"
+                       {% if selected_workflow_id and selected_workflow_id|add:"0" == item.template.id %}checked
+                       {% elif not selected_workflow_id and item.is_perfect_match %}checked
+                       {% elif not selected_workflow_id and forloop.first %}checked{% endif %}>
+                <div>
+                    <label class="form-check-label text-xs font-bold text-dark d-block mb-1 cursor-pointer" for="workflow_{{ item.template.id }}">
+                        {{ item.template.name }}
+                    </label>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for r in item.reasons %}
+                        <span class="badge bg-white text-secondary border border-light font-medium" style="font-size: 8px; padding: 2px 4px;">{{ r }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge {% if item.is_perfect_match %}bg-success{% else %}bg-secondary{% endif %} bg-opacity-10 {% if item.is_perfect_match %}text-success{% else %}text-secondary{% endif %} font-bold text-xxs px-2 py-1">
+                    {{ item.match_percentage }}٪ تطابق
+                </span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted py-3 text-xs">هیچ الگوی فرآیند استخدامی در سیستم تعریف نشده است.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

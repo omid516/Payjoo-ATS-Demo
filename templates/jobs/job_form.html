@@ -3,10 +3,16 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
+<!-- Tom Select CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
     /* Style custom design for kamaDatepicker to match our theme */
     #bd-root-id_start_date, #bd-root-id_end_date {
         font-family: 'Vazirmatn', sans-serif !important;
+    }
+    .ts-dropdown {
+        direction: rtl !important;
+        text-align: right !important;
     }
 </style>
 {% endblock %}
@@ -290,8 +296,56 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.js"></script>
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Tom Select for Code (post code) autocomplete
+        new TomSelect('#id_code', {
+            valueField: 'post_code',
+            labelField: 'display_name',
+            searchField: 'display_name',
+            create: false,
+            placeholder: "جستجو و انتخاب پست سازمانی...",
+            rtl: true,
+            preload: 'focus',
+            load: function(query, callback) {
+                var url = '{% url "search_posts_api" %}?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json.items);
+                    }).catch(() => {
+                        callback();
+                    });
+            },
+            onChange: function(value) {
+                if (value) {
+                    var url = '{% url "post_detail_api" %}?post_code=' + encodeURIComponent(value);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && !data.error) {
+                                if (data.title) {
+                                    document.getElementById('id_title').value = data.title;
+                                }
+                                if (data.department) {
+                                    document.getElementById('id_department').value = data.department;
+                                }
+                                if (data.unit) {
+                                    document.getElementById('id_unit').value = data.unit;
+                                }
+                                if (data.job_category) {
+                                    document.getElementById('id_job_category').value = data.job_category;
+                                }
+                            }
+                        }).catch(err => {
+                            console.error('Error fetching post details:', err);
+                        });
+                }
+            }
+        });
+
         // Initialize Persian Datepicker
         kamaDatepicker('id_start_date', {
             buttonsColor: '#0052cc',

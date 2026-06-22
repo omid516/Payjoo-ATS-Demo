@@ -41,3 +41,19 @@ class AssessmentCompetencyAdmin(admin.ModelAdmin):
     list_display = ('stage', 'name', 'weight')
     list_filter = ('stage__job', 'stage')
     search_fields = ('name',)
+
+
+from .models import CentralCompetency, JobOpportunityCompetency
+
+@admin.register(CentralCompetency)
+class CentralCompetencyAdmin(admin.ModelAdmin):
+    list_display = ('code', 'title', 'post_code', 'post_title', 'competency_type', 'importance', 'level', 'management_name')
+    list_filter = ('competency_type', 'importance', 'level', 'management_name')
+    search_fields = ('code', 'title', 'post_code', 'post_title')
+
+
+@admin.register(JobOpportunityCompetency)
+class JobOpportunityCompetencyAdmin(admin.ModelAdmin):
+    list_display = ('job', 'code', 'title', 'competency_type', 'importance', 'level')
+    list_filter = ('job', 'competency_type', 'importance', 'level')
+    search_fields = ('code', 'title', 'job__title', 'job__code')

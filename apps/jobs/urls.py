@@ -12,7 +12,15 @@ from .views import (
     ExportJobsExcelView,
     WorkflowStagesPreviewView,
     JobOpportunityPrintDocView,
-    JobOpportunityBulkStatusView
+    JobOpportunityBulkStatusView,
+    CentralCompetencyListView,
+    CentralCompetencyUploadView,
+    RecruitmentPatternDashboardView,
+    JobCompetencyConfigView,
+    JobAssessmentPlanPrintView,
+    SearchPostsApiView,
+    SearchPostsDetailApiView,
+    CustomCompetenciesReportView
 )
 
 urlpatterns = [
@@ -30,4 +38,13 @@ urlpatterns = [
     path('workflows/<int:pk>/edit/', WorkflowTemplateUpdateView.as_view(), name='workflow_edit'),
     path('workflows/<int:pk>/delete/', WorkflowTemplateDeleteView.as_view(), name='workflow_delete'),
     path('workflows/<int:pk>/stages/', WorkflowStagesPreviewView.as_view(), name='workflow_stages_preview'),
+
+    path('competencies/', CentralCompetencyListView.as_view(), name='competency_list'),
+    path('competencies/upload/', CentralCompetencyUploadView.as_view(), name='competency_upload'),
+    path('competencies/patterns/', RecruitmentPatternDashboardView.as_view(), name='recruitment_patterns'),
+    path('competencies/custom-report/', CustomCompetenciesReportView.as_view(), name='custom_competencies_report'),
+    path('api/posts/search/', SearchPostsApiView.as_view(), name='search_posts_api'),
+    path('api/posts/detail/', SearchPostsDetailApiView.as_view(), name='post_detail_api'),
+    path('<int:job_id>/competencies/', JobCompetencyConfigView.as_view(), name='job_competency_config'),
+    path('<int:job_id>/assessment-plan/print/', JobAssessmentPlanPrintView.as_view(), name='job_assessment_plan_print'),
 ]

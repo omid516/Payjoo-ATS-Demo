@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}داشبورد الگوهای استخدامی مبتنی بر شایستگی | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .pattern-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+    .stat-badge {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0052cc;
+        line-height: 1;
+    }
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+    }
+    .post-card {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+    .post-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="font-bold text-secondary mb-1">📊 داشبورد الگوهای استخدامی (Recruitment Patterns)</h3>
+    <p class="text-muted text-sm m-0">تحلیل، استخراج و شبیه‌سازی مراحل و اوزان ارزیابی بر اساس پروفایل شایستگی‌های سازمان.</p>
+</div>
+
+<!-- ردیف کارت‌های آماری -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card pattern-card border-0 p-4 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <span class="text-xxs font-bold text-muted d-block mb-1.5 uppercase">تعداد کل شایستگی‌های مرجع</span>
+                <span class="stat-badge">{{ total_count }}</span>
+            </div>
+            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card pattern-card border-0 p-4 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <span class="text-xxs font-bold text-muted d-block mb-1.5 uppercase">پست‌های سازمانی دارای شایستگی</span>
+                <span class="stat-badge text-success">{{ unique_posts_count }}</span>
+            </div>
+            <div class="p-3 bg-success bg-opacity-10 text-success rounded-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card pattern-card border-0 p-4 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <span class="text-xxs font-bold text-muted d-block mb-1.5 uppercase">مراحل ارزیابی فعال در پترن‌ها</span>
+                <span class="stat-badge text-warning">۴ مرحله</span>
+            </div>
+            <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- توزیع انواع شایستگی‌ها -->
+    <div class="col-lg-4">
+        <div class="card pattern-card border-0 p-4 shadow-xs h-100">
+            <h5 class="font-bold text-secondary mb-4">توزیع انواع شایستگی‌ها در بانک مرجع</h5>
+            <div class="d-flex flex-column gap-3.5">
+                {% for item in type_distribution %}
+                <div>
+                    <div class="d-flex justify-content-between text-xs font-semibold mb-1">
+                        <span>
+                            {% if item.competency_type == 'KN' %}دانش (Knowledge)
+                            {% elif item.competency_type == 'SK' %}مهارت (Skill)
+                            {% elif item.competency_type == 'AB' %}توانایی (Ability)
+                            {% elif item.competency_type == 'GE' %}رفتاری (Behavioral)
+                            {% elif item.competency_type == 'ST' %}ارزش‌ها و سبک‌ها
+                            {% elif item.competency_type == 'PR' %}گردشکار
+                            {% elif item.competency_type == 'CQ' %}گواهینامه و صلاحیت
+                            {% else %}علایق حرفه‌ای{% endif %}
+                        </span>
+                        <strong class="text-primary">{{ item.count }} ردیف</strong>
+                    </div>
+                    <div class="progress progress-bar-custom bg-light">
+                        <div class="progress-bar {% if item.competency_type == 'KN' %}bg-primary{% elif item.competency_type in 'SK,AB' %}bg-success{% elif item.competency_type in 'GE,ST' %}bg-warning{% else %}bg-secondary{% endif %}" 
+                             role="progressbar" 
+                             style="width: {% widthratio item.count total_count 100 %}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- الگوهای ارزیابی پیشنهادی بر اساس شایستگی‌های پست -->
+    <div class="col-lg-8">
+        <div class="card pattern-card border-0 p-4 shadow-xs h-100">
+            <h5 class="font-bold text-secondary mb-2">شبیه‌سازی الگوی فرآیند و وزن ارزیابی پست‌ها</h5>
+            <p class="text-muted text-xs mb-4">نمونه محاسباتی وزن مراحل ارزیابی بر اساس شایستگی‌های ثبت شده برای هر پست سازمانی.</p>
+            
+            <div class="d-flex flex-column gap-3">
+                {% for pattern in post_patterns %}
+                <div class="card post-card p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary text-xxs font-bold px-2 py-1 mb-1">کد پست: {{ pattern.post_code }}</span>
+                            <h6 class="font-bold text-secondary m-0">{{ pattern.post_title|default:"بدون عنوان" }}</h6>
+                        </div>
+                        <span class="text-xs text-muted font-medium">{{ pattern.competencies_count }} شایستگی تعریف شده</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-1.5 mt-2">
+                        {% for stype, sdata in pattern.plan.items %}
+                        <div class="d-flex align-items-center gap-1.5 border border-light bg-light bg-opacity-50 px-2.5 py-1.5 rounded" style="border-radius: 6px;">
+                            <span class="text-xs text-secondary font-medium">
+                                {% if stype == 'EXAM' %}📝
+                                {% elif stype == 'SKILL_TEST' %}⚙️
+                                {% elif stype == 'INTERVIEW' %}🗣️
+                                {% else %}🏢{% endif %}
+                                {{ sdata.name }}:
+                            </span>
+                            <span class="badge bg-primary text-white text-xxs font-bold">{{ sdata.weight }}٪</span>
+                        </div>
+                        {% empty %}
+                        <span class="text-xxs text-muted">این پست فاقد شایستگی ارزیابی‌شونده (KN, SK, AB, GE, ST) است و فرآیند ارزیابی برای آن پیشنهاد نمی‌شود.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-5">اطلاعاتی در بانک شایستگی موجود نیست. لطفا ابتدا فایل اکسل شایستگی را آپلود کنید.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

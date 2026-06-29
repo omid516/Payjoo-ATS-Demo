@@ -328,44 +328,38 @@ class ApplicationStageState(SoftDeleteModel):
 
     @property
     def is_accessible(self):
-        # The stage state is accessible (editable) if all prior stages (by sequence) are COMPLETED or is_conditional_pass.
-        prior_states = self.application.stage_states.filter(
-            stage__sequence__lt=self.stage.sequence,
-            is_deleted=False
-        )
+        # Using prefetched stage states if available to avoid N+1 query
+        states = list(self.application.stage_states.all())
+        prior_states = [state for state in states if state.stage.sequence < self.stage.sequence and not state.is_deleted]
         return all(state.status == ApplicationStageState.STATUS_COMPLETED or state.is_conditional_pass for state in prior_states)
 
     @property
     def has_failed_prior_stages(self):
         if hasattr(self, 'has_failed_prior'):
             return self.has_failed_prior
-        prior_states = self.application.stage_states.filter(
-            stage__sequence__lt=self.stage.sequence,
-            is_deleted=False
-        )
+        states = list(self.application.stage_states.all())
+        prior_states = [state for state in states if state.stage.sequence < self.stage.sequence and not state.is_deleted]
         return any(state.status == self.STATUS_FAILED and not state.is_conditional_pass for state in prior_states)
 
     @property
     def prev_stage_state(self):
-        return self.application.stage_states.filter(
-            stage__sequence__lt=self.stage.sequence,
-            is_deleted=False
-        ).order_by('-stage__sequence').first()
+        states = list(self.application.stage_states.all())
+        prior_states = [state for state in states if state.stage.sequence < self.stage.sequence and not state.is_deleted]
+        if not prior_states:
+            return None
+        return max(prior_states, key=lambda state: state.stage.sequence)
 
     @property
     def actual_evaluation_date(self):
         if self.evaluation_date:
             return self.evaluation_date
         
-        from apps.recruitment_planning.models import JobStagePlan
-        stage_plan = JobStagePlan.objects.filter(
-            plan__job=self.application.job,
-            stage=self.stage,
-            is_deleted=False
-        ).first()
-        if stage_plan and stage_plan.planned_end_date:
-            return stage_plan.planned_end_date
-            
+        job = self.application.job
+        plan = getattr(job, 'recruitment_plan', None)
+        if plan and not plan.is_deleted:
+            for sp in plan.stage_plans.all():
+                if sp.stage_id == self.stage_id and not sp.is_deleted:
+                    return sp.planned_end_date
         return None
 
     @property

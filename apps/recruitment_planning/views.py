@@ -141,18 +141,8 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             config = configs.get(stype)
             capacity_limit = config.monthly_capacity if config else 100
             
-            # Total headcount consuming this stage type in current month
-            from django.db.models import Sum
-            consumed = JobStagePlan.objects.filter(
-                stage_type=stype,
-                planned_end_date__range=(g_start, g_end),
-                plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
-                plan__is_deleted=False,
-                plan__job__is_deleted=False,
-                is_deleted=False
-            ).exclude(
-                plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
-            ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+            from .utils import get_consumed_capacity
+            consumed = get_consumed_capacity(stype, g_start, g_end, year, month)
             
             remaining = max(0, capacity_limit - consumed)
             percentage = round((consumed / capacity_limit) * 100, 1) if capacity_limit > 0 else 0
@@ -808,15 +798,8 @@ class JobPlanningSuggestionsView(LoginRequiredMixin, RoleRequiredMixin, View):
             g_start, g_end = get_jalali_month_range(y, m)
             stages_data = []
             for stype in ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
-                consumed = JobStagePlan.objects.filter(
-                    stage_type=stype,
-                    planned_end_date__range=(g_start, g_end),
-                    plan__is_deleted=False,
-                    plan__job__is_deleted=False,
-                    is_deleted=False
-                ).exclude(
-                    plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
-                ).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+                from .utils import get_consumed_capacity
+                consumed = get_consumed_capacity(stype, g_start, g_end, y, m, exclude_job=job)
                 
                 config = configs.get(stype)
                 limit = config.monthly_capacity if config else 100
@@ -1304,7 +1287,9 @@ class EditJobStagePlanView(LoginRequiredMixin, RoleRequiredMixin, View):
                 is_deleted=False
             )
             if states_to_update.exists():
-                states_to_update.update(evaluation_date=end_date)
+                for state in states_to_update:
+                    state.evaluation_date = end_date
+                    state.save()
 
             # Update plan's overall start_date and predicted_end_date
             all_sps = plan.stage_plans.filter(is_deleted=False)
@@ -1367,7 +1352,7 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         funnel_data = []
         if selected_job:
             # Funnel for specific job
-            stages = list(selected_job.stages.filter(is_deleted=False).order_by('sequence'))
+            stages = sorted([s for s in selected_job.stages.all() if not s.is_deleted], key=lambda x: x.sequence)
             job_apps = JobApplication.objects.filter(job=selected_job, is_deleted=False).prefetch_related('stage_states', 'stage_states__stage')
             total_apps = job_apps.count()
             
@@ -1383,13 +1368,20 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 reached_count = 0
                 passed_count = 0
                 for app in job_apps:
-                    # An application reached this stage if all prior stages are completed or conditional pass
-                    prior_states = [s for s in app.stage_states.all() if s.stage.sequence < stage.sequence and not s.is_deleted]
-                    reached = all(s.status == 'COMPLETED' or s.is_conditional_pass for s in prior_states)
+                    states_by_type = {s.stage.stage_type: s for s in app.stage_states.all() if not s.is_deleted}
+                    
+                    reached = True
+                    prior_stages = [s for s in stages if s.sequence < stage.sequence]
+                    for prior in prior_stages:
+                        p_state = states_by_type.get(prior.stage_type)
+                        if not p_state or (p_state.status != 'COMPLETED' and not p_state.is_conditional_pass):
+                            reached = False
+                            break
+                            
                     if reached:
                         reached_count += 1
-                        state = next((s for s in app.stage_states.all() if s.stage_id == stage.id and not s.is_deleted), None)
-                        if state and (state.status == 'COMPLETED' or state.is_conditional_pass):
+                        curr_state = states_by_type.get(stage.stage_type)
+                        if curr_state and (curr_state.status == 'COMPLETED' or curr_state.is_conditional_pass):
                             passed_count += 1
                 
                 pass_rate = round((passed_count / reached_count) * 100, 1) if reached_count > 0 else 0.0
@@ -1402,95 +1394,108 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                     'pass_rate': pass_rate,
                     'conversion_rate': conversion_rate
                 })
+            
+            # Now calculate final selection (جذب نهایی)
+            reached_selected_count = 0
+            passed_selected_count = 0
+            for app in job_apps:
+                states_by_type = {s.stage.stage_type: s for s in app.stage_states.all() if not s.is_deleted}
+                reached_selected = True
+                for s in stages:
+                    s_state = states_by_type.get(s.stage_type)
+                    if not s_state or (s_state.status != 'COMPLETED' and not s_state.is_conditional_pass):
+                        reached_selected = False
+                        break
+                if reached_selected or app.status == 'SELECTED':
+                    reached_selected_count += 1
+                    if app.status == 'SELECTED':
+                        passed_selected_count += 1
+            
+            pass_rate = round((passed_selected_count / reached_selected_count) * 100, 1) if reached_selected_count > 0 else 0.0
+            conversion_rate = round((passed_selected_count / total_apps) * 100, 1) if total_apps > 0 else 0.0
+            funnel_data.append({
+                'stage_name': 'جذب نهایی',
+                'reached': reached_selected_count,
+                'passed': passed_selected_count,
+                'pass_rate': pass_rate,
+                'conversion_rate': conversion_rate
+            })
         else:
             # Global funnel using standard stage types
-            global_apps = JobApplication.objects.filter(is_deleted=False).prefetch_related('stage_states', 'stage_states__stage')
+            global_apps = JobApplication.objects.filter(is_deleted=False).select_related('job').prefetch_related('stage_states', 'stage_states__stage', 'job__stages')
             total_apps = global_apps.count()
             
-            reached_screening = total_apps
-            passed_screening = 0
-            reached_exam = 0
-            passed_exam = 0
-            reached_skill = 0
-            passed_skill = 0
-            reached_interview = 0
-            passed_interview = 0
-            reached_assessment = 0
-            passed_assessment = 0
-            reached_selected = 0
-            passed_selected = 0
+            stats = {
+                'SCREENING': {'reached': 0, 'passed': 0, 'name': 'غربالگری اولیه'},
+                'EXAM': {'reached': 0, 'passed': 0, 'name': 'آزمون کتبی'},
+                'SKILL_TEST': {'reached': 0, 'passed': 0, 'name': 'آزمون مهارتی'},
+                'INTERVIEW': {'reached': 0, 'passed': 0, 'name': 'مصاحبه حضوری'},
+                'ASSESSMENT': {'reached': 0, 'passed': 0, 'name': 'کانون ارزیابی'},
+                'SELECTED': {'reached': 0, 'passed': 0, 'name': 'جذب نهایی'},
+            }
             
             for app in global_apps:
-                states = {s.stage.stage_type: s for s in app.stage_states.all() if not s.is_deleted}
+                job = app.job
+                if not job:
+                    continue
+                stages = sorted([s for s in job.stages.all() if not s.is_deleted], key=lambda x: x.sequence)
+                states_by_type = {s.stage.stage_type: s for s in app.stage_states.all() if not s.is_deleted}
                 
-                scr_ok = True
-                if 'SCREENING' in states:
-                    scr_ok = states['SCREENING'].status == 'COMPLETED' or states['SCREENING'].is_conditional_pass
+                # Check stages that exist in this job
+                for stage in stages:
+                    stype = stage.stage_type
+                    if stype not in stats:
+                        continue
+                    
+                    # A candidate reached this stage if all prior active stages of the job are completed
+                    reached = True
+                    prior_stages = [s for s in stages if s.sequence < stage.sequence]
+                    for prior in prior_stages:
+                        p_state = states_by_type.get(prior.stage_type)
+                        if not p_state or (p_state.status != 'COMPLETED' and not p_state.is_conditional_pass):
+                            reached = False
+                            break
+                            
+                    if reached:
+                        stats[stype]['reached'] += 1
+                        curr_state = states_by_type.get(stype)
+                        if curr_state and (curr_state.status == 'COMPLETED' or curr_state.is_conditional_pass):
+                            stats[stype]['passed'] += 1
                 
-                exam_ok = scr_ok
-                if 'EXAM' in states:
-                    exam_ok = scr_ok and (states['EXAM'].status == 'COMPLETED' or states['EXAM'].is_conditional_pass)
-                    
-                skill_ok = exam_ok
-                if 'SKILL_TEST' in states:
-                    skill_ok = exam_ok and (states['SKILL_TEST'].status == 'COMPLETED' or states['SKILL_TEST'].is_conditional_pass)
-                    
-                intv_ok = skill_ok
-                if 'INTERVIEW' in states:
-                    intv_ok = skill_ok and (states['INTERVIEW'].status == 'COMPLETED' or states['INTERVIEW'].is_conditional_pass)
-                    
-                asmt_ok = intv_ok
-                if 'ASSESSMENT' in states:
-                    asmt_ok = intv_ok and (states['ASSESSMENT'].status == 'COMPLETED' or states['ASSESSMENT'].is_conditional_pass)
-                
-                selected_ok = app.status == 'SELECTED'
-                
-                if 'SCREENING' in states:
-                    if scr_ok: passed_screening += 1
-                else:
-                    passed_screening += 1
-                    
-                if scr_ok:
-                    reached_exam += 1
-                    if 'EXAM' in states:
-                        if exam_ok: passed_exam += 1
-                    else:
-                        passed_exam += 1
-                        
-                if exam_ok:
-                    reached_skill += 1
-                    if 'SKILL_TEST' in states:
-                        if skill_ok: passed_skill += 1
-                    else:
-                        passed_skill += 1
-                        
-                if skill_ok:
-                    reached_interview += 1
-                    if 'INTERVIEW' in states:
-                        if intv_ok: passed_interview += 1
-                    else:
-                        passed_interview += 1
-                        
-                if intv_ok:
-                    reached_assessment += 1
-                    if 'ASSESSMENT' in states:
-                        if asmt_ok: passed_assessment += 1
-                    else:
-                        passed_assessment += 1
-                        
-                if asmt_ok:
-                    reached_selected += 1
-                    if selected_ok: passed_selected += 1
+                # Check Selected
+                reached_selected = True
+                for s in stages:
+                    s_state = states_by_type.get(s.stage_type)
+                    if not s_state or (s_state.status != 'COMPLETED' and not s_state.is_conditional_pass):
+                        reached_selected = False
+                        break
+                if reached_selected or app.status == 'SELECTED':
+                    stats['SELECTED']['reached'] += 1
+                    if app.status == 'SELECTED':
+                        stats['SELECTED']['passed'] += 1
             
             funnel_data = [
-                {'stage_name': 'کل متقاضیان', 'reached': total_apps, 'passed': total_apps, 'pass_rate': 100.0, 'conversion_rate': 100.0},
-                {'stage_name': 'غربالگری اولیه', 'reached': reached_screening, 'passed': passed_screening, 'pass_rate': round((passed_screening / reached_screening) * 100, 1) if reached_screening > 0 else 0.0, 'conversion_rate': round((passed_screening / total_apps) * 100, 1) if total_apps > 0 else 0.0},
-                {'stage_name': 'آزمون کتبی', 'reached': reached_exam, 'passed': passed_exam, 'pass_rate': round((passed_exam / reached_exam) * 100, 1) if reached_exam > 0 else 0.0, 'conversion_rate': round((passed_exam / total_apps) * 100, 1) if total_apps > 0 else 0.0},
-                {'stage_name': 'آزمون مهارتی', 'reached': reached_skill, 'passed': passed_skill, 'pass_rate': round((passed_skill / reached_skill) * 100, 1) if reached_skill > 0 else 0.0, 'conversion_rate': round((passed_skill / total_apps) * 100, 1) if total_apps > 0 else 0.0},
-                {'stage_name': 'مصاحبه حضوری', 'reached': reached_interview, 'passed': passed_interview, 'pass_rate': round((passed_interview / reached_interview) * 100, 1) if reached_interview > 0 else 0.0, 'conversion_rate': round((passed_interview / total_apps) * 100, 1) if total_apps > 0 else 0.0},
-                {'stage_name': 'کانون ارزیابی', 'reached': reached_assessment, 'passed': passed_assessment, 'pass_rate': round((passed_assessment / reached_assessment) * 100, 1) if reached_assessment > 0 else 0.0, 'conversion_rate': round((passed_assessment / total_apps) * 100, 1) if total_apps > 0 else 0.0},
-                {'stage_name': 'جذب نهایی', 'reached': reached_selected, 'passed': passed_selected, 'pass_rate': round((passed_selected / reached_selected) * 100, 1) if reached_selected > 0 else 0.0, 'conversion_rate': round((passed_selected / total_apps) * 100, 1) if total_apps > 0 else 0.0},
+                {
+                    'stage_name': 'کل متقاضیان',
+                    'reached': total_apps,
+                    'passed': total_apps,
+                    'pass_rate': 100.0,
+                    'conversion_rate': 100.0
+                }
             ]
+            for key in ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT', 'SELECTED']:
+                s_info = stats[key]
+                reached = s_info['reached']
+                passed = s_info['passed']
+                pass_rate = round((passed / reached) * 100, 1) if reached > 0 else 0.0
+                conversion_rate = round((passed / total_apps) * 100, 1) if total_apps > 0 else 0.0
+                funnel_data.append({
+                    'stage_name': s_info['name'],
+                    'reached': reached,
+                    'passed': passed,
+                    'pass_rate': pass_rate,
+                    'conversion_rate': conversion_rate
+                })
 
         # 2. Trend Chart (۶ ماه گذشته)
         today_j = jdatetime.date.today()
@@ -1631,24 +1636,71 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 score__gt=0,
                 is_deleted=False
             )
-            buckets = [0, 0, 0, 0, 0, 0]
-            for state in states:
-                val = state.score
-                if val < 50:
-                    buckets[0] += 1
-                elif val < 60:
-                    buckets[1] += 1
-                elif val < 70:
-                    buckets[2] += 1
-                elif val < 80:
-                    buckets[3] += 1
-                elif val < 90:
-                    buckets[4] += 1
-                else:
-                    buckets[5] += 1
+            if code == 'ASSESSMENT':
+                buckets = [0, 0, 0, 0]
+                labels = ["0-40", "40-50", "50-60", "۶۰ به بالا"]
+                colors = [
+                    'rgba(239, 68, 68, 0.7)',  # 0-40
+                    'rgba(245, 158, 11, 0.7)', # 40-50
+                    'rgba(245, 158, 11, 0.7)', # 50-60
+                    'rgba(16, 185, 129, 0.8)'  # Above 60
+                ]
+                borders = [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#f59e0b',
+                    '#10b981'
+                ]
+                for state in states:
+                    val = state.score
+                    if val < 40:
+                        buckets[0] += 1
+                    elif val < 50:
+                        buckets[1] += 1
+                    elif val < 60:
+                        buckets[2] += 1
+                    else:
+                        buckets[3] += 1
+            else:
+                buckets = [0, 0, 0, 0, 0, 0]
+                labels = ["0-50", "50-60", "60-70", "70-80", "80-90", "90-100"]
+                colors = [
+                    'rgba(239, 68, 68, 0.7)',  # 0-50
+                    'rgba(245, 158, 11, 0.7)', # 50-60
+                    'rgba(79, 70, 229, 0.8)',  # 60-70
+                    'rgba(79, 70, 229, 0.8)',  # 70-80
+                    'rgba(79, 70, 229, 0.8)',  # 80-90
+                    'rgba(16, 185, 129, 0.8)'  # 90-100
+                ]
+                borders = [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#4f46e5',
+                    '#4f46e5',
+                    '#4f46e5',
+                    '#10b981'
+                ]
+                for state in states:
+                    val = state.score
+                    if val < 50:
+                        buckets[0] += 1
+                    elif val < 60:
+                        buckets[1] += 1
+                    elif val < 70:
+                        buckets[2] += 1
+                    elif val < 80:
+                        buckets[3] += 1
+                    elif val < 90:
+                        buckets[4] += 1
+                    else:
+                        buckets[5] += 1
+
             score_distributions[code] = {
                 'label': label,
                 'data': buckets,
+                'labels': labels,
+                'colors': colors,
+                'borders': borders,
                 'total_scores': sum(buckets)
             }
 
@@ -1677,6 +1729,8 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
         page_number = request.GET.get('page', 1)
         log_page_obj = paginator.get_page(page_number)
 
+        completed_trend = [h + r for h, r in zip(hired_trend, rejected_trend)]
+
         context = {
             'jobs_list': jobs_list,
             'selected_job': selected_job,
@@ -1685,6 +1739,7 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             'applied_trend': applied_trend,
             'hired_trend': hired_trend,
             'rejected_trend': rejected_trend,
+            'completed_trend': completed_trend,
             'recruiter_stats': recruiter_stats,
             'score_distributions': score_distributions,
             

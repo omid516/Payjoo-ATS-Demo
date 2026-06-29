@@ -459,8 +459,9 @@ def handle_stage_state_notification(sender, instance, created, **kwargs):
         date_str = jd.strftime('%Y/%m/%d')
         time_str = instance.evaluation_time or "10:00"
         
-        is_exam = (stage_type == 'EXAM') or ('آزمون' in stage.name)
-        is_interview = (stage_type == 'INTERVIEW') or ('مصاحبه' in stage.name)
+        stage_name_lower = stage.name.lower()
+        is_exam = (stage_type in ['EXAM', 'SKILL_TEST']) or any(kw in stage_name_lower for kw in ['آزمون', 'کتبی', 'مهارتی', 'سنجش', 'تخصصی', 'عمومی', 'عملکردی'])
+        is_interview = (stage_type in ['INTERVIEW', 'ASSESSMENT']) or any(kw in stage_name_lower for kw in ['مصاحبه', 'ارزیابی', 'کانون', 'گفتگو', 'حضوری', 'شایستگی'])
         
         # سناریو ۲: دعوت به آزمون کتبی / تخصصی
         if is_exam:

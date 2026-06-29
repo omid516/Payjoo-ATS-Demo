@@ -82,35 +82,57 @@
                 <table class="table table-hover align-middle mb-0 text-xs">
                     <thead class="table-light text-secondary font-bold">
                         <tr>
-                            <th class="py-2.5 px-3 text-right" style="width: 20%;">شایستگی پست</th>
-                            <th class="py-2.5 px-3 text-center" style="width: 15%;">چارچوب مرجع</th>
-                            <th class="py-2.5 px-3 text-right" style="width: 25%;">بعد / شاخص معادل جهانی</th>
-                            <th class="py-2.5 px-3 text-center" style="width: 15%;">ابزار سنجش پیشنهادی</th>
-                            <th class="py-2.5 px-3 text-right" style="width: 25%;">تحلیل فنی انتخاب ابزار</th>
+                            <th class="py-2.5 px-3 text-right" style="width: 20%;">شایستگی و ابزار سنجش</th>
+                            <th class="py-2.5 px-3 text-right" style="width: 20%;">چارچوب و بعد مرجع</th>
+                            <th class="py-2.5 px-3 text-right" style="width: 25%;">نشانگرهای رفتاری کلیدی</th>
+                            <th class="py-2.5 px-3 text-center" style="width: 15%;">بنچمارک قبولی</th>
+                            <th class="py-2.5 px-3 text-right" style="width: 20%;">تحلیل فنی انتخاب ابزار</th>
                         </tr>
                     </thead>
                     <tbody class="text-secondary font-medium">
                         {% for mapping in benchmark_mappings %}
                         <tr>
-                            <td class="py-2.5 px-3 text-dark font-bold">{{ mapping.competency }}</td>
-                            <td class="py-2.5 px-3 text-center">
+                            <td class="py-2.5 px-3">
+                                <div class="text-dark font-bold mb-1.5">{{ mapping.competency }}</div>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary px-2 py-1" style="border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2); font-size: 9px; font-weight: 600;">
+                                    🛠️ {{ mapping.tool }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3">
+                                <div class="mb-1">
                                 {% if 'SHL' in mapping.framework or 'shl' in mapping.framework|lower %}
-                                    <span class="badge px-2 py-1.5" style="background-color: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; font-size: 9.5px; font-weight: 700;">{{ mapping.framework }}</span>
+                                    <span class="badge px-2 py-0.5" style="background-color: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; font-size: 9px; font-weight: 700;">{{ mapping.framework }}</span>
                                 {% elif 'Lominger' in mapping.framework or 'lominger' in mapping.framework|lower %}
-                                    <span class="badge px-2 py-1.5" style="background-color: rgba(139, 92, 246, 0.12); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 6px; font-size: 9.5px; font-weight: 700;">{{ mapping.framework }}</span>
+                                    <span class="badge px-2 py-0.5" style="background-color: rgba(139, 92, 246, 0.12); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 6px; font-size: 9px; font-weight: 700;">{{ mapping.framework }}</span>
                                 {% elif 'Korn Ferry' in mapping.framework or 'korn' in mapping.framework|lower or 'ferry' in mapping.framework|lower %}
-                                    <span class="badge px-2 py-1.5" style="background-color: rgba(20, 184, 166, 0.12); color: #0d9488; border: 1px solid rgba(20, 184, 166, 0.25); border-radius: 6px; font-size: 9.5px; font-weight: 700;">{{ mapping.framework }}</span>
+                                    <span class="badge px-2 py-0.5" style="background-color: rgba(20, 184, 166, 0.12); color: #0d9488; border: 1px solid rgba(20, 184, 166, 0.25); border-radius: 6px; font-size: 9px; font-weight: 700;">{{ mapping.framework }}</span>
                                 {% elif 'DDI' in mapping.framework or 'ddi' in mapping.framework|lower %}
-                                    <span class="badge px-2 py-1.5" style="background-color: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 6px; font-size: 9.5px; font-weight: 700;">{{ mapping.framework }}</span>
+                                    <span class="badge px-2 py-0.5" style="background-color: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 6px; font-size: 9px; font-weight: 700;">{{ mapping.framework }}</span>
                                 {% else %}
-                                    <span class="badge bg-light text-secondary border px-2 py-1.5" style="border-radius: 6px; font-size: 9.5px; font-weight: 700;">{{ mapping.framework }}</span>
+                                    <span class="badge bg-light text-secondary border px-2 py-0.5" style="border-radius: 6px; font-size: 9px; font-weight: 700;">{{ mapping.framework }}</span>
+                                {% endif %}
+                                </div>
+                                <span class="font-semibold text-dark text-xxs" style="line-height: 1.4; font-family: monospace;">{{ mapping.dimension }}</span>
+                            </td>
+                            <td class="py-2.5 px-3 text-xxs text-secondary">
+                                {% if mapping.behavioral_indicators %}
+                                    <ul class="ps-3 mb-0" style="line-height: 1.5; padding-right: 15px;">
+                                        {% for indicator in mapping.behavioral_indicators %}
+                                            <li class="mb-1">{{ indicator }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
-                            <td class="py-2.5 px-3 font-semibold text-dark text-xxs" style="line-height: 1.5; font-family: monospace;">{{ mapping.dimension }}</td>
                             <td class="py-2.5 px-3 text-center">
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary px-2.5 py-1.5" style="border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.25); font-size: 9.5px; font-weight: 600;">
-                                    {{ mapping.tool }}
-                                </span>
+                                {% if mapping.pass_benchmark %}
+                                    <span class="badge bg-success bg-opacity-10 text-success px-2 py-1.5" style="border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 9.5px; font-weight: 700; white-space: normal; line-height: 1.3;">
+                                        🎯 {{ mapping.pass_benchmark }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
                             </td>
                             <td class="py-2.5 px-3 text-xxs text-muted" style="line-height: 1.6; text-align: justify;">{{ mapping.rationale }}</td>
                         </tr>
@@ -170,8 +192,8 @@
                     <span class="text-success" style="font-size: 1.1rem;">🎬</span>
                     سناریوی پیشنهادی کانون ارزیابی (Assessment Scenario)
                 </h6>
-                <div class="text-xs text-secondary font-medium p-3 bg-light bg-opacity-40 rounded-3 border border-light" style="line-height: 1.8; text-align: justify;">
-                    {{ scenario }}
+                <div class="text-xs text-secondary font-medium p-3 bg-light bg-opacity-40 rounded-3 border border-light ai-scenario-text" style="line-height: 1.8; text-align: justify;">
+                    {{ scenario|linebreaks }}
                 </div>
             </div>
         </div>
@@ -189,7 +211,19 @@
                 <div class="col-md-4">
                     <div class="p-3 border border-light rounded-3 bg-light bg-opacity-25 h-100 hover-shadow-xs position-relative" style="transition: all 0.2s ease;">
                         <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary px-2 py-1" style="font-size: 9px; box-shadow: 0 2px 4px rgba(99, 102, 241, 0.25);">{{ forloop.counter }}</span>
-                        <p class="text-xs text-secondary m-0 font-semibold" style="line-height: 1.7; text-align: justify; padding-top: 2px;">{{ q }}</p>
+                        {% if q.question %}
+                            <div class="mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary font-bold px-2 py-1" style="font-size: 9px; border: 1px solid rgba(99, 102, 241, 0.15);">🎯 شایستگی: {{ q.competency }}</span>
+                            </div>
+                            <p class="text-xs text-secondary m-0 font-semibold mb-2" style="line-height: 1.7; text-align: justify;">{{ q.question }}</p>
+                            {% if q.criteria %}
+                                <div class="text-xxs text-muted mt-2 border-top pt-2" style="line-height: 1.5;">
+                                    <strong class="text-secondary">💡 راهنمای ارزیابی:</strong> {{ q.criteria }}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-xs text-secondary m-0 font-semibold" style="line-height: 1.7; text-align: justify; padding-top: 2px;">{{ q }}</p>
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}

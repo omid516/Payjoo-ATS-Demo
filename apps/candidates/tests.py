@@ -26,13 +26,15 @@ class CandidateModuleTests(TestCase):
             workflow=self.workflow,
             name='آزمون کتبی',
             default_weight=40,
-            sequence=1
+            sequence=1,
+            stage_type='EXAM'
         )
         self.stage_template_2 = WorkflowStageTemplate.objects.create(
             workflow=self.workflow,
             name='مصاحبه فنی',
             default_weight=60,
-            sequence=2
+            sequence=2,
+            stage_type='INTERVIEW'
         )
 
         # Create a JobOpportunity

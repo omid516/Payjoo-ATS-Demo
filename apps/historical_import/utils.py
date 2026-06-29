@@ -990,6 +990,8 @@ def import_fixed_template_excel(excel_file, user):
                     if job.is_deleted:
                         job.is_deleted = False
                         job.deleted_at = None
+                        from apps.jobs.models import JobOpportunityStage
+                        JobOpportunityStage.all_objects.filter(job=job).update(is_deleted=False, deleted_at=None)
                     job.title = title or job.title
                     job.department = department or job.department
                     job.unit = unit or job.unit

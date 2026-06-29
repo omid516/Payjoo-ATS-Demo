@@ -466,7 +466,11 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
         stages_list = list(stages)
         first_stage = stages_list[0] if stages_list and ('غربالگری' in stages_list[0].name or stages_list[0].stage_type == 'SCREENING') else None
         
-        apps_qs = self.object.applications.filter(is_deleted=False).select_related('candidate').prefetch_related('stage_states__stage')
+        apps_qs = self.object.applications.filter(is_deleted=False).select_related(
+            'candidate', 'job__recruitment_plan'
+        ).prefetch_related(
+            'stage_states__stage', 'job__recruitment_plan__stage_plans'
+        )
         
         def get_app_priority(app):
             eff_status = app.effective_status
@@ -485,6 +489,9 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
             return 4
 
         apps_list = list(apps_qs)
+        for app in apps_list:
+            for state in app.stage_states.all():
+                state.application = app
         apps_list.sort(key=lambda app: (get_app_priority(app), -app.final_score, -app.id))
         
         data['applications'] = apps_list
@@ -4308,10 +4315,7 @@ class CandidatesByStageListView(LoginRequiredMixin, RoleRequiredMixin, ListView)
         # 4. Stage Type Filter
         stage_type = self.request.GET.get('stage_type', '').strip()
         if stage_type:
-            if stage_type == 'SCREENING':
-                queryset = queryset.filter(Q(current_stage__stage_type='SCREENING') | Q(current_stage__isnull=True))
-            else:
-                queryset = queryset.filter(current_stage__stage_type=stage_type)
+            queryset = queryset.filter(job__status=stage_type)
 
         return queryset
 
@@ -4378,12 +4382,156 @@ class CandidatesByStageListView(LoginRequiredMixin, RoleRequiredMixin, ListView)
         context['total_in_progress'] = active_apps.count()
         
         from django.db.models import Q
-        context['screening_count'] = active_apps.filter(Q(current_stage__stage_type='SCREENING') | Q(current_stage__isnull=True)).count()
-        context['exam_count'] = active_apps.filter(current_stage__stage_type='EXAM').count()
-        context['skill_count'] = active_apps.filter(current_stage__stage_type='SKILL_TEST').count()
-        context['interview_count'] = active_apps.filter(current_stage__stage_type='INTERVIEW').count()
-        context['assessment_count'] = active_apps.filter(current_stage__stage_type='ASSESSMENT').count()
+        context['screening_count'] = active_apps.filter(job__status='SCREENING').count()
+        context['exam_count'] = active_apps.filter(job__status='EXAM').count()
+        context['skill_count'] = active_apps.filter(job__status='SKILL_TEST').count()
+        context['interview_count'] = active_apps.filter(job__status='INTERVIEW').count()
+        context['assessment_count'] = active_apps.filter(job__status='ASSESSMENT').count()
         
         return context
+
+
+class BulkSendNotificationModalView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_SPECIALIST, UserProfile.ROLE_RECRUITMENT_DIRECTOR]
+
+    def get(self, request, job_id):
+        from apps.accounts.models import SMSTemplate
+        from apps.jobs.models import JobOpportunity
+        from apps.candidates.models import JobApplication
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        app_ids_str = request.GET.get('app_ids', '')
+        if not app_ids_str:
+            return HttpResponse("متقاضیی انتخاب نشده است.", status=400)
+            
+        app_ids = [int(x) for x in app_ids_str.split(',') if x.isdigit()]
+        applications = JobApplication.objects.filter(
+            pk__in=app_ids, 
+            job=job, 
+            status=JobApplication.STATUS_IN_PROGRESS, 
+            is_deleted=False
+        ).prefetch_related('candidate', 'stage_states__stage')
+        
+        if not applications.exists():
+            return HttpResponse("هیچ متقاضی واجد شرایطی یافت نشد.", status=400)
+            
+        templates = SMSTemplate.objects.filter(is_deleted=False).order_by('name')
+        
+        # Prepare previews or details for each
+        preview_candidates = []
+        for app in applications:
+            state = app.stage_states.filter(stage=app.current_stage, is_deleted=False).first()
+            preview_candidates.append({
+                'app': app,
+                'candidate': app.candidate,
+                'stage': app.current_stage,
+                'state': state
+            })
+            
+        context = {
+            'job': job,
+            'preview_candidates': preview_candidates,
+            'templates': templates,
+            'app_ids_str': app_ids_str
+        }
+        return render(request, 'candidates/partials/bulk_send_notification_modal.html', context)
+
+
+class BulkSendNotificationView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_SPECIALIST, UserProfile.ROLE_RECRUITMENT_DIRECTOR]
+
+    def post(self, request, job_id):
+        from apps.accounts.models import SMSTemplate
+        from apps.jobs.models import JobOpportunity, OrganizationSetting
+        from apps.candidates.models import JobApplication
+        from apps.candidates.signals import send_dynamic_email, send_gateway_sms, render_notification_template
+        from apps.accounts.views import render_template_text
+        from django.contrib import messages
+
+        job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+        app_ids_str = request.POST.get('app_ids', '')
+        if not app_ids_str:
+            messages.error(request, "هیچ متقاضی انتخاب نشده است.")
+            return redirect('job_pipeline', pk=job_id)
+
+        app_ids = [int(x) for x in app_ids_str.split(',') if x.isdigit()]
+        applications = JobApplication.objects.filter(
+            pk__in=app_ids, 
+            job=job, 
+            status=JobApplication.STATUS_IN_PROGRESS, 
+            is_deleted=False
+        )
+
+        org_setting = OrganizationSetting.get_active_setting()
+        if not org_setting:
+            messages.error(request, "تنظیمات سازمان یافت نشد.")
+            return redirect('job_pipeline', pk=job_id)
+
+        notification_type = request.POST.get('notification_type', 'SMART')
+        send_sms = request.POST.get('send_sms') == 'on'
+        send_email = request.POST.get('send_email') == 'on'
+        custom_body = request.POST.get('custom_body', '').strip()
+
+        if not send_sms and not send_email:
+            messages.error(request, "لطفاً حداقل یک کانال ارتباطی (پیامک یا ایمیل) را انتخاب کنید.")
+            return redirect('job_pipeline', pk=job_id)
+
+        sent_count = 0
+        for app in applications:
+            state = app.stage_states.filter(stage=app.current_stage, is_deleted=False).first()
+            if not state:
+                continue
+
+            import jdatetime
+            date_str = ""
+            if state.evaluation_date:
+                jd = jdatetime.date.fromgregorian(date=state.evaluation_date)
+                date_str = jd.strftime('%Y/%m/%d')
+            time_str = state.evaluation_time or "10:00"
+
+            if notification_type == 'SMART':
+                stage_name_lower = state.stage.name.lower()
+                is_exam = (state.stage.stage_type in ['EXAM', 'SKILL_TEST']) or any(kw in stage_name_lower for kw in ['آزمون', 'کتبی', 'مهارتی', 'سنجش', 'تخصصی', 'عمومی', 'عملکردی'])
+                is_interview = (state.stage.stage_type in ['INTERVIEW', 'ASSESSMENT']) or any(kw in stage_name_lower for kw in ['مصاحبه', 'ارزیابی', 'کانون', 'گفتگو', 'حضوری', 'شایستگی'])
+
+                if is_exam:
+                    if send_email and org_setting.exam_email_enabled:
+                        subject = render_notification_template(org_setting.exam_email_subject, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        body = render_notification_template(org_setting.exam_email_body, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        send_dynamic_email(org_setting, app.candidate.email, subject, body)
+                    if send_sms and org_setting.exam_sms_enabled:
+                        body = render_notification_template(org_setting.exam_sms_body, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        send_gateway_sms(org_setting, app.candidate.phone_number, body)
+                    sent_count += 1
+                elif is_interview:
+                    if send_email and org_setting.interview_email_enabled:
+                        subject = render_notification_template(org_setting.interview_email_subject, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        body = render_notification_template(org_setting.interview_email_body, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        send_dynamic_email(org_setting, app.candidate.email, subject, body)
+                    if send_sms and org_setting.interview_sms_enabled:
+                        body = render_notification_template(org_setting.interview_sms_body, app.candidate, job, stage_name=state.stage.name, date=date_str, time=time_str)
+                        send_gateway_sms(org_setting, app.candidate.phone_number, body)
+                    sent_count += 1
+            else:
+                # Custom Template or Manual Body
+                if notification_type.isdigit():
+                    tmpl = SMSTemplate.objects.filter(pk=int(notification_type), is_deleted=False).first()
+                    text = render_template_text(tmpl.body, app.candidate, job, state.stage, state, app) if tmpl else ""
+                else:
+                    text = render_template_text(custom_body, app.candidate, job, state.stage, state, app)
+
+                if text:
+                    if send_sms:
+                        send_gateway_sms(org_setting, app.candidate.phone_number, text)
+                    if send_email:
+                        subject = f"اطلاعیه جدید از {org_setting.name}"
+                        body = f"""<div dir="rtl" style="font-family: Tahoma, Arial, sans-serif; text-align: right; padding: 20px; line-height: 1.6;">
+                            <p>{text}</p>
+                        </div>"""
+                        send_dynamic_email(org_setting, app.candidate.email, subject, body)
+                    sent_count += 1
+
+        messages.success(request, f"اعلانات با موفقیت برای {sent_count} متقاضی ارسال شد.")
+        return redirect('job_pipeline', pk=job_id)
 
 

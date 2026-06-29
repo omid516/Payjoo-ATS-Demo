@@ -83,17 +83,36 @@
                         + افزودن شایستگی دستی
                     </button>
                 </div>
+
+                <!-- اعمال مدل شایستگی -->
+                <div class="mb-3.5 p-2.5 bg-light bg-opacity-50 border border-light rounded-3 d-flex align-items-center justify-content-between gap-2 mb-3">
+                    <div class="flex-grow-1">
+                        <select id="competency-model-select" class="form-select form-select-sm text-xxs font-semibold" style="border-radius: 6px;">
+                            <option value="">-- اعمال مدل شایستگی پیش‌فرض سازمان --</option>
+                            {% for model in competency_models %}
+                            <option value="{{ model.id }}">{{ model.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-xxs btn-primary text-xxs px-2.5 py-1.5" onclick="applyCompetencyModel()" style="border-radius: 6px; flex-shrink: 0;">
+                        ⚡ اعمال مدل
+                    </button>
+                </div>
                 
                 <div class="border border-light rounded-3 bg-light bg-opacity-25 p-3 d-flex flex-column" style="min-height: 180px;">
                     <div id="custom-comps-container" class="d-flex flex-column gap-2">
                         <!-- شایستگی‌های دستی از پیش ذخیره شده یا افزوده‌شده در این فیلدها رندر می‌شوند -->
                         {% for comp in custom_competencies_list %}
                         <div class="custom-comp-item d-flex align-items-center justify-content-between p-2.5 bg-white border border-light rounded-3 hover-shadow-xs">
-                            <input type="hidden" name="custom_competencies" value='{"title": "{{ comp.title }}", "competency_type": "{{ comp.competency_type }}", "importance": {{ comp.importance }}, "level": {{ comp.level }}}'>
+                            <input type="hidden" name="custom_competencies" value='{"title": "{{ comp.title }}", "competency_type": "{{ comp.competency_type }}", "importance": {{ comp.importance }}, "level": {{ comp.level }}, "code": "{{ comp.code|default:'' }}", "model_name": "{{ comp.model_name|default:'' }}"}'>
                             <div class="flex-grow-1">
                                 <div class="text-xs font-bold text-dark mb-1">
                                     {{ comp.title }}
+                                    {% if comp.model_name %}
+                                    <span class="badge bg-info bg-opacity-10 text-info font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">مدل: {{ comp.model_name }}</span>
+                                    {% else %}
                                     <span class="badge bg-warning bg-opacity-10 text-warning font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">دستی</span>
+                                    {% endif %}
                                 </div>
                                 <div class="d-flex gap-1 flex-wrap">
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">
@@ -144,7 +163,7 @@
                 <!-- گزینه‌های محاسباتی -->
                 <div class="mb-3.5 p-2.5 bg-light bg-opacity-75 border border-light rounded-3 d-flex align-items-center mb-3">
                     <div class="form-check form-switch m-0 d-flex align-items-center gap-2" style="direction: rtl;">
-                        <input class="form-check-input ms-0 me-2" type="checkbox" name="round_to_five" id="round_to_five" {% if round_to_five %}checked{% endif %} onchange="triggerPreviewUpdate()" style="cursor: pointer;">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" name="round_to_five" id="round_to_five" {% if round_to_five %}checked{% endif %} onchange="triggerPreviewUpdate(true)" style="cursor: pointer;">
                         <label class="form-check-label text-xs font-bold text-secondary" for="round_to_five" style="cursor: pointer;">
                             ⚖️ رند کردن اوزان شایستگی‌ها و مراحل به مضرب ۵
                         </label>
@@ -182,8 +201,8 @@
 <div id="htmx-preview-trigger"
      hx-post="{% url 'job_competency_config' job.id %}"
      hx-target="#preview-table-container"
-     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name='workflow_template_id'], [name='custom_competencies'], [name='round_to_five']"
-     hx-vals="js:{action: 'preview'}"
+     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name^='stage_active_'], [name='workflow_template_id'], [name='custom_competencies'], [name='round_to_five'], [name='deactivated_stages']"
+     hx-vals="js:{action: 'preview', recalculate_weights: getRecalculateWeights()}"
      hx-trigger="updatePreview">
 </div>
 
@@ -397,20 +416,47 @@
         return Array.from(checkboxes).map(cb => cb.value);
     }
 
-    function triggerPreviewUpdate() {
+    function toggleStageActive(checkbox, stageKey) {
+        const input = document.getElementById('deactivated_stages_input');
+        if (!input) return;
+        let deactivated = input.value ? input.value.split(',') : [];
+        
+        if (!checkbox.checked) {
+            if (!deactivated.includes(stageKey)) {
+                deactivated.push(stageKey);
+            }
+        } else {
+            deactivated = deactivated.filter(s => s !== stageKey);
+        }
+        
+        input.value = deactivated.join(',');
+        triggerPreviewUpdate(true);
+    }
+
+    let recalculateWeightsNext = false;
+    function triggerPreviewUpdate(recalculate) {
+        if (recalculate) {
+            recalculateWeightsNext = true;
+        }
         htmx.trigger('#htmx-preview-trigger', 'updatePreview');
+    }
+    
+    function getRecalculateWeights() {
+        const val = recalculateWeightsNext;
+        recalculateWeightsNext = false;
+        return val;
     }
 
     function selectAllPostComps() {
         const checkboxes = document.querySelectorAll('.post-comp-item:not(.d-none) .post-comp-checkbox');
         checkboxes.forEach(cb => cb.checked = true);
-        triggerPreviewUpdate();
+        triggerPreviewUpdate(true);
     }
 
     function deselectAllPostComps() {
         const checkboxes = document.querySelectorAll('.post-comp-item:not(.d-none) .post-comp-checkbox');
         checkboxes.forEach(cb => cb.checked = false);
-        triggerPreviewUpdate();
+        triggerPreviewUpdate(true);
     }
 
     function filterPostCompetencies() {
@@ -434,19 +480,24 @@
         filterPostCompetencies();
     }
 
-    function submitCustomCompForm(event) {
-        event.preventDefault();
-        const titleInput = document.getElementById('custom_title');
-        const typeInput = document.getElementById('custom_type');
-        const importanceInput = document.getElementById('custom_importance');
-        const levelInput = document.getElementById('custom_level');
-        
-        const title = titleInput.value.trim();
-        const typeVal = typeInput.value;
-        const importanceVal = parseInt(importanceInput.value);
-        const levelVal = parseInt(levelInput.value);
-        
-        if (!title) return;
+    function showFloatingFeedback(text) {
+        const msg = document.createElement('div');
+        msg.className = 'position-fixed bottom-0 end-0 m-4 p-3 bg-success text-white rounded-3 shadow animate__animated animate__fadeInUp';
+        msg.style.zIndex = '9999';
+        msg.innerText = text;
+        document.body.appendChild(msg);
+        setTimeout(() => {
+            msg.classList.remove('animate__fadeInUp');
+            msg.classList.add('animate__fadeOutDown');
+            setTimeout(() => msg.remove(), 500);
+        }, 3000);
+    }
+
+    function addCustomCompItemMarkup(title, typeVal, importanceVal, levelVal, code = '', modelName = '') {
+        const emptyMsg = document.querySelector('.empty-custom-msg');
+        if (emptyMsg) {
+            emptyMsg.remove();
+        }
         
         const typeLabels = {
             'KN': 'دانش',
@@ -465,14 +516,14 @@
             title: title,
             competency_type: typeVal,
             importance: importanceVal,
-            level: levelVal
+            level: levelVal,
+            code: code,
+            model_name: modelName
         };
         
-        // Remove empty state message if it exists
-        const emptyMsg = document.querySelector('.empty-custom-msg');
-        if (emptyMsg) {
-            emptyMsg.remove();
-        }
+        const badgeMarkup = modelName 
+            ? `<span class="badge bg-info bg-opacity-10 text-info font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">مدل: ${escapeHtml(modelName)}</span>`
+            : `<span class="badge bg-warning bg-opacity-10 text-warning font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">دستی</span>`;
         
         const container = document.getElementById('custom-comps-container');
         const itemHtml = `
@@ -481,12 +532,12 @@
                 <div class="flex-grow-1">
                     <div class="text-xs font-bold text-dark mb-1">
                         ${escapeHtml(title)}
-                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">دستی</span>
+                        ${badgeMarkup}
                     </div>
                     <div class="d-flex gap-1 flex-wrap">
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">${typeLabels[typeVal]}</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح: ${lvlLabels[levelVal]}</span>
-                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت: ${impLabels[importanceVal]}</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">${typeLabels[typeVal] || typeVal}</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح: ${lvlLabels[levelVal] || levelVal}</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت: ${impLabels[importanceVal] || importanceVal}</span>
                     </div>
                 </div>
                 <button type="button" class="btn btn-link text-danger p-0 ms-2" onclick="removeCustomComp(this)">
@@ -498,9 +549,26 @@
         `;
         
         container.insertAdjacentHTML('beforeend', itemHtml);
+    }
+
+    function submitCustomCompForm(event) {
+        event.preventDefault();
+        const titleInput = document.getElementById('custom_title');
+        const typeInput = document.getElementById('custom_type');
+        const importanceInput = document.getElementById('custom_importance');
+        const levelInput = document.getElementById('custom_level');
+        
+        const title = titleInput.value.trim();
+        const typeVal = typeInput.value;
+        const importanceVal = parseInt(importanceInput.value);
+        const levelVal = parseInt(levelInput.value);
+        
+        if (!title) return;
+        
+        addCustomCompItemMarkup(title, typeVal, importanceVal, levelVal);
         
         // Trigger live preview update
-        triggerPreviewUpdate();
+        triggerPreviewUpdate(true);
         
         // Hide modal
         const modalEl = document.getElementById('customCompModal');
@@ -512,6 +580,53 @@
         if (customTitleSelect) {
             customTitleSelect.clear();
         }
+    }
+
+    function applyCompetencyModel() {
+        const select = document.getElementById('competency-model-select');
+        const modelId = select.value;
+        if (!modelId) {
+            alert('لطفاً ابتدا یک مدل شایستگی را انتخاب کنید.');
+            return;
+        }
+        
+        const url = `/jobs/api/competency-models/${modelId}/`;
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('خطا در دریافت اطلاعات مدل شایستگی');
+                return response.json();
+            })
+            .then(data => {
+                let addedCount = 0;
+                data.items.forEach(item => {
+                    const exists = Array.from(document.querySelectorAll('#custom-comps-container input[name="custom_competencies"]'))
+                        .some(input => {
+                            try {
+                                const val = JSON.parse(input.value);
+                                return val.title.trim() === item.title.trim();
+                            } catch (e) {
+                                return false;
+                            }
+                        });
+                        
+                    if (!exists) {
+                        addCustomCompItemMarkup(item.title, item.competency_type, item.importance, item.level, item.code, item.model_name);
+                        addedCount++;
+                    }
+                });
+                
+                if (addedCount > 0) {
+                    showFloatingFeedback(`✓ تعداد ${addedCount} شایستگی از مدل «${data.name}» اعمال شد.`);
+                    triggerPreviewUpdate(true);
+                } else {
+                    alert('تمام شایستگی‌های این مدل پیش از این اضافه شده‌اند.');
+                }
+                select.value = '';
+            })
+            .catch(error => {
+                console.error(error);
+                alert('خطا در دریافت اطلاعات مدل شایستگی.');
+            });
     }
     
     function removeCustomComp(button) {
@@ -525,11 +640,12 @@
                 container.innerHTML = '<div class="text-center text-muted py-4 text-xs empty-custom-msg">هیچ شایستگی دستی ثبت نشده است.</div>';
             }
             
-            triggerPreviewUpdate();
+            triggerPreviewUpdate(true);
         }
     }
     
     function escapeHtml(text) {
+        if (!text) return '';
         const map = {
             '&': '&amp;',
             '<': '&lt;',
@@ -537,7 +653,7 @@
             '"': '&quot;',
             "'": '&#039;'
         };
-        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
     window.applyAIWeights = function(weightsStr) {
@@ -554,18 +670,7 @@
             if (applied) {
                 // Trigger preview update to recalculate and validate total weights
                 triggerPreviewUpdate();
-                
-                // Show a nice temporary floating feedback message
-                const msg = document.createElement('div');
-                msg.className = 'position-fixed bottom-0 end-0 m-4 p-3 bg-success text-white rounded-3 shadow animate__animated animate__fadeInUp';
-                msg.style.zIndex = '9999';
-                msg.innerText = '✓ اوزان پیشنهادی هوش مصنوعی بر روی فرم اعمال شدند.';
-                document.body.appendChild(msg);
-                setTimeout(() => {
-                    msg.classList.remove('animate__fadeInUp');
-                    msg.classList.add('animate__fadeOutDown');
-                    setTimeout(() => msg.remove(), 500);
-                }, 3000);
+                showFloatingFeedback('✓ اوزان پیشنهادی هوش مصنوعی بر روی فرم اعمال شدند.');
             }
         } catch (e) {
             console.error('Error applying AI weights:', e);

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}مدیریت مدل‌های شایستگی سازمانی | سامانه پیجو{% endblock %}
+
+{% block extra_head %}
+<style>
+    .split-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+    .model-item-link {
+        display: block;
+        padding: 12px 16px;
+        border-radius: 10px;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        margin-bottom: 6px;
+        border: 1px solid transparent;
+    }
+    .model-item-link:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+    .model-item-link.active {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: #bfdbfe;
+        font-weight: 600;
+    }
+    .badge-type {
+        font-size: 8.5px;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4" style="direction: rtl;">
+    <div>
+        <h3 class="font-bold text-secondary mb-1">🏷️ مدل‌های شایستگی سازمانی</h3>
+        <p class="text-muted text-sm m-0">تعریف الگوهای شایستگی رفتاری و عمومی (مثلاً کارشناسی، سرپرستی و ...) جهت اعمال سریع به پست‌های سازمانی.</p>
+    </div>
+</div>
+
+<div class="row g-4" style="direction: rtl;">
+    <!-- ستون لیست مدل‌ها (راست) -->
+    <div class="col-lg-4">
+        <div class="card split-card border-0 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="font-bold text-secondary m-0">لیست مدل‌های شایستگی</h6>
+                <button class="btn btn-xs btn-primary d-flex align-items-center gap-1 font-semibold" 
+                        style="border-radius: 6px;"
+                        hx-get="{% url 'competency_model_list' %}?action=create_form"
+                        hx-target="#model-details-container">
+                    + مدل جدید
+                </button>
+            </div>
+            
+            <div class="flex-grow-1 overflow-auto pe-1" style="max-height: 550px;" id="models-list-pane">
+                {% for m in models %}
+                <a href="javascript:void(0);" 
+                   class="model-item-link {% if selected_model and selected_model.id == m.id %}active{% endif %}" 
+                   id="model-link-{{ m.id }}"
+                   hx-get="{% url 'competency_model_list' %}?model_id={{ m.id }}"
+                   hx-target="#model-details-container"
+                   onclick="setActiveModelLink(this)">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-xs font-bold">{{ m.name }}</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-xxs font-semibold">{{ m.items.filter.count|default:0 }} شایستگی</span>
+                    </div>
+                    {% if m.description %}
+                    <div class="text-xxs text-muted mt-1 text-truncate" style="max-width: 250px;">{{ m.description }}</div>
+                    {% endif %}
+                </a>
+                {% empty %}
+                <div class="text-center text-muted py-5 text-xs empty-models-msg">هیچ مدل شایستگی تعریف نشده است.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- ستون جزئیات و کارپوشه مدیریت (چپ) -->
+    <div class="col-lg-8">
+        <div id="model-details-container" class="h-100">
+            {% if selected_model %}
+                {% include "jobs/partials/competency_model_detail.html" with model=selected_model items=items %}
+            {% else %}
+                <div class="card split-card border-0 p-5 text-center d-flex flex-column justify-content-center align-items-center h-100" style="min-height: 400px;">
+                    <div class="p-3 bg-light rounded-circle mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-muted">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                    </div>
+                    <h6 class="font-bold text-secondary">هیچ مدل شایستگی انتخاب نشده است</h6>
+                    <p class="text-muted text-xxs mb-0">لطفاً از ستون سمت راست یک مدل انتخاب کنید یا روی دکمه «+ مدل جدید» کلیک نمایید.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function setActiveModelLink(el) {
+        document.querySelectorAll('.model-item-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        el.classList.add('active');
+    }
+</script>
+{% endblock %}

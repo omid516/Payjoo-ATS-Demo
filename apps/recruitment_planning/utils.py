@@ -170,12 +170,7 @@ def calculate_recruitment_schedule(job, start_date, overrides=None):
                 # Fetch consumed capacity for the month to display in preview
                 j_end = jdatetime.date.fromgregorian(date=planned_end)
                 g_month_start, g_month_end = get_jalali_month_range(j_end.year, j_end.month)
-                consumed = JobStagePlan.objects.filter(
-                    stage_type=stage_type,
-                    planned_end_date__range=(g_month_start, g_month_end),
-                    plan__is_deleted=False,
-                    is_deleted=False
-                ).exclude(plan__job=job).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+                consumed = get_consumed_capacity(stage_type, g_month_start, g_month_end, j_end.year, j_end.month, exclude_job=job)
             else:
                 planned_start = current_start
                 if is_exact:
@@ -190,12 +185,7 @@ def calculate_recruitment_schedule(job, start_date, overrides=None):
                     j_end = jdatetime.date.fromgregorian(date=planned_end)
                     g_month_start, g_month_end = get_jalali_month_range(j_end.year, j_end.month)
                     
-                    consumed = JobStagePlan.objects.filter(
-                        stage_type=stage_type,
-                        planned_end_date__range=(g_month_start, g_month_end),
-                        plan__is_deleted=False,
-                        is_deleted=False
-                    ).exclude(plan__job=job).aggregate(total=Sum('plan__job__headcount'))['total'] or 0
+                    consumed = get_consumed_capacity(stage_type, g_month_start, g_month_end, j_end.year, j_end.month, exclude_job=job)
                     
                     if consumed + job.headcount <= capacity_limit:
                         break
@@ -234,4 +224,47 @@ def calculate_recruitment_schedule(job, start_date, overrides=None):
             current_start = get_next_working_day(add_working_days(planned_start, sla_days, holidays_set), holidays_set)
 
     return schedule
+
+
+def get_consumed_capacity(stage_type, g_start, g_end, year, month, exclude_job=None):
+    """
+    Calculates the consumed capacity of a stage type in a given month.
+    If the month is the current month (matching today's date), it counts the actual candidate applications 
+    in progress for the jobs that are scheduled in this month.
+    Otherwise (for past/future months), it sums the planned headcount of the scheduled jobs.
+    """
+    from apps.recruitment_planning.models import JobStagePlan, JobRecruitmentPlan
+    from apps.jobs.models import JobOpportunity
+    from django.db.models import Sum, Q
+    
+    stage_plans = JobStagePlan.objects.filter(
+        stage_type=stage_type,
+        planned_end_date__range=(g_start, g_end),
+        plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
+        plan__is_deleted=False,
+        plan__job__is_deleted=False,
+        is_deleted=False
+    ).exclude(
+        plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
+    )
+    if exclude_job:
+        stage_plans = stage_plans.exclude(plan__job=exclude_job)
+        
+    today_j = jdatetime.date.today()
+    is_current_month = (year == today_j.year and month == today_j.month)
+    
+    if is_current_month:
+        from apps.candidates.models import JobApplication
+        active_apps = JobApplication.objects.filter(
+            status=JobApplication.STATUS_IN_PROGRESS, 
+            is_deleted=False
+        ).exclude(
+            job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
+        )
+        if exclude_job:
+            active_apps = active_apps.exclude(job=exclude_job)
+            
+        return active_apps.filter(job__status=stage_type).count()
+    else:
+        return stage_plans.aggregate(total=Sum('plan__job__headcount'))['total'] or 0
 

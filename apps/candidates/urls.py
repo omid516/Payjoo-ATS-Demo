@@ -62,7 +62,10 @@ from .views import (
     EditAdmissionDateView,
     UpdateAdmissionDateView,
     CandidatesByStageListView,
+    BulkSendNotificationModalView,
+    BulkSendNotificationView,
 )
+
 
 urlpatterns = [
     path('', CandidateListView.as_view(), name='candidate_list'),
@@ -138,4 +141,7 @@ urlpatterns = [
     path('application/<int:pk>/edit-admission-date/', EditAdmissionDateView.as_view(), name='edit_admission_date'),
     path('application/<int:pk>/update-admission-date/', UpdateAdmissionDateView.as_view(), name='update_admission_date'),
     path('by-stage/', CandidatesByStageListView.as_view(), name='candidates_by_stage_list'),
+    path('opportunity/<int:job_id>/pipeline/bulk-send-notification-modal/', BulkSendNotificationModalView.as_view(), name='bulk_send_notification_modal'),
+    path('opportunity/<int:job_id>/pipeline/bulk-send-notification/', BulkSendNotificationView.as_view(), name='bulk_send_notification'),
 ]
+

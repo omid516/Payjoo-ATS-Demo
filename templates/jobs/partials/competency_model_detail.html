@@ -1,0 +1,130 @@
+<div class="card split-card border-0 p-4 h-100 d-flex flex-column" style="direction: rtl;">
+    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+        <div>
+            <h5 class="font-bold text-dark mb-1">{{ model.name }}</h5>
+            <p class="text-muted text-xxs m-0">{{ model.description|default:"بدون توضیحات" }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-xxs btn-outline-secondary d-flex align-items-center gap-1 font-semibold" 
+                    hx-get="{% url 'competency_model_list' %}?action=edit_form&model_id={{ model.id }}"
+                    hx-target="#model-details-container"
+                    style="border-radius: 6px; padding: 4px 8px;">
+                ⚙️ ویرایش اطلاعات
+            </button>
+            <form action="{% url 'competency_model_manage' %}" method="post" onsubmit="return confirm('آیا از حذف این مدل شایستگی اطمینان کامل دارید؟ تمام شایستگی‌های تعریف‌شده در آن حذف خواهند شد.');" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="model_id" value="{{ model.id }}">
+                <button type="submit" class="btn btn-xxs btn-outline-danger d-flex align-items-center gap-1 font-semibold" style="border-radius: 6px; padding: 4px 8px;">
+                    🗑️ حذف مدل
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- فرم افزودن شایستگی سریع به مدل -->
+    <div class="bg-light bg-opacity-50 border border-light rounded-3 p-3 mb-4">
+        <h6 class="font-bold text-secondary text-xs mb-2.5">➕ افزودن شایستگی به این مدل:</h6>
+        <form hx-post="{% url 'competency_model_item_manage' model.id %}" hx-target="#model-details-container" class="m-0 row g-2.5 align-items-end">
+            {% csrf_token %}
+            <div class="col-md-4">
+                <label class="form-label text-xxs font-semibold text-secondary mb-1">عنوان شایستگی:</label>
+                <input type="text" name="title" class="form-control form-control-sm text-xs" style="border-radius: 6px;" placeholder="مثلا: خلاقیت و نوآوری" required>
+            </div>
+            <div class="col-md-2.5">
+                <label class="form-label text-xxs font-semibold text-secondary mb-1">نوع شایستگی:</label>
+                <select name="competency_type" class="form-select form-select-sm text-xs" style="border-radius: 6px;">
+                    {% for code, label in type_choices %}
+                    <option value="{{ code }}" {% if code == 'GE' %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-xxs font-semibold text-secondary mb-1">اهمیت:</label>
+                <select name="importance" class="form-select form-select-sm text-xs" style="border-radius: 6px;">
+                    {% for val, label in importance_choices %}
+                    <option value="{{ val }}" {% if val == 1 %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-xxs font-semibold text-secondary mb-1">سطح نیاز:</label>
+                <select name="level" class="form-select form-select-sm text-xs" style="border-radius: 6px;">
+                    {% for val, label in level_choices %}
+                    <option value="{{ val }}" {% if val == 2 %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1.5 text-end">
+                <button type="submit" class="btn btn-sm btn-primary w-100 font-bold text-xs" style="border-radius: 6px; padding: 7px 0;">+ افزودن</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- جدول شایستگی‌های این مدل -->
+    <div class="flex-grow-1 overflow-auto">
+        <h6 class="font-bold text-secondary text-xs mb-2">شایستگی‌های تعریف‌شده در مدل ({{ items.count|default:0 }} مورد):</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center text-xs mb-0">
+                <thead>
+                    <tr class="table-light text-secondary">
+                        <th style="width: 6%;">ترتیب</th>
+                        <th class="text-start">عنوان شایستگی</th>
+                        <th style="width: 15%;">نوع شایستگی</th>
+                        <th style="width: 15%;">اهمیت شایستگی</th>
+                        <th style="width: 15%;">سطح شایستگی</th>
+                        <th style="width: 10%;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="font-bold text-secondary">{{ forloop.counter }}</td>
+                        <td class="text-start font-semibold text-dark">
+                            {{ item.title }}
+                            <div class="text-xxs text-muted font-bold mt-1" style="font-size: 8px;">کد: {{ item.code }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary badge-type">
+                                {{ item.get_competency_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if item.importance == 1 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger badge-type">۱ - محوری</span>
+                            {% elif item.importance == 2 %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning badge-type">۲ - تکلیف محور</span>
+                            {% else %}
+                                <span class="badge bg-info bg-opacity-10 text-info badge-type">۳ - حداقلی</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.level == 3 %}
+                                <span class="badge bg-success bg-opacity-10 text-success badge-type">۳ - تسلط</span>
+                            {% elif item.level == 2 %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary badge-type">۲ - توانایی</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark badge-type">۱ - آشنایی</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-link text-danger p-0" 
+                                    hx-post="{% url 'competency_model_item_manage' model.id %}" 
+                                    hx-vals='{"action": "delete", "item_id": "{{ item.id }}"}'
+                                    hx-target="#model-details-container"
+                                    hx-confirm="آیا از حذف این شایستگی از این مدل شایستگی اطمینان دارید؟"
+                                    style="text-decoration: none;">
+                                🗑️ حذف
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">هنوز هیچ شایستگی برای این مدل تعریف نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

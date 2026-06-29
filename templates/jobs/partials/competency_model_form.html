@@ -1,0 +1,53 @@
+<div class="card split-card border-0 p-4 h-100 d-flex flex-column" style="direction: rtl;">
+    <div class="border-bottom pb-3 mb-4">
+        <h5 class="font-bold text-dark mb-1">
+            {% if action == 'edit' %}📝 ویرایش مدل شایستگی
+            {% else %}✨ تعریف مدل شایستگی جدید{% endif %}
+        </h5>
+        <p class="text-muted text-xxs m-0">تعریف نام و توضیحات مدل جهت سازماندهی شایستگی‌های عمومی.</p>
+    </div>
+
+    <form action="{% url 'competency_model_manage' %}" method="post" class="flex-grow-1 d-flex flex-column justify-content-between m-0">
+        {% csrf_token %}
+        {% if action == 'edit' %}
+        <input type="hidden" name="model_id" value="{{ model.id }}">
+        {% endif %}
+
+        <div>
+            <div class="mb-3">
+                <label for="model_name_input" class="form-label font-semibold text-xs text-secondary mb-1.5">نام مدل شایستگی:</label>
+                <input type="text" 
+                       name="name" 
+                       id="model_name_input" 
+                       value="{% if action == 'edit' %}{{ model.name }}{% endif %}" 
+                       class="form-control text-xs" 
+                       style="border-radius: 8px;" 
+                       placeholder="مثلا: مدل شایستگی کارشناسی / سرپرستی / تکنسینی" 
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label for="model_desc_input" class="form-label font-semibold text-xs text-secondary mb-1.5">توضیحات مدل (اختیاری):</label>
+                <textarea name="description" 
+                          id="model_desc_input" 
+                          rows="4" 
+                          class="form-control text-xs" 
+                          style="border-radius: 8px;" 
+                          placeholder="توضیحاتی در مورد رده سازمانی، حوزه شمول یا اهداف ارزیابی این مدل شایستگی بنویسید...">{% if action == 'edit' %}{{ model.description|default:'' }}{% endif %}</textarea>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 border-top pt-4 mt-4">
+            <button type="submit" class="btn btn-success text-xs font-bold px-4 py-2" style="border-radius: 8px;">
+                ✓ ذخیره اطلاعات
+            </button>
+            <button type="button" 
+                    class="btn btn-outline-secondary text-xs font-semibold px-4 py-2" 
+                    hx-get="{% url 'competency_model_list' %}{% if model %}?model_id={{ model.id }}{% endif %}" 
+                    hx-target="#model-details-container" 
+                    style="border-radius: 8px;">
+                انصراف
+            </button>
+        </div>
+    </form>
+</div>

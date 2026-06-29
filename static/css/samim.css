@@ -1,0 +1,29 @@
+@font-face {
+    font-family: 'Samim';
+    src: url('Samim.eot');
+    src: url('Samim.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/samim//static/fonts/samim/Samim.woff2') format('woff2'),
+         url('/static/fonts/samim/Samim.woff') format('woff'),
+         url('/static/fonts/samim/Samim.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Samim';
+    src: url('Samim-Bold.eot');
+    src: url('Samim-Bold.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/samim//static/fonts/samim/Samim-Bold.woff2') format('woff2'),
+         url('/static/fonts/samim/Samim-Bold.woff') format('woff'),
+         url('/static/fonts/samim/Samim-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'Samim';
+    src: url('Samim-Medium.eot');
+    src: url('Samim-Medium.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/samim//static/fonts/samim/Samim-Medium.woff2') format('woff2'),
+         url('/static/fonts/samim/Samim-Medium.woff') format('woff'),
+         url('/static/fonts/samim/Samim-Medium.ttf') format('truetype');
+    font-weight: 500;
+}

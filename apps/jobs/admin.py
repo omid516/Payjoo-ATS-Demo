@@ -47,9 +47,10 @@ from .models import CentralCompetency, JobOpportunityCompetency
 
 @admin.register(CentralCompetency)
 class CentralCompetencyAdmin(admin.ModelAdmin):
-    list_display = ('code', 'title', 'post_code', 'post_title', 'competency_type', 'importance', 'level', 'management_name')
-    list_filter = ('competency_type', 'importance', 'level', 'management_name')
+    list_display = ('code', 'title', 'post_code', 'post_title', 'competency_type', 'cluster_raw', 'importance', 'level', 'management_name', 'is_organizational')
+    list_filter = ('is_organizational', 'competency_type', 'cluster_raw', 'importance', 'level', 'management_name')
     search_fields = ('code', 'title', 'post_code', 'post_title')
+    list_per_page = 50
 
 
 @admin.register(JobOpportunityCompetency)
@@ -57,3 +58,18 @@ class JobOpportunityCompetencyAdmin(admin.ModelAdmin):
     list_display = ('job', 'code', 'title', 'competency_type', 'importance', 'level')
     list_filter = ('job', 'competency_type', 'importance', 'level')
     search_fields = ('code', 'title', 'job__title', 'job__code')
+
+
+from .models import CompetencyModel, CompetencyModelItem
+
+class CompetencyModelItemInline(admin.TabularInline):
+    model = CompetencyModelItem
+    extra = 3
+    fields = ('title', 'competency_type', 'importance', 'level', 'code')
+
+@admin.register(CompetencyModel)
+class CompetencyModelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+    inlines = [CompetencyModelItemInline]
+

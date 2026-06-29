@@ -1,0 +1,176 @@
+{% load jalali_tags %}
+<div class="modal-header py-3 bg-gradient-indigo text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border-radius: 8px 8px 0 0;">
+    <div class="d-flex align-items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+        </svg>
+        <h6 class="modal-title font-semibold m-0" id="notificationModalLabel">ارسال گروهی اعلانات و دعوت‌نامه‌ها</h6>
+    </div>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+</div>
+
+<form action="{% url 'bulk_send_notification' job.id %}" method="post" class="m-0">
+    {% csrf_token %}
+    <input type="hidden" name="app_ids" value="{{ app_ids_str }}">
+
+    <div class="modal-body p-4" dir="rtl" style="max-height: 75vh; overflow-y: auto;">
+        
+        <!-- Recipient Count & List -->
+        <div class="mb-4">
+            <label class="form-label font-bold text-secondary text-sm d-block mb-2">گیرندگان منتخب ({{ preview_candidates|length }} نفر):</label>
+            <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border" style="max-height: 120px; overflow-y: auto;">
+                {% for pc in preview_candidates %}
+                    <span class="badge bg-white text-secondary border px-2.5 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 text-xs shadow-xs">
+                        <span class="w-1.5 h-1.5 rounded-circle bg-indigo"></span>
+                        <strong>{{ pc.candidate.first_name }} {{ pc.candidate.last_name }}</strong>
+                        <span class="text-muted text-xxs font-normal">({{ pc.stage.name }})</span>
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Channels Toggles -->
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <label class="form-label font-bold text-secondary text-xs d-block mb-3">۱. انتخاب کانال‌های ارتباطی</label>
+                    
+                    <div class="form-check form-switch mb-3 d-flex align-items-center gap-2 ps-0">
+                        <input class="form-check-input ms-0" type="checkbox" name="send_sms" id="channel_sms" checked style="width: 32px; height: 18px; cursor: pointer;">
+                        <label class="form-check-label font-medium text-secondary text-sm cursor-pointer mb-0" for="channel_sms">💬 ارسال پیامک (SMS)</label>
+                    </div>
+
+                    <div class="form-check form-switch d-flex align-items-center gap-2 ps-0">
+                        <input class="form-check-input ms-0" type="checkbox" name="send_email" id="channel_email" checked style="width: 32px; height: 18px; cursor: pointer;">
+                        <label class="form-check-label font-medium text-secondary text-sm cursor-pointer mb-0" for="channel_email">✉️ ارسال ایمیل (SMTP)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Template type selection -->
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <label for="notification_type" class="form-label font-bold text-secondary text-xs mb-2">۲. نوع پیام ارسالی</label>
+                    <select class="form-select border-slate shadow-xs" id="notification_type" name="notification_type" onchange="onNotificationTypeChange(this)" style="border-radius: 8px; font-size: 0.85rem;">
+                        <option value="SMART" selected>✨ دعوت‌نامه هوشمند (آزمون/مصاحبه/مهارتی)</option>
+                        <option value="CUSTOM">📝 متن دلخواه سفارشی</option>
+                        <optgroup label="قالب‌های پیامک ثبت‌شده">
+                            {% for tmpl in templates %}
+                                <option value="{{ tmpl.id }}">{{ tmpl.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+                    <small class="text-muted text-xxs d-block mt-2">دعوت‌نامه هوشمند به طور خودکار بر اساس نوع هر مرحله و تاریخ ارزیابی تعیین شده، متن مناسب را صادر می‌کند.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Invitation Information Banner -->
+        <div id="smart-invitation-info" class="mt-4 p-3 border border-success bg-success bg-opacity-5 rounded-3 d-flex gap-3 align-items-start">
+            <span class="text-success mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l8.982-11.795m-9 0L9.814 3.096 15 8.25" />
+                </svg>
+            </span>
+            <div>
+                <h6 class="font-bold text-success text-sm mb-1">سیستم ارسال هوشمند دعوت‌نامه فعال است</h6>
+                <p class="text-muted text-xs m-0">سیستم بر اساس نوع مرحله هر داوطلب (مثلاً آزمون کتبی، کانون ارزیابی، آزمون مهارتی یا جلسه مصاحبه)، الگوهای مربوطه سازمان را بارگذاری کرده و فیلدهای تاریخ و ساعت را به شکل خودکار مقداردهی و برای داوطلب ارسال می‌کند.</p>
+            </div>
+        </div>
+
+        <!-- Custom text editor -->
+        <div id="custom-body-container" class="mt-4" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+                <label for="custom_body" class="form-label font-bold text-secondary text-xs m-0">۳. ویرایش متن پیام سفارشی</label>
+                <span class="text-xxs text-muted" id="char_counter">۰ کاراکتر (بخش اول پیام)</span>
+            </div>
+            <textarea name="custom_body" id="custom_body" rows="5" class="form-control text-right" style="font-size: 0.85rem; border-radius: 8px; direction: rtl;" placeholder="متن پیام خود را تایپ کنید. از {نام}، {نام_خانوادگی} و {عنوان_شغل} جهت شخصی‌سازی می‌توانید استفاده کنید..."></textarea>
+            
+            <div class="mt-2.5">
+                <span class="d-block text-xxs font-bold text-secondary mb-1.5">درج سریع متغیرها:</span>
+                <div class="d-flex flex-wrap gap-1.5">
+                    <button type="button" class="btn btn-xs btn-outline-secondary px-2 py-1 rounded" onclick="insertVar('{نام}')" style="font-size: 10px;">{نام}</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary px-2 py-1 rounded" onclick="insertVar('{نام_خانوادگی}')" style="font-size: 10px;">{نام_خانوادگی}</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary px-2 py-1 rounded" onclick="insertVar('{عنوان_شغل}')" style="font-size: 10px;">{عنوان_شغل}</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary px-2 py-1 rounded" onclick="insertVar('{نام_مرحله}')" style="font-size: 10px;">{نام_مرحله}</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary px-2 py-1 rounded" onclick="insertVar('{نمره}')" style="font-size: 10px;">{نمره}</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer py-2 bg-light d-flex justify-content-between" style="border-radius: 0 0 8px 8px;">
+        <span class="text-xxs text-muted">⚠️ پس از کلیک روی ارسال، پیام‌ها در صف خروجی درگاه قرار می‌گیرند.</span>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1.5" data-bs-dismiss="modal" style="border-radius: 8px;">انصراف</button>
+            <button type="submit" class="btn btn-sm btn-primary px-4 py-1.5 d-flex align-items-center gap-1.5 font-bold" style="background-color: #4f46e5; border: none; border-radius: 8px;">
+                <span>🚀 ارسال اعلانات</span>
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+    const templatesData = {
+        {% for tmpl in templates %}
+            "{{ tmpl.id }}": `{{ tmpl.body|escapejs }}`,
+        {% endfor %}
+    };
+    
+    function onNotificationTypeChange(select) {
+        const val = select.value;
+        const textareaDiv = document.getElementById('custom-body-container');
+        const customTextarea = document.getElementById('custom_body');
+        
+        if (val === 'SMART') {
+            textareaDiv.style.display = 'none';
+            customTextarea.required = false;
+            document.getElementById('smart-invitation-info').style.display = 'flex';
+        } else {
+            textareaDiv.style.display = 'block';
+            document.getElementById('smart-invitation-info').style.display = 'none';
+            
+            if (val && templatesData[val]) {
+                customTextarea.value = templatesData[val];
+            } else {
+                customTextarea.value = '';
+            }
+            customTextarea.required = true;
+            updateCharCount();
+        }
+    }
+
+    const textarea = document.getElementById('custom_body');
+    const counter = document.getElementById('char_counter');
+
+    function updateCharCount() {
+        if (!textarea) return;
+        const len = textarea.value.length;
+        let parts = 1;
+        if (len > 70) {
+            parts = Math.ceil(len / 67);
+        } else if (len === 0) {
+            parts = 0;
+        }
+        counter.innerText = `${len} کاراکتر (${parts} بخش پیامک)`;
+    }
+
+    if (textarea) {
+        textarea.addEventListener('input', updateCharCount);
+    }
+
+    function insertVar(placeholderText) {
+        if (!textarea) return;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        
+        textarea.value = text.substring(0, start) + placeholderText + text.substring(end, text.length);
+        textarea.focus();
+        
+        const newPos = start + placeholderText.length;
+        textarea.setSelectionRange(newPos, newPos);
+        updateCharCount();
+    }
+</script>

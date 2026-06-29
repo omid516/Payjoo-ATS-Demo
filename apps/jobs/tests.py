@@ -856,11 +856,14 @@ class CompetencyEngineTests(TestCase):
 
     def test_job_competency_config_views(self):
         """تست ویوی تخصیص شایستگی‌ها به فرصت شغلی"""
-        # Load config page
         url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        from apps.jobs.models import CompetencyModel
+        comp_model = CompetencyModel.objects.create(name="مدل تست")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'jobs/job_competency_config.html')
+        self.assertIn('competency_models', response.context)
+        self.assertIn(comp_model, list(response.context['competency_models']))
 
         # 1. Test search posts dynamic GET action
         search_response = self.client.get(url, {'action': 'search_posts', 'q': '8526'})
@@ -1053,7 +1056,7 @@ class CompetencyEngineTests(TestCase):
             'job_category': 'کارشناس',
             'headcount': 2,
             'recruitment_type': 'EXTERNAL',
-            'status': 'PLANNING',
+            'status': 'RECEIVED',
             'stages-TOTAL_FORMS': '0',
             'stages-INITIAL_FORMS': '0',
             'stages-MIN_NUM_FORMS': '0',
@@ -1064,6 +1067,36 @@ class CompetencyEngineTests(TestCase):
         
         new_job = JobOpportunity.objects.get(request_number='REQ-REDIRECT-001')
         expected_redirect_url = reverse('job_competency_config', kwargs={'job_id': new_job.id})
+        self.assertRedirects(response, expected_redirect_url)
+
+    def test_job_opportunity_creation_planning_redirects_to_planning(self):
+        """تست اینکه پس از ایجاد فرصت شغلی جدید با وضعیت برنامه‌ریزی، کاربر به صفحه برنامه‌ریزی هدایت می‌شود"""
+        CentralCompetency.objects.create(
+            post_code='8527', post_title='ریخته گری ۲', code='KNHS0004', title='HSE 2',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+        
+        form_data = {
+            'request_number': 'REQ-REDIRECT-002',
+            'title': 'شغل تستی ریدایرکت برنامه‌ریزی',
+            'code': '8527',
+            'department': 'فناوری اطلاعات',
+            'unit': 'فناوری',
+            'job_category': 'کارشناس',
+            'headcount': 2,
+            'recruitment_type': 'EXTERNAL',
+            'status': 'PLANNING',
+            'stages-TOTAL_FORMS': '0',
+            'stages-INITIAL_FORMS': '0',
+            'stages-MIN_NUM_FORMS': '0',
+            'stages-MAX_NUM_FORMS': '1000',
+        }
+        url = reverse('job_add')
+        response = self.client.post(url, form_data)
+        
+        new_job = JobOpportunity.objects.get(request_number='REQ-REDIRECT-002')
+        expected_redirect_url = reverse('job_planning', kwargs={'job_id': new_job.id}) + '?next=print_doc'
         self.assertRedirects(response, expected_redirect_url)
 
     def test_post_detail_api_auto_populates_fields(self):
@@ -1604,9 +1637,9 @@ class RecruitmentPatternSimulatorTests(TestCase):
 
         result = get_ai_recommendation('TEST-P', 'Test Post', comps, refresh=True)
         questions = result['questions']
-        self.assertTrue(any('برنامه‌نویسی پایتون' in q for q in questions))
-        self.assertFalse(any('Leadership Skills' in q for q in questions))
-        self.assertFalse(any('امنیت سایبری' in q for q in questions))
+        self.assertTrue(any('برنامه‌نویسی پایتون' in q['question'] for q in questions))
+        self.assertFalse(any('Leadership Skills' in q['question'] for q in questions))
+        self.assertFalse(any('امنیت سایبری' in q['question'] for q in questions))
 
     def test_ai_advise_caching_and_refresh(self):
         from apps.jobs.models import AIPostRecommendation, AISetting
@@ -1625,7 +1658,7 @@ class RecruitmentPatternSimulatorTests(TestCase):
 
         from unittest.mock import patch, MagicMock
         mock_response_content = (
-            '{"choices": [{"message": {"content": "{\\"opt_advice\\": [{\\"text\\": \\"Advice Live\\", \\"weights\\": {\\"EXAM\\": 40}}], \\"scenario\\": \\"Scenario Live\\", \\"questions\\": [\\"Question Live\\"], \\"benchmark_mappings\\": [{\\"competency\\": \\"Comp Live\\", \\"framework\\": \\"Framework Live\\", \\"dimension\\": \\"Dim Live\\", \\"tool\\": \\"Tool Live\\", \\"rationale\\": \\"Rationale Live\\"}]}"}}]}'
+            '{"choices": [{"message": {"content": "{\\"opt_advice\\": [{\\"text\\": \\"Advice Live\\", \\"weights\\": {\\"EXAM\\": 40}}], \\"scenario\\": \\"Scenario Live\\", \\"questions\\": [{\\"competency\\": \\"Comp Live\\", \\"question\\": \\"Question Live\\", \\"criteria\\": \\"Criteria Live\\"}], \\"benchmark_mappings\\": [{\\"competency\\": \\"Comp Live\\", \\"framework\\": \\"Framework Live\\", \\"dimension\\": \\"Dim Live\\", \\"tool\\": \\"Tool Live\\", \\"behavioral_indicators\\": [\\"Ind 1\\"], \\"pass_benchmark\\": \\"3.5\\", \\"rationale\\": \\"Rationale Live\\"}]}"}}]}'
         )
         mock_response = MagicMock()
         mock_response.status = 200
@@ -1645,7 +1678,7 @@ class RecruitmentPatternSimulatorTests(TestCase):
             rec = AIPostRecommendation.objects.get(post_code='DEV-01')
             self.assertEqual(rec.scenario, 'Scenario Live')
             self.assertEqual(rec.benchmark_mappings, [
-                {"competency": "Comp Live", "framework": "Framework Live", "dimension": "Dim Live", "tool": "Tool Live", "rationale": "Rationale Live"}
+                {"competency": "Comp Live", "framework": "Framework Live", "dimension": "Dim Live", "tool": "Tool Live", "behavioral_indicators": ["Ind 1"], "pass_benchmark": "3.5", "rationale": "Rationale Live"}
             ])
 
             # 2. Fetch again without refresh - should read from cache and NOT call urlopen again

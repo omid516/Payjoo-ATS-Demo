@@ -243,7 +243,7 @@ def adjust_weights_to_step(weights, step=5, target_sum=100, limits=None):
     return rounded
 
 
-def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_scores=None, round_to_five=False):
+def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_scores=None, round_to_five=False, active_stages=None, deactivated_stages=None):
     """
     Takes a list/queryset of JobOpportunityCompetency and calculates:
     - required stages and their weights (summing to 100%)
@@ -253,10 +253,11 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
     Returns:
     - dict: {
         'stages': {
-            'EXAM': {'name': 'آزمون کتبی', 'weight': percent, 'min_limit': 20, 'max_limit': 50, 'passing_score': 60, 'competencies': [...]},
+            'EXAM': {'name': 'آزمون کتبی', 'weight': percent, 'min_limit': 20, 'max_limit': 50, 'passing_score': 60, 'competencies': [...], 'is_active': True},
             ...
         },
-        'errors': []
+        'errors': [],
+        'warnings': []
       }
     """
     # 1. Define Stage Constraints
@@ -278,10 +279,6 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
     }
 
     # 2. Filter competencies by type and calculate individual competency weights
-    # Importance Weight: Core (1) -> 3, Duty-based (2) -> 2, Minimal (3) -> 1
-    # Proficiency Weight: Mastery (3) -> 3, Ability (2) -> 2, Familiarity (1) -> 1
-    # Comp Weight = ImportanceWeight * ProficiencyWeight
-    
     valid_competencies = []
     has_kn = False
     has_sk_ab = False
@@ -290,10 +287,10 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
     for comp in competencies:
         ctype = comp.competency_type
         if ctype in ['PR', 'CQ', 'IN']:
-            continue # ignore for now
+            continue
             
         imp_weight = 3 if comp.importance == 1 else (2 if comp.importance == 2 else 1)
-        prof_weight = comp.level # Already 1, 2, 3
+        prof_weight = comp.level
         weight = imp_weight * prof_weight
         
         valid_competencies.append({
@@ -311,162 +308,157 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
         elif ctype in ['GE', 'ST']:
             has_ge_st = True
 
-    # 3. Determine active stages based on rules
-    active_stage_keys = set()
-    active_stage_keys.add('SCREENING') # Always active!
+    # 3. Determine recommended active stages based on rules
+    recommended_stages = {'SCREENING'}
     if has_kn:
-        active_stage_keys.add('EXAM')
+        recommended_stages.add('EXAM')
     if has_sk_ab:
-        active_stage_keys.add('SKILL_TEST')
-        active_stage_keys.add('INTERVIEW') # Required if SK or AB exists
+        recommended_stages.add('SKILL_TEST')
+        recommended_stages.add('INTERVIEW')
     if has_ge_st:
-        active_stage_keys.add('ASSESSMENT')
+        recommended_stages.add('ASSESSMENT')
         
-    if len(active_stage_keys) <= 1:
-        # Only SCREENING is active
-        return {'stages': {}, 'errors': ["هیچ شایستگی معتبری برای تعیین مراحل ارزیابی انتخاب نشده است."]}
+    # If active_stages is None, we default to recommended stages
+    if active_stages is None:
+        active_stages = recommended_stages
+    else:
+        active_stages = set(active_stages)
+        
+    if deactivated_stages:
+        active_stages = active_stages - set(deactivated_stages)
+        
+    active_stages.add('SCREENING') # SCREENING is always active
 
     # 4. Aggregate weights to stages
-    # - KN -> Written test (EXAM)
-    # - SK/AB -> Skills test (SKILL_TEST) and Technical interview (INTERVIEW)
-    # - GE/ST -> Assessment Center (ASSESSMENT)
-    stage_raw_scores = {k: 0.0 for k in active_stage_keys}
-    stage_competencies = {k: [] for k in active_stage_keys}
+    stage_raw_scores = {k: 0.0 for k in STAGE_LIMITS.keys()}
+    stage_competencies = {k: [] for k in STAGE_LIMITS.keys()}
     
     for comp in valid_competencies:
         ctype = comp['type']
         if ctype == 'KN':
-            if 'EXAM' in stage_raw_scores:
-                stage_raw_scores['EXAM'] += comp['weight']
-                stage_competencies['EXAM'].append(comp)
+            stage_raw_scores['EXAM'] += comp['weight']
+            stage_competencies['EXAM'].append(comp)
         elif ctype in ['SK', 'AB']:
-            # Full weight goes to both Skills Test and Technical Interview
-            if 'SKILL_TEST' in stage_raw_scores:
-                stage_raw_scores['SKILL_TEST'] += comp['weight']
-                stage_competencies['SKILL_TEST'].append(comp)
-            if 'INTERVIEW' in stage_raw_scores:
-                stage_raw_scores['INTERVIEW'] += comp['weight']
-                stage_competencies['INTERVIEW'].append(comp)
+            stage_raw_scores['SKILL_TEST'] += comp['weight']
+            stage_competencies['SKILL_TEST'].append(comp)
+            stage_raw_scores['INTERVIEW'] += comp['weight']
+            stage_competencies['INTERVIEW'].append(comp)
         elif ctype in ['GE', 'ST']:
-            if 'ASSESSMENT' in stage_raw_scores:
-                stage_raw_scores['ASSESSMENT'] += comp['weight']
-                stage_competencies['ASSESSMENT'].append(comp)
+            stage_raw_scores['ASSESSMENT'] += comp['weight']
+            stage_competencies['ASSESSMENT'].append(comp)
 
-    # 5. Convert to percentage weights with constraints
     errors = []
-    int_w = {}
-    
-    if custom_weights:
-        # Parse and validate custom manual weights
-        for k in active_stage_keys:
-            if k == 'SCREENING':
-                int_w['SCREENING'] = 0
-                continue
-            val = custom_weights.get(k)
-            if val is not None and str(val).strip() != '':
-                try:
-                    val_int = int(val)
-                except (ValueError, TypeError):
-                    errors.append(f"وزن وارد شده برای مرحله {STAGE_NAMES[k]} نامعتبر است.")
-                    val_int = 0
-                
-                min_val, max_val = STAGE_LIMITS[k]
-                if val_int < min_val:
-                    errors.append(f"وزن مرحله {STAGE_NAMES[k]} نمی‌تواند کمتر از {min_val}٪ باشد.")
-                elif val_int > max_val:
-                    errors.append(f"وزن مرحله {STAGE_NAMES[k]} نمی‌تواند بیشتر از {max_val}٪ باشد.")
-                
-                int_w[k] = val_int
-            else:
-                errors.append(f"وزن مرحله {STAGE_NAMES[k]} وارد نشده است.")
-                int_w[k] = 0
-                
-        if not errors:
-            total_custom = sum(int_w[k] for k in active_stage_keys if k != 'SCREENING')
-            if total_custom != 100:
-                errors.append(f"مجموع اوزان مراحل ارزیابی باید دقیقاً ۱۰۰٪ باشد. (مجموع فعلی: {total_custom}٪)")
-    else:
-        # Standard automated clipping & normalization algorithm
-        non_screening_keys = [k for k in active_stage_keys if k != 'SCREENING']
-        w = {k: stage_raw_scores.get(k, 0.0) for k in non_screening_keys}
-        total_raw = sum(w.values())
-        
-        if not non_screening_keys:
-            pass
-        elif total_raw == 0:
-            w = {k: 100.0 / len(non_screening_keys) for k in non_screening_keys}
-        else:
-            w = {k: (val / total_raw) * 100.0 for k, val in w.items()}
-            
-        if round_to_five and non_screening_keys:
-            # Adjust to step=5 using helper
-            int_w_non = adjust_weights_to_step(w, step=5, target_sum=100, limits={k: STAGE_LIMITS[k] for k in non_screening_keys})
-            int_w = {k: int_w_non.get(k, 0) for k in active_stage_keys}
-            int_w['SCREENING'] = 0
-        elif non_screening_keys:
-            # Iterative clamping
-            for _ in range(10):
-                clamped = {}
-                for k in non_screening_keys:
-                    min_val, max_val = STAGE_LIMITS[k]
-                    clamped[k] = max(min_val, min(max_val, w[k]))
-                    
-                clamped_sum = sum(clamped.values())
-                diff = 100.0 - clamped_sum
-                
-                if abs(diff) < 0.01:
-                    w = clamped
-                    break
-                    
-                if diff > 0:
-                    adjustable = {k: STAGE_LIMITS[k][1] - clamped[k] for k in non_screening_keys if clamped[k] < STAGE_LIMITS[k][1]}
-                    total_adj = sum(adjustable.values())
-                    if total_adj == 0:
-                        w = {k: (val / clamped_sum) * 100.0 for k, val in clamped.items()}
-                        break
-                    w = {k: clamped[k] + (adjustable.get(k, 0.0) / total_adj) * diff for k in non_screening_keys}
-                else:
-                    adjustable = {k: clamped[k] - STAGE_LIMITS[k][0] for k in non_screening_keys if clamped[k] > STAGE_LIMITS[k][0]}
-                    total_adj = sum(adjustable.values())
-                    if total_adj == 0:
-                        w = {k: (val / clamped_sum) * 100.0 for k, val in clamped.items()}
-                        break
-                    w = {k: clamped[k] + (adjustable.get(k, 0.0) / total_adj) * diff for k in non_screening_keys}
+    warnings = []
+    int_w = {k: 0 for k in STAGE_LIMITS.keys()}
 
-            # Integer rounding
-            int_w = {k: int(round(w.get(k, 0))) for k in active_stage_keys}
-            int_w['SCREENING'] = 0
-            
-            non_screening_sum = sum(int_w[k] for k in non_screening_keys)
-            diff = 100 - non_screening_sum
-            if diff != 0:
-                # Find candidates for adjustment: stages that won't violate their limits if we add/subtract diff
-                candidates = []
-                for k in non_screening_keys:
-                    min_val, max_val = STAGE_LIMITS[k]
-                    new_val = int_w[k] + diff
-                    if min_val <= new_val <= max_val:
-                        candidates.append(k)
-                
-                if candidates:
-                    # Adjust the candidate with the largest fractional part
-                    best_candidate = max(candidates, key=lambda k: w[k] - int_w[k] if diff > 0 else int_w[k] - w[k])
-                    int_w[best_candidate] += diff
-                else:
-                    # Fallback to the stage with the largest weight that has space to move
-                    fallback_stage = max(non_screening_keys, key=lambda k: w[k])
-                    int_w[fallback_stage] += diff
+    # 5. Calculate weights
+    # Only active stages (excluding SCREENING) get non-zero weights
+    active_keys_for_calc = [k for k in active_stages if k != 'SCREENING']
+    
+    if not active_keys_for_calc:
+        errors.append("حداقل یک مرحله ارزیابی باید فعال باشد.")
+    else:
+        if custom_weights:
+            for k in active_keys_for_calc:
+                val = custom_weights.get(k)
+                if val is not None and str(val).strip() != '':
+                    try:
+                        val_int = int(val)
+                    except (ValueError, TypeError):
+                        errors.append(f"وزن وارد شده برای مرحله {STAGE_NAMES[k]} نامعتبر است.")
+                        val_int = 0
                     
+                    if val_int < 0 or val_int > 100:
+                        errors.append(f"وزن مرحله {STAGE_NAMES[k]} باید بین ۰ تا ۱۰۰ باشد.")
+                        val_int = 0
+                    
+                    min_val, max_val = STAGE_LIMITS[k]
+                    if val_int < min_val:
+                        errors.append(f"وزن مرحله {STAGE_NAMES[k]} نمی‌تواند کمتر از {min_val}٪ باشد.")
+                    elif val_int > max_val:
+                        errors.append(f"وزن مرحله {STAGE_NAMES[k]} نمی‌تواند بیشتر از {max_val}٪ باشد.")
+                    
+                    int_w[k] = val_int
+                else:
+                    errors.append(f"وزن مرحله {STAGE_NAMES[k]} وارد نشده است.")
+                    int_w[k] = 0
+            
+            total_custom = sum(int_w[k] for k in active_keys_for_calc)
+            if not errors and total_custom != 100:
+                errors.append(f"مجموع اوزان مراحل ارزیابی باید دقیقاً ۱۰۰٪ باشد. (مجموع فعلی: {total_custom}٪)")
+        else:
+            w = {k: stage_raw_scores.get(k, 0.0) for k in active_keys_for_calc}
+            total_raw = sum(w.values())
+            
+            if total_raw == 0:
+                w = {k: 100.0 / len(active_keys_for_calc) for k in active_keys_for_calc}
+            else:
+                w = {k: (val / total_raw) * 100.0 for k, val in w.items()}
+                
+            if round_to_five:
+                int_w_non = adjust_weights_to_step(w, step=5, target_sum=100, limits={k: STAGE_LIMITS[k] for k in active_keys_for_calc})
+                for k in active_keys_for_calc:
+                    int_w[k] = int_w_non.get(k, 0)
+            else:
+                # Iterative clamping
+                for _ in range(10):
+                    clamped = {}
+                    for k in active_keys_for_calc:
+                        min_val, max_val = STAGE_LIMITS[k]
+                        clamped[k] = max(min_val, min(max_val, w[k]))
+                        
+                    clamped_sum = sum(clamped.values())
+                    diff = 100.0 - clamped_sum
+                    
+                    if abs(diff) < 0.01:
+                        w = clamped
+                        break
+                        
+                    if diff > 0:
+                        adjustable = {k: STAGE_LIMITS[k][1] - clamped[k] for k in active_keys_for_calc if clamped[k] < STAGE_LIMITS[k][1]}
+                        total_adj = sum(adjustable.values())
+                        if total_adj == 0:
+                            w = {k: (val / clamped_sum) * 100.0 for k, val in clamped.items()}
+                            break
+                        w = {k: clamped[k] + (adjustable.get(k, 0.0) / total_adj) * diff for k in active_keys_for_calc}
+                    else:
+                        adjustable = {k: clamped[k] - STAGE_LIMITS[k][0] for k in active_keys_for_calc if clamped[k] > STAGE_LIMITS[k][0]}
+                        total_adj = sum(adjustable.values())
+                        if total_adj == 0:
+                            w = {k: (val / clamped_sum) * 100.0 for k, val in clamped.items()}
+                            break
+                        w = {k: clamped[k] + (adjustable.get(k, 0.0) / total_adj) * diff for k in active_keys_for_calc}
+
+                # Integer rounding
+                for k in active_keys_for_calc:
+                    int_w[k] = int(round(w.get(k, 0)))
+                
+                non_screening_sum = sum(int_w[k] for k in active_keys_for_calc)
+                diff = 100 - non_screening_sum
+                if diff != 0:
+                    candidates = []
+                    for k in active_keys_for_calc:
+                        min_val, max_val = STAGE_LIMITS[k]
+                        new_val = int_w[k] + diff
+                        if min_val <= new_val <= max_val:
+                            candidates.append(k)
+                    
+                    if candidates:
+                        best_candidate = max(candidates, key=lambda k: w[k] - int_w[k] if diff > 0 else int_w[k] - w[k])
+                        int_w[best_candidate] += diff
+                    else:
+                        fallback_stage = max(active_keys_for_calc, key=lambda k: w[k])
+                        int_w[fallback_stage] += diff
+
     # 6. Build final output stages
     result_stages = {}
     ordered_keys = ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']
     for k in ordered_keys:
-        if k not in active_stage_keys:
-            continue
-            
+        is_active = k in active_stages
         s_comps = stage_competencies.get(k, [])
         computed_comps = []
-        if k != 'SCREENING':
+        
+        if k != 'SCREENING' and s_comps:
             s_total_comp_w = sum(c['weight'] for c in s_comps)
             for c in s_comps:
                 c_rel_w = int(round((c['weight'] / s_total_comp_w) * 100)) if s_total_comp_w > 0 else 100
@@ -513,16 +505,18 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
 
         result_stages[k] = {
             'name': STAGE_NAMES[k],
-            'weight': int_w[k],
+            'weight': int_w[k] if is_active else 0,
             'min_limit': min_val,
             'max_limit': max_val,
-            'passing_score': passing_score,
-            'competencies': computed_comps
+            'passing_score': passing_score if is_active else 0,
+            'competencies': computed_comps,
+            'is_active': is_active
         }
         
     return {
         'stages': result_stages,
-        'errors': errors
+        'errors': errors,
+        'warnings': warnings
     }
 
 

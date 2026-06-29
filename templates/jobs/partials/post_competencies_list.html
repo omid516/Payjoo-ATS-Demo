@@ -64,7 +64,7 @@
                    id="comp_{{ comp.id }}" 
                    data-type="{{ comp.competency_type }}"
                    {% if comp.code in selected_codes %}checked{% endif %}
-                   onchange="triggerPreviewUpdate();">
+                   onchange="triggerPreviewUpdate(true);">
             <label class="form-check-label text-xs font-semibold text-dark ms-2" for="comp_{{ comp.id }}">
                 {{ comp.title }}
                 <span class="text-xxs text-muted font-bold block" style="font-size: 9px; display: block; margin-top: 2px;">کد: {{ comp.code }}</span>

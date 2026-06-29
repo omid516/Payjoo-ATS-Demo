@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.accounts.models import UserProfile
-from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate
+from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, CompetencyModel
 from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet
 
 def normalize_digits(s):
@@ -200,6 +200,8 @@ class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView
 
     def get_success_url(self):
         from django.urls import reverse
+        if self.object.status == JobOpportunity.STATUS_PLANNING:
+            return reverse('job_planning', kwargs={'job_id': self.object.pk}) + '?next=print_doc'
         return reverse('job_competency_config', kwargs={'job_id': self.object.pk})
 
     def get_context_data(self, **kwargs):
@@ -862,13 +864,29 @@ def get_ai_recommendation(post_code, post_title, comps, refresh=False):
             comp_list_str = "\n".join([f"- {c.title} ({c.get_competency_type_display()} - اهمیت: {c.get_importance_display()})" for c in comps])
 
             system_prompt = (
-                "شما یک دستیار هوشمند، ارشد و بسیار دقیق در حوزه جذب، استخدام و توسعه منابع انسانی هستید.\n"
-                "وظیفه شما این است که با تحلیل دقیق عنوان پست سازمانی و لیست شایستگی‌های تعریف‌شده آن، یک راهبرد اختصاصی، سناریوی ارزیابی عملی و نگاشت بنچمارک‌های جهانی تولید کنید.\n"
-                "برای پرهیز از خروجی‌های تکراری و یکسان، توصیه‌ها و سناریوهای شما باید کاملاً منعکس‌کننده ماهیت و نیازمندی‌های خاص شغل باشد. به عنوان مثال:\n"
-                "- برای مشاغل فنی/مهندسی/IT: بر آزمون‌های مهارتی عملی، سناریوهای طراحی سیستم، برنامه‌نویسی زوجی و حل مسئله تیمی تمرکز کنید.\n"
-                "- برای مشاغل مدیریتی/سرپرستی: بر سناریوهای بازی نقش، حل تعارض، مدیریت کارتابل (In-Basket) و مصاحبه‌های عمیق رفتاری بر اساس Lominger و Korn Ferry تمرکز کنید.\n"
-                "- برای مشاغل فروش/پشتیبانی/اداری: بر سناریوهای شبیه‌سازی مشتری، نفوذ و اثرگذاری، تعامل تیمی و تاب‌آوری تمرکز کنید.\n\n"
-                "همچنین باید تمامی شایستگی‌های ورودی پست را با چارچوب‌های استاندارد جهانی (SHL UCF، Lominger، Korn Ferry یا DDI) تطبیق داده و نگاشت کنید.\n"
+                "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌ها و طراح کانون‌های ارزیابی منابع انسانی هستید.\n"
+                "وظیفه شما این است که با تحلیل دقیق عنوان پست سازمانی و لیست شایستگی‌های تعریف‌شده آن، یک راهبرد اختصاصی، سناریوی ارزیابی کاملاً واقعی و کاربردی و نگاشت بنچمارک‌های جهانی تولید کنید.\n"
+                "برای پرهیز از خروجی‌های تکراری و کلیشه‌ای، سناریو و توصیه‌های شما باید کاملاً منطبق بر شایستگی‌های ورودی و نیازمندی‌های این شغل خاص طراحی شود. سناریو را به عنوان یک کارشناس خبره جذب و با جزئیات بنویسید.\n\n"
+                "قوانین تولید محتوای فیلدها:\n"
+                "1. سناریو (scenario) باید یک متن ساختاریافته فارسی و تفصیلی باشد که شامل سرفصل‌های زیر با علامت هشتگ (###) باشد:\n"
+                "   - ### عنوان سناریوی کانون ارزیابی\n"
+                "   - ### مدت زمان پیشنهادی سنجش\n"
+                "   - ### فضای شبیه‌سازی و نقش کاندیدا (مثلاً ایفای نقش مدیر، حل کارتابل، کار گروهی...)\n"
+                "   - ### شرح چالش اصلی سناریو (مسئله پیچیده‌ای که داوطلب باید حل کند)\n"
+                "   - ### نحوه سنجش شایستگی‌های ورودی در این سناریو (ذکر نحوه ارزیابی شایستگی‌های درخواستی کاربر به صورت مجزا)\n"
+                "   - ### راهنمای ناظر/ارزیاب کانون (نشانه‌های رفتاری مثبت و منفی برای رصد و امتیازدهی)\n\n"
+                "2. لیست سوالات مصاحبه (questions) باید شامل شیءهایی با فیلدهای زیر باشد:\n"
+                "   - competency: نام شایستگی هدف (دقیقاً یکی از شایستگی‌های ورودی)\n"
+                "   - question: سوال رفتاری ساختاریافته (CBI) مبتنی بر روش STAR (موقعیت، وظیفه، اقدام، نتیجه) به زبان فارسی و روان\n"
+                "   - criteria: راهنمای ارزیابی پاسخ مطلوب و نشانگرهای رفتاری مطلوب برای مصاحبه‌کننده\n\n"
+                "3. نگاشت بنچمارک‌ها (benchmark_mappings) باید شامل فیلدهای زیر باشد:\n"
+                "   - competency: نام دقیق شایستگی ورودی از لیست کاربر\n"
+                "   - framework: نام یکی از چارچوب‌های مرجع جهانی معتبر (مانند SHL UCF یا Lominger یا Korn Ferry یا DDI)\n"
+                "   - dimension: بعد معادل انگلیسی و فارسی در آن چارچوب مرجع\n"
+                "   - tool: ابزار ارزیابی مناسب (مانند آزمون کتبی، کانون ارزیابی، ایفای نقش، تست شبیه‌ساز، یا کارتابل)\n"
+                "   - behavioral_indicators: آرایه‌ای حاوی ۲ الی ۳ نشانگر رفتاری قابل مشاهده و سنجش مربوط به این شایستگی در کار واقعی\n"
+                "   - pass_benchmark: نمره قبولی پیشنهادی در مقیاس ۱ تا ۵ به همراه توصیف کوتاه (مثلاً: ۳.۵ از ۵: توانایی کار مستقل)\n"
+                "   - rationale: تحلیل کوتاه فنی و کاربردی علت انتخاب ابزار و دلیل نگاشت به بعد جهانی\n\n"
                 "پاسخ خود را دقیقاً در قالب ساختار JSON زیر بازگردانید و هیچ توضیح اضافه یا متنی خارج از JSON ارائه ندهید. پاسخ‌ها حتماً به زبان فارسی باشد:\n"
                 "{\n"
                 "  \"opt_advice\": [\n"
@@ -879,18 +897,22 @@ def get_ai_recommendation(post_code, post_title, comps, refresh=False):
                 "  ],\n"
                 "  \"benchmark_mappings\": [\n"
                 "    {\n"
-                "      \"competency\": \"نام دقیق شایستگی ورودی از لیست کاربر\",\n"
-                "      \"framework\": \"نام یکی از چارچوب‌های جهانی (مثلاً SHL UCF یا Lominger یا Korn Ferry یا DDI)\",\n"
-                "      \"dimension\": \"نام بعد یا عنوان معادل دقیق در آن چارچوب جهانی\",\n"
-                "      \"tool\": \"ابزار سنجش پیشنهادی (مثلاً آزمون کتبی، کانون ارزیابی، ایفای نقش، تست شبیه‌ساز)\",\n"
-                "      \"rationale\": \"توضیح کوتاه فنی و کاربردی درباره علت این نگاشت و نحوه ارزیابی آن\"\n"
+                "      \"competency\": \"نام دقیق شایستگی ورودی\",\n"
+                "      \"framework\": \"نام چارچوب مرجع\",\n"
+                "      \"dimension\": \"بعد معادل\",\n"
+                "      \"tool\": \"ابزار پیشنهادی\",\n"
+                "      \"behavioral_indicators\": [\"نشانگر ۱\", \"نشانگر ۲\"],\n"
+                "      \"pass_benchmark\": \"بنچمارک قبولی پیشنهادی از ۱ تا ۵\",\n"
+                "      \"rationale\": \"تحلیل فنی علت انتخاب ابزار\"\n"
                 "    }\n"
                 "  ],\n"
-                "  \"scenario\": \"شرح کامل سناریوی ارزیابی و ابزارها متناسب با پست (حداقل ۳ الی ۴ جمله تفصیلی)\",\n"
+                "  \"scenario\": \"متن کامل سناریوی ارزیابی با سرفصل‌های هشتگ‌دار بر اساس الگوی بالا\",\n"
                 "  \"questions\": [\n"
-                "    \"سوال مصاحبه ساختاریافته CBI اول مبتنی بر شایستگی‌های این پست...\",\n"
-                "    \"سوال مصاحبه ساختاریافته CBI دوم...\",\n"
-                "    \"سوال مصاحبه ساختاریافته CBI سوم...\"\n"
+                "    {\n"
+                "      \"competency\": \"نام شایستگی هدف\",\n"
+                "      \"question\": \"سوال مصاحبه رفتاری CBI بر اساس تکنیک STAR\",\n"
+                "      \"criteria\": \"راهنمای ارزیابی پاسخ مطلوب\"\n"
+                "    }\n"
                 "  ]\n"
                 "}"
             )
@@ -1017,38 +1039,75 @@ def get_ai_recommendation(post_code, post_title, comps, refresh=False):
                 dim = f"Applying Expertise and Technology ({c.title})"
                 tool = "آزمون کتبی تخصصی"
                 rat = f"سنجش دانش نظری و تخصصی داوطلب در رابطه با شایستگی «{c.title}»."
+                behavioral_indicators = [
+                    f"تسلط علمی کامل بر مباحث فنی و الزامات اجرایی مرتبط با {c.title}",
+                    f"توانایی تحلیل و حل مسائل تئوریک و کاربردی در حوزه {c.title}"
+                ]
+                pass_benchmark = "۴ از ۵ (تسلط علمی کامل)"
             elif c.competency_type in ['SK', 'AB']:
                 dim = f"Applying Skills and Practical Abilities ({c.title})"
                 tool = "آزمون مهارتی عملی یا شبیه‌ساز"
                 rat = f"ارزیابی توانمندی داوطلب در پیاده‌سازی عملی مهارت «{c.title}» در کار واقعی."
+                behavioral_indicators = [
+                    f"انجام سریع و بدون خطای وظایف کاری مرتبط با {c.title}",
+                    f"عیب‌یابی سریع و خلاقانه فرآیندها در هنگام بروز چالش در {c.title}"
+                ]
+                pass_benchmark = "۳.۵ از ۵ (کار مستقل بدون سرپرستی مستقیم)"
             else:
                 dim = f"Behavioral Competence and Values ({c.title})"
                 tool = "شبیه‌سازی ایفای نقش یا کانون ارزیابی"
                 rat = f"بررسی الگوهای رفتاری و انطباق فرهنگی داوطلب با معیارهای «{c.title}»."
+                behavioral_indicators = [
+                    f"همکاری موثر تیمی و بروز رفتار حرفه‌ای تحت فشار کاری مرتبط با {c.title}",
+                    f"انعطاف‌پذیری و سازگاری با تغییر اولویت‌ها بر مبنای ارزش‌های {c.title}"
+                ]
+                pass_benchmark = "۳ از ۵ (انطباق رفتاری متوسط رو به بالا)"
                 
             benchmark_mappings.append({
                 "competency": c.title,
                 "framework": fw,
                 "dimension": dim,
                 "tool": tool,
+                "behavioral_indicators": behavioral_indicators,
+                "pass_benchmark": pass_benchmark,
                 "rationale": rat
             })
             
         comp_titles_str = "، ".join([c.title for c in comps[:3]])
+        
         scenario = (
-            f"سناریوی ارزیابی شبیه‌سازی‌شده برای پست سازمانی «{post_title}» مبتنی بر شایستگی‌های {comp_titles_str} طراحی شده است. "
-            f"این کانون ارزیابی شامل یک مطالعه موردی (Case Study) ۳۰ دقیقه‌ای و یک تمرین شبیه‌سازی نقش است که طی آن داوطلب در مواجهه با چالش‌های روزمره شغل «{post_title}» قرار می‌گیرد. "
-            f"در پایان، داوطلبان در یک مصاحبه ساختاریافته رفتاری شرکت می‌کنند تا مهارت‌های حل تعارض، تاب‌آوری و تفکر تحلیلی آن‌ها به طور دقیق ارزیابی شود."
+            f"### عنوان سناریوی کانون ارزیابی\n"
+            f"شبیه‌سازی مدیریت بحران عملیاتی و تعاملات کاری پست {post_title}\n\n"
+            f"### مدت زمان پیشنهادی سنجش\n"
+            f"۴۵ دقیقه ارزیابی عملی + ۱۵ دقیقه بازخورد و ثبت مشاهدات\n\n"
+            f"### فضای شبیه‌سازی و نقش کاندیدا\n"
+            f"داوطلب به عنوان سرپرست یا کارشناس ارشد بخش در مواجهه با یک چالش فرضی اما واقعی سازمان قرار می‌گیرد. او باید یک کارتابل شلوغ از ایمیل‌ها و درخواست‌های فوری مربوط به شایستگی‌های {comp_titles_str} را اولویت‌بندی کرده و با یک همکار فرضی (ارزیاب ایفاگر نقش) که معترض است، گفتگو کند.\n\n"
+            f"### شرح چالش اصلی سناریو\n"
+            f"سیستم اصلی پروژه در آستانه تحویل نهایی با مشکل فنی و ارتباطی مواجه شده است و همزمان اولویت‌ها تغییر کرده‌اند. داوطلب باید ضمن اتخاذ تصمیمات فنی منطقی، خشم همکار خود را مدیریت کند و برنامه کاری جدید را تنظیم نماید.\n\n"
+            f"### نحوه سنجش شایستگی‌های ورودی در این سناریو\n"
+            f"هر یک از شایستگی‌ها بر اساس سناریو به شرح زیر ارزیابی می‌شود:\n"
+        )
+        for c in comps[:3]:
+            scenario += f"- **{c.title}**: میزان تسلط داوطلب در اتخاذ تصمیمات ملموس و عملی در طول بحران و کیفیت خروجی کارتابل شبیه‌سازی‌شده.\n"
+        
+        scenario += (
+            f"\n### راهنمای ناظر/ارزیاب کانون\n"
+            f"- **نشانه‌های رفتاری مثبت**: حفظ آرامش لحن، اولویت‌بندی مجدد بر اساس فوریت و اهمیت، ارائه راه‌حل‌های ساختاریافته فنی.\n"
+            f"- **نشانه‌های رفتاری منفی**: سردرگمی در کارتابل، پرخاش یا تسلیم شدن در تعامل با همکار معترض، نداشتن برنامه شفاف عملیاتی."
         )
         
         questions = []
         for c in comps[:3]:
-            questions.append(
-                f"یک تجربه واقعی را شرح دهید که در آن برای پیشبرد وظایف شغلی نیاز مبرم به استفاده از «{c.title}» داشتید. چطور چالش را مدیریت کردید و نتیجه چه بود؟"
-            )
-        questions.append(
-            f"به عنوان کاندیدای پست «{post_title}»، اگر در محیط کار با شرایط بحرانی یا تغییر ناگهانی اولویت‌ها مواجه شوید، چطور برنامه‌ریزی و اقدام می‌کنید؟"
-        )
+            questions.append({
+                "competency": c.title,
+                "question": f"یک تجربه واقعی کاری را شرح دهید که در آن نیاز مبرم به استفاده از شایستگی «{c.title}» برای حل یک چالش کاری داشتید. دقیقاً چه کردید و نتیجه چه بود؟",
+                "criteria": f"ارزیابی توانمندی داوطلب در استفاده عملی از {c.title}، ارائه مصادیق واقعی بر اساس STAR، و میزان اثرگذاری اقدامات وی بر روی اهداف پروژه."
+            })
+        questions.append({
+            "competency": "برنامه‌ریزی و مدیریت بحران",
+            "question": f"به عنوان کاندیدای پست «{post_title}»، اگر در یک موقعیت بحرانی با تداخل منافع ذینفعان و تغییر ناگهانی اولویت‌ها روبرو شوید، چگونه اولویت‌ها را بازنگری و اقدام می‌کنید؟",
+            "criteria": "توانایی حفظ خونسردی، تفکیک امور مهم و فوری، تعامل سازنده با ذینفعان ناراضی و ارائه برنامه بازنگری‌شده شفاف."
+        })
 
         for item in raw_advice:
             opt_advice.append({
@@ -1730,14 +1789,24 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
         db_stages = job.stages.filter(is_deleted=False)
         custom_weights = None
         custom_passing_scores = None
+        deactivated_stages = []
         if db_stages.exists():
             custom_weights = {}
             custom_passing_scores = {}
+            active_stages_in_db = set()
             for stage in db_stages:
                 if stage.stage_type in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
                     custom_weights[stage.stage_type] = stage.weight
                     custom_passing_scores[stage.stage_type] = int(stage.passing_score)
+                    active_stages_in_db.add(stage.stage_type)
+            
+            # Find recommended stages
+            plan_temp = calculate_assessment_plan(selected_comps)
+            for k, s in plan_temp['stages'].items():
+                if k != 'SCREENING' and s.get('is_active', False) and k not in active_stages_in_db:
+                    deactivated_stages.append(k)
 
+        deactivated_stages_str = ','.join(deactivated_stages)
         round_to_five = request.GET.get('round_to_five', 'on') == 'on'
 
         # Get suggested workflows based on current selection
@@ -1745,12 +1814,15 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             selected_comps,
             custom_weights=custom_weights,
             custom_passing_scores=custom_passing_scores,
-            round_to_five=round_to_five
+            round_to_five=round_to_five,
+            deactivated_stages=deactivated_stages
         )
-        active_stage_keys = list(plan_res['stages'].keys())
+        active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
         from .utils import suggest_workflow_templates
         suggested_workflows = suggest_workflow_templates(active_stage_keys)
         selected_workflow_id = job.workflow.id if job.workflow else None
+
+        competency_models = CompetencyModel.objects.filter(is_deleted=False)
 
         context = {
             'job': job,
@@ -1763,7 +1835,9 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             'calculated_plan': plan_res['stages'],
             'suggested_workflows': suggested_workflows,
             'selected_workflow_id': selected_workflow_id,
-            'round_to_five': round_to_five
+            'round_to_five': round_to_five,
+            'competency_models': competency_models,
+            'deactivated_stages_str': deactivated_stages_str
         }
         return render(request, self.template_name, context)
 
@@ -1790,11 +1864,13 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             comps = CentralCompetency.objects.filter(id__in=comp_ids, is_deleted=False)
             
             # Fetch custom weights
+            recalculate_weights = request.POST.get('recalculate_weights') == 'true'
             custom_weights = {}
-            for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
-                val = request.POST.get(f'stage_weight_{key}')
-                if val is not None and val.strip() != '':
-                    custom_weights[key] = val
+            if not recalculate_weights:
+                for key in ['EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']:
+                    val = request.POST.get(f'stage_weight_{key}')
+                    if val is not None and val.strip() != '':
+                        custom_weights[key] = val
 
             # Fetch custom passing scores
             custom_passing_scores = {}
@@ -1835,15 +1911,18 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
+            deactivated_stages_raw = request.POST.get('deactivated_stages', '').strip()
+            deactivated_stages = [s.strip() for s in deactivated_stages_raw.split(',') if s.strip()]
 
             plan_res = calculate_assessment_plan(
                 temp_comps,
                 custom_weights=custom_weights,
                 custom_passing_scores=custom_passing_scores,
-                round_to_five=round_to_five
+                round_to_five=round_to_five,
+                deactivated_stages=deactivated_stages
             )
             
-            active_stage_keys = list(plan_res['stages'].keys())
+            active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
             from .utils import suggest_workflow_templates
             suggested_workflows = suggest_workflow_templates(active_stage_keys)
             
@@ -1852,7 +1931,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'calculated_plan': plan_res['stages'],
                 'errors': plan_res.get('errors', []),
                 'suggested_workflows': suggested_workflows,
-                'selected_workflow_id': selected_workflow_id
+                'selected_workflow_id': selected_workflow_id,
+                'deactivated_stages_str': deactivated_stages_raw
             }
             # Renders only the preview table part
             return render(request, 'jobs/partials/competency_preview_table.html', context)
@@ -1920,12 +2000,15 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
+            deactivated_stages_raw = request.POST.get('deactivated_stages', '').strip()
+            deactivated_stages = [s.strip() for s in deactivated_stages_raw.split(',') if s.strip()]
 
             plan_res = calculate_assessment_plan(
                 temp_comps,
                 custom_weights=custom_weights,
                 custom_passing_scores=custom_passing_scores,
-                round_to_five=round_to_five
+                round_to_five=round_to_five,
+                deactivated_stages=deactivated_stages
             )
             stages_data = plan_res['stages']
             
@@ -1937,7 +2020,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 
                 # Retrieve matching suggested workflows for the error screen
                 from .utils import suggest_workflow_templates
-                active_stage_keys = list(stages_data.keys())
+                active_stage_keys = [k for k, s in stages_data.items() if s.get('is_active', False)]
                 suggested_workflows = suggest_workflow_templates(active_stage_keys)
                 
                 # Prepare suggested post context
@@ -1962,7 +2045,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     'errors': errors,
                     'suggested_workflows': suggested_workflows,
                     'selected_workflow_id': request.POST.get('workflow_template_id'),
-                    'round_to_five': round_to_five
+                    'round_to_five': round_to_five,
+                    'deactivated_stages_str': deactivated_stages_raw
                 }
                 return render(request, self.template_name, context)
 
@@ -2047,6 +2131,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 # Create new customized stages and assessment competencies
                 seq = 1
                 for key, s_info in stages_data.items():
+                    if not s_info.get('is_active', False):
+                        continue
                     # Create the JobOpportunityStage
                     stage = JobOpportunityStage.objects.create(
                         job=job,
@@ -2512,4 +2598,209 @@ class OrganizationSettingView(LoginRequiredMixin, RoleRequiredMixin, View):
             'stage_statuses': stage_statuses,
         }
         return render(request, self.template_name, context)
+
+
+# --- Competency Model Management Views ---
+from django.http import JsonResponse
+from django.urls import reverse
+from apps.jobs.models import CompetencyModel, CompetencyModelItem
+
+TYPE_CHOICES = [
+    ('KN', 'دانش (Knowledge)'),
+    ('SK', 'مهارت (Skill)'),
+    ('AB', 'توانایی (Ability)'),
+    ('GE', 'رفتاری (General/Behavioral)'),
+    ('ST', 'ارزش‌ها و سبک‌ها (Styles & Values)'),
+]
+IMPORTANCE_CHOICES = [
+    (1, '۱ - محوری'),
+    (2, '۲ - تکلیف محور'),
+    (3, '۳ - حداقلی'),
+]
+LEVEL_CHOICES = [
+    (1, '۱ - آشنایی'),
+    (2, '۲ - توانایی'),
+    (3, '۳ - تسلط'),
+]
+
+class CompetencyModelListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = CompetencyModel
+    template_name = 'jobs/competency_model_list.html'
+    context_object_name = 'models'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def get_queryset(self):
+        return CompetencyModel.objects.filter(is_deleted=False).order_by('name')
+
+    def get(self, request, *args, **kwargs):
+        action = request.GET.get('action', '').strip()
+        model_id = request.GET.get('model_id', '').strip()
+        
+        if action == 'create_form':
+            context = {'action': 'create'}
+            return render(request, 'jobs/partials/competency_model_form.html', context)
+            
+        elif action == 'edit_form':
+            model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+            context = {'action': 'edit', 'model': model_obj}
+            return render(request, 'jobs/partials/competency_model_form.html', context)
+            
+        elif model_id:
+            model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+            items = model_obj.items.filter(is_deleted=False)
+            context = {
+                'model': model_obj,
+                'items': items,
+                'type_choices': TYPE_CHOICES,
+                'importance_choices': IMPORTANCE_CHOICES,
+                'level_choices': LEVEL_CHOICES,
+            }
+            return render(request, 'jobs/partials/competency_model_detail.html', context)
+            
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        model_id = self.request.GET.get('model_id', '').strip()
+        if model_id:
+            try:
+                model_obj = CompetencyModel.objects.get(id=model_id, is_deleted=False)
+                context['selected_model'] = model_obj
+                context['items'] = model_obj.items.filter(is_deleted=False)
+            except CompetencyModel.DoesNotExist:
+                pass
+        context['type_choices'] = TYPE_CHOICES
+        context['importance_choices'] = IMPORTANCE_CHOICES
+        context['level_choices'] = LEVEL_CHOICES
+        return context
+
+
+class CompetencyModelManageView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', '').strip()
+        model_id = request.POST.get('model_id', '').strip()
+        
+        if action == 'delete':
+            model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+            model_obj.items.filter(is_deleted=False).update(
+                is_deleted=True,
+                deleted_at=timezone.now()
+            )
+            model_obj.is_deleted = True
+            model_obj.deleted_at = timezone.now()
+            model_obj.save()
+            from django.contrib import messages
+            messages.success(request, "مدل شایستگی با موفقیت حذف شد.")
+            return redirect('competency_model_list')
+            
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        
+        if model_id:
+            model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+            model_obj.name = name
+            model_obj.description = description
+            model_obj.save()
+            from django.contrib import messages
+            messages.success(request, "اطلاعات مدل شایستگی با موفقیت بروزرسانی شد.")
+            return redirect(reverse('competency_model_list') + f'?model_id={model_obj.id}')
+        else:
+            model_obj = CompetencyModel.objects.create(
+                name=name,
+                description=description
+            )
+            from django.contrib import messages
+            messages.success(request, "مدل شایستگی جدید با موفقیت ایجاد شد.")
+            return redirect(reverse('competency_model_list') + f'?model_id={model_obj.id}')
+
+
+class CompetencyModelItemManageView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def post(self, request, model_id, *args, **kwargs):
+        model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+        action = request.POST.get('action', '').strip()
+        
+        if action == 'delete':
+            item_id = request.POST.get('item_id', '').strip()
+            item = get_object_or_404(CompetencyModelItem, id=item_id, competency_model=model_obj, is_deleted=False)
+            item.is_deleted = True
+            item.deleted_at = timezone.now()
+            item.save()
+        else:
+            title = request.POST.get('title', '').strip()
+            competency_type = request.POST.get('competency_type', 'GE').strip()
+            importance = int(request.POST.get('importance', 1))
+            level = int(request.POST.get('level', 2))
+            
+            import uuid
+            code = f"MODEL-{uuid.uuid4().hex[:8]}"
+            
+            CompetencyModelItem.objects.create(
+                competency_model=model_obj,
+                title=title,
+                competency_type=competency_type,
+                importance=importance,
+                level=level,
+                code=code
+            )
+            
+        items = model_obj.items.filter(is_deleted=False)
+        context = {
+            'model': model_obj,
+            'items': items,
+            'type_choices': TYPE_CHOICES,
+            'importance_choices': IMPORTANCE_CHOICES,
+            'level_choices': LEVEL_CHOICES,
+        }
+        return render(request, 'jobs/partials/competency_model_detail.html', context)
+
+
+class CompetencyModelDetailApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def get(self, request, model_id, *args, **kwargs):
+        model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
+        items = model_obj.items.filter(is_deleted=False)
+        
+        items_data = []
+        for item in items:
+            items_data.append({
+                'title': item.title,
+                'competency_type': item.competency_type,
+                'importance': item.importance,
+                'level': item.level,
+                'code': item.code,
+                'model_name': model_obj.name,
+            })
+            
+        data = {
+            'id': model_obj.id,
+            'name': model_obj.name,
+            'description': model_obj.description,
+            'items': items_data,
+        }
+        return JsonResponse(data)
 

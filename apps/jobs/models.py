@@ -448,14 +448,20 @@ class JobOpportunityStage(SoftDeleteModel):
             return self.is_manually_completed
 
         from apps.candidates.models import ApplicationStageState
-        reached_states = [
-            state for state in ApplicationStageState.objects.filter(
-                stage=self,
-                is_deleted=False,
-                application__is_deleted=False
-            ).select_related('application')
-            if state.is_accessible
-        ]
+        reached_states_qs = ApplicationStageState.objects.filter(
+            stage=self,
+            is_deleted=False,
+            application__is_deleted=False
+        ).select_related('application').prefetch_related('application__stage_states__stage')
+
+        reached_states = []
+        for state in reached_states_qs:
+            state.stage = self
+            for s in state.application.stage_states.all():
+                s.application = state.application
+            if state.is_accessible:
+                reached_states.append(state)
+
         if not reached_states:
             return False
         return not any(state.status == ApplicationStageState.STATUS_PENDING for state in reached_states)
@@ -507,9 +513,9 @@ class AssessmentCompetency(SoftDeleteModel):
 
 
 class CentralCompetency(SoftDeleteModel):
-    post_code = models.CharField(max_length=50, verbose_name="کد پست")
+    post_code = models.CharField(max_length=50, db_index=True, verbose_name="کد پست")
     post_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="پست")
-    code = models.CharField(max_length=50, verbose_name="کد شایستگی")
+    code = models.CharField(max_length=50, db_index=True, verbose_name="کد شایستگی")
     old_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد شایستگی قدیم")
     title = models.CharField(max_length=300, verbose_name="شایستگی")
     competency_type = models.CharField(max_length=10, choices=[
@@ -543,6 +549,13 @@ class CentralCompetency(SoftDeleteModel):
     section_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="قسمت")
     cost_center_code = models.CharField(max_length=50, null=True, blank=True, verbose_name="کد مرکز هزینه")
     cost_center_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="مرکز هزینه")
+
+    is_organizational = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name="شایستگی سازمانی",
+        help_text="شایستگی‌هایی که در بیش از ۵۰٪ پست‌های سازمان تعریف شده‌اند و سطح سازمانی دارند"
+    )
 
     class Meta:
         verbose_name = "شایستگی مرجع"
@@ -579,6 +592,7 @@ class JobOpportunityCompetency(SoftDeleteModel):
         (3, 'تسلط'),
     ], verbose_name="سطح شایستگی")
     is_custom = models.BooleanField(default=False, verbose_name="ایجاد دستی")
+    model_name = models.CharField(max_length=100, null=True, blank=True, verbose_name="نام مدل شایستگی")
 
     class Meta:
         verbose_name = "شایستگی فرصت شغلی"
@@ -587,6 +601,49 @@ class JobOpportunityCompetency(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.title} ({self.code}) - {self.job.title}"
+
+
+class CompetencyModel(SoftDeleteModel):
+    name = models.CharField(max_length=100, verbose_name="نام مدل شایستگی")
+    description = models.TextField(null=True, blank=True, verbose_name="توضیحات")
+    
+    class Meta:
+        verbose_name = "مدل شایستگی"
+        verbose_name_plural = "مدل‌های شایستگی"
+        
+    def __str__(self):
+        return self.name
+
+
+class CompetencyModelItem(SoftDeleteModel):
+    competency_model = models.ForeignKey(CompetencyModel, on_delete=models.CASCADE, related_name='items', verbose_name="مدل شایستگی")
+    title = models.CharField(max_length=300, verbose_name="عنوان شایستگی")
+    competency_type = models.CharField(max_length=10, choices=[
+        ('KN', 'دانش (Knowledge)'),
+        ('SK', 'مهارت (Skill)'),
+        ('AB', 'توانایی (Ability)'),
+        ('GE', 'رفتاری (General/Behavioral)'),
+        ('ST', 'ارزش‌ها و سبک‌ها (Styles & Values)'),
+    ], default='GE', verbose_name="نوع شایستگی")
+    importance = models.PositiveIntegerField(choices=[
+        (1, 'محوری'),
+        (2, 'تکلیف محور'),
+        (3, 'حداقلی'),
+    ], default=1, verbose_name="اهمیت شایستگی")
+    level = models.PositiveIntegerField(choices=[
+        (1, 'آشنایی'),
+        (2, 'توانایی'),
+        (3, 'تسلط'),
+    ], default=2, verbose_name="سطح شایستگی")
+    code = models.CharField(max_length=50, default='MODEL', verbose_name="کد شایستگی")
+
+    class Meta:
+        verbose_name = "شایستگی مدل"
+        verbose_name_plural = "شایستگی‌های مدل"
+
+    def __str__(self):
+        return f"{self.title} - {self.competency_model.name}"
+
 
 
 class AISetting(SoftDeleteModel):

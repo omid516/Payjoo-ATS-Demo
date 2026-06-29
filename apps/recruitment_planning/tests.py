@@ -309,6 +309,11 @@ class RecruitmentPlanningTests(TestCase):
 
     def test_job_creation_redirect_flow(self):
         """تست هدایت خودکار ایجاد شغل به برنامه‌ریزی و سپس سند آزمون"""
+        from apps.jobs.models import CentralCompetency
+        CentralCompetency.objects.create(
+            post_code='SEC-01', post_title='امنیت شبکه', code='KN_SEC_01', title='Security Knowledge',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی', importance=1, level=2
+        )
         self.client.login(username='admin_planning', password='testpassword123')
         
         job_add_url = reverse('job_add')

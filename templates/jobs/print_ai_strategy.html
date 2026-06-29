@@ -17,7 +17,7 @@
             line-height: 1.6;
         }
         .print-container {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto;
             border: 1px solid #cbd5e1;
             padding: 2.5rem;
@@ -159,25 +159,45 @@
         <table class="table table-bordered align-middle text-xs mb-4">
             <thead class="table-light text-secondary font-bold">
                 <tr>
-                    <th style="width: 20%;" class="text-right">شایستگی پست</th>
-                    <th style="width: 15%; text-align: center;">چارچوب مرجع</th>
-                    <th style="width: 25%;" class="text-right">بعد / شاخص معادل جهانی</th>
-                    <th style="width: 15%; text-align: center;">ابزار سنجش پیشنهادی</th>
-                    <th style="width: 25%;" class="text-right">تحلیل فنی انتخاب ابزار</th>
+                    <th style="width: 20%;" class="text-right">شایستگی و ابزار سنجش</th>
+                    <th style="width: 20%;" class="text-right">چارچوب و بعد مرجع</th>
+                    <th style="width: 25%;" class="text-right">نشانگرهای رفتاری کلیدی</th>
+                    <th style="width: 15%; text-align: center;">بنچمارک قبولی</th>
+                    <th style="width: 20%;" class="text-right">تحلیل فنی انتخاب ابزار</th>
                 </tr>
             </thead>
             <tbody class="text-secondary font-medium">
                 {% for mapping in benchmark_mappings %}
                 <tr>
-                    <td class="fw-bold text-dark">{{ mapping.competency }}</td>
-                    <td class="text-center">
-                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 10px;">{{ mapping.framework }}</span>
+                    <td class="fw-bold text-dark">
+                        <div>{{ mapping.competency }}</div>
+                        <span class="badge bg-light text-secondary border mt-1" style="font-size: 9px;">🛠️ {{ mapping.tool }}</span>
                     </td>
-                    <td style="font-family: monospace; font-size: 10px;">{{ mapping.dimension }}</td>
-                    <td class="text-center">
-                        <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 10px;">{{ mapping.tool }}</span>
+                    <td>
+                        <div class="mb-1">
+                            <span class="badge bg-light text-dark border px-2 py-0.5" style="font-size: 9.5px;">{{ mapping.framework }}</span>
+                        </div>
+                        <span style="font-family: monospace; font-size: 9.5px; line-height: 1.3;">{{ mapping.dimension }}</span>
                     </td>
-                    <td class="text-muted" style="font-size: 11px;">{{ mapping.rationale }}</td>
+                    <td>
+                        {% if mapping.behavioral_indicators %}
+                            <ul class="ps-3 mb-0" style="font-size: 10px; line-height: 1.4; padding-right: 15px;">
+                                {% for indicator in mapping.behavioral_indicators %}
+                                    <li class="mb-1">{{ indicator }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if mapping.pass_benchmark %}
+                            <span class="badge bg-light text-success border px-2 py-1" style="font-size: 10px; font-weight: bold;">🎯 {{ mapping.pass_benchmark }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted" style="font-size: 10.5px; line-height: 1.4; text-align: justify;">{{ mapping.rationale }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -189,8 +209,8 @@
 
     <!-- 3. Evaluation Scenario -->
     <h5 class="fw-bold section-title">۳. سناریوی پیشنهادی کانون ارزیابی و ابزارهای سنجش</h5>
-    <div class="p-3 border rounded-3 bg-light bg-opacity-25 mb-4 text-sm text-secondary" style="line-height: 1.7; text-align: justify;">
-        {{ scenario }}
+    <div class="p-3 border rounded-3 bg-light bg-opacity-25 mb-4 text-xs text-secondary" style="line-height: 1.8; text-align: justify;">
+        {{ scenario|linebreaks }}
     </div>
 
     <!-- 4. CBI Questions -->
@@ -198,15 +218,29 @@
     <table class="table table-bordered align-middle text-sm mb-5">
         <thead class="table-light">
             <tr>
-                <th style="width: 10%;" class="text-center">ردیف</th>
-                <th>سوال مصاحبه پیشنهادی هوشمند</th>
+                <th style="width: 8%;" class="text-center">ردیف</th>
+                <th>سوال مصاحبه پیشنهادی هوشمند و راهنمای ارزیابی</th>
             </tr>
         </thead>
         <tbody>
             {% for q in questions %}
             <tr>
                 <td class="text-center font-bold text-secondary">{{ forloop.counter }}</td>
-                <td class="text-secondary">{{ q }}</td>
+                <td class="text-secondary">
+                    {% if q.question %}
+                        <div class="mb-1.5">
+                            <span class="badge bg-light text-primary border px-2 py-0.5" style="font-size: 9.5px; font-weight: bold;">🎯 شایستگی: {{ q.competency }}</span>
+                        </div>
+                        <div class="fw-semibold text-dark mb-2" style="font-size: 12px; line-height: 1.6;">{{ q.question }}</div>
+                        {% if q.criteria %}
+                            <div class="text-muted" style="font-size: 10.5px; border-top: 1px dashed #e2e8f0; padding-top: 6px; margin-top: 6px; line-height: 1.5;">
+                                <strong>💡 راهنمای ارزیابی (STAR):</strong> {{ q.criteria }}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-dark" style="font-size: 12px; line-height: 1.6;">{{ q }}</div>
+                    {% endif %}
+                </td>
             </tr>
             {% empty %}
             <tr>

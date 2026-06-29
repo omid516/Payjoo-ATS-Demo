@@ -220,11 +220,17 @@
         <h5 class="font-semibold text-secondary m-0">لیست متقاضیان و نمرات ارزیابی</h5>
         <div id="bulk-actions" class="d-none align-items-center gap-2">
             <span class="text-xs text-muted font-medium"><span id="selected-count">0</span> متقاضی انتخاب شده‌اند</span>
-            <button type="submit" form="bulk-action-form" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 font-semibold">
+            <button type="submit" form="bulk-action-form" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
                 انتقال به مرحله بعد
+            </button>
+            <button type="button" onclick="openBulkNotificationModal()" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                ارسال پیامک و ایمیل
             </button>
         </div>
     </div>
@@ -360,7 +366,60 @@
     </div>
 </div>
 
+<!-- Modal for bulk notifications -->
+<div class="modal fade" id="bulkNotificationModal" tabindex="-1" aria-labelledby="bulkNotificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="bulk-notification-modal-content">
+            <!-- Loaded dynamically -->
+        </div>
+    </div>
+</div>
+
 <script>
+    function openBulkNotificationModal() {
+        const checkboxes = document.querySelectorAll('.app-checkbox:checked');
+        const appIds = Array.from(checkboxes).map(cb => cb.value).join(',');
+        if (!appIds) {
+            alert('لطفاً حداقل یک متقاضی را انتخاب کنید.');
+            return;
+        }
+        
+        const url = "{% url 'bulk_send_notification_modal' job.id %}?app_ids=" + appIds;
+        
+        const modalContent = document.getElementById('bulk-notification-modal-content');
+        modalContent.innerHTML = `
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">در حال بارگذاری الگوها و اطلاعات...</p>
+            </div>
+        `;
+        
+        const modalEl = document.getElementById('bulkNotificationModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('خطا در دریافت اطلاعات');
+                }
+                return response.text();
+            })
+            .then(html => {
+                modalContent.innerHTML = html;
+                // Execute scripts inside the loaded content
+                const scripts = modalContent.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    newScript.text = script.text;
+                    document.body.appendChild(newScript).parentNode.removeChild(newScript);
+                });
+            })
+            .catch(err => {
+                modalContent.innerHTML = `<div class="modal-header py-3 bg-danger text-white"><h6 class="modal-title font-semibold m-0">خطا</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-danger py-4 text-center">${err.message || 'خطا در بارگذاری اطلاعات. مجدداً تلاش کنید.'}</div>`;
+            });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const selectAllCheckbox = document.getElementById('select-all');
         const candidateCheckboxes = document.querySelectorAll('.app-checkbox');

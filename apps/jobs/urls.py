@@ -25,7 +25,11 @@ from .views import (
     SearchCompetenciesApiView,
     AISettingView,
     JobAIStrategyPrintView,
-    OrganizationSettingView
+    OrganizationSettingView,
+    CompetencyModelDetailApiView,
+    CompetencyModelListView,
+    CompetencyModelManageView,
+    CompetencyModelItemManageView
 )
 
 
@@ -50,12 +54,16 @@ urlpatterns = [
     path('competencies/upload/', CentralCompetencyUploadView.as_view(), name='competency_upload'),
     path('competencies/patterns/', RecruitmentPatternDashboardView.as_view(), name='recruitment_patterns'),
     path('competencies/custom-report/', CustomCompetenciesReportView.as_view(), name='custom_competencies_report'),
+    path('competencies/models/', CompetencyModelListView.as_view(), name='competency_model_list'),
+    path('competencies/models/manage/', CompetencyModelManageView.as_view(), name='competency_model_manage'),
+    path('competencies/models/<int:model_id>/items/', CompetencyModelItemManageView.as_view(), name='competency_model_item_manage'),
     path('competencies/settings/ai/', AISettingView.as_view(), name='ai_setting'),
     path('settings/organization/', OrganizationSettingView.as_view(), name='organization_setting'),
 
     path('api/posts/search/', SearchPostsApiView.as_view(), name='search_posts_api'),
     path('api/posts/detail/', SearchPostsDetailApiView.as_view(), name='post_detail_api'),
     path('api/competencies/search/', SearchCompetenciesApiView.as_view(), name='search_competencies_api'),
+    path('api/competency-models/<int:model_id>/', CompetencyModelDetailApiView.as_view(), name='competency_model_detail_api'),
     path('<int:job_id>/competencies/', JobCompetencyConfigView.as_view(), name='job_competency_config'),
     path('<int:job_id>/assessment-plan/print/', JobAssessmentPlanPrintView.as_view(), name='job_assessment_plan_print'),
     path('competencies/patterns/print-ai-strategy/', JobAIStrategyPrintView.as_view(), name='job_ai_strategy_print'),

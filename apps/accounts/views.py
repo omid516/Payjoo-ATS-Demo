@@ -201,14 +201,25 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         completed_states_qs = ApplicationStageState.objects.filter(
             status__in=['COMPLETED', 'FAILED'],
             is_deleted=False,
-        ).select_related('application__job', 'stage')
+        ).select_related(
+            'application__job', 'stage'
+        ).prefetch_related(
+            'application__stage_states__stage'
+        )
         if not include_closed:
             completed_states_qs = completed_states_qs.exclude(
                 application__job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
             )
 
+        # Cache application references on stage states to prevent DB lookup when accessing state.application
+        completed_states_list = list(completed_states_qs)
+        for state in completed_states_list:
+            app = state.application
+            for s in app.stage_states.all():
+                s.application = app
+
         stage_times = {}
-        for state in completed_states_qs:
+        for state in completed_states_list:
             app = state.application
             stage = state.stage
             days = None
@@ -221,11 +232,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     duration = state.updated_at - app.created_at
                     days = duration.total_seconds() / (24 * 3600)
             else:
-                prev_state = app.stage_states.filter(
-                    stage__sequence__lt=stage.sequence,
-                    status__in=['COMPLETED', 'FAILED'],
-                    is_deleted=False
-                ).order_by('-stage__sequence').first()
+                app_states = list(app.stage_states.all())
+                prior_states = [s for s in app_states if s.stage.sequence < stage.sequence and s.status in ['COMPLETED', 'FAILED'] and not s.is_deleted]
+                if prior_states:
+                    prior_states.sort(key=lambda s: s.stage.sequence)
+                    prev_state = prior_states[-1]
+                else:
+                    prev_state = None
                 
                 if prev_state:
                     prev_time = prev_state.evaluation_date if prev_state.evaluation_date else prev_state.updated_at.date()
@@ -271,39 +284,51 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         from apps.recruitment_planning.models import JobStagePlan, StageTypeConfiguration
         from datetime import datetime
         
+        # Pre-cache StageTypeConfigurations to avoid DB hits inside loop
+        configs = {cfg.stage_type: cfg.default_sla_days for cfg in StageTypeConfiguration.objects.filter(is_deleted=False)}
+
         delayed_candidates = []
         in_progress_apps = JobApplication.objects.filter(
             status='IN_PROGRESS',
             is_deleted=False
-        ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).select_related('candidate', 'job')
+        ).exclude(
+            job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).select_related(
+            'candidate', 'job', 'job__recruitment_plan', 'current_stage'
+        ).prefetch_related(
+            'job__stages',
+            'stage_states__stage',
+            'job__recruitment_plan__stage_plans'
+        )
         
-        for app in in_progress_apps:
+        in_progress_apps_list = list(in_progress_apps)
+        # Assign application back-reference on child states
+        for app in in_progress_apps_list:
+            for s in app.stage_states.all():
+                s.application = app
+
+        for app in in_progress_apps_list:
             job = app.job
-            # پیدا کردن مرحله ارزیابی متناظر با وضعیت شغل
-            stage = job.stages.filter(stage_type=job.status, is_deleted=False).first()
+            job_stages = list(job.stages.all())
+            stage = next((s for s in job_stages if s.stage_type == job.status and not s.is_deleted), None)
             if not stage:
-                stage = app.current_stage or job.stages.filter(is_deleted=False).order_by('sequence').first()
+                stage = app.current_stage or next((s for s in sorted(job_stages, key=lambda s: s.sequence) if not s.is_deleted), None)
             
             if not stage:
                 continue
                 
-            # دریافت تعداد روزهای مجاز طبق SLA
-            stage_plan = JobStagePlan.objects.filter(
-                plan__job=job,
-                stage=stage,
-                plan__is_deleted=False,
-                is_deleted=False
-            ).first()
+            # دریافت تعداد روزهای مجاز طبق SLA در حافظه
+            stage_plan = None
+            plan = getattr(job, 'recruitment_plan', None)
+            if plan and not plan.is_deleted:
+                stage_plan = next((sp for sp in plan.stage_plans.all() if sp.stage_id == stage.id and not sp.is_deleted), None)
+            
             if stage_plan:
                 sla_days = stage_plan.sla_days
             else:
-                config = StageTypeConfiguration.objects.filter(
-                    stage_type=stage.stage_type,
-                    is_deleted=False
-                ).first()
-                sla_days = config.default_sla_days if config else 5
+                sla_days = configs.get(stage.stage_type, 5)
                 
-            # تعیین تاریخ شروع حضور در مرحله فعلی
+            # تعیین تاریخ شروع حضور در مرحله فعلی در حافظه
             active_since = None
             if stage.sequence == 1:
                 if job.start_date:
@@ -311,11 +336,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 else:
                     active_since = app.created_at
             else:
-                prev_state = app.stage_states.filter(
-                    stage__sequence__lt=stage.sequence,
-                    status__in=['COMPLETED', 'FAILED'],
-                    is_deleted=False
-                ).order_by('-stage__sequence').first()
+                app_states = list(app.stage_states.all())
+                prior_states = [s for s in app_states if s.stage.sequence < stage.sequence and s.status in ['COMPLETED', 'FAILED'] and not s.is_deleted]
+                if prior_states:
+                    prior_states.sort(key=lambda s: s.stage.sequence)
+                    prev_state = prior_states[-1]
+                else:
+                    prev_state = None
                 
                 if prev_state:
                     if prev_state.evaluation_date:
@@ -346,7 +373,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         data['delayed_candidates'] = delayed_candidates[:5] # نمایش حداکثر ۵ مورد بحرانی‌تر
         
         # محاسبه نرخ انحراف از SLA
-        in_progress_count = in_progress_apps.count()
+        in_progress_count = len(in_progress_apps_list)
         sla_violation_rate = round((len(delayed_candidates) / in_progress_count) * 100, 1) if in_progress_count > 0 else 0
         data['sla_violation_rate'] = sla_violation_rate
 
@@ -360,12 +387,81 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         data['active_stages'] = active_stages
         data['active_stage_types'] = STAGE_TYPE_ORDER  # برای استفاده در view
 
-        def build_stage_counts(apps_qs, stage_types):
-            """برای یک queryset از applications، تعداد متقاضیان در هر stage_type را بر اساس وضعیت فرصت شغلی (job.status) برمی‌گرداند"""
-            rows = apps_qs.values('job__status').annotate(cnt=Count('id'))
-            return {row['job__status']: row['cnt'] for row in rows}
+        # 1. Fetch total jobs count grouped by department, unit, and category in aggregate queries
+        dept_job_counts = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).values('department').annotate(cnt=Count('id'))
+        dept_job_map = {row['department']: row['cnt'] for row in dept_job_counts if row['department']}
 
-        # آمار دپارتمان‌ها
+        unit_job_counts = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).exclude(unit='').exclude(unit=None).values('unit').annotate(cnt=Count('id'))
+        unit_job_map = {row['unit']: row['cnt'] for row in unit_job_counts if row['unit']}
+
+        cat_job_counts = JobOpportunity.objects.filter(is_deleted=False).exclude(
+            status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).exclude(job_category='').exclude(job_category=None).values('job_category').annotate(cnt=Count('id'))
+        cat_job_map = {row['job_category']: row['cnt'] for row in cat_job_counts if row['job_category']}
+
+        # 2. Fetch candidate counts grouped by (department, stage_type), (unit, stage_type), and (category, stage_type) in aggregate queries
+        dept_stage_counts = JobApplication.objects.filter(
+            status='IN_PROGRESS',
+            is_deleted=False
+        ).exclude(
+            job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).values(
+            'job__department', 'current_stage__stage_type'
+        ).annotate(
+            cnt=Count('id')
+        )
+        dept_stage_map = {}
+        for row in dept_stage_counts:
+            dept = row['job__department']
+            stype = row['current_stage__stage_type'] or 'SCREENING'
+            if dept:
+                if dept not in dept_stage_map:
+                    dept_stage_map[dept] = {}
+                dept_stage_map[dept][stype] = row['cnt']
+
+        unit_stage_counts = JobApplication.objects.filter(
+            status='IN_PROGRESS',
+            is_deleted=False
+        ).exclude(
+            job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).values(
+            'job__unit', 'current_stage__stage_type'
+        ).annotate(
+            cnt=Count('id')
+        )
+        unit_stage_map = {}
+        for row in unit_stage_counts:
+            unit = row['job__unit']
+            stype = row['current_stage__stage_type'] or 'SCREENING'
+            if unit:
+                if unit not in unit_stage_map:
+                    unit_stage_map[unit] = {}
+                unit_stage_map[unit][stype] = row['cnt']
+
+        cat_stage_counts = JobApplication.objects.filter(
+            status='IN_PROGRESS',
+            is_deleted=False
+        ).exclude(
+            job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
+        ).values(
+            'job__job_category', 'current_stage__stage_type'
+        ).annotate(
+            cnt=Count('id')
+        )
+        cat_stage_map = {}
+        for row in cat_stage_counts:
+            cat = row['job__job_category']
+            stype = row['current_stage__stage_type'] or 'SCREENING'
+            if cat:
+                if cat not in cat_stage_map:
+                    cat_stage_map[cat] = {}
+                cat_stage_map[cat][stype] = row['cnt']
+
+        # 3. Build dept_stats
         departments = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
             status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).values_list('department', flat=True).order_by().distinct())
@@ -373,11 +469,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         for dept in departments:
             if not dept:
                 continue
-            total_jobs_dept = JobOpportunity.objects.filter(department=dept, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
-            dept_apps = JobApplication.objects.filter(
-                job__department=dept, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
-            counts = build_stage_counts(dept_apps, STAGE_TYPE_ORDER)
+            total_jobs_dept = dept_job_map.get(dept, 0)
+            counts = dept_stage_map.get(dept, {})
             dept_row = {
                 'department': dept,
                 'total_jobs': total_jobs_dept,
@@ -388,7 +481,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             dept_stats.append(dept_row)
         data['dept_stats'] = dept_stats
 
-        # آمار واحدها
+        # 4. Build unit_stats
         units = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
             status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).exclude(unit='').exclude(unit=None).values_list('unit', flat=True).order_by().distinct())
@@ -396,11 +489,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         for unit in units:
             if not unit:
                 continue
-            total_jobs_unit = JobOpportunity.objects.filter(unit=unit, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
-            unit_apps = JobApplication.objects.filter(
-                job__unit=unit, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
-            counts = build_stage_counts(unit_apps, STAGE_TYPE_ORDER)
+            total_jobs_unit = unit_job_map.get(unit, 0)
+            counts = unit_stage_map.get(unit, {})
             unit_row = {
                 'unit': unit,
                 'total_jobs': total_jobs_unit,
@@ -411,7 +501,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             unit_stats.append(unit_row)
         data['unit_stats'] = unit_stats
 
-        # آمار رده‌های شغلی
+        # 5. Build category_stats
         categories = list(JobOpportunity.objects.filter(is_deleted=False).exclude(
             status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']
         ).exclude(job_category='').exclude(job_category=None).values_list('job_category', flat=True).order_by().distinct())
@@ -419,11 +509,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         for cat in categories:
             if not cat:
                 continue
-            total_jobs_cat = JobOpportunity.objects.filter(job_category=cat, is_deleted=False).exclude(status__in=['CLOSED', 'CANCELLED', 'SUSPENDED']).count()
-            cat_apps = JobApplication.objects.filter(
-                job__job_category=cat, status='IN_PROGRESS', is_deleted=False
-            ).exclude(job__status__in=['CLOSED', 'CANCELLED', 'SUSPENDED'])
-            counts = build_stage_counts(cat_apps, STAGE_TYPE_ORDER)
+            total_jobs_cat = cat_job_map.get(cat, 0)
+            counts = cat_stage_map.get(cat, {})
             cat_row = {
                 'job_category': cat,
                 'total_jobs': total_jobs_cat,
@@ -436,13 +523,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # ۸. میانگین زمان تعیین تکلیف فرصت شغلی و درخواست‌ها
         # میانگین زمان بستن فرصت شغلی (از تاریخ شروع/ایجاد تا انتخاب نهایی کاندیدا یا بسته‌شدن فرصت)
-        closed_jobs = JobOpportunity.objects.filter(status='CLOSED', is_deleted=False)
+        closed_jobs = JobOpportunity.objects.filter(status='CLOSED', is_deleted=False).prefetch_related('applications')
         job_durations = []
         for job in closed_jobs:
             pub_date = job.start_date or job.created_at.date()
-            # پیدا کردن اولین اپلیکیشن قبول نهایی شده برای این موقعیت شغلی
-            selected_app = job.applications.filter(status='SELECTED', is_deleted=False).order_by('updated_at').first()
-            if selected_app:
+            selected_apps = [app for app in job.applications.all() if app.status == 'SELECTED' and not app.is_deleted]
+            if selected_apps:
+                selected_apps.sort(key=lambda app: app.updated_at)
+                selected_app = selected_apps[0]
                 close_date = selected_app.updated_at.date()
             else:
                 close_date = job.updated_at.date()
@@ -492,24 +580,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         data['unified_category_stats'] = unified_category_stats
 
         # خلاصه pipeline: فرصت‌هایی که آماده تصمیم‌گیری نهایی هستند
-        from apps.jobs.models import JobOpportunityStage
         ready_for_decision = []
         assessment_jobs = JobOpportunity.objects.filter(
             status__in=['ASSESSMENT', 'INTERVIEW', 'FINAL_SELECTION'], is_deleted=False
         ).order_by('-updated_at')[:10]
+        
+        # Optimize by getting ready stats in a single query
+        ready_stats = ApplicationStageState.objects.filter(
+            application__job__in=assessment_jobs,
+            application__status='IN_PROGRESS',
+            is_deleted=False
+        ).values('application__job').annotate(
+            pending=DCount('id', filter=Q(status='PENDING')),
+            completed=DCount('id', filter=Q(status__in=['COMPLETED', 'FAILED']))
+        )
+        ready_map = {row['application__job']: row for row in ready_stats}
+        
         for j in assessment_jobs:
-            pending_count = ApplicationStageState.objects.filter(
-                application__job=j,
-                application__status='IN_PROGRESS',
-                status='PENDING',
-                is_deleted=False
-            ).count()
-            completed_count = ApplicationStageState.objects.filter(
-                application__job=j,
-                application__status='IN_PROGRESS',
-                status__in=['COMPLETED', 'FAILED'],
-                is_deleted=False
-            ).count()
+            row = ready_map.get(j.id, {'pending': 0, 'completed': 0})
+            pending_count = row['pending']
+            completed_count = row['completed']
             ready_for_decision.append({
                 'job': j,
                 'pending': pending_count,

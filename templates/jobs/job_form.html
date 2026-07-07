@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if object %}ویرایش فرصت شغلی{% else %}افزودن فرصت شغلی جدید{% endif %}{% endblock %}
+{% block title %}{% if object %}{{ t.jf_edit_title }}{% else %}{{ t.jf_add_title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
@@ -23,12 +23,12 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
         </svg>
-        بازگشت به لیست
+        {% if current_language_code == 'en' %}Back to List{% elif current_language_code == 'tr' %}Listeye Dön{% elif current_language_code == 'ar' %}الالتحاق بالقائمة{% else %}بازگشت به لیست{% endif %}
     </a>
     <h3 class="font-semibold text-secondary">
-        {% if object %}ویرایش فرصت شغلی: {{ object.title }}{% else %}افزودن فرصت شغلی جدید{% endif %}
+        {% if object %}{{ t.jf_edit_sub }} {{ object.title }}{% else %}{{ t.jf_add_title }}{% endif %}
     </h3>
-    <p class="text-muted text-sm m-0">اطلاعات فرصت شغلی و مراحل فرآیند ارزیابی متقاضیان را مشخص کنید</p>
+    <p class="text-muted text-sm m-0">{{ t.jf_desc }}</p>
 </div>
 
 {% if form.non_field_errors %}
@@ -53,59 +53,59 @@
             {% csrf_token %}
             
             <!-- Section 1: General Info -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">۱. اطلاعات عمومی فرصت شغلی</h5>
+            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">{{ t.jf_section_general }}</h5>
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">شماره درخواست</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_req_num }}</label>
                     {{ form.request_number }}
                     {% if form.request_number.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.request_number.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">کد شغل</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_code }}</label>
                     {{ form.code }}
                     {% if form.code.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.code.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label font-medium text-secondary">عنوان شغل</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_title }}</label>
                     {{ form.title }}
                     {% if form.title.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.title.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">بخش / دپارتمان</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_dept }}</label>
                     {{ form.department }}
                     {% if form.department.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.department.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">واحد سازمانی</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_unit }}</label>
                     {{ form.unit }}
                     {% if form.unit.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.unit.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">رده شغلی</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_cat }}</label>
                     {{ form.job_category }}
                     {% if form.job_category.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.job_category.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">ظرفیت جذب (تعداد)</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_headcount }}</label>
                     {{ form.headcount }}
                     {% if form.headcount.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.headcount.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">نوع استخدام</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_type }}</label>
                     {{ form.recruitment_type }}
                     {% if form.recruitment_type.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.recruitment_type.errors.0 }}</div>
@@ -114,19 +114,19 @@
             </div>
 
             <!-- Section 2: Planning -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">۲. برنامه‌ریزی و زمان‌بندی</h5>
+            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">{{ t.jf_section_planning }}</h5>
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">کارشناس جذب مسئول</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_recruiter }}</label>
                     {{ form.assigned_recruiter }}
                     {% if form.assigned_recruiter.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.assigned_recruiter.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">الگوی فرآیند استخدامی (Workflow)</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_workflow }}</label>
                     {{ form.workflow }}
-                    <small class="text-muted text-xs d-block mt-1">با انتخاب الگو، مراحل فرآیند به صورت خودکار تخصیص می‌یابند.</small>
+                    <small class="text-muted text-xs d-block mt-1">{{ t.jf_workflow_help }}</small>
                     {% if form.workflow.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.workflow.errors.0 }}</div>
                     {% endif %}
@@ -135,21 +135,21 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">وضعیت فرصت شغلی</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_status }}</label>
                     {{ form.status }}
                     {% if form.status.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.status.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">تاریخ شروع</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_start_date }}</label>
                     {{ form.start_date }}
                     {% if form.start_date.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.start_date.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-medium text-secondary">تاریخ پایان</label>
+                    <label class="form-label font-medium text-secondary">{{ t.jf_end_date }}</label>
                     {{ form.end_date }}
                     {% if form.end_date.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.end_date.errors.0 }}</div>
@@ -158,24 +158,32 @@
             </div>
 
             <!-- Section 3: Descriptions -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">۳. شرح شغل، شرایط احراز و یادداشت‌ها</h5>
+            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">
+                {% if current_language_code == 'en' %}3. Job Description, Requirements & Notes{% elif current_language_code == 'tr' %}3. İş Tanımı, Gereksinimler & Notlar{% elif current_language_code == 'ar' %}٣. شرح الوظيفة، الشروط والملاحظات{% else %}۳. شرح شغل، شرایط احراز و یادداشت‌ها{% endif %}
+            </h5>
             <div class="row g-3 mb-4">
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">شرح شغل</label>
+                    <label class="form-label font-medium text-secondary">
+                        {% if current_language_code == 'en' %}Job Description{% elif current_language_code == 'tr' %}İş Tanımı{% elif current_language_code == 'ar' %}شرح الوظيفة{% else %}شرح شغل{% endif %}
+                    </label>
                     {{ form.description }}
                     {% if form.description.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.description.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">شرایط احراز</label>
+                    <label class="form-label font-medium text-secondary">
+                        {% if current_language_code == 'en' %}Requirements{% elif current_language_code == 'tr' %}Gereksinimler{% elif current_language_code == 'ar' %}شروط التأهيل{% else %}شرایط احراز{% endif %}
+                    </label>
                     {{ form.requirements }}
                     {% if form.requirements.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.requirements.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">یادداشت‌های داخلی و اداری</label>
+                    <label class="form-label font-medium text-secondary">
+                        {% if current_language_code == 'en' %}Internal & Office Notes{% elif current_language_code == 'tr' %}Dahili & Ofis Notları{% elif current_language_code == 'ar' %}ملاحظات داخلية وإدارية{% else %}یادداشت‌های داخلی و اداری{% endif %}
+                    </label>
                     {{ form.notes }}
                     {% if form.notes.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.notes.errors.0 }}</div>
@@ -184,14 +192,14 @@
             </div>
 
             <!-- Section 4: Dynamic Stages -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">۴. مراحل فرآیند ارزیابی متقاضیان</h5>
+            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">{{ t.jf_section_stages }}</h5>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="text-muted text-xs m-0">مراحل ارزیابی را به همراه وزن هر کدام تعریف کنید. مجموع درصدها باید دقیقاً ۱۰۰٪ باشد.</p>
+                <p class="text-muted text-xs m-0">{{ t.jf_stages_help }}</p>
                 <button type="button" id="add-stage-btn" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    افزودن مرحله
+                    {% if current_language_code == 'en' %}Add Stage{% elif current_language_code == 'tr' %}Aşama Ekle{% elif current_language_code == 'ar' %}إضافة مرحلة{% else %}افزودن مرحله{% endif %}
                 </button>
             </div>
 
@@ -202,28 +210,28 @@
                 <div class="row g-2 align-items-end stage-form-row mb-3" id="stage-form-{{ forloop.counter0 }}">
                     {{ stage_form.id }}
                     <div class="col-md-4">
-                        <label class="form-label text-xs text-muted mb-1">نام مرحله ارزیابی</label>
+                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_name }}</label>
                         {{ stage_form.name }}
                         {% if stage_form.name.errors %}
                         <div class="text-danger text-xs mt-1">{{ stage_form.name.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label text-xs text-muted mb-1">نوع مرحله</label>
+                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_type }}</label>
                         {{ stage_form.stage_type }}
                         {% if stage_form.stage_type.errors %}
                         <div class="text-danger text-xs mt-1">{{ stage_form.stage_type.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label text-xs text-muted mb-1">وزن (٪)</label>
+                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_weight }}</label>
                         {{ stage_form.weight }}
                         {% if stage_form.weight.errors %}
                         <div class="text-danger text-xs mt-1">{{ stage_form.weight.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-1">
-                        <label class="form-label text-xs text-muted mb-1">ترتیب</label>
+                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_seq }}</label>
                         {{ stage_form.sequence }}
                         {% if stage_form.sequence.errors %}
                         <div class="text-danger text-xs mt-1">{{ stage_form.sequence.errors.0 }}</div>
@@ -235,11 +243,11 @@
                                 {{ stage_form.DELETE }}
                             </div>
                             <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="deleteStageRow('{{ forloop.counter0 }}')">
-                                حذف
+                                {{ t.delete }}
                             </button>
                         {% else %}
                             <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeNewStageRow('{{ forloop.counter0 }}')">
-                                حذف
+                                {{ t.delete }}
                             </button>
                         {% endif %}
                     </div>
@@ -249,15 +257,15 @@
 
             <div class="col-12 mt-1 mb-4">
                 <div class="alert alert-info py-2.5 px-3 text-sm d-flex align-items-center justify-content-between mb-0" id="weight_sum_alert">
-                    <span>مجموع درصد وزن مراحل: <strong id="weight_sum_val">۰</strong>٪</span>
-                    <span class="font-semibold text-xs" id="weight_sum_status">مجموع مقادیر معتبر است.</span>
+                    <span>{% if current_language_code == 'en' %}Total stage weight: {% elif current_language_code == 'tr' %}Toplam aşama ağırlığı: {% elif current_language_code == 'ar' %}مجموع أوزان المراحل: {% else %}مجموع درصد وزن مراحل: {% endif %}<strong id="weight_sum_val">۰</strong>٪</span>
+                    <span class="font-semibold text-xs" id="weight_sum_status">{% if current_language_code == 'en' %}Total value is valid.{% elif current_language_code == 'tr' %}Toplam değer geçerlidir.{% elif current_language_code == 'ar' %}المجموع الكلي صحيح.{% else %}مجموع مقادیر معتبر است.{% endif %}</span>
                 </div>
             </div>
 
             <div class="mt-4 d-flex justify-content-end gap-2">
-                <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2">انصراف</a>
+                <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2">{{ t.cancel }}</a>
                 <button type="submit" class="btn btn-primary-custom px-4 py-2">
-                    {% if object %}ذخیره تغییرات{% else %}ایجاد فرصت شغلی{% endif %}
+                    {% if object %}{{ t.cf_save }}{% else %}{% if current_language_code == 'en' %}Create Job Post{% elif current_language_code == 'tr' %}İş Fırsatı Oluştur{% elif current_language_code == 'ar' %}إنشاء فرصة العمل{% else %}ایجاد فرصت شغلی{% endif %}{% endif %}
                 </button>
             </div>
         </form>
@@ -269,24 +277,24 @@
     <div class="row g-2 align-items-end stage-form-row mb-3" id="stage-form-__prefix__">
         {{ stages.empty_form.id }}
         <div class="col-md-4">
-            <label class="form-label text-xs text-muted mb-1">نام مرحله ارزیابی</label>
+            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_name }}</label>
             {{ stages.empty_form.name }}
         </div>
         <div class="col-md-3">
-            <label class="form-label text-xs text-muted mb-1">نوع مرحله</label>
+            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_type }}</label>
             {{ stages.empty_form.stage_type }}
         </div>
         <div class="col-md-2">
-            <label class="form-label text-xs text-muted mb-1">وزن (٪)</label>
+            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_weight }}</label>
             {{ stages.empty_form.weight }}
         </div>
         <div class="col-md-1">
-            <label class="form-label text-xs text-muted mb-1">ترتیب</label>
+            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_seq }}</label>
             {{ stages.empty_form.sequence }}
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeNewStageRow('__prefix__')">
-                حذف
+                {{ t.delete }}
             </button>
         </div>
     </div>
@@ -306,7 +314,7 @@
             labelField: 'display_name',
             searchField: 'display_name',
             create: false,
-            placeholder: "جستجو و انتخاب پست سازمانی...",
+            placeholder: "{% if current_language_code == 'en' %}Search and select post...{% elif current_language_code == 'tr' %}Pozisyon ara ve seç...{% elif current_language_code == 'ar' %}البحث واختيار الوظيفة...{% else %}جستجو و انتخاب پست سازمانی...{% endif %}",
             rtl: true,
             preload: 'focus',
             load: function(query, callback) {
@@ -347,24 +355,27 @@
         });
 
         // Initialize Persian Datepicker
-        kamaDatepicker('id_start_date', {
-            buttonsColor: '#0052cc',
-            markToday: true,
-            gotoToday: true,
-            twodigit: true,
-            closeAfterSelect: true,
-            nextButtonIcon: '>',
-            previousButtonIcon: '<'
-        });
-        kamaDatepicker('id_end_date', {
-            buttonsColor: '#0052cc',
-            markToday: true,
-            gotoToday: true,
-            twodigit: true,
-            closeAfterSelect: true,
-            nextButtonIcon: '>',
-            previousButtonIcon: '<'
-        });
+        const langCode = "{{ current_language_code }}";
+        if (langCode === 'fa' || langCode === 'ar') {
+            kamaDatepicker('id_start_date', {
+                buttonsColor: '#0052cc',
+                markToday: true,
+                gotoToday: true,
+                twodigit: true,
+                closeAfterSelect: true,
+                nextButtonIcon: '>',
+                previousButtonIcon: '<'
+            });
+            kamaDatepicker('id_end_date', {
+                buttonsColor: '#0052cc',
+                markToday: true,
+                gotoToday: true,
+                twodigit: true,
+                closeAfterSelect: true,
+                nextButtonIcon: '>',
+                previousButtonIcon: '<'
+            });
+        }
 
         const container = document.getElementById('stages-formset-container');
         const template = document.getElementById('stage-form-template').innerHTML;
@@ -387,11 +398,11 @@
             if (total === 100) {
                 sumAlert.classList.remove('alert-info', 'alert-danger');
                 sumAlert.classList.add('alert-success');
-                sumStatus.textContent = 'مجموع مقادیر معتبر است (۱۰۰٪).';
+                sumStatus.textContent = "{% if current_language_code == 'en' %}Total is valid (100%).{% elif current_language_code == 'tr' %}Toplam değer geçerlidir (%100).{% elif current_language_code == 'ar' %}المجموع الكلي صحيح (١٠٠٪).{% else %}مجموع مقادیر معتبر است (۱۰۰٪).{% endif %}";
             } else {
                 sumAlert.classList.remove('alert-info', 'alert-success');
                 sumAlert.classList.add('alert-danger');
-                sumStatus.textContent = 'مجموع مقادیر باید دقیقاً ۱۰۰٪ باشد.';
+                sumStatus.textContent = "{% if current_language_code == 'en' %}Total must be exactly 100%.{% elif current_language_code == 'tr' %}Toplam tam olarak %100 olmalıdır.{% elif current_language_code == 'ar' %}المجموع الكلي يجب أن يكون ١٠٠٪ تماماً.{% else %}مجموع مقادیر باید دقیقاً ۱۰۰٪ باشد.{% endif %}";
             }
         }
         
@@ -445,7 +456,7 @@
         // Fetch and show workflow stages preview
         const workflowSelect = document.getElementById('id_workflow');
         const previewContainer = document.getElementById('workflow-stages-preview');
-
+ 
         function updateWorkflowPreview() {
             const workflowId = workflowSelect.value;
             if (!workflowId) {
@@ -453,7 +464,7 @@
                 previewContainer.classList.add('d-none');
                 return;
             }
-
+ 
             // Fetch stages
             fetch(`/jobs/workflows/${workflowId}/stages/`)
                 .then(response => {
@@ -468,11 +479,11 @@
                 })
                 .catch(error => {
                     console.error('Error fetching workflow stages:', error);
-                    previewContainer.innerHTML = '<span class="text-danger text-xs">خطا در بارگذاری مراحل الگو</span>';
+                    previewContainer.innerHTML = '<span class="text-danger text-xs">{% if current_language_code == 'en' %}Error loading workflow stages{% elif current_language_code == 'tr' %}Şablon aşamaları yüklenirken hata oluştu{% elif current_language_code == 'ar' %}خطأ في تحميل مراحل النموذج{% else %}خطا در بارگذاری مراحل الگو{% endif %}</span>';
                     previewContainer.classList.remove('d-none');
                 });
         }
-
+ 
         if (workflowSelect) {
             workflowSelect.addEventListener('change', updateWorkflowPreview);
             updateWorkflowPreview(); // Check initial state (e.g., when editing an existing job)

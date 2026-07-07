@@ -590,7 +590,7 @@
             return;
         }
         
-        const url = `/jobs/api/competency-models/${modelId}/`;
+        const url = "{% url 'competency_model_detail_api' 99999 %}".replace('99999', modelId);
         fetch(url)
             .then(response => {
                 if (!response.ok) throw new Error('خطا در دریافت اطلاعات مدل شایستگی');

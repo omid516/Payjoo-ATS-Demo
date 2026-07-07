@@ -1,108 +1,118 @@
 {% load jalali_tags %}
+ 
 {% if selected_job %}
-{% if is_job_closed_or_cancelled %}
-    <div class="alert alert-warning border-warning border-opacity-30 bg-warning bg-opacity-10 d-flex align-items-center gap-2 mb-4 py-3 px-4 rounded-3 text-warning-dark">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="color: #a16207;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <span class="font-semibold" style="font-size: 0.9rem; color: #a16207;">⚠️ هشدار: این فرصت شغلی در وضعیت <strong>«{{ selected_job.get_status_display }}»</strong> قرار دارد. امکان ثبت، ویرایش یا تغییر وضعیت متقاضیان در این وضعیت وجود ندارد.</span>
-    </div>
-{% elif bulk_success %}
-    <div class="alert alert-success border-success border-opacity-30 bg-success bg-opacity-10 d-flex align-items-center gap-2 mb-4 py-3 px-4 rounded-3 text-success">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <span class="font-semibold" style="font-size: 0.9rem;">تغییرات نمرات و وضعیت‌های ارزیابی با موفقیت ثبت نهایی گردیدند.</span>
-    </div>
-{% endif %}
-
-<!-- Visual Pipeline Path Header -->
-<div class="mb-4 p-3 bg-light bg-opacity-50 border border-slate rounded-3 d-flex align-items-center flex-wrap gap-2">
-    <span class="text-secondary font-bold text-xs">🗺️ مسیر فرآیند استخدام:</span>
-    {% for s in stages %}
-        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">
-            {{ s.name }} <span class="text-muted font-normal text-xxs">({{ s.weight }}٪)</span>
-        </span>
-        {% if not forloop.last %}
-            <span class="text-muted text-xs font-bold">➔</span>
-        {% endif %}
-    {% endfor %}
-</div>
-
-<form hx-post="{% url 'candidate_score_entry' %}" 
-      hx-target="#score-entry-list-container" 
-      hx-indicator="#loading-indicator" 
-      class="m-0">
+<form method="post" action="{% url 'candidate_score_entry' %}" class="needs-validation" novalidate>
     {% csrf_token %}
     <input type="hidden" name="job_id" value="{{ selected_job.id }}">
-
-    <div class="row g-3 mb-4 align-items-end p-3 bg-light bg-opacity-50 border border-slate rounded-3">
+    
+    {% if is_job_closed_or_cancelled %}
+    <div class="alert alert-warning mb-3 py-2.5 px-3 text-sm border-warning border-opacity-25" style="background-color: #fef9c3 !important;">
+        <span class="font-semibold" style="font-size: 0.9rem; color: #a16207;">
+            {% if current_language_code == 'en' %}⚠️ Warning: This job opportunity is in state <strong>"{{ selected_job.get_status_display }}"</strong>. No changes are allowed.{% elif current_language_code == 'tr' %}⚠️ Uyarı: Bu iş fırsatı <strong>"{{ selected_job.get_status_display }}"</strong> durumundadır. Değişiklik yapılamaz.{% elif current_language_code == 'ar' %}⚠️ تنبيه: فرصة العمل الحالية في وضع <strong>«{{ selected_job.get_status_display }}»</strong>. لا يمكن تعديل درجات المرشحين.{% else %}⚠️ هشدار: این فرصت شغلی در وضعیت <strong>«{{ selected_job.get_status_display }}»</strong> قرار دارد. امکان ثبت، ویرایش یا تغییر وضعیت متقاضیان در این وضعیت وجود ندارد.{% endif %}
+        </span>
+    </div>
+    {% endif %}
+ 
+    {% if messages %}
+        {% for message in messages %}
+            {% if "bulk_score_success" in message.tags %}
+            <div class="alert alert-success alert-dismissible fade show mb-3 py-2 px-3 text-sm" role="alert">
+                {{ t.se_success }}
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+ 
+    <div class="card premium-card mb-4 bg-light bg-opacity-40">
+        <div class="card-body p-3.5 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-1.5 text-xs text-secondary font-medium">
+                <span>{{ t.se_path }}</span>
+                {% for stage in stages %}
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20 px-2 py-1 rounded">
+                        {{ stage.name }} ({{ stage.weight }}٪)
+                    </span>
+                    {% if not forloop.last %}
+                        <span class="text-muted text-xxs">➔</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Filters & Actions Row -->
+    <div class="row g-3 align-items-end mb-4">
+        <!-- Search input inside matrix -->
         <div class="col-md-4">
-            <label class="form-label font-semibold text-xs text-muted mb-1.5">جستجوی متقاضی (نام، نام خانوادگی، یا کد ملی):</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white border-slate border-end-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
-                    </svg>
-                </span>
+            <label class="form-label font-semibold text-xs text-muted mb-1.5">{{ t.se_search_cand }}</label>
+            <div class="input-group input-group-sm">
                 <input type="text" 
                        name="q" 
                        value="{{ selected_q|default:'' }}" 
+                       class="form-control text-xs" 
+                       placeholder="{{ t.se_search_cand_placeholder }}"
                        hx-get="{% url 'candidate_score_entry' %}"
-                       hx-trigger="keyup changed delay:400ms"
+                       hx-trigger="keyup changed delay:500ms"
                        hx-include="[name='job_id'], [name='eval_status'], [name='show_failed_prior'], [name='bypass_locks']"
                        hx-target="#score-entry-list-container"
-                       hx-indicator="#loading-indicator"
-                       class="form-control border-slate border-start-0 ps-0 text-xs" 
-                       placeholder="برای جستجو تایپ کنید...">
+                       hx-indicator="#loading-indicator">
             </div>
         </div>
+ 
+        <!-- Status filter -->
         <div class="col-md-3">
-            <label class="form-label font-semibold text-xs text-muted mb-1.5">فیلتر متقاضیان:</label>
+            <label class="form-label font-semibold text-xs text-muted mb-1.5">{{ t.se_filter }}</label>
             <select name="eval_status" 
+                    class="form-select form-select-sm text-xs"
                     hx-get="{% url 'candidate_score_entry' %}"
                     hx-trigger="change"
                     hx-include="[name='job_id'], [name='q'], [name='show_failed_prior'], [name='bypass_locks']"
                     hx-target="#score-entry-list-container"
-                    hx-indicator="#loading-indicator"
-                    class="form-select border-slate text-xs font-semibold">
-                <option value="PENDING" {% if selected_eval_status == 'PENDING' %}selected{% endif %}>فقط متقاضیان در حال بررسی (IN_PROGRESS)</option>
-                <option value="COMPLETED_FAILED" {% if selected_eval_status == 'COMPLETED_FAILED' %}selected{% endif %}>فقط تعیین تکلیف شده‌ها (نهایی)</option>
-                <option value="ALL" {% if selected_eval_status == 'ALL' %}selected{% endif %}>همه متقاضیان فرصت شغلی</option>
+                    hx-indicator="#loading-indicator">
+                <option value="PENDING" {% if selected_eval_status == 'PENDING' %}selected{% endif %}>{{ t.se_filter_pending }}</option>
+                <option value="COMPLETED_FAILED" {% if selected_eval_status == 'COMPLETED_FAILED' %}selected{% endif %}>{{ t.se_filter_completed }}</option>
+                <option value="ALL" {% if selected_eval_status == 'ALL' %}selected{% endif %}>{{ t.se_filter_all }}</option>
             </select>
         </div>
-        <div class="col-md-2 d-flex flex-column justify-content-end mb-2">
-            <div class="form-check form-switch mb-1.5">
-                <input class="form-check-input shadow-none" type="checkbox" name="show_failed_prior" id="showFailedPrior"
+ 
+        <!-- Boolean Filters Checkboxes -->
+        <div class="col-md-2.5 d-flex flex-column gap-2 mb-1.5">
+            <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                <input type="checkbox" 
+                       name="show_failed_prior" 
+                       id="show_failed_prior" 
+                       class="form-check-input" 
+                       {% if show_failed_prior %}checked{% endif %}
                        hx-get="{% url 'candidate_score_entry' %}"
                        hx-trigger="change"
                        hx-include="[name='job_id'], [name='q'], [name='eval_status'], [name='bypass_locks']"
                        hx-target="#score-entry-list-container"
-                       hx-indicator="#loading-indicator"
-                       {% if show_failed_prior %}checked{% endif %}>
-                <label class="form-check-label font-semibold text-xxs text-muted cursor-pointer mb-0" style="line-height: 1.2;" for="showFailedPrior">
-                    نمایش مردودین/ردشده‌ها
-                </label>
+                       hx-indicator="#loading-indicator">
+                <label for="show_failed_prior" class="form-check-label text-xs font-semibold text-secondary cursor-pointer" style="margin-top: 2px;">{{ t.se_show_failed }}</label>
             </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input shadow-none" type="checkbox" name="bypass_locks" id="bypassLocks"
+            
+            <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                <input type="checkbox" 
+                       name="bypass_locks" 
+                       id="bypass_locks" 
+                       class="form-check-input" 
+                       {% if bypass_locks %}checked{% endif %}
                        hx-get="{% url 'candidate_score_entry' %}"
                        hx-trigger="change"
                        hx-include="[name='job_id'], [name='q'], [name='eval_status'], [name='show_failed_prior']"
                        hx-target="#score-entry-list-container"
-                       hx-indicator="#loading-indicator"
-                       {% if bypass_locks %}checked{% endif %}>
-                <label class="form-check-label font-semibold text-xxs text-muted cursor-pointer mb-0" style="line-height: 1.2;" for="bypassLocks">
-                    ثبت آزاد (بای‌پس قفل‌ها)
-                </label>
+                       hx-indicator="#loading-indicator">
+                <label for="bypass_locks" class="form-check-label text-xs font-semibold text-secondary cursor-pointer" style="margin-top: 2px;">{{ t.se_bypass }}</label>
             </div>
         </div>
-        <div class="col-md-3">
-            <label class="form-label font-semibold text-xs text-muted mb-1.5">ثبت تاریخ گروهی (اختیاری):</label>
+ 
+        <!-- Bulk Date Set -->
+        <div class="col-md-2.5">
+            <label class="form-label font-semibold text-xs text-muted mb-1.5">{% if current_language_code == 'en' %}Bulk Date (Optional):{% elif current_language_code == 'tr' %}Toplu Tarih (İsteğe bağlı):{% elif current_language_code == 'ar' %}تاريخ جماعي (اختياري):{% else %}ثبت تاریخ گروهی (اختیاری):{% endif %}</label>
             <div class="input-group input-group-sm">
                 <input type="text" 
                        id="bulk_eval_date" 
-                       placeholder="مثال: ۱۴۰۵/۰۳/۱۶" 
+                       placeholder="{% if current_language_code == 'en' %}e.g. 2026/06/30{% elif current_language_code == 'tr' %}Örn: 2026/06/30{% elif current_language_code == 'ar' %}مثال: ١٤٠٥/٠٣/١٦{% else %}مثال: ۱۴۰۵/۰۳/۱۶{% endif %}" 
                        class="form-control text-center text-xs" 
                        autocomplete="off"
                        {% if is_job_closed_or_cancelled %}disabled{% endif %}>
@@ -110,28 +120,28 @@
                        class="btn btn-primary text-xs font-semibold" 
                        onclick="applyBulkDate()"
                        {% if is_job_closed_or_cancelled %}disabled{% endif %}>
-                    اعمال به همه
+                    {% if current_language_code == 'en' %}Apply to All{% elif current_language_code == 'tr' %}Herkese Uygula{% elif current_language_code == 'ar' %}تطبيق على الكل{% else %}اعمال به همه{% endif %}
                 </button>
             </div>
         </div>
     </div>
- 
+  
     <div class="card premium-card">
         <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center">
-            <h5 class="font-semibold text-secondary m-0">ماتریس ارزیابی و ثبت نمرات: {{ selected_job.title }}</h5>
+            <h5 class="font-semibold text-secondary m-0">{% if current_language_code == 'en' %}Assessment Matrix & Scores: {{ selected_job.title }}{% elif current_language_code == 'tr' %}Değerlendirme Matrisi & Puanlar: {{ selected_job.title }}{% elif current_language_code == 'ar' %}مصفوفة التقييم ورصد الدرجات: {{ selected_job.title }}{% else %}ماتریس ارزیابی و ثبت نمرات: {{ selected_job.title }}{% endif %}</h5>
             <div class="d-flex align-items-center gap-2">
                 <button type="button" class="btn btn-outline-success btn-xs d-flex align-items-center gap-1.5 font-semibold" data-bs-toggle="modal" data-bs-target="#exportScoreModal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
                         <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
                         <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
                     </svg>
-                    خروجی اکسل مرحله
+                    {% if current_language_code == 'en' %}Excel Export{% elif current_language_code == 'tr' %}Excel Çıktısı{% elif current_language_code == 'ar' %}خروج إكسل{% else %}خروجی اکسل مرحله{% endif %}
                 </button>
                 <button type="button" class="btn btn-outline-primary btn-xs d-flex align-items-center gap-1.5 font-semibold" data-bs-toggle="modal" data-bs-target="#importScoreModal" {% if is_job_closed_or_cancelled %}disabled{% endif %}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v12m0 0-3-3m3 3 3-3m-3-12h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" />
                     </svg>
-                    ورود نمرات از اکسل
+                    {% if current_language_code == 'en' %}Excel Import{% elif current_language_code == 'tr' %}Excel'den Yükle{% elif current_language_code == 'ar' %}ورود نمرات از إكسل{% else %}ورود نمرات از اکسل{% endif %}
                 </button>
                 <button type="button" 
                         hx-get="{% url 'manage_default_interviewers' job_id=selected_job.id %}" 
@@ -140,10 +150,10 @@
                         data-bs-target="#defaultInterviewersModal" 
                         class="btn btn-outline-secondary btn-xs d-flex align-items-center gap-1.5 font-semibold"
                         {% if is_job_closed_or_cancelled %}disabled{% endif %}>
-                    ⚙️ مصاحبه‌گران پیش‌فرض
+                    ⚙️ {% if current_language_code == 'en' %}Default Interviewers{% elif current_language_code == 'tr' %}Varsayılan Mülakatçılar{% elif current_language_code == 'ar' %}المقابلون الافتراضيون{% else %}مصاحبه‌گران پیش‌فرض{% endif %}
                 </button>
                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">
-                    {{ page_obj.paginator.count|default:applications|length }} متقاضی یافت شد
+                    {{ page_obj.paginator.count|default:applications|length }} {% if current_language_code == 'en' %}candidate(s) found{% elif current_language_code == 'tr' %}aday bulundu{% elif current_language_code == 'ar' %}متقدم تم العثور عليهم{% else %}متقاضی یافت شد{% endif %}
                 </span>
             </div>
         </div>
@@ -153,12 +163,12 @@
                     <thead class="table-light border-bottom border-slate">
                         <tr>
                             <th class="ps-4 sortable-header text-secondary" style="min-width: 220px; user-select: none;">
-                                مشخصات متقاضی <span class="sort-icon text-muted ms-1">⇅</span>
+                                {% if current_language_code == 'en' %}Candidate Specifications{% elif current_language_code == 'tr' %}Aday Bilgileri{% elif current_language_code == 'ar' %}بيانات المتقدم{% else %}مشخصات متقاضی{% endif %} <span class="sort-icon text-muted ms-1">⇅</span>
                             </th>
                             {% for stage in stages %}
                                 <th class="text-center sortable-header text-secondary" style="min-width: 145px; border-right: 1px solid #f1f5f9; user-select: none;">
                                     <div class="font-semibold text-xs">{{ stage.name }} <span class="sort-icon text-muted ms-1">⇅</span></div>
-                                    <small class="text-muted d-block text-xxs font-normal mt-0.5">ضریب: {{ stage.weight }}٪</small>
+                                    <small class="text-muted d-block text-xxs font-normal mt-0.5">{% if current_language_code == 'en' %}Weight: {% elif current_language_code == 'tr' %}Ağırlık: {% elif current_language_code == 'ar' %}الضريبة: {% else %}ضریب: {% endif %}{{ stage.weight }}٪</small>
                                     {% if stage.stage_type == 'INTERVIEW' %}
                                         <div class="mt-1">
                                             <button type="button"
@@ -170,17 +180,17 @@
                                                     style="border-radius: 4px; font-size: 9px;"
                                                     onclick="event.stopPropagation();"
                                                     {% if is_job_closed_or_cancelled %}disabled{% endif %}>
-                                                📋 ثبت گروهی نمرات
+                                                📋 {% if current_language_code == 'en' %}Bulk Score Entry{% elif current_language_code == 'tr' %}Toplu Puan Girişi{% elif current_language_code == 'ar' %}تسجيل جماعي للدرجات{% else %}ثبت گروهی نمرات{% endif %}
                                             </button>
                                         </div>
                                     {% endif %}
                                 </th>
                             {% endfor %}
                             <th class="text-center sortable-header text-secondary" data-sort-dir="desc" style="min-width: 110px; border-right: 1px solid #e2e8f0; background-color: #f8fafc; user-select: none;">
-                                امتیاز موزون کل <span class="sort-icon text-primary ms-1">▼</span>
+                                {% if current_language_code == 'en' %}Total Weighted Score{% elif current_language_code == 'tr' %}Toplam Ağırlıklı Puan{% elif current_language_code == 'ar' %}امتياز موزون كل{% else %}امتیاز موزون کل{% endif %} <span class="sort-icon text-primary ms-1">▼</span>
                             </th>
                             <th class="text-center sortable-header text-secondary" style="min-width: 165px; border-right: 1px solid #e2e8f0; user-select: none;">
-                                تصمیم نهایی پرونده <span class="sort-icon text-muted ms-1">⇅</span>
+                                {% if current_language_code == 'en' %}Final Application Status{% elif current_language_code == 'tr' %}Nihai Başvuru Kararı{% elif current_language_code == 'ar' %}تصمیم نهایی پرونده{% else %}تصمیم نهایی پرونده{% endif %} <span class="sort-icon text-muted ms-1">⇅</span>
                             </th>
                         </tr>
                     </thead>
@@ -190,7 +200,7 @@
                         {% empty %}
                             <tr>
                                 <td colspan="{{ stages|length|add:3 }}" class="text-center py-5 text-muted">
-                                    هیچ متقاضی برای این فرصت شغلی یافت نشد.
+                                    {% if current_language_code == 'en' %}No candidates found for this job opportunity.{% elif current_language_code == 'tr' %}Bu iş fırsatı için aday bulunamadı.{% elif current_language_code == 'ar' %}لم يتم العثور على أي متقدم لهذه الوظيفة.{% else %}هیچ متقاضی برای این فرصت شغلی یافت نشد.{% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -204,13 +214,13 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
-                ثبت و محاسبه نمرات موزون ماتریس
+                {% if current_language_code == 'en' %}Save & Calculate Weighted Scores{% elif current_language_code == 'tr' %}Kaydet & Ağırlıklı Puanları Hesapla{% elif current_language_code == 'ar' %}حفظ وحساب الدرجات الموزونة للمصفوفة{% else %}ثبت و محاسبه نمرات موزون ماتریس{% endif %}
             </button>
         </div>
         {% endif %}
     </div>
 </form>
-
+ 
 <!-- Modal for Excel Score Export -->
 <div class="modal fade" id="exportScoreModal" tabindex="-1" aria-labelledby="exportScoreModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -222,29 +232,29 @@
                 <input type="hidden" name="show_failed_prior" value="{% if show_failed_prior %}true{% else %}false{% endif %}">
                 
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title font-bold text-secondary fs-6" id="exportScoreModalLabel">دریافت خروجی اکسل نمرات</h5>
+                    <h5 class="modal-title font-bold text-secondary fs-6" id="exportScoreModalLabel">{% if current_language_code == 'en' %}Excel Score Export{% elif current_language_code == 'tr' %}Excel Puan Çıktısı Al{% elif current_language_code == 'ar' %}دریافت خروجی اکسل نمرات{% else %}دریافت خروجی اکسل نمرات{% endif %}</h5>
                     <button type="button" class="btn-close m-0 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">مرحله ارزیابی مورد نظر:</label>
+                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">{% if current_language_code == 'en' %}Target assessment stage:{% elif current_language_code == 'tr' %}Değerlendirme aşaması:{% elif current_language_code == 'ar' %}مرحلة التقييم المطلوبة:{% else %}مرحله ارزیابی مورد نظر:{% endif %}</label>
                         <select name="stage_id" class="form-select text-xs" required>
-                            <option value="">-- لطفاً یک مرحله را انتخاب کنید --</option>
+                            <option value="">{% if current_language_code == 'en' %}-- Please select a stage --{% elif current_language_code == 'tr' %}-- Lütfen bir aşama seçin --{% elif current_language_code == 'ar' %}-- الرجاء اختيار مرحلة --{% else %}-- لطفاً یک مرحله را انتخاب کنید --{% endif %}</option>
                             {% for s in stages %}
-                                <option value="{{ s.id }}">{{ s.name }} (ضریب: {{ s.weight }}٪)</option>
+                                <option value="{{ s.id }}">{{ s.name }} ({% if current_language_code == 'en' %}Weight: {% elif current_language_code == 'tr' %}Ağırlık: {% elif current_language_code == 'ar' %}الضريبة: {% else %}ضریب: {% endif %}{{ s.weight }}٪)</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-semibold" data-bs-dismiss="modal">انصراف</button>
-                    <button type="submit" class="btn btn-sm btn-success font-semibold">دانلود فایل اکسل</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary font-semibold" data-bs-dismiss="modal">{{ t.cancel }}</button>
+                    <button type="submit" class="btn btn-sm btn-success font-semibold">{% if current_language_code == 'en' %}Download Excel{% elif current_language_code == 'tr' %}Excel İndir{% elif current_language_code == 'ar' %}تحميل ملف إكسل{% else %}دانلود فایل اکسل{% endif %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
+ 
 <!-- Modal for Excel Score Import -->
 <div class="modal fade" id="importScoreModal" tabindex="-1" aria-labelledby="importScoreModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -255,22 +265,53 @@
                 <input type="hidden" name="bypass_locks" value="{% if bypass_locks %}true{% else %}false{% endif %}">
                 
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title font-bold text-secondary fs-6" id="importScoreModalLabel">ورود نمرات از فایل اکسل</h5>
+                    <h5 class="modal-title font-bold text-secondary fs-6" id="importScoreModalLabel">{% if current_language_code == 'en' %}Import Scores from Excel{% elif current_language_code == 'tr' %}Excel'den Puanları Yükle{% elif current_language_code == 'ar' %}ورود نمرات از فایل اکسل{% else %}ورود نمرات از فایل اکسل{% endif %}</h5>
                     <button type="button" class="btn-close m-0 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">انتخاب مرحله برای بارگذاری نمرات:</label>
+                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">{% if current_language_code == 'en' %}Target stage to load scores:{% elif current_language_code == 'tr' %}Puan yüklenecek aşama:{% elif current_language_code == 'ar' %}اختيار مرحلة لتحميل الدرجات:{% else %}انتخاب مرحله برای بارگذاری نمرات:{% endif %}</label>
                         <select name="stage_id" class="form-select text-xs mb-3" required>
-                            <option value="">-- لطفاً مرحله مورد نظر را انتخاب کنید --</option>
+                            <option value="">{% if current_language_code == 'en' %}-- Please select a stage --{% elif current_language_code == 'tr' %}-- Lütfen bir aşama seçin --{% elif current_language_code == 'ar' %}-- الرجاء اختيار مرحلة --{% else %}-- لطفاً مرحله مورد نظر را انتخاب کنید --{% endif %}</option>
                             {% for s in stages %}
-                                <option value="{{ s.id }}">{{ s.name }} (ضریب: {{ s.weight }}٪)</option>
+                                <option value="{{ s.id }}">{{ s.name }} ({% if current_language_code == 'en' %}Weight: {% elif current_language_code == 'tr' %}Ağırlık: {% elif current_language_code == 'ar' %}الضريبة: {% else %}ضریب: {% endif %}{{ s.weight }}٪)</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="alert alert-info border-info border-opacity-25 bg-info bg-opacity-10 text-secondary text-xs mb-4">
-                        <h6 class="font-bold text-secondary mb-1.5">راهنمای بارگذاری نمرات:</h6>
+                        <h6 class="font-bold text-secondary mb-1.5">{% if current_language_code == 'en' %}Instructions for uploading scores:{% elif current_language_code == 'tr' %}Puan Yükleme Kılavuzu:{% elif current_language_code == 'ar' %}دليل تحميل الدرجات:{% else %}راهنمای بارگذاری نمرات:{% endif %}</h6>
                         <ul class="mb-0 ps-3">
+                            {% if current_language_code == 'en' %}
+                            <li class="mb-1">First, download the Excel file template for the matching stage.</li>
+                            <li class="mb-1">Fill the scores in the <strong>"Final Stage Score"</strong> column (between 0 and 100).</li>
+                            <li class="mb-1">Set status in the <strong>"Evaluation Status"</strong> column:
+                                <ul class="mt-1 ps-3 text-muted" style="list-style-type: circle;">
+                                    <li>Accepted: <strong>"Passed"</strong></li>
+                                    <li>Rejected: <strong>"Failed"</strong></li>
+                                    <li>Pending: <strong>"Pending"</strong></li>
+                                </ul>
+                            </li>
+                            {% elif current_language_code == 'tr' %}
+                            <li class="mb-1">İlk olarak, ilgili aşamanın Excel şablon dosyasını indirin.</li>
+                            <li class="mb-1">Puanları <strong>"Aşama Nihai Puanı"</strong> sütununa (0-100 arası) yazın.</li>
+                            <li class="mb-1">Durumu <strong>"Değerlendirme Durumu"</strong> sütununa girin:
+                                <ul class="mt-1 ps-3 text-muted" style="list-style-type: circle;">
+                                    <li>Kabul Edildi: <strong>"Geçti"</strong></li>
+                                    <li>Elendi: <strong>"Kaldı"</strong></li>
+                                    <li>Beklemede: <strong>"Bekliyor"</strong></li>
+                                </ul>
+                            </li>
+                            {% elif current_language_code == 'ar' %}
+                            <li class="mb-1">أولاً، قم بتحميل ملف إكسل النموذجي المخصص لنفس المرحلة.</li>
+                            <li class="mb-1">اكتب الدرجات في عمود <strong>«الدرجة النهائية للمرحلة»</strong> (بين ٠ و ١٠٠).</li>
+                            <li class="mb-1">أدخل حالة المرشح في عمود <strong>«حالة التقييم»</strong>:
+                                <ul class="mt-1 ps-3 text-muted" style="list-style-type: circle;">
+                                    <li>مقبول: <strong>«ناجح»</strong></li>
+                                    <li>مستبعد: <strong>«راسب»</strong></li>
+                                    <li>قيد الانتظار: <strong>«انتظار»</strong></li>
+                                </ul>
+                            </li>
+                            {% else %}
                             <li class="mb-1">ابتدا فایل اکسل مربوط به همان مرحله را دانلود کنید.</li>
                             <li class="mb-1">نمره‌ها را در ستون <strong>«نمره نهایی مرحله»</strong> (بین ۰ تا ۱۰۰) بنویسید.</li>
                             <li class="mb-1">وضعیت هر داوطلب را در ستون <strong>«وضعیت ارزیابی»</strong> وارد کنید:
@@ -280,17 +321,18 @@
                                     <li>در انتظار: <strong>«در انتظار»</strong> یا <strong>«در انتظار ارزیابی»</strong></li>
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">انتخاب فایل اکسل (.xlsx):</label>
+                        <label class="form-label font-semibold text-xs text-secondary mb-1.5">{% if current_language_code == 'en' %}Select Excel File (.xlsx):{% elif current_language_code == 'tr' %}Excel Dosyası Seç (.xlsx):{% elif current_language_code == 'ar' %}اختيار ملف إكسل (.xlsx):{% else %}انتخاب فایل اکسل (.xlsx):{% endif %}</label>
                         <input type="file" name="excel_file" accept=".xlsx" required class="form-control text-xs">
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-semibold" data-bs-dismiss="modal">انصراف</button>
-                    <button type="submit" class="btn btn-sm btn-primary font-semibold">ثبت و بارگذاری نمرات</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary font-semibold" data-bs-dismiss="modal">{{ t.cancel }}</button>
+                    <button type="submit" class="btn btn-sm btn-primary font-semibold">{% if current_language_code == 'en' %}Submit & Upload{% elif current_language_code == 'tr' %}Gönder & Yükle{% elif current_language_code == 'ar' %}رصد وتحميل الدرجات{% else %}ثبت و بارگذاری نمرات{% endif %}</button>
                 </div>
             </form>
         </div>
@@ -304,7 +346,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
         </svg>
     </div>
-    <h6 class="font-semibold text-secondary mb-1">فرصت شغلی انتخاب نشده است</h6>
-    <p class="text-muted text-xs">جهت ورود نمرات و بررسی وضعیت متقاضیان، ابتدا از منوی بالا یک فرصت شغلی را انتخاب کنید.</p>
+    <h6 class="font-semibold text-secondary mb-1">{% if current_language_code == 'en' %}No Job Post Selected{% elif current_language_code == 'tr' %}İş Fırsatı Seçilmedi{% elif current_language_code == 'ar' %}لم يتم اختيار فرصة عمل{% else %}فرصت شغلی انتخاب نشده است{% endif %}</h6>
+    <p class="text-muted text-xs">{% if current_language_code == 'en' %}To enter scores and check candidates status, please select a job post from the dropdown above.{% elif current_language_code == 'tr' %}Puan girişi yapmak ve aday durumlarını incelemek için, önce yukarıdaki menüden bir iş fırsatı seçin.{% elif current_language_code == 'ar' %}لرصد الدرجات ومراجعة حالات المتقدمين، يرجى أولاً اختيار فرصة عمل من القائمة أعلاه.{% else %}جهت ورود نمرات و بررسی وضعیت متقاضیان، ابتدا از منوی بالا یک فرصت شغلی را انتخاب کنید.{% endif %}</p>
 </div>
 {% endif %}

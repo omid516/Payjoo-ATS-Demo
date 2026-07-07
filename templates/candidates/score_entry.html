@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}ورود نمرات و ارزیابی متقاضیان{% endblock %}
+{% block title %}{{ t.se_title }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
@@ -30,8 +30,8 @@
 
 {% block content %}
 <div class="mb-4">
-    <h3 class="font-semibold text-secondary mb-1">ورود سریع نمرات آزمون و ارزیابی</h3>
-    <p class="text-muted text-sm m-0">فرصت شغلی مورد نظر را انتخاب کرده و نمرات و وضعیت مرحله جاری هر متقاضی را ثبت نمایید.</p>
+    <h3 class="font-semibold text-secondary mb-1">{{ t.se_title }}</h3>
+    <p class="text-muted text-sm m-0">{{ t.se_desc }}</p>
 </div>
 
 <!-- Job Opportunity Selector Card -->
@@ -42,7 +42,7 @@
             {% if selected_job %}<input type="hidden" name="job_id" value="{{ selected_job.id }}">{% endif %}
             {% if selected_stage %}<input type="hidden" name="stage_id" value="{{ selected_stage.id }}">{% endif %}
             <label class="form-label font-medium text-secondary mb-2" style="font-size: 0.85rem;">
-                🔍 جستجوی فرصت شغلی (عنوان یا کد)
+                {{ t.se_search_job }}
             </label>
             <div class="input-group input-group-sm" style="max-width: 480px;">
                 <input type="text" 
@@ -50,33 +50,35 @@
                        id="job_q_input"
                        value="{{ job_q }}"
                        class="form-control border-slate shadow-sm"
-                       placeholder="مثلاً: کارشناس، بازرس، ۴۱۲۰..."
+                       placeholder="{{ t.se_search_placeholder }}"
                        style="border-radius: 8px 0 0 8px; font-size: 0.875rem;">
                 <button type="submit" class="btn btn-primary btn-sm px-3" style="border-radius: 0 8px 8px 0;">
-                    جستجو
+                    {{ t.se_search_btn }}
                 </button>
                 {% if job_q %}
-                <a href="{% url 'candidate_score_entry' %}" class="btn btn-outline-secondary btn-sm px-2" title="پاک کردن فیلتر" style="border-radius: 0 8px 8px 0; margin-right: 4px;">✕</a>
+                <a href="{% url 'candidate_score_entry' %}" class="btn btn-outline-secondary btn-sm px-2" title="{% if current_language_code == 'en' %}Clear Filter{% elif current_language_code == 'tr' %}Filtreyi Temizle{% elif current_language_code == 'ar' %}إزالة التصفية{% else %}پاک کردن فیلتر{% endif %}" style="border-radius: 0 8px 8px 0; margin-right: 4px;">✕</a>
                 {% endif %}
             </div>
             {% if job_q %}
             <div class="mt-1">
-                <small class="text-muted">{{ jobs|length }} فرصت شغلی یافت شد برای «{{ job_q }}»</small>
+                <small class="text-muted">
+                    {% if current_language_code == 'en' %}{{ jobs|length }} matching job posts found for "{{ job_q }}"{% elif current_language_code == 'tr' %}"{{ job_q }}" için {{ jobs|length }} eşleşen iş fırsatı bulundu{% elif current_language_code == 'ar' %}{{ jobs|length }} فرصة عمل مطابقة لبحث "{{ job_q }}"{% else %}{{ jobs|length }} فرصت شغلی یافت شد برای «{{ job_q }}»{% endif %}
+                </small>
             </div>
             {% endif %}
         </form>
 
         <div class="row g-3">
             <div class="col-md-12">
-                <label class="form-label font-medium text-secondary mb-2" style="font-size: 0.9rem;">انتخاب فرصت شغلی</label>
+                <label class="form-label font-medium text-secondary mb-2" style="font-size: 0.9rem;">{{ t.se_select_job }}</label>
                 <select name="job_id" 
                         hx-get="{% url 'candidate_score_entry' %}{% if job_q %}?job_q={{ job_q }}{% endif %}" 
                         hx-target="#score-entry-list-container" 
                         hx-indicator="#loading-indicator"
-                        onchange="document.getElementById('score-entry-list-container').innerHTML = '<div class=\'text-center py-5 text-muted\'>در حال بارگذاری ماتریس ارزیابی...</div>';"
+                        onchange="document.getElementById('score-entry-list-container').innerHTML = '<div class=\'text-center py-5 text-muted\'>{% if current_language_code == 'en' %}Loading assessment matrix...{% elif current_language_code == 'tr' %}Değerlendirme matrisi yükleniyor...{% elif current_language_code == 'ar' %}جاري تحميل مصفوفة التقييم...{% else %}در حال بارگذاری ماتریس ارزیابی...{% endif %}</div>';"
                         class="form-select form-select-lg shadow-sm border-slate" 
                         style="font-size: 0.95rem; border-radius: 10px;">
-                    <option value="">-- لطفاً یک فرصت شغلی را انتخاب کنید --</option>
+                    <option value="">{{ t.se_select_placeholder }}</option>
                     {% for job in jobs %}
                         <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
                             [{{ job.code }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' or job.status == 'SUSPENDED' %}({{ job.get_status_display }}){% endif %}
@@ -88,7 +90,7 @@
         
         <div id="loading-indicator" class="htmx-indicator mt-3 text-primary d-flex align-items-center gap-2">
             <div class="spinner-border spinner-border-sm" role="status"></div>
-            <span class="text-sm">در حال بارگذاری...</span>
+            <span class="text-sm">{{ t.se_loading }}</span>
         </div>
     </div>
 </div>
@@ -131,11 +133,11 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header py-3">
-                <h6 class="modal-title font-semibold" id="defaultInterviewersModalLabel">⚙️ مصاحبه‌گران پیش‌فرض فرصت شغلی</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                <h6 class="modal-title font-semibold" id="defaultInterviewersModalLabel">⚙️ {% if current_language_code == 'en' %}Default Job Interviewers{% elif current_language_code == 'tr' %}İş Fırsatı Varsayılan Mülakatçıları{% elif current_language_code == 'ar' %}المقابلون الافتراضيون للوظيفة{% else %}مصاحبه‌گران پیش‌فرض فرصت شغلی{% endif %}</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% if current_language_code == 'en' %}Close{% elif current_language_code == 'tr' %}Kapat{% elif current_language_code == 'ar' %}إغلاق{% else %}بستن{% endif %}"></button>
             </div>
             <div class="modal-body py-3" id="defaultInterviewersBody">
-                <div class="text-center text-muted text-sm py-3">در حال بارگذاری...</div>
+                <div class="text-center text-muted text-sm py-3">{{ t.se_loading }}</div>
             </div>
         </div>
     </div>
@@ -147,13 +149,13 @@
         <div class="modal-content">
             <div class="modal-header py-3">
                 <div>
-                    <h6 class="modal-title font-semibold mb-0" id="bulkInterviewModalLabel">📋 ورود سریع نمرات گروهی مصاحبه‌گران</h6>
-                    <small class="text-muted text-xs" id="bulkModalSubtitle">جدول ماتریسی: سطر = متقاضی، ستون = مصاحبه‌گر</small>
+                    <h6 class="modal-title font-semibold mb-0" id="bulkInterviewModalLabel">📋 {% if current_language_code == 'en' %}Quick Bulk Interview Scores Entry{% elif current_language_code == 'tr' %}Hızlı Toplu Mülakat Puanı Girişi{% elif current_language_code == 'ar' %}تسجيل سريع نمرات المقابلة الجماعية{% else %}ورود سریع نمرات گروهی مصاحبه‌گران{% endif %}</h6>
+                    <small class="text-muted text-xs" id="bulkModalSubtitle">{% if current_language_code == 'en' %}Matrix: Row = Candidate, Column = Interviewer{% elif current_language_code == 'tr' %}Matris: Satır = Aday, Sütun = Mülakatçı{% elif current_language_code == 'ar' %}مصفوفة: السطر = المرشح، العمود = المقابل{% else %}جدول ماتریسی: سطر = متقاضی، ستون = مصاحبه‌گر{% endif %}</small>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% if current_language_code == 'en' %}Close{% elif current_language_code == 'tr' %}Kapat{% elif current_language_code == 'ar' %}إغلاق{% else %}بستن{% endif %}"></button>
             </div>
             <div class="modal-body py-3" id="bulkInterviewModalBody">
-                <div class="text-center text-muted text-sm py-3">در حال بارگذاری...</div>
+                <div class="text-center text-muted text-sm py-3">{{ t.se_loading }}</div>
             </div>
         </div>
     </div>
@@ -165,21 +167,10 @@
 <script src="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.js"></script>
 <script>
     function initializeDatepickers() {
-        if (document.getElementById('bulk_eval_date')) {
-            kamaDatepicker('bulk_eval_date', {
-                buttonsColor: '#0052cc',
-                markToday: true,
-                gotoToday: true,
-                twodigit: true,
-                closeAfterSelect: true,
-                nextButtonIcon: '>',
-                previousButtonIcon: '<'
-            });
-        }
-        
-        document.querySelectorAll('.jalali-datepicker-input').forEach(input => {
-            if (!input.disabled && input.id) {
-                kamaDatepicker(input.id, {
+        const langCode = "{{ current_language_code }}";
+        if (langCode === 'fa' || langCode === 'ar') {
+            if (document.getElementById('bulk_eval_date')) {
+                kamaDatepicker('bulk_eval_date', {
                     buttonsColor: '#0052cc',
                     markToday: true,
                     gotoToday: true,
@@ -189,7 +180,21 @@
                     previousButtonIcon: '<'
                 });
             }
-        });
+            
+            document.querySelectorAll('.jalali-datepicker-input').forEach(input => {
+                if (!input.disabled && input.id) {
+                    kamaDatepicker(input.id, {
+                        buttonsColor: '#0052cc',
+                        markToday: true,
+                        gotoToday: true,
+                        twodigit: true,
+                        closeAfterSelect: true,
+                        nextButtonIcon: '>',
+                        previousButtonIcon: '<'
+                    });
+                }
+            });
+        }
     }
 
     function applyBulkDate() {
@@ -288,7 +293,7 @@
         for (let i = 0; i < 10; i++) {
             cleaned = cleaned.replace(persianDigits[i], i).replace(arabicDigits[i], i);
         }
-        cleaned = cleaned.replace(/,/g, '.').replace(/[^\d.-]/g, '');
+        cleaned = cleaned.replace(/٫/g, '.').replace(/,/g, '.').replace(/[^\d.-]/g, '');
         const parsed = parseFloat(cleaned);
         return isNaN(parsed) ? 0 : parsed;
     }
@@ -324,10 +329,10 @@
             const badge = cell.querySelector('.badge');
             if (badge) {
                 const txt = badge.textContent.trim();
-                if (txt.includes('پذیرفته شده نهایی') || txt.includes('SELECTED')) return 4;
+                if (txt.includes('پذیرفته شده نهایی') || txt.includes('SELECTED') || txt.includes('قبول نهایی')) return 4;
                 if (txt.includes('ذخیره') || txt.includes('RESERVE')) return 3;
-                if (txt.includes('در حال بررسی') || txt.includes('IN_PROGRESS')) return 2;
-                if (txt.includes('رد شده') || txt.includes('REJECTED')) return 1;
+                if (txt.includes('در حال بررسی') || txt.includes('IN_PROGRESS') || txt.includes('در حال ارزیابی')) return 2;
+                if (txt.includes('رد شده') || txt.includes('REJECTED') || txt.includes('مردود شده')) return 1;
                 return txt;
             }
             return cell.textContent.trim();
@@ -361,7 +366,7 @@
         const txt = textSpan.textContent.trim();
         if (txt.includes('قبول') || txt.includes('COMPLETED')) return 3;
         if (txt.includes('در انتظار') || txt.includes('PENDING')) return 2;
-        if (txt.includes('رد') || txt.includes('FAILED')) return 1;
+        if (txt.includes('رد') || txt.includes('FAILED') || txt.includes('مردود')) return 1;
 
         return txt;
     }

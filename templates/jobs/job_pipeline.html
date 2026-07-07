@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load jalali_tags %}
-{% block title %}پایپلاین ارزیابی: {{ job.title }}{% endblock %}
+{% block title %}{{ t.jp_title }} {{ job.title }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/kamadatepicker@1.5.3/dist/kamadatepicker.min.css">
@@ -49,12 +49,12 @@
         </svg>
     </div>
     <div class="flex-grow-1">
-        <h5 class="alert-heading font-bold mb-1 text-success">ارزیابی تمامی مراحل به پایان رسیده است!</h5>
-        <p class="m-0 text-sm text-secondary">تمام متقاضیان فعال در کلیه مراحل تعیین شده مورد ارزیابی قرار گرفته‌اند. اکنون می‌توانید برای رتبه‌بندی نهایی و تصمیم‌گیری نهایی اقدام نمایید.</p>
+        <h5 class="alert-heading font-bold mb-1 text-success">{{ t.jp_all_completed_title }}</h5>
+        <p class="m-0 text-sm text-secondary">{{ t.jp_all_completed_desc }}</p>
     </div>
     <div class="ms-auto">
         <a href="{% url 'job_final_ranking' job.id %}" class="btn btn-success font-semibold px-4 py-2 shadow-xs d-flex align-items-center gap-1">
-            <span>🏆 مشاهده رتبه‌بندی و تصمیم‌گیری نهایی</span>
+            <span>{{ t.jp_all_completed_btn }}</span>
         </a>
     </div>
 </div>
@@ -66,42 +66,42 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
-            بازگشت به فرصت‌های شغلی
+            {{ t.jp_back }}
         </a>
         <h3 class="font-semibold text-secondary m-0">
-            پایپلاین ارزیابی متقاضیان: {{ job.title }}
+            {{ t.jp_sub }} {{ job.title }}
         </h3>
-        <p class="text-muted text-sm m-0">کد شغل: {{ job.code }} | دپارتمان: {{ job.department }} | واحد: {{ job.unit|default:"-" }}{% if job.job_category %} | رده شغلی: {{ job.job_category }}{% endif %}</p>
+        <p class="text-muted text-sm m-0">{{ t.jp_code }} {{ job.code }} | {{ t.jp_dept }} {{ job.department }} | {{ t.jp_unit }} {{ job.unit|default:"-" }}{% if job.job_category %} | {{ t.jp_cat }} {{ job.job_category }}{% endif %}</p>
     </div>
     <div class="d-flex gap-2 align-items-center">
         <!-- Dropdown for print documents -->
         <div class="dropdown">
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-1.5 font-semibold py-2 px-3 rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" /></svg>
-                <span>چاپ و خروجی‌ها</span>
+                <span>{{ t.jp_print }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end text-sm p-1 shadow border-slate" style="border-radius: 10px; min-width: 180px;">
                 <li>
                     <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_print_doc' job.id %}" target="_blank">
-                        <span>🖨️</span> سند آزمون استخدامی
+                        <span>🖨️</span> {{ t.jp_doc_exam }}
                     </a>
                 </li>
                 <li>
                     <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_print_ad' job.id %}" target="_blank">
-                        <span>📢</span> آگهی استخدامی کاندیدا
+                        <span>📢</span> {{ t.jp_doc_ad }}
                     </a>
                 </li>
                 {% if job.selected_competencies.exists %}
                 <li>
                     <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_assessment_plan_print' job.id %}" target="_blank">
-                        <span>📄</span> Assessment Plan
+                        <span>📄</span> {{ t.jp_doc_ap }}
                     </a>
                 </li>
                 {% endif %}
                 {% if job.has_exam_stage %}
                 <li>
                     <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_exam_specification_print' job.id %}" target="_blank">
-                        <span>📝</span> سند مرکز آزمون
+                        <span>📝</span> {{ t.jp_doc_spec }}
                     </a>
                 </li>
                 {% endif %}
@@ -109,11 +109,11 @@
         </div>
 
         <a href="{% url 'job_final_ranking' job.id %}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold py-2 px-3 rounded-3">
-            <span>🏆 رتبه‌بندی نهایی</span>
+            <span>{{ t.jp_final_ranking }}</span>
         </a>
         
         <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-3 font-medium d-flex align-items-center" style="height: 38px;">
-            تعداد متقاضیان: {{ applications.count }} نفر
+            {{ t.jp_total_candidates }} {{ applications.count }} {% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}
         </span>
     </div>
 </div>
@@ -121,7 +121,7 @@
 <!-- Workflow Stages Stepper info -->
 <div class="card premium-card mb-4">
     <div class="card-header bg-white border-bottom border-slate py-3">
-        <h6 class="font-semibold text-secondary m-0">مراحل و ضرایب ارزیابی فرآیند</h6>
+        <h6 class="font-semibold text-secondary m-0">{{ t.jp_stages_title }}</h6>
     </div>
     <div class="card-body p-4 bg-light bg-opacity-50">
         <div class="row g-3 justify-content-center">
@@ -131,12 +131,12 @@
                     <div>
                         <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
                             {% if stage.is_completed %}
-                                <span class="badge bg-success text-white rounded-circle px-1.5 py-1.5 font-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;" title="تکمیل شده">
+                                <span class="badge bg-success text-white rounded-circle px-1.5 py-1.5 font-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;" title="{{ t.jp_stage_completed }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                     </svg>
                                 </span>
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 rounded text-xxs font-semibold">تکمیل شده</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 rounded text-xxs font-semibold">{{ t.jp_stage_completed }}</span>
                             {% else %}
                                 <span class="badge bg-primary text-white rounded-circle px-1.5 py-1.5 font-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
                                     {{ stage.sequence }}
@@ -144,7 +144,7 @@
                             {% endif %}
                         </div>
                         <h6 class="font-semibold text-secondary mb-1">{{ stage.name }}</h6>
-                        <span class="text-xs text-muted d-block mb-2">وزن مرحله: {{ stage.weight }}٪</span>
+                        <span class="text-xs text-muted d-block mb-2">{{ t.jp_stage_weight }} {{ stage.weight }}٪</span>
 
                         {% with sp=stage_plans|get_item:stage.id %}
                             {% include "recruitment_planning/partials/stage_plan_view.html" with stage=stage stage_plan=sp %}
@@ -152,7 +152,7 @@
                         
                         {% if stage.interviewers.all %}
                             <div class="border-top border-slate-light pt-2 text-start mb-3 mt-2" style="font-size: 11px;">
-                                <span class="text-xxs font-semibold text-muted d-block mb-1">مصاحبه‌گران:</span>
+                                <span class="text-xxs font-semibold text-muted d-block mb-1">{% if current_language_code == 'en' %}Interviewers:{% elif current_language_code == 'tr' %}Mülakatçılar:{% elif current_language_code == 'ar' %}المقابلون:{% else %}مصاحبه‌گران:{% endif %}</span>
                                 {% for mapping in stage.interviewers.all %}
                                     <div class="text-xxs text-secondary d-flex justify-content-between align-items-center mb-1">
                                         <span>• {{ mapping.user.get_full_name|default:mapping.user.username }}</span>
@@ -165,28 +165,28 @@
                     
                     <!-- Manual completion toggle controls -->
                     <div class="mt-2 pt-2 border-top border-slate-light text-center w-100">
-                        <span class="text-xxs text-muted d-block mb-1">وضعیت مرحله:</span>
+                        <span class="text-xxs text-muted d-block mb-1">{% if current_language_code == 'en' %}Stage status:{% elif current_language_code == 'tr' %}Aşama durumu:{% elif current_language_code == 'ar' %}حالة المرحلة:{% else %}وضعیت مرحله:{% endif %}</span>
                         <div class="btn-group btn-group-xs w-100 mb-2" role="group">
                             <button type="button" 
                                     class="btn btn-xs {% if stage.is_manually_completed == True %}btn-success{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
                                     hx-post="{% url 'toggle_stage_completion' stage.id %}?status=completed"
                                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                                    title="تکمیل دستی">
-                                تکمیل
+                                    title="{% if current_language_code == 'en' %}Manual complete{% else %}تکمیل دستی{% endif %}">
+                                {% if current_language_code == 'en' %}Complete{% elif current_language_code == 'tr' %}Tamamla{% elif current_language_code == 'ar' %}إكمال{% else %}تکمیل{% endif %}
                             </button>
                             <button type="button" 
                                     class="btn btn-xs {% if stage.is_manually_completed == False %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
                                     hx-post="{% url 'toggle_stage_completion' stage.id %}?status=pending"
                                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                                    title="در انتظار دستی">
-                                انتظار
+                                    title="{% if current_language_code == 'en' %}Manual wait{% else %}در انتظار دستی{% endif %}">
+                                {% if current_language_code == 'en' %}Pending{% elif current_language_code == 'tr' %}Bekleme{% elif current_language_code == 'ar' %}انتظار{% else %}انتظار{% endif %}
                             </button>
                             <button type="button" 
                                     class="btn btn-xs {% if stage.is_manually_completed is None %}btn-info text-white{% else %}btn-outline-secondary{% endif %} py-1 px-1 text-xxs font-semibold"
                                     hx-post="{% url 'toggle_stage_completion' stage.id %}?status=auto"
                                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                                    title="سیستمی (خودکار)">
-                                خودکار
+                                    title="{% if current_language_code == 'en' %}System (Auto){% else %}سیستمی (خودکار){% endif %}">
+                                {% if current_language_code == 'en' %}Auto{% elif current_language_code == 'tr' %}Otomatik{% elif current_language_code == 'ar' %}تلقائي{% else %}خودکار{% endif %}
                             </button>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                             hx-target="#interviewer-modal-content" 
                             data-bs-toggle="modal" 
                             data-bs-target="#interviewerModal">
-                        مدیریت مصاحبه‌گران
+                        {% if current_language_code == 'en' %}Manage Interviewers{% elif current_language_code == 'tr' %}Mülakatçıları Yönet{% elif current_language_code == 'ar' %}إدارة المقابلين{% else %}مدیریت مصاحبه‌گران{% endif %}
                     </button>
                 </div>
             </div>
@@ -204,8 +204,8 @@
             <div class="col-md-1 d-none d-md-flex flex-column align-items-center justify-content-center text-muted">
                 {% with gap=stage_gaps|get_item:stage.id %}
                     {% if gap is not None %}
-                        <span class="text-xxs font-semibold bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-0.5 rounded-pill mb-1" title="فاصله زمانی تا مرحله بعد" style="white-space: nowrap;">
-                            ⏱️ {{ gap }} روز فاصله
+                        <span class="text-xxs font-semibold bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-0.5 rounded-pill mb-1" title="{% if current_language_code == 'en' %}Gap until next stage{% else %}فاصله زمانی تا مرحله بعد{% endif %}" style="white-space: nowrap;">
+                            ⏱️ {% if current_language_code == 'en' %}{{ gap }} day(s) gap{% elif current_language_code == 'tr' %}{{ gap }} gün ara{% elif current_language_code == 'ar' %}فارق {{ gap }} يوم{% else %}{{ gap }} روز فاصله{% endif %}
                         </span>
                     {% endif %}
                 {% endwith %}
@@ -215,7 +215,7 @@
             </div>
             {% endif %}
             {% empty %}
-            <div class="col-12 text-center text-muted py-2">هیچ مرحله ارزیابی برای این شغل تعریف نشده است.</div>
+            <div class="col-12 text-center text-muted py-2">{{ t.se_no_evaluations }}</div>
             {% endfor %}
         </div>
     </div>
@@ -224,20 +224,20 @@
 <!-- Applicants evaluation board -->
 <div class="card premium-card">
     <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center">
-        <h5 class="font-semibold text-secondary m-0">لیست متقاضیان و نمرات ارزیابی</h5>
+        <h5 class="font-semibold text-secondary m-0">{% if current_language_code == 'en' %}Candidates List & Assessment Scores{% elif current_language_code == 'tr' %}Aday Listesi & Değerlendirme Puanları{% elif current_language_code == 'ar' %}قائمة المتقدمين ودرجات التقييم{% else %}لیست متقاضیان و نمرات ارزیابی{% endif %}</h5>
         <div id="bulk-actions" class="d-none align-items-center gap-2">
-            <span class="text-xs text-muted font-medium"><span id="selected-count">0</span> متقاضی انتخاب شده‌اند</span>
+            <span class="text-xs text-muted font-medium"><span id="selected-count">0</span> {% if current_language_code == 'en' %} candidates selected{% elif current_language_code == 'tr' %} aday seçildi{% elif current_language_code == 'ar' %} متقدم تم اختيارهم{% else %} متقاضی انتخاب شده‌اند{% endif %}</span>
             <button type="submit" form="bulk-action-form" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
-                انتقال به مرحله بعد
+                {% if current_language_code == 'en' %}Advance to Next Stage{% elif current_language_code == 'tr' %}Sonraki Aşamaya Taşı{% elif current_language_code == 'ar' %}النقل للمرحلة التالية{% else %}انتقال به مرحله بعد{% endif %}
             </button>
             <button type="button" onclick="openBulkNotificationModal()" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
-                ارسال پیامک و ایمیل
+                {% if current_language_code == 'en' %}Send SMS & Email{% elif current_language_code == 'tr' %}SMS & E-posta Gönder{% elif current_language_code == 'ar' %}إرسال رسالة بريدية وهاتفية{% else %}ارسال پیامک و ایمیل{% endif %}
             </button>
         </div>
     </div>
@@ -250,10 +250,10 @@
                             <input type="checkbox" id="select-all" class="form-check-input">
                         </th>
                         <th style="min-width: 220px; cursor: pointer; user-select: none;" class="sortable-header" data-column="name">
-                            مشخصات متقاضی <span class="sort-icon text-muted"></span>
+                            {% if current_language_code == 'en' %}Candidate Specifications{% elif current_language_code == 'tr' %}Aday Bilgileri{% elif current_language_code == 'ar' %}بيانات المتقدم{% else %}مشخصات متقاضی{% endif %} <span class="sort-icon text-muted"></span>
                         </th>
                         <th style="min-width: 150px; cursor: pointer; user-select: none;" class="sortable-header" data-column="status">
-                            وضعیت کلی درخواست <span class="sort-icon text-muted"></span>
+                            {% if current_language_code == 'en' %}Application Status{% elif current_language_code == 'tr' %}Başvuru Durumu{% elif current_language_code == 'ar' %}الحالة الإجمالية للطلب{% else %}وضعیت کلی درخواست{% endif %} <span class="sort-icon text-muted"></span>
                         </th>
                         {% for stage in table_stages %}
                         <th class="text-center sortable-header" style="cursor: pointer; user-select: none; min-width: 130px;" data-column="stage-{{ forloop.counter0 }}">
@@ -261,9 +261,9 @@
                         </th>
                         {% endfor %}
                         <th class="text-center sortable-header" style="min-width: 100px; cursor: pointer; user-select: none;" data-column="final-score">
-                            امتیاز نهایی وزنی <span class="sort-icon text-muted"></span>
+                            {% if current_language_code == 'en' %}Weighted Final Score{% elif current_language_code == 'tr' %}Nihai Ağırlıklı Puan{% elif current_language_code == 'ar' %}الدرجة النهائية الموزونة{% else %}امتیاز نهایی وزنی{% endif %} <span class="sort-icon text-muted"></span>
                         </th>
-                        <th class="pe-4 text-end" style="min-width: 120px;">عملیات</th>
+                        <th class="pe-4 text-end" style="min-width: 120px;">{{ t.actions_th }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -285,25 +285,25 @@
                                     {{ app.candidate.first_name }} {{ app.candidate.last_name }}
                                 </a>
                                 {% if scr_state and scr_state.status == 'FAILED' %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1.5 py-0.5 rounded text-xxs font-semibold">مردود در غربالگری</span>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1.5 py-0.5 rounded text-xxs font-semibold">{% if current_language_code == 'en' %}Screening Failed{% elif current_language_code == 'tr' %}Ön Elemede Elendi{% elif current_language_code == 'ar' %}مستبعد في الغربلة{% else %}مردود در غربالگری{% endif %}</span>
                                 {% endif %}
                             </div>
-                            <div class="text-muted text-xs mt-0.5">کد ملی: {{ app.candidate.national_id }}</div>
+                            <div class="text-muted text-xs mt-0.5">{{ t.cd_national_id }} {{ app.candidate.national_id }}</div>
                             {% if app.candidate.personnel_number %}
-                            <div class="text-primary font-semibold text-xxs mt-0.5">شماره پرسنلی: {{ app.candidate.personnel_number }}</div>
+                            <div class="text-primary font-semibold text-xxs mt-0.5">{{ t.cd_personnel_number }} {{ app.candidate.personnel_number }}</div>
                             {% endif %}
                         </td>
                         <td>
                             <div class="d-flex flex-column gap-1">
                                 <div id="app-status-badge-{{ app.id }}">
                                     {% if eff_status == 'IN_PROGRESS' %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">در حال ارزیابی</span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Under Assessment{% elif current_language_code == 'tr' %}Değerlendiriliyor{% elif current_language_code == 'ar' %}تحت التقييم{% else %}در حال ارزیابی{% endif %}</span>
                                     {% elif eff_status == 'SELECTED' %}
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">قبول نهایی</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Accepted{% elif current_language_code == 'tr' %}Kabul Edildi{% elif current_language_code == 'ar' %}مقبول نهائياً{% else %}قبول نهایی{% endif %}</span>
                                     {% elif eff_status == 'RESERVE' %}
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">ذخیره</span>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Reserve{% elif current_language_code == 'tr' %}Yedek{% elif current_language_code == 'ar' %}إحتياط{% else %}ذخیره{% endif %}</span>
                                     {% elif eff_status == 'REJECTED' %}
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">مردود شده</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Rejected{% elif current_language_code == 'tr' %}Elendi{% elif current_language_code == 'ar' %}مستبعد{% else %}مردود شده{% endif %}</span>
                                     {% endif %}
                                 </div>
                                 <form hx-post="{% url 'update_application_status' app.id %}" hx-target="#app-status-badge-{{ app.id }}" hx-swap="outerHTML" class="m-0 mt-1">
@@ -334,7 +334,7 @@
                         </td>
                         
                         <td class="pe-4 text-end">
-                            <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info">مشاهده پرونده کامل</a>
+                            <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info">{{ t.view_profile_btn }}</a>
                         </td>
                     </tr>
                     {% endwith %}
@@ -343,7 +343,7 @@
                     {% empty %}
                     <tr class="empty-row">
                         <td colspan="{{ table_stages.count|add:5 }}" class="text-center py-5 text-muted">
-                            هیچ متقاضی برای این فرصت شغلی ثبت‌نام نکرده است.
+                            {% if current_language_code == 'en' %}No candidates have registered for this job yet.{% elif current_language_code == 'tr' %}Bu iş fırsatına henüz başvuran aday yok.{% elif current_language_code == 'ar' %}لم يتم تسجيل أي متقدم لهذه الوظيفة حتى الآن.{% else %}هیچ متقاضی برای این فرصت شغلی ثبت‌نام نکرده است.{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -361,7 +361,7 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 1 1 1.085 1.085l-.04.02-.041.02a.75.75 0 0 1-1.085-1.085l.04-.02Zm0 5.625.041-.02a.75.75 0 1 1 1.085 1.085l-.04.02-.041.02a.75.75 0 0 1-1.085-1.085l.04-.02ZM12 21.75a9.75 9.75 0 1 0 0-19.5 9.75 9.75 0 0 0 0 19.5Z" />
     </svg>
-    <span><strong>راهنمای ویرایش:</strong> برای ویرایش نمره یا وضعیت ارزیابی در هر مرحله، کافیست بر روی سلول مربوط به آن نمره در جدول کلیک کنید تا فرم ویرایش سریع برای شما فعال گردد.</span>
+    <span><strong>{% if current_language_code == 'en' %}Edit Guide:{% elif current_language_code == 'tr' %}Düzenleme Kılavuzu:{% elif current_language_code == 'ar' %}دليل التعديل:{% else %}راهنمای ویرایش:{% endif %}</strong> {% if current_language_code == 'en' %}To edit a score or status, simply click on the corresponding cell in the table to activate the quick edit form.{% elif current_language_code == 'tr' %}Bir puanı veya durumu düzenlemek için, tablodaki ilgili hücreye tıklamanız yeterlidir.{% elif current_language_code == 'ar' %}لتعديل الدرجة أو القرار، اضغط على الخلية المطلوبة في الجدول لتفعيل نموذج التعديل السريع.{% else %}برای ویرایش نمره یا وضعیت ارزیابی در هر مرحله، کافیست بر روی سلول مربوط به آن نمره در جدول کلیک کنید تا فرم ویرایش سریع برای شما فعال گردد.{% endif %}</span>
 </div>
 
 <!-- Modal for managing stage interviewers -->
@@ -387,7 +387,7 @@
         const checkboxes = document.querySelectorAll('.app-checkbox:checked');
         const appIds = Array.from(checkboxes).map(cb => cb.value).join(',');
         if (!appIds) {
-            alert('لطفاً حداقل یک متقاضی را انتخاب کنید.');
+            alert('{% if current_language_code == 'en' %}Please select at least one candidate.{% elif current_language_code == 'tr' %}Lütfen en az bir aday seçin.{% elif current_language_code == 'ar' %}يرجى اختيار متقدم واحد على الأقل.{% else %}لطفاً حداقل یک متقاضی را انتخاب کنید.{% endif %}');
             return;
         }
         
@@ -397,7 +397,7 @@
         modalContent.innerHTML = `
             <div class="modal-body text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">در حال بارگذاری الگوها و اطلاعات...</p>
+                <p class="mt-2 text-muted">{% if current_language_code == 'en' %}Loading template and data...{% elif current_language_code == 'tr' %}Şablon ve bilgiler yükleniyor...{% elif current_language_code == 'ar' %}جاري تحميل البيانات والنموذج...{% else %}در حال بارگذاری الگوها و اطلاعات...{% endif %}</p>
             </div>
         `;
         
@@ -408,7 +408,7 @@
         fetch(url)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('خطا در دریافت اطلاعات');
+                    throw new Error('{% if current_language_code == 'en' %}Error loading data{% elif current_language_code == 'tr' %}Bilgi yüklenirken hata oluştu{% elif current_language_code == 'ar' %}خطأ في تحميل البيانات{% else %}خطا در دریافت اطلاعات{% endif %}');
                 }
                 return response.text();
             })
@@ -423,7 +423,7 @@
                 });
             })
             .catch(err => {
-                modalContent.innerHTML = `<div class="modal-header py-3 bg-danger text-white"><h6 class="modal-title font-semibold m-0">خطا</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-danger py-4 text-center">${err.message || 'خطا در بارگذاری اطلاعات. مجدداً تلاش کنید.'}</div>`;
+                modalContent.innerHTML = `<div class="modal-header py-3 bg-danger text-white"><h6 class="modal-title font-semibold m-0">Error</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-danger py-4 text-center">${err.message || 'Error occurred.'}</div>`;
             });
     }
 
@@ -549,7 +549,7 @@
 
                         function getScoreFromCell(cell) {
                             if (cell.classList.contains('bg-light') && cell.classList.contains('text-muted')) {
-                                return -2; // Locked/inaccessible
+                                  return -2; // Locked/inaccessible
                             }
                             const div = cell.querySelector('.font-bold');
                             if (div) {

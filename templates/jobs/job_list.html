@@ -50,8 +50,8 @@
 {% block content %}
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <h3 class="font-semibold text-secondary mb-1">فرصت‌های شغلی</h3>
-        <p class="text-muted text-sm m-0">تعریف فرصت‌های شغلی جدید و تنظیم مراحل و وزن‌های پویای فرآیند ارزیابی متقاضیان</p>
+        <h3 class="font-semibold text-secondary mb-1">{{ t.jobs }}</h3>
+        <p class="text-muted text-sm m-0">{{ t.job_sub }}</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="{% url 'job_export_excel' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1.5">
@@ -59,20 +59,20 @@
                 <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
                 <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
             </svg>
-            خروجی اکسل
+            {{ t.export_excel }}
         </a>
         {% if user.profile.can_manage_jobs %}
         <button type="button" data-bs-toggle="modal" data-bs-target="#bulkStatusModal" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
             </svg>
-            تغییر وضعیت دسته‌جمعی
+            {{ t.bulk_status }}
         </button>
         <a href="{% url 'job_add' %}" class="btn btn-sm btn-primary-custom d-flex align-items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            افزودن فرصت شغلی جدید
+            {{ t.add_job }}
         </a>
         {% endif %}
     </div>
@@ -84,14 +84,14 @@
         <form method="get" action="" class="row g-3">
             <!-- جستجوی متنی -->
             <div class="col-12 col-md-4 col-lg-3">
-                <label for="id_q" class="form-label text-xs font-bold text-muted mb-1">🔍 جستجوی فرصت شغلی</label>
-                <input type="text" name="q" id="id_q" class="form-control form-control-sm text-sm" placeholder="عنوان، کد شغل یا شماره درخواست..." value="{{ filters.q }}">
+                <label for="id_q" class="form-label text-xs font-bold text-muted mb-1">🔍 {{ t.search_job }}</label>
+                <input type="text" name="q" id="id_q" class="form-control form-control-sm text-sm" placeholder="{{ t.search_placeholder }}" value="{{ filters.q }}">
             </div>
             
             <!-- دپارتمان / واحد -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_department" class="form-label text-xs font-bold text-muted mb-1">🏢 دپارتمان</label>
-                <select name="department" id="id_department" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه دپارتمان‌ها">
+                <label for="id_department" class="form-label text-xs font-bold text-muted mb-1">🏢 {{ t.department_label }}</label>
+                <select name="department" id="id_department" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_departments }}">
                     {% for dept in departments %}
                         <option value="{{ dept }}" {% if dept in filters.department %}selected{% endif %}>{{ dept }}</option>
                     {% endfor %}
@@ -100,8 +100,8 @@
 
             <!-- واحد سازمانی -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_unit" class="form-label text-xs font-bold text-muted mb-1">⚙️ واحد سازمانی</label>
-                <select name="unit" id="id_unit" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه واحدها">
+                <label for="id_unit" class="form-label text-xs font-bold text-muted mb-1">⚙️ {{ t.unit_label }}</label>
+                <select name="unit" id="id_unit" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_units }}">
                     {% for unit in units %}
                         <option value="{{ unit }}" {% if unit in filters.unit %}selected{% endif %}>{{ unit }}</option>
                     {% endfor %}
@@ -110,8 +110,8 @@
 
             <!-- وضعیت -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_status" class="form-label text-xs font-bold text-muted mb-1">🏷️ وضعیت</label>
-                <select name="status" id="id_status" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه وضعیت‌ها">
+                <label for="id_status" class="form-label text-xs font-bold text-muted mb-1">🏷️ {{ t.status_label }}</label>
+                <select name="status" id="id_status" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_statuses }}">
                     {% for code, label in status_choices %}
                         <option value="{{ code }}" {% if code in filters.status %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -120,8 +120,8 @@
 
             <!-- نوع استخدام -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_recruitment_type" class="form-label text-xs font-bold text-muted mb-1">👥 نوع استخدام</label>
-                <select name="recruitment_type" id="id_recruitment_type" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه موارد">
+                <label for="id_recruitment_type" class="form-label text-xs font-bold text-muted mb-1">👥 {{ t.recruitment_type_label }}</label>
+                <select name="recruitment_type" id="id_recruitment_type" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_types }}">
                     {% for code, label in recruitment_choices %}
                         <option value="{{ code }}" {% if code in filters.recruitment_type %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -130,8 +130,8 @@
 
             <!-- رده شغلی -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_job_category" class="form-label text-xs font-bold text-muted mb-1">🎖️ رده شغلی</label>
-                <select name="job_category" id="id_job_category" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه رده‌ها">
+                <label for="id_job_category" class="form-label text-xs font-bold text-muted mb-1">🎖️ {{ t.category_label }}</label>
+                <select name="job_category" id="id_job_category" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_categories }}">
                     {% for code, label in category_choices %}
                         <option value="{{ code }}" {% if code in filters.job_category %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -140,8 +140,8 @@
 
             <!-- منبع ایجاد -->
             <div class="col-6 col-md-4 col-lg-3">
-                <label for="id_source" class="form-label text-xs font-bold text-muted mb-1">📥 منبع ایجاد</label>
-                <select name="source" id="id_source" class="form-select form-select-sm text-sm multi-select" multiple placeholder="همه منابع">
+                <label for="id_source" class="form-label text-xs font-bold text-muted mb-1">📥 {{ t.source_label }}</label>
+                <select name="source" id="id_source" class="form-select form-select-sm text-sm multi-select" multiple placeholder="{{ t.all_sources }}">
                     {% for code, label in source_choices %}
                         <option value="{{ code }}" {% if code in filters.source %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -154,7 +154,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v3.444c0 .362-.143.71-.4 1.033L15 15.126V21l-6-3v-2.874L3.4 9.25a1.233 1.233 0 0 1-.4-1.033V4.774c0-.54.384-1.006.917-1.096A50.065 50.065 0 0 1 12 3Z" />
                     </svg>
-                    اعمال فیلترها
+                    {{ t.apply_filters }}
                 </button>
                 
                 {% if active_filters_count > 0 %}
@@ -162,7 +162,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
-                    پاک کردن ({{ active_filters_count }})
+                    {{ t.clear_filters }} ({{ active_filters_count }})
                 </a>
                 {% endif %}
             </div>
@@ -178,7 +178,7 @@
                     <tr>
                         <th class="ps-4 align-middle">
                             <a href="{% sort_url 'code' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                کد / شماره درخواست
+                                {{ t.code_th }}
                                 {% if current_sort == 'code' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -198,7 +198,7 @@
                         </th>
                         <th class="align-middle">
                             <a href="{% sort_url 'title' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                عنوان شغل
+                                {{ t.title_th }}
                                 {% if current_sort == 'title' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -218,7 +218,7 @@
                         </th>
                         <th class="align-middle">
                             <a href="{% sort_url 'department' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                دپارتمان / واحد
+                                {{ t.dept_th }}
                                 {% if current_sort == 'department' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -238,7 +238,7 @@
                         </th>
                         <th class="align-middle">
                             <a href="{% sort_url 'created_at' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                تاریخ دریافت
+                                {{ t.date_th }}
                                 {% if current_sort == 'created_at' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -258,7 +258,7 @@
                         </th>
                         <th class="align-middle">
                             <a href="{% sort_url 'headcount' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                ظرفیت جذب
+                                {{ t.headcount_th }}
                                 {% if current_sort == 'headcount' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -278,7 +278,7 @@
                         </th>
                         <th class="align-middle">
                             <a href="{% sort_url 'recruitment_type' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                نوع استخدام
+                                {{ t.type_th }}
                                 {% if current_sort == 'recruitment_type' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -296,11 +296,11 @@
                                 {% endif %}
                             </a>
                         </th>
-                        <th class="align-middle text-secondary font-semibold text-xs">متقاضیان ثبت‌نامی</th>
-                        <th class="align-middle text-secondary font-semibold text-xs">مراحل و ضرایب ارزیابی (به ترتیب فرآیند)</th>
+                        <th class="align-middle text-secondary font-semibold text-xs">{{ t.candidates_th }}</th>
+                        <th class="align-middle text-secondary font-semibold text-xs">{{ t.stages_th }}</th>
                         <th class="align-middle">
                             <a href="{% sort_url 'status' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
-                                وضعیت
+                                {{ t.status_th }}
                                 {% if current_sort == 'status' %}
                                     {% if current_order == 'asc' %}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
@@ -318,7 +318,7 @@
                                 {% endif %}
                             </a>
                         </th>
-                        <th class="pe-4 text-end align-middle text-secondary font-semibold text-xs">عملیات</th>
+                        <th class="pe-4 text-end align-middle text-secondary font-semibold text-xs">{{ t.actions_th }}</th>
                     </tr>
                 </thead>
                 <tbody id="job-table-body">
@@ -326,7 +326,7 @@
                     <tr id="job-{{ job.id }}">
                         <td class="ps-4">
                             <span class="font-medium text-primary d-block">{{ job.code }}</span>
-                            <span class="text-muted text-xs">درخواست: {{ job.request_number }}</span>
+                            <span class="text-muted text-xs">{{ t.request_lbl }} {{ job.request_number }}</span>
                         </td>
                         <td class="font-semibold">{{ job.title }}</td>
                         <td>
@@ -341,11 +341,11 @@
                         <td class="text-sm font-medium text-secondary">
                             {{ job.created_at.date|to_jalali|default:"-" }}
                         </td>
-                        <td>{{ job.headcount }} نفر</td>
+                        <td>{{ job.headcount }} {% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</td>
                         <td>{{ job.get_recruitment_type_display }}</td>
                         <td>
                             <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20 px-2 py-1.5 rounded font-semibold text-xs">
-                                {{ job.candidate_count|default:"0" }} نفر
+                                {{ job.candidate_count|default:"0" }} {% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}
                             </span>
                         </td>
                         <td>
@@ -360,50 +360,50 @@
                                     {{ stage.name }}: {{ stage.weight }}٪
                                 </span>
                                 {% empty %}
-                                <span class="text-muted text-xs">بدون مرحله ارزیابی</span>
+                                <span class="text-muted text-xs">{% if current_language_code == 'en' %}No assessment stages{% elif current_language_code == 'tr' %}Değerlendirme aşaması yok{% elif current_language_code == 'ar' %}بدون مراحل تقييم{% else %}بدون مرحله ارزیابی{% endif %}</span>
                                 {% endfor %}
                             </div>
                         </td>
                         <td>
                             {% if job.status == 'RECEIVED' %}
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded font-medium">دریافت شده</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Received{% elif current_language_code == 'tr' %}Alındı{% elif current_language_code == 'ar' %}تم الاستلام{% else %}دریافت شده{% endif %}</span>
                             {% elif job.status == 'PLANNING' %}
-                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1.5 rounded font-medium">برنامه‌ریزی</span>
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Planning{% elif current_language_code == 'tr' %}Planlama{% elif current_language_code == 'ar' %}تخطيط{% else %}برنامه‌ریزی{% endif %}</span>
                             {% elif job.status == 'PUBLISHED' %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded font-medium">منتشر شده</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Published{% elif current_language_code == 'tr' %}Yayınlandı{% elif current_language_code == 'ar' %}منشور{% else %}منتشر شده{% endif %}</span>
                             {% elif job.status == 'REGISTRATION_CLOSED' %}
-                                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 px-2.5 py-1.5 rounded font-medium">خاتمه ثبت‌نام</span>
+                                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Reg Closed{% elif current_language_code == 'tr' %}Kayıt Kapatıldı{% elif current_language_code == 'ar' %}إغلاق التسجيل{% else %}خاتمه ثبت‌نام{% endif %}</span>
                             {% elif job.status == 'SCREENING' %}
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">غربالگری اولیه</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Screening{% elif current_language_code == 'tr' %}Ön Eleme{% elif current_language_code == 'ar' %}غربالگری اولیه{% else %}غربالگری اولیه{% endif %}</span>
                             {% elif job.status == 'EXAM' %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">آزمون کتبی</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Written Exam{% elif current_language_code == 'tr' %}Yazılı Sınav{% elif current_language_code == 'ar' %}آزمون کتبی{% else %}آزمون کتبی{% endif %}</span>
                             {% elif job.status == 'SKILL_TEST' %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">آزمون مهارتی</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Skill Test{% elif current_language_code == 'tr' %}Beceri Testi{% elif current_language_code == 'ar' %}آزمون مهارتی{% else %}آزمون مهارتی{% endif %}</span>
                             {% elif job.status == 'INTERVIEW' %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">مصاحبه حضوری</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Interview{% elif current_language_code == 'tr' %}Mülakat{% elif current_language_code == 'ar' %}مصاحبه حضوری{% else %}مصاحبه حضوری{% endif %}</span>
                             {% elif job.status == 'ASSESSMENT' %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">کانون ارزیابی</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Assessment Center{% elif current_language_code == 'tr' %}Değerlendirme Merkezi{% elif current_language_code == 'ar' %}کانون ارزیابی{% else %}کانون ارزیابی{% endif %}</span>
                             {% elif job.status == 'FINAL_SELECTION' %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded font-medium">انتخاب نهایی</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Final Selection{% elif current_language_code == 'tr' %}Son Seçim{% elif current_language_code == 'ar' %}الانتخاب النهائي{% else %}انتخاب نهایی{% endif %}</span>
                             {% elif job.status == 'CLOSED' %}
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded font-medium">اتمام یافته</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Completed{% elif current_language_code == 'tr' %}Tamamlandı{% elif current_language_code == 'ar' %}اتمام یافته{% else %}اتمام یافته{% endif %}</span>
                             {% elif job.status == 'CANCELLED' %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded font-medium">لغو شده</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Cancelled{% elif current_language_code == 'tr' %}İptal Edildi{% elif current_language_code == 'ar' %}لغو شده{% else %}لغو شده{% endif %}</span>
                             {% elif job.status == 'SUSPENDED' %}
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">توقف موقت</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 rounded font-medium">{% if current_language_code == 'en' %}Suspended{% elif current_language_code == 'tr' %}Geçici Durdurma{% elif current_language_code == 'ar' %}توقف موقت{% else %}توقف موقت{% endif %}</span>
                             {% endif %}
                         </td>
                         <td class="pe-4 text-end">
                             <div class="d-flex align-items-center justify-content-end gap-1.5">
                                 {% if user.profile.is_recruitment_staff %}
                                 <a href="{% url 'job_pipeline' job.id %}" class="btn btn-xs btn-primary-custom font-semibold py-1 px-2.5 rounded-pill shadow-sm">
-                                    🎯 پایپلاین
+                                    🎯 {{ t.pipeline }}
                                 </a>
                                 {% endif %}
 
                                 <div class="dropdown">
                                     <button class="btn btn-xs btn-light border dropdown-toggle font-semibold py-1 px-2.5 rounded-pill shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        ⚙️ گزینه‌ها
+                                        ⚙️ {{ t.options }}
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end text-sm p-1 shadow border-slate" style="border-radius: 10px; min-width: 190px;">
                                         {% if user.profile.is_recruitment_staff or user.profile.role == 'ADMIN' or user.profile.role == 'JOB_CLASSIFICATION_USER' %}
@@ -479,7 +479,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            هیچ فرصت شغلی در سیستم تعریف نشده است.
+                            {% if current_language_code == 'en' %}No job opportunities defined in the system.{% elif current_language_code == 'tr' %}Sistemde tanımlanmış iş fırsatı yok.{% elif current_language_code == 'ar' %}لم يتم تعريف أي فرص عمل في النظام.{% else %}هیچ فرصت شغلی در سیستم تعریف نشده است.{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -492,7 +492,7 @@
     {% if is_paginated %}
     <div class="card-footer bg-white border-top py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
         <div class="text-xs text-muted font-medium">
-            نمایش ردیف‌های {{ page_obj.start_index }} تا {{ page_obj.end_index }} از مجموع {{ paginator.count }} فرصت شغلی
+            {% if current_language_code == 'en' %}Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of total {{ paginator.count }} jobs{% elif current_language_code == 'tr' %}{{ page_obj.start_index }} - {{ page_obj.end_index }} arası gösteriliyor (Toplam {{ paginator.count }} iş){% elif current_language_code == 'ar' %}عرض الصفوف من {{ page_obj.start_index }} إلى {{ page_obj.end_index }} من إجمالي {{ paginator.count }} فرص عمل{% else %}نمایش ردیف‌های {{ page_obj.start_index }} تا {{ page_obj.end_index }} از مجموع {{ paginator.count }} فرصت شغلی{% endif %}
         </div>
         <nav aria-label="Page navigation">
             <ul class="pagination pagination-sm m-0 gap-1">
@@ -500,12 +500,12 @@
                 {% if page_obj.has_previous %}
                 <li class="page-item">
                     <a class="page-link rounded px-2.5 py-1.5" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo; قبلی</span>
+                        <span aria-hidden="true">&laquo; {% if current_language_code == 'en' %}Prev{% elif current_language_code == 'tr' %}Önceki{% elif current_language_code == 'ar' %}السابق{% else %}قبلی{% endif %}</span>
                     </a>
                 </li>
                 {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link rounded px-2.5 py-1.5">&laquo; قبلی</span>
+                    <span class="page-link rounded px-2.5 py-1.5">&laquo; {% if current_language_code == 'en' %}Prev{% elif current_language_code == 'tr' %}Önceki{% elif current_language_code == 'ar' %}السابق{% else %}قبلی{% endif %}</span>
                 </li>
                 {% endif %}
 
@@ -522,12 +522,12 @@
                 {% if page_obj.has_next %}
                 <li class="page-item">
                     <a class="page-link rounded px-2.5 py-1.5" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}" aria-label="Next">
-                        <span aria-hidden="true">بعدی &raquo;</span>
+                        <span aria-hidden="true">{% if current_language_code == 'en' %}Next{% elif current_language_code == 'tr' %}Sonraki{% elif current_language_code == 'ar' %}التالي{% else %}بعدی{% endif %} &raquo;</span>
                     </a>
                 </li>
                 {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link rounded px-2.5 py-1.5">بعدی &raquo;</span>
+                    <span class="page-link rounded px-2.5 py-1.5">{% if current_language_code == 'en' %}Next{% elif current_language_code == 'tr' %}Sonraki{% elif current_language_code == 'ar' %}التالي{% else %}بعدی{% endif %} &raquo;</span>
                 </li>
                 {% endif %}
             </ul>
@@ -536,7 +536,7 @@
     {% else %}
     <div class="card-footer bg-white border-top py-3">
         <div class="text-xs text-muted font-medium text-center text-md-start">
-            مجموعاً {{ jobs|length }} فرصت شغلی یافت شد.
+            {% if current_language_code == 'en' %}Total of {{ jobs|length }} job(s) found.{% elif current_language_code == 'tr' %}Toplam {{ jobs|length }} iş fırsatı bulundu.{% elif current_language_code == 'ar' %}تم العثور على إجمالي {{ jobs|length }} فرصة عمل.{% else %}مجموعاً {{ jobs|length }} فرصت شغلی یافت شد.{% endif %}
         </div>
     </div>
     {% endif %}
@@ -548,23 +548,23 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
             <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title font-semibold text-secondary text-sm" id="bulkStatusModalLabel">⚙️ تغییر وضعیت دسته‌جمعی فرصت‌های شغلی</h5>
+                <h5 class="modal-title font-semibold text-secondary text-sm" id="bulkStatusModalLabel">{% if current_language_code == 'en' %}⚙️ Bulk Update Job Status{% elif current_language_code == 'tr' %}⚙️ Toplu İş Durumu Güncelleme{% elif current_language_code == 'ar' %}⚙️ تغيير الحالة الجماعي لفرص العمل{% else %}⚙️ تغییر وضعیت دسته‌جمعی فرصت‌های شغلی{% endif %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{% url 'job_bulk_status_update' %}" method="post">
                 {% csrf_token %}
                 <div class="modal-body py-3">
-                    <p class="text-xs text-muted mb-3">کدهای فرصت شغلی مورد نظر را وارد کرده (هر خط یک کد یا با ویرگول جدا شده) و وضعیت جدید را انتخاب نمایید.</p>
+                    <p class="text-xs text-muted mb-3">{% if current_language_code == 'en' %}Enter the job codes (one per line or separated by comma) and select the new status.{% elif current_language_code == 'tr' %}İş kodlarını girin (her satıra bir kod veya virgülle ayrılmış) ve yeni durumu seçin.{% elif current_language_code == 'ar' %}أدخل رموز فرص العمل المطلوبة (كل رمز في سطر أو مفصولة بفاصلة) واختر الحالة الجديدة.{% else %}کدهای فرصت شغلی مورد نظر را وارد کرده (هر خط یک کد یا با ویرگول جدا شده) و وضعیت جدید را انتخاب نمایید.{% endif %}</p>
                     
                     <div class="mb-3">
-                        <label for="bulk_job_codes" class="form-label text-xs font-bold text-muted mb-1">کدهای فرصت شغلی</label>
+                        <label for="bulk_job_codes" class="form-label text-xs font-bold text-muted mb-1">{% if current_language_code == 'en' %}Job Codes{% elif current_language_code == 'tr' %}İş Kodları{% elif current_language_code == 'ar' %}رموز فرص العمل{% else %}کدهای فرصت شغلی{% endif %}</label>
                         <textarea class="form-control text-sm font-monospace" name="job_codes" id="bulk_job_codes" rows="5" placeholder="DEV-100&#10;SYS-101&#10;..." required style="direction: ltr; text-align: left;"></textarea>
                     </div>
                     
                     <div>
-                        <label for="bulk_new_status" class="form-label text-xs font-bold text-muted mb-1">وضعیت جدید</label>
+                        <label for="bulk_new_status" class="form-label text-xs font-bold text-muted mb-1">{% if current_language_code == 'en' %}New Status{% elif current_language_code == 'tr' %}Yeni Durum{% elif current_language_code == 'ar' %}الحالة الجديدة{% else %}وضعیت جدید{% endif %}</label>
                         <select class="form-select text-sm" name="new_status" id="bulk_new_status" required>
-                            <option value="">-- انتخاب وضعیت جدید --</option>
+                            <option value="">{% if current_language_code == 'en' %}-- Select New Status --{% elif current_language_code == 'tr' %}-- Yeni Durum Seçin --{% elif current_language_code == 'ar' %}-- اختر الحالة الجديدة --{% else %}-- انتخاب وضعیت جدید --{% endif %}</option>
                             {% for code, label in status_choices %}
                                 <option value="{{ code }}">{{ label }}</option>
                             {% endfor %}
@@ -572,8 +572,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">انصراف</button>
-                    <button type="submit" class="btn btn-sm btn-primary-custom">اعمال تغییر وضعیت</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">{% if current_language_code == 'en' %}Cancel{% elif current_language_code == 'tr' %}İptal{% elif current_language_code == 'ar' %}إلغاء{% else %}انصراف{% endif %}</button>
+                    <button type="submit" class="btn btn-sm btn-primary-custom">{% if current_language_code == 'en' %}Apply Status Change{% elif current_language_code == 'tr' %}Durum Değişikliğini Uygula{% elif current_language_code == 'ar' %}تطبيق تغيير الحالة{% else %}اعمال تغییر وضعیت{% endif %}</button>
                 </div>
             </form>
         </div>

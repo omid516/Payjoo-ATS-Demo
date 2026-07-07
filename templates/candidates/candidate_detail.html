@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load jalali_tags %}
-{% block title %}پروفایل متقاضی: {{ candidate.first_name }} {{ candidate.last_name }}{% endblock %}
+{% block title %}{{ t.cd_title }} {{ candidate.first_name }} {{ candidate.last_name }}{% endblock %}
 
 {% block content %}
 <div class="mb-4 d-flex justify-content-between align-items-end">
@@ -9,27 +9,27 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
-            بازگشت به لیست متقاضیان
+            {{ t.cd_back }}
         </a>
         <h3 class="font-semibold text-secondary m-0">
-            پروفایل متقاضی: {{ candidate.first_name }} {{ candidate.last_name }}
+            {{ t.cd_title }} {{ candidate.first_name }} {{ candidate.last_name }}
         </h3>
-        <p class="text-muted text-sm m-0">نمایش کامل سوابق هویتی، تحصیلی، کاری و تاریخچه ارزیابی‌های استخدامی</p>
+        <p class="text-muted text-sm m-0">{{ t.cd_sub }}</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'candidate_apply' candidate.id %}" class="btn btn-primary-custom d-flex align-items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            ثبت درخواست جدید (انتساب به شغل)
+            {{ t.cd_new_app }}
         </a>
         <a href="{% url 'candidate_resume_print' candidate.id %}" target="_blank" class="btn btn-outline-primary d-flex align-items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
             </svg>
-            چاپ رزومه
+            {{ t.cd_print_resume }}
         </a>
-        <a href="{% url 'candidate_edit' candidate.id %}" class="btn btn-outline-secondary">ویرایش متقاضی</a>
+        <a href="{% url 'candidate_edit' candidate.id %}" class="btn btn-outline-secondary">{{ t.cd_edit_candidate }}</a>
     </div>
 </div>
 
@@ -43,10 +43,10 @@
                         {{ candidate.first_name|slice:":1" }}{{ candidate.last_name|slice:":1" }}
                     </div>
                     <h5 class="font-semibold text-secondary mb-1">{{ candidate.first_name }} {{ candidate.last_name }}</h5>
-                    <div class="text-muted text-sm mb-1">کد ملی: {{ candidate.national_id }}</div>
+                    <div class="text-muted text-sm mb-1">{{ t.cd_national_id }} {{ candidate.national_id }}</div>
                     {% if candidate.personnel_number %}
                     <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">
-                        شماره پرسنلی: {{ candidate.personnel_number }}
+                        {{ t.cd_personnel_number }} {{ candidate.personnel_number }}
                     </span>
                     {% endif %}
                 </div>
@@ -54,15 +54,15 @@
                 <hr class="border-slate my-3">
                 
                 <div class="mb-3">
-                    <label class="text-muted text-xs d-block mb-1">شماره تماس</label>
+                    <label class="text-muted text-xs d-block mb-1">{{ t.cd_phone }}</label>
                     <span class="font-medium text-secondary">{{ candidate.phone_number }}</span>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted text-xs d-block mb-1">آدرس ایمیل</label>
+                    <label class="text-muted text-xs d-block mb-1">{{ t.cd_email }}</label>
                     <span class="font-medium text-secondary text-break">{{ candidate.email }}</span>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted text-xs d-block mb-1">تاریخ ثبت‌نام در سامانه</label>
+                    <label class="text-muted text-xs d-block mb-1">{{ t.cd_created_at }}</label>
                     <span class="font-medium text-secondary">{{ candidate.created_at|to_jalali }}</span>
                 </div>
                 
@@ -72,12 +72,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
-                        دانلود فایل رزومه
+                        {{ t.cd_download_resume }}
                     </a>
                 </div>
                 {% else %}
                 <div class="alert alert-warning py-2 px-3 text-xs text-center mb-0 mt-4">
-                    فاقد فایل رزومه آپلود شده
+                    {{ t.cd_no_resume }}
                 </div>
                 {% endif %}
             </div>
@@ -89,7 +89,7 @@
         <!-- Education list -->
         <div class="card premium-card mb-4">
             <div class="card-header bg-white border-bottom border-slate py-3">
-                <h5 class="font-semibold text-secondary m-0">سوابق تحصیلی</h5>
+                <h5 class="font-semibold text-secondary m-0">{{ t.cd_edu_title }}</h5>
             </div>
             <div class="card-body p-4">
                 {% for edu in education_list %}
@@ -100,13 +100,13 @@
                     </div>
                     <div class="text-end">
                         <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1.5 rounded text-xs d-block mb-1">
-                            فارغ‌التحصیلی: {{ edu.graduation_year }}
+                            {{ t.cd_graduation }} {{ edu.graduation_year }}
                         </span>
-                        <small class="text-secondary font-medium">معدل: {{ edu.gpa }}</small>
+                        <small class="text-secondary font-medium">{{ t.cd_gpa }} {{ edu.gpa }}</small>
                     </div>
                 </div>
                 {% empty %}
-                <div class="text-center py-4 text-muted">سابقه تحصیلی ثبت نشده است.</div>
+                <div class="text-center py-4 text-muted">{{ t.cd_no_edu }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -114,7 +114,7 @@
         <!-- Experience list -->
         <div class="card premium-card mb-4">
             <div class="card-header bg-white border-bottom border-slate py-3">
-                <h5 class="font-semibold text-secondary m-0">سوابق کاری</h5>
+                <h5 class="font-semibold text-secondary m-0">{{ t.cd_exp_title }}</h5>
             </div>
             <div class="card-body p-4">
                 {% for exp in experience_list %}
@@ -125,7 +125,7 @@
                             <span class="text-primary text-sm font-medium">{{ exp.company }}</span>
                         </div>
                         <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1.5 rounded text-xs">
-                            بازه: {{ exp.start_date|to_jalali }} تا {% if exp.end_date %}{{ exp.end_date|to_jalali }}{% else %}اکنون{% endif %}
+                            {{ t.cd_exp_range }} {{ exp.start_date|to_jalali }} {% if current_language_code == 'en' %}to{% elif current_language_code == 'tr' %}ile{% elif current_language_code == 'ar' %}إلى{% else %}تا{% endif %} {% if exp.end_date %}{{ exp.end_date|to_jalali }}{% else %}{{ t.cd_now }}{% endif %}
                         </span>
                     </div>
                     {% if exp.description %}
@@ -133,7 +133,7 @@
                     {% endif %}
                 </div>
                 {% empty %}
-                <div class="text-center py-4 text-muted">سابقه کاری ثبت نشده است.</div>
+                <div class="text-center py-4 text-muted">{{ t.cd_no_exp }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -141,7 +141,7 @@
         <!-- Languages & Skills -->
         <div class="card premium-card mb-4">
             <div class="card-header bg-white border-bottom border-slate py-3">
-                <h5 class="font-semibold text-secondary m-0">مهارت‌ها و زبان‌های خارجی</h5>
+                <h5 class="font-semibold text-secondary m-0">{{ t.cd_skills_title }}</h5>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -152,9 +152,9 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-briefcase-fill" viewBox="0 0 16 16">
                                   <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z"/>
                                   <path d="M0 12.5A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V6.85L8.129 8.947a.5.5 0 0 1-.258 0L0 6.85v5.65z"/>
-                                </svg>
+                                  </svg>
                             </span>
-                            مهارت‌های تخصصی
+                            {{ t.cd_skills_sub }}
                         </h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for skill in skill_list %}
@@ -163,7 +163,7 @@
                                     <span class="text-muted">| {{ skill.get_level_display }}</span>
                                 </span>
                             {% empty %}
-                                <span class="text-muted text-sm">مهارتی ثبت نشده است.</span>
+                                <span class="text-muted text-sm">{{ t.cd_no_skill }}</span>
                             {% endfor %}
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                                   <path d="M8.715 11.605a12.08 12.08 0 0 1-3.57-2.082l.069-.08C6.838 8.78 8.04 7.524 8.9 6h-1.383a7.02 7.02 0 0 1-1.127 1.83 11.233 11.233 0 0 1-3.513-2.613l.707-.707a10.271 10.271 0 0 0 2.93 2.113 10.986 10.986 0 0 0 2.528-3.633H.5V3h5V1h1v2h5v1h-1.561c-.411 1.19-.8 2.122-1.44 2.933a8.801 8.801 0 0 0 2.44 2.09l-.15.982zM1.968 11.226a11.12 11.12 0 0 1 2.22-3.162 11.777 11.777 0 0 0 2.22 3.162l-.707.707a9.747 9.747 0 0 1-1.513-2.386 9.722 9.722 0 0 1-1.513 2.386l-.707-.707z"/>
                                 </svg>
                             </span>
-                            زبان‌های خارجی
+                            {{ t.cd_langs_sub }}
                         </h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for lang in language_list %}
@@ -185,7 +185,7 @@
                                     <span class="text-muted">| {{ lang.get_proficiency_display }}</span>
                                 </span>
                             {% empty %}
-                                <span class="text-muted text-sm">زبانی ثبت نشده است.</span>
+                                <span class="text-muted text-sm">{{ t.cd_no_lang }}</span>
                             {% endfor %}
                         </div>
                     </div>
@@ -196,7 +196,7 @@
         <!-- Certificates -->
         <div class="card premium-card mb-4">
             <div class="card-header bg-white border-bottom border-slate py-3">
-                <h5 class="font-semibold text-secondary m-0">دوره‌ها و گواهینامه‌ها</h5>
+                <h5 class="font-semibold text-secondary m-0">{{ t.cd_certs_title }}</h5>
             </div>
             <div class="card-body p-4">
                 {% for cert in certificate_list %}
@@ -207,17 +207,17 @@
                     </div>
                     <div class="text-end">
                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded text-xs d-block mb-1">
-                            اخذ: {{ cert.issue_date|to_jalali }}
+                            {{ t.cd_certs_date }} {{ cert.issue_date|to_jalali }}
                         </span>
                         {% if cert.expiration_date %}
-                            <small class="text-muted text-xs">انقضا: {{ cert.expiration_date|to_jalali }}</small>
+                            <small class="text-muted text-xs">{{ t.cd_certs_exp }} {{ cert.expiration_date|to_jalali }}</small>
                         {% else %}
-                            <small class="text-muted text-xs">بدون تاریخ انقضا</small>
+                            <small class="text-muted text-xs">{{ t.cd_certs_no_exp }}</small>
                         {% endif %}
                     </div>
                 </div>
                 {% empty %}
-                <div class="text-center py-4 text-muted">دوره یا گواهینامه‌ای ثبت نشده است.</div>
+                <div class="text-center py-4 text-muted">{{ t.cd_no_certs }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -225,19 +225,19 @@
         <!-- Job Applications -->
         <div class="card premium-card">
             <div class="card-header bg-white border-bottom border-slate py-3">
-                <h5 class="font-semibold text-secondary m-0">تاریخچه درخواست‌های همکاری</h5>
+                <h5 class="font-semibold text-secondary m-0">{{ t.cd_apps_title }}</h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4">فرصت شغلی</th>
-                                <th>تاریخ درخواست</th>
-                                <th>مرحله ارزیابی جاری</th>
-                                <th>امتیاز کل</th>
-                                <th>وضعیت کل</th>
-                                <th class="pe-4 text-end">عملیات</th>
+                                <th class="ps-4">{{ t.cd_apps_job }}</th>
+                                <th>{{ t.cd_apps_date }}</th>
+                                <th>{{ t.cd_apps_stage }}</th>
+                                <th>{{ t.cd_apps_score }}</th>
+                                <th>{{ t.cd_apps_status }}</th>
+                                <th class="pe-4 text-end">{{ t.actions_th }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -249,19 +249,19 @@
                                     {% if app.current_stage %}
                                     <span class="text-primary font-medium">{{ app.current_stage.name }}</span>
                                     {% else %}
-                                    <span class="text-muted">شروع ارزیابی</span>
+                                    <span class="text-muted">{{ t.start_process }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="font-bold text-secondary">{{ app.final_score|floatformat:1 }}</td>
                                 <td>
                                     {% if app.status == 'IN_PROGRESS' %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">در حال ارزیابی</span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Under Assessment{% elif current_language_code == 'tr' %}Değerlendiriliyor{% elif current_language_code == 'ar' %}تحت التقييم{% else %}در حال ارزیابی{% endif %}</span>
                                     {% elif app.status == 'SELECTED' %}
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">قبول نهایی</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Accepted{% elif current_language_code == 'tr' %}Kabul Edildi{% elif current_language_code == 'ar' %}مقبول نهائياً{% else %}قبول نهایی{% endif %}</span>
                                     {% elif app.status == 'RESERVE' %}
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">ذخیره</span>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Reserve{% elif current_language_code == 'tr' %}Yedek{% elif current_language_code == 'ar' %}إحتياط{% else %}ذخیره{% endif %}</span>
                                     {% elif app.status == 'REJECTED' %}
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">مردود شده</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Rejected{% elif current_language_code == 'tr' %}Elendi{% elif current_language_code == 'ar' %}مستبعد{% else %}مردود شده{% endif %}</span>
                                     {% endif %}
                                 </td>
                                 <td class="pe-4 text-end">
@@ -269,14 +269,14 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
                                         </svg>
-                                        کارنامه ارزیابی
+                                        {{ t.cd_apps_transcript }}
                                     </a>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="6" class="text-center py-4 text-muted">
-                                    هنوز هیچ درخواستی برای این متقاضی ثبت نشده است.
+                                    {{ t.cd_no_apps }}
                                 </td>
                             </tr>
                             {% endfor %}

@@ -57,16 +57,18 @@
 <!-- هدر بالای صفحه -->
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h3 class="font-semibold text-secondary mb-1">میز کار الکترونیک</h3>
-        <p class="text-muted text-sm m-0">سلام <strong>{{ user.get_full_name|default:user.username }}</strong> — نمای لحظه‌ای وضعیت فرآیند جذب</p>
+        <h3 class="font-semibold text-secondary mb-1">{{ t.workspace }}</h3>
+        <p class="text-muted text-sm m-0">
+            {% if current_language_code == 'en' %}Hello <strong>{{ user.get_full_name|default:user.username }}</strong> — Real-time view of recruitment process{% elif current_language_code == 'tr' %}Merhaba <strong>{{ user.get_full_name|default:user.username }}</strong> — İşe alım sürecinin anlık görünümü{% elif current_language_code == 'ar' %}مرحباً <strong>{{ user.get_full_name|default:user.username }}</strong> — نظرة عامة على حالة التوظيف{% else %}سلام <strong>{{ user.get_full_name|default:user.username }}</strong> — نمای لحظه‌ای وضعیت فرآیند جذب{% endif %}
+        </p>
     </div>
     <div class="d-flex gap-2 no-print">
-        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">🖨️ چاپ داشبورد / خروجی PDF</button>
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">{{ t.print_pdf }}</button>
         {% if user.profile.can_view_audit_logs %}
-        <a href="{% url 'audit_log_list' %}" class="btn btn-sm btn-outline-secondary">🕒 تاریخچه فعالیت‌ها</a>
+        <a href="{% url 'audit_log_list' %}" class="btn btn-sm btn-outline-secondary">{{ t.history_btn }}</a>
         {% endif %}
-        <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-primary">📋 فرصت‌های شغلی</a>
-        <a href="{% url 'candidate_score_entry' %}" class="btn btn-sm btn-primary-custom">✏️ ورود نمرات</a>
+        <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-primary">{{ t.jobs_btn }}</a>
+        <a href="{% url 'candidate_score_entry' %}" class="btn btn-sm btn-primary-custom">{{ t.enter_scores }}</a>
     </div>
 </div>
 
@@ -76,11 +78,13 @@
         <a href="{% url 'job_list' %}" class="text-decoration-none">
             <div class="card premium-card kpi-card p-3 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted text-xs font-semibold">فرصت‌های فعال</span>
-                    <span class="badge bg-primary bg-opacity-10 text-primary text-xxs px-2 py-1 font-bold">در جریان</span>
+                    <span class="text-muted text-xs font-semibold">{{ t.active_opportunities }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary text-xxs px-2 py-1 font-bold">{{ t.in_flow }}</span>
                 </div>
                 <div class="fs-3 font-bold text-primary mb-0">{{ active_jobs_count }}</div>
-                <div class="text-muted text-xxs mt-1">از کل <strong>{{ total_jobs }}</strong> فرصت شغلی</div>
+                <div class="text-muted text-xxs mt-1">
+                    {% if current_language_code == 'en' %}of <strong>{{ total_jobs }}</strong> total jobs{% elif current_language_code == 'tr' %}toplam <strong>{{ total_jobs }}</strong> iş fırsatı arasından{% elif current_language_code == 'ar' %}من إجمالي <strong>{{ total_jobs }}</strong> فرصة عمل{% else %}از کل <strong>{{ total_jobs }}</strong> فرصت شغلی{% endif %}
+                </div>
             </div>
         </a>
     </div>
@@ -88,11 +92,13 @@
         <a href="{% url 'candidates_by_stage_list' %}" class="text-decoration-none">
             <div class="card premium-card kpi-card p-3 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted text-xs font-semibold">متقاضیان در ارزیابی</span>
-                    <span class="badge bg-warning bg-opacity-10 text-warning text-xxs px-2 py-1 font-bold">فعال</span>
+                    <span class="text-muted text-xs font-semibold">{{ t.candidates_assessing }}</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning text-xxs px-2 py-1 font-bold">{{ t.active_status }}</span>
                 </div>
                 <div class="fs-3 font-bold text-warning mb-0">{{ in_progress_apps }}</div>
-                <div class="text-muted text-xxs mt-1">از کل <strong>{{ total_candidates }}</strong> متقاضی</div>
+                <div class="text-muted text-xxs mt-1">
+                    {% if current_language_code == 'en' %}of <strong>{{ total_candidates }}</strong> total candidates{% elif current_language_code == 'tr' %}toplam <strong>{{ total_candidates }}</strong> aday arasından{% elif current_language_code == 'ar' %}من إجمالي <strong>{{ total_candidates }}</strong> متقدم{% else %}از کل <strong>{{ total_candidates }}</strong> متقاضی{% endif %}
+                </div>
             </div>
         </a>
     </div>
@@ -100,11 +106,15 @@
         <a href="{% url 'selected_candidates_list' %}" class="text-decoration-none">
             <div class="card premium-card kpi-card p-3 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted text-xs font-semibold">پذیرفته‌شده نهایی</span>
-                    <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2 py-1 font-bold">قبول</span>
+                    <span class="text-muted text-xs font-semibold">{{ t.selected_candidates_kpi }}</span>
+                    <span class="badge bg-success bg-opacity-10 text-success text-xxs px-2 py-1 font-bold">
+                        {% if current_language_code == 'en' %}Pass{% elif current_language_code == 'tr' %}Geçti{% elif current_language_code == 'ar' %}قبول{% else %}قبول{% endif %}
+                    </span>
                 </div>
                 <div class="fs-3 font-bold text-success mb-0">{{ selected_candidates }}</div>
-                <div class="text-muted text-xxs mt-1">⌀ {{ avg_job_finalization_days }} روز برای بستن هر فرصت</div>
+                <div class="text-muted text-xxs mt-1">
+                    {% if current_language_code == 'en' %}⌀ {{ avg_job_finalization_days }} days to close{% elif current_language_code == 'tr' %}⌀ {{ avg_job_finalization_days }} kapatma günü{% elif current_language_code == 'ar' %}⌀ {{ avg_job_finalization_days }} يوماً للإغلاق{% else %}⌀ {{ avg_job_finalization_days }} روز برای بستن{% endif %}
+                </div>
             </div>
         </a>
     </div>
@@ -112,11 +122,11 @@
         <a href="{% url 'sla_delays_dashboard' %}" class="text-decoration-none h-100 d-block">
             <div class="card premium-card kpi-card p-3 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted text-xs font-semibold">متقاضیان خارج از SLA</span>
-                    <span class="badge bg-danger bg-opacity-10 text-danger text-xxs px-2 py-1 font-bold">هشدار</span>
+                    <span class="text-muted text-xs font-semibold">{% if current_language_code == 'en' %}Candidates out of SLA{% elif current_language_code == 'tr' %}SLA Dışı Adaylar{% elif current_language_code == 'ar' %}المتقدمين خارج SLA{% else %}متقاضیان خارج از SLA{% endif %}</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger text-xxs px-2 py-1 font-bold">{% if current_language_code == 'en' %}Warning{% elif current_language_code == 'tr' %}Uyarı{% elif current_language_code == 'ar' %}تنبيه{% else %}هشدار{% endif %}</span>
                 </div>
                 <div class="fs-3 font-bold text-danger mb-0">{{ delayed_candidates_count }}</div>
-                <div class="text-muted text-xxs mt-1">نیاز به پیگیری فوری دارند</div>
+                <div class="text-muted text-xxs mt-1">{% if current_language_code == 'en' %}Require immediate follow-up{% elif current_language_code == 'tr' %}Acil takip gerektirir{% elif current_language_code == 'ar' %}يتطلب متابعة عاجلة{% else %}نیاز به پیگیری فوری دارند{% endif %}</div>
             </div>
         </a>
     </div>
@@ -128,7 +138,7 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">👥 متقاضیان فعال در مراحل ارزیابی</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{% if current_language_code == 'en' %}👥 Active Candidates in Assessment Stages{% elif current_language_code == 'tr' %}👥 Değerlendirme Aşamalarındaki Aktif Adaylar{% elif current_language_code == 'ar' %}👥 المتقدمين النشطين في مراحل التقييم{% else %}👥 متقاضیان فعال در مراحل ارزیابی{% endif %}</h5>
             </div>
             <div class="card-body pt-0">
                 <div class="chart-container">
@@ -143,11 +153,11 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">⏱️ میانگین روزهای حضور در هر مرحله</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{% if current_language_code == 'en' %}⏱️ Avg Days Spent in Each Stage{% elif current_language_code == 'tr' %}⏱️ Aşamada Geçirilen Ortalama Gün{% elif current_language_code == 'ar' %}⏱️ متوسط أيام البقاء في كل مرحلة{% else %}⏱️ میانگین روزهای حضور در هر مرحله{% endif %}</h5>
                 <a href="?include_closed={% if include_closed %}0{% else %}1{% endif %}"
                    class="btn btn-xs {% if include_closed %}btn-primary{% else %}btn-outline-secondary{% endif %} px-2 py-0.5 font-bold"
                    style="font-size: 9px; border-radius: 5px;">
-                   {% if include_closed %}شامل اتمام‌یافته ✓{% else %}+ اتمام‌یافته{% endif %}
+                   {% if include_closed %}{% if current_language_code == 'en' %}Includes Completed ✓{% elif current_language_code == 'tr' %}Tamamlananları Dahil Et ✓{% elif current_language_code == 'ar' %}يشمل المكتملة ✓{% else %}شامل اتمام‌یافته ✓{% endif %}{% else %}{% if current_language_code == 'en' %}+ Completed{% elif current_language_code == 'tr' %}+ Tamamlananlar{% elif current_language_code == 'ar' %}+ المكتملة{% else %}+ اتمام‌یافته{% endif %}{% endif %}
                 </a>
             </div>
             <div class="card-body pt-0">
@@ -162,7 +172,7 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">🎖️ متقاضیان فعال بر اساس رده شغلی</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{% if current_language_code == 'en' %}🎖️ Active Candidates by Job Level{% elif current_language_code == 'tr' %}🎖️ Görev Derecesine Göre Aktif Adaylar{% elif current_language_code == 'ar' %}🎖️ المتقدمين النشطين حسب الفئة الوظيفية{% else %}🎖️ متقاضیان فعال بر اساس رده شغلی{% endif %}</h5>
             </div>
             <div class="card-body pt-0">
                 <div class="chart-container">
@@ -180,7 +190,7 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">📊 وضعیت فرصت‌های شغلی</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{{ t.job_status_legend }}</h5>
             </div>
             <div class="card-body pt-0">
                 {% for item in job_status_distribution %}
@@ -209,7 +219,7 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">📂 توزیع بر اساس رده شغلی</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{{ t.job_dist_legend }}</h5>
             </div>
             <div class="card-body pt-0">
                 {% for cat in unified_category_stats %}
@@ -217,8 +227,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-1 text-xs">
                         <span class="font-bold text-secondary">{{ cat.name }}</span>
                         <span class="text-muted text-xxs">
-                            <strong>{{ cat.active_jobs }}</strong> فرصت فعال از کل <strong>{{ cat.total_jobs }}</strong> فرصت
-                            <span class="badge bg-primary bg-opacity-10 text-primary ms-1 font-bold">{{ cat.total_candidates }} متقاضی</span>
+                            <strong>{{ cat.active_jobs }}</strong> {% if current_language_code == 'en' %}active of{% elif current_language_code == 'tr' %}aktif /{% elif current_language_code == 'ar' %}فرصة نشطة من إجمالي{% else %}فرصت فعال از کل{% endif %} <strong>{{ cat.total_jobs }}</strong> {% if current_language_code == 'en' %}jobs{% elif current_language_code == 'tr' %}fırsat{% elif current_language_code == 'ar' %}فرصة{% else %}فرصت{% endif %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary ms-1 font-bold">{{ cat.total_candidates }} {% if current_language_code == 'en' %}candidates{% elif current_language_code == 'tr' %}aday{% elif current_language_code == 'ar' %}متقدم{% else %}متقاضی{% endif %}</span>
                         </span>
                     </div>
                     <div class="progress progress-thin" style="height: 6px;">
@@ -226,7 +236,7 @@
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-muted text-xs mb-0">اطلاعاتی موجود نیست.</p>
+                <p class="text-muted text-xs mb-0">{{ t.no_data }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -236,7 +246,7 @@
     <div class="col-md-4">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">📈 وضعیت پرونده‌های متقاضیان</h5>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{{ t.cand_status_legend }}</h5>
             </div>
             <div class="card-body pt-0">
                 {% for item in app_status_dist %}
@@ -266,8 +276,8 @@
     <div class="col-md-6">
         <div class="card premium-card bg-white h-100">
             <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                <h5 class="card-title font-semibold text-secondary m-0 text-sm">🎯 فرصت‌های در مرحله ارزیابی و مصاحبه</h5>
-                <a href="{% url 'job_list' %}" class="text-primary text-xxs font-bold">مشاهده همه فرصت‌ها ←</a>
+                <h5 class="card-title font-semibold text-secondary m-0 text-sm">{{ t.job_ass_int_legend }}</h5>
+                <a href="{% url 'job_list' %}" class="text-primary text-xxs font-bold">{{ t.view_all_jobs }}</a>
             </div>
             <div class="card-body pt-0" style="overflow-y: auto; max-height: 400px;">
                 {% for item in ready_for_decision %}
@@ -282,8 +292,8 @@
                                 text-xxs px-2 py-0.5 font-bold">{{ item.job.get_status_display }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center text-xs text-muted mb-2">
-                            <span>کد شغل: {{ item.job.code }}</span>
-                            <span>{{ item.pending }} در انتظار / {{ item.completed }} ارزیابی‌شده</span>
+                            <span>{% if current_language_code == 'en' %}Job Code:{% elif current_language_code == 'tr' %}İş Kodu:{% elif current_language_code == 'ar' %}رمز الوظيفة:{% else %}کد شغل:{% endif %} {{ item.job.code }}</span>
+                            <span>{% if current_language_code == 'en' %}{{ item.pending }} pending / {{ item.completed }} evaluated{% elif current_language_code == 'tr' %}{{ item.pending }} bekleyen / {{ item.completed }} değerlendirilen{% elif current_language_code == 'ar' %}{{ item.pending }} في الانتظار / {{ item.completed }} تم تقييمه{% else %}{{ item.pending }} در انتظار / {{ item.completed }} ارزیابی‌شده{% endif %}</span>
                         </div>
                         {% if item.total > 0 %}
                         <div class="progress progress-thin" style="height: 8px;">
@@ -293,7 +303,7 @@
                     </div>
                 </a>
                 {% empty %}
-                <div class="text-center py-5 text-muted text-xs">فرصت شغلی فعالی در مراحل کانون/مصاحبه یافت نشد.</div>
+                <div class="text-center py-5 text-muted text-xs">{{ t.no_active_jobs_err }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -306,11 +316,11 @@
             <div class="col-12">
                 <div class="card premium-card bg-white border-start border-3 border-danger">
                     <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                        <h5 class="card-title font-semibold text-danger m-0 text-sm">⚠️ متقاضیان خارج از SLA (دارای تأخیر)</h5>
+                        <h5 class="card-title font-semibold text-danger m-0 text-sm">{{ t.delayed_candidates_legend }}</h5>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-danger bg-opacity-10 text-danger text-xxs font-bold">{{ delayed_candidates_count }} مورد</span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger text-xxs font-bold">{{ delayed_candidates_count }} {% if current_language_code == 'en' %}items{% elif current_language_code == 'tr' %}adet{% elif current_language_code == 'ar' %}مورد{% else %}مورد{% endif %}</span>
                             <a href="{% url 'sla_delays_dashboard' %}" class="btn btn-xs btn-outline-danger font-bold text-xxs py-1 px-2.5" style="border-radius: 6px; font-size: 10px;">
-                                میز کار تأخیرات SLA ←
+                                {{ t.sla_dashboard_btn }}
                             </a>
                         </div>
                     </div>
@@ -319,13 +329,13 @@
                         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light text-xs">
                             <div>
                                 <span class="font-bold text-secondary d-block">{{ item.candidate.first_name }} {{ item.candidate.last_name }}</span>
-                                <span class="text-muted text-xxs">{{ item.stage_name }} — در فرصت: {{ item.job.title }}</span>
+                                <span class="text-muted text-xxs">{{ item.stage_name }} — {% if current_language_code == 'en' %}in job:{% elif current_language_code == 'tr' %}fırsatında:{% elif current_language_code == 'ar' %}في الفرصة:{% else %}در فرصت:{% endif %} {{ item.job.title }}</span>
                             </div>
-                            <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 font-bold text-xxs">{{ item.days_waiting }} روز حضور ({{ item.overdue_days }} روز تأخیر)</span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 font-bold text-xxs">{{ item.days_waiting }} {% if current_language_code == 'en' %}days waiting{% elif current_language_code == 'tr' %}bekleme günü{% elif current_language_code == 'ar' %}أيام حضور{% else %}روز حضور{% endif %} ({{ item.overdue_days }} {% if current_language_code == 'en' %}days overdue{% elif current_language_code == 'tr' %}gün gecikme{% elif current_language_code == 'ar' %}أيام تأخير{% else %}روز تأخیر{% endif %})</span>
                         </div>
                         {% empty %}
                         <div class="text-center py-4">
-                            <span class="text-success text-xs font-semibold">✓ تمامی متقاضیان در بازه زمانی استاندارد بررسی شده‌اند.</span>
+                            <span class="text-success text-xs font-semibold">{% if current_language_code == 'en' %}✓ All candidates are evaluated within standard SLA timeline.{% elif current_language_code == 'tr' %}✓ Tüm adaylar standart SLA süresi içinde değerlendirildi.{% elif current_language_code == 'ar' %}✓ تم تقييم جميع المتقدمين في الوقت المحدد.{% else %}✓ تمامی متقاضیان در بازه زمانی استاندارد بررسی شده‌اند.{% endif %}</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -336,42 +346,42 @@
             <div class="col-12">
                 <div class="card premium-card bg-white shadow-sm border-0">
                     <div class="card-header bg-white py-3 border-0">
-                        <h5 class="card-title font-semibold text-secondary m-0 text-sm">📈 شاخص‌های کارایی و بهره‌وری جذب</h5>
+                        <h5 class="card-title font-semibold text-secondary m-0 text-sm">{% if current_language_code == 'en' %}📈 Recruitment Efficiency & Productivity KPIs{% elif current_language_code == 'tr' %}📈 İşe Alım Verimlilik & Üretkenlik Metrikleri{% elif current_language_code == 'ar' %}📈 مؤشرات كفاءة وإنتاجية التوظيف{% else %}📈 شاخص‌های کارایی و بهره‌وری جذب{% endif %}</h5>
                     </div>
                     <div class="card-body pt-0">
                         <div class="row g-2">
                             <div class="col-6">
                                 <div class="p-2.5 bg-light rounded-3 text-right" style="border: 1px solid #e2e8f0; border-radius: 8px;">
-                                    <span class="text-xxs text-muted d-block mb-1">سرعت استخدام (Time-to-Hire)</span>
-                                    <strong class="text-primary text-xs">{{ avg_job_finalization_days }} روز</strong>
-                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">مدت زمان کل فرآیند از انتشار تا جذب نهایی</p>
+                                    <span class="text-xxs text-muted d-block mb-1">{% if current_language_code == 'en' %}Time-to-Hire{% elif current_language_code == 'tr' %}İşe Alım Süresi (Time-to-Hire){% elif current_language_code == 'ar' %}سرعة التوظيف (Time-to-Hire){% else %}سرعت استخدام (Time-to-Hire){% endif %}</span>
+                                    <strong class="text-primary text-xs">{{ avg_job_finalization_days }}{% if current_language_code == 'en' %} days{% elif current_language_code == 'tr' %} gün{% elif current_language_code == 'ar' %} يوماً{% else %} روز{% endif %}</strong>
+                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">{% if current_language_code == 'en' %}Total duration from job post to final hire{% elif current_language_code == 'tr' %}İlandan işe alıma kadar olan toplam süre{% elif current_language_code == 'ar' %}إجمالي المدة من نشر الوظيفة وحتى التعيين النهائي{% else %}مدت زمان کل فرآیند از انتشار تا جذب نهایی{% endif %}</p>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-2.5 bg-light rounded-3 text-right" style="border: 1px solid #e2e8f0; border-radius: 8px;">
-                                    <span class="text-xxs text-muted d-block mb-1">سرعت تعیین تکلیف متقاضی</span>
-                                    <strong class="text-info text-xs">{{ avg_app_finalization_days }} روز</strong>
-                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">مدت زمان متوسط بررسی هر پرونده متقاضی</p>
+                                    <span class="text-xxs text-muted d-block mb-1">{% if current_language_code == 'en' %}Candidate Time-to-Decision{% elif current_language_code == 'tr' %}Aday Karar Hızı{% elif current_language_code == 'ar' %}سرعة تحديد مصير المتقدم{% else %}سرعت تعیین تکلیف متقاضی{% endif %}</span>
+                                    <strong class="text-info text-xs">{{ avg_app_finalization_days }}{% if current_language_code == 'en' %} days{% elif current_language_code == 'tr' %} gün{% elif current_language_code == 'ar' %} يوماً{% else %} روز{% endif %}</strong>
+                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">{% if current_language_code == 'en' %}Average time spent evaluating a candidate profile{% elif current_language_code == 'tr' %}Aday profilini değerlendirmek için harcanan ortalama süre{% elif current_language_code == 'ar' %}متوسط الوقت المستغرق في تقييم ملف المتقدم{% else %}مدت زمان متوسط بررسی هر پرونده متقاضی{% endif %}</p>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-2.5 bg-light rounded-3 text-right" style="border: 1px solid #e2e8f0; border-radius: 8px;">
-                                    <span class="text-xxs text-muted d-block mb-1">نرخ انحراف از SLA</span>
+                                    <span class="text-xxs text-muted d-block mb-1">{% if current_language_code == 'en' %}SLA Violation Rate{% elif current_language_code == 'tr' %}SLA İhlal Oranı{% elif current_language_code == 'ar' %}معدل انحراف SLA{% else %}نرخ انحراف از SLA{% endif %}</span>
                                     <strong class="{% if sla_violation_rate > 25 %}text-danger{% elif sla_violation_rate > 10 %}text-warning{% else %}text-success{% endif %} text-xs">
                                         {{ sla_violation_rate }}٪
                                     </strong>
-                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">سهم متقاضیان فعال دارای تأخیر زمانی</p>
+                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">{% if current_language_code == 'en' %}Share of active candidates with delays{% elif current_language_code == 'tr' %}Geciken aktif adayların oranı{% elif current_language_code == 'ar' %}نسبة المتقدمين النشطين المتأخرين{% else %}سهم متقاضیان فعال دارای تأخیر زمانی{% endif %}</p>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-2.5 bg-light rounded-3 text-right" style="border: 1px solid #e2e8f0; border-radius: 8px;">
-                                    <span class="text-xxs text-muted d-block mb-1">گلوگاه اصلی فرآیند</span>
+                                    <span class="text-xxs text-muted d-block mb-1">{% if current_language_code == 'en' %}Main Process Bottleneck{% elif current_language_code == 'tr' %}Ana Süreç Darboğazı{% elif current_language_code == 'ar' %}عنق الزجاجة الرئيسي للعملية{% else %}گلوگاه اصلی فرآیند{% endif %}</span>
                                     {% if bottleneck_stage %}
                                     <strong class="text-warning text-xs" style="font-size: 11px;">{{ bottleneck_stage.stage_name }}</strong>
-                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">میانگین حضور متقاضی: <strong>{{ bottleneck_stage.avg_days }} روز</strong></p>
+                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">{% if current_language_code == 'en' %}Avg time in stage:{% elif current_language_code == 'tr' %}Aşamadaki ort. süre:{% elif current_language_code == 'ar' %}متوسط الوقت في المرحلة:{% else %}میانگین حضور متقاضی:{% endif %} <strong>{{ bottleneck_stage.avg_days }}{% if current_language_code == 'en' %} days{% elif current_language_code == 'tr' %} gün{% elif current_language_code == 'ar' %} يوماً{% else %} روز{% endif %}</strong></p>
                                     {% else %}
-                                    <strong class="text-success text-xs">بدون گلوگاه</strong>
-                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">تمامی مراحل در زمان مجاز هستند</p>
+                                    <strong class="text-success text-xs">{% if current_language_code == 'en' %}No Bottleneck{% elif current_language_code == 'tr' %}Darboğaz Yok{% elif current_language_code == 'ar' %}لا يوجد عنق زجاجة{% else %}بدون گلوگاه{% endif %}</strong>
+                                    <p class="text-muted text-xxs m-0 mt-1" style="font-size: 9px; line-height: 1.2;">{% if current_language_code == 'en' %}All stages are within allowed limits{% elif current_language_code == 'tr' %}Tüm aşamalar izin verilen limitler dahilinde{% elif current_language_code == 'ar' %}جميع المراحل تقع ضمن الحدود المسموح بها{% else %}تمامی مراحل در زمان مجاز هستند{% endif %}</p>
                                     {% endif %}
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load jalali_tags %}
 
-{% block title %}پایش متقاضیان به تفکیک مراحل | سامانه پیجو{% endblock %}
+{% block title %}{{ t.stage_track_breadcrumbs }} | {{ t.sidebar_title }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -55,12 +55,12 @@
     <div>
         <nav aria-label="breadcrumb" class="mb-1">
             <ol class="breadcrumb mb-0 text-xs">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">میز کار</a></li>
-                <li class="breadcrumb-item active text-primary" aria-current="page">پایش متقاضیان به تفکیک مراحل</li>
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">{{ t.workspace }}</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">{{ t.stage_track_breadcrumbs }}</li>
             </ol>
         </nav>
-        <h1 class="h3 font-bold text-secondary mb-1" id="page-title">پایش متقاضیان به تفکیک مراحل ارزیابی</h1>
-        <p class="text-muted text-sm m-0">لیست تمامی متقاضیان در جریان ارزیابی فعال با امکان تفکیک و رصد مرحله فعلی</p>
+        <h1 class="h3 font-bold text-secondary mb-1" id="page-title">{{ t.stage_track_title }}</h1>
+        <p class="text-muted text-sm m-0">{{ t.stage_track_sub }}</p>
     </div>
     <div class="d-flex gap-2">
         <a id="excel-export-btn" href="?export=excel&q={{ q }}&job_opportunity={{ selected_job_id }}&department={{ selected_dept }}&stage_type={{ selected_stage_type }}" class="btn btn-sm btn-success d-flex align-items-center gap-1.5 font-semibold">
@@ -68,9 +68,9 @@
                 <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
                 <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
             </svg>
-            خروجی اکسل (Excel)
+            {{ t.export_excel_btn }}
         </a>
-        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary font-semibold">بازگشت به داشبورد</a>
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary font-semibold">{{ t.back_to_dashboard }}</a>
     </div>
 </div>
 
@@ -86,8 +86,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">کل در حال ارزیابی</h6>
-                    <h5 class="font-bold text-warning m-0" id="total-selected-kpi">{{ total_in_progress }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{{ t.kpi_total_assessing }}</h6>
+                    <h5 class="font-bold text-warning m-0" id="total-selected-kpi">{{ total_in_progress }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -103,8 +103,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">غربالگری</h6>
-                    <h5 class="font-bold text-info m-0" id="screening-kpi">{{ screening_count }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{{ t.kpi_screening }}</h6>
+                    <h5 class="font-bold text-info m-0" id="screening-kpi">{{ screening_count }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -120,8 +120,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">آزمون کتبی</h6>
-                    <h5 class="font-bold text-primary m-0" id="exam-kpi">{{ exam_count }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{% if current_language_code == 'en' %}Written Exam{% elif current_language_code == 'tr' %}Yazılı Sınav{% elif current_language_code == 'ar' %}الامتحان التحريري{% else %}آزمون کتبی{% endif %}</h6>
+                    <h5 class="font-bold text-primary m-0" id="exam-kpi">{{ exam_count }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -137,8 +137,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">آزمون مهارتی</h6>
-                    <h5 class="font-bold text-secondary m-0" id="skill-kpi">{{ skill_count }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{% if current_language_code == 'en' %}Skill Test{% elif current_language_code == 'tr' %}Beceri Testi{% elif current_language_code == 'ar' %}الامتحان العملي{% else %}آزمون مهارتی{% endif %}</h6>
+                    <h5 class="font-bold text-secondary m-0" id="skill-kpi">{{ skill_count }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -154,8 +154,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">مصاحبه حضوری</h6>
-                    <h5 class="font-bold text-success m-0" id="interview-kpi">{{ interview_count }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{% if current_language_code == 'en' %}Interview{% elif current_language_code == 'tr' %}Mülakat{% elif current_language_code == 'ar' %}المقابلة الشخصية{% else %}مصاحبه حضوری{% endif %}</h6>
+                    <h5 class="font-bold text-success m-0" id="interview-kpi">{{ interview_count }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -171,8 +171,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h6 class="text-muted text-xxs mb-0.5 font-medium">کانون ارزیابی</h6>
-                    <h5 class="font-bold text-danger m-0" id="assessment-kpi">{{ assessment_count }} نفر</h5>
+                    <h6 class="text-muted text-xxs mb-0.5 font-medium">{% if current_language_code == 'en' %}Assessment Center{% elif current_language_code == 'tr' %}Değerlendirme Merkezi{% elif current_language_code == 'ar' %}مركز التقييم{% else %}کانون ارزیابی{% endif %}</h6>
+                    <h5 class="font-bold text-danger m-0" id="assessment-kpi">{{ assessment_count }}{% if current_language_code == 'en' %} person(s){% elif current_language_code == 'tr' %} kişi{% elif current_language_code == 'ar' %} شخص{% else %} نفر{% endif %}</h5>
                 </div>
             </div>
         </div>
@@ -192,14 +192,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
                             </svg>
                         </span>
-                        <input type="text" name="q" id="search-input" value="{{ q }}" class="form-control border-start-0 ps-0 text-sm" placeholder="جستجو نام، کدملی، کدشغل...">
+                        <input type="text" name="q" id="search-input" value="{{ q }}" class="form-control border-start-0 ps-0 text-sm" placeholder="{{ t.search_track_placeholder }}">
                     </div>
                 </div>
                 
                 <!-- فیلتر مرحله ارزیابی -->
                 <div class="col-md-3">
                     <select name="stage_type" id="stage-select" class="form-select text-sm">
-                        <option value="">-- فیلتر مرحله ارزیابی --</option>
+                        <option value="">{{ t.filter_stage_placeholder }}</option>
                         {% for type_code, type_label in stage_types %}
                             <option value="{{ type_code }}" {% if selected_stage_type == type_code %}selected{% endif %}>{{ type_label }}</option>
                         {% endfor %}
@@ -209,7 +209,7 @@
                 <!-- فیلتر فرصت شغلی -->
                 <div class="col-md-2">
                     <select name="job_opportunity" id="job-select" class="form-select text-sm">
-                        <option value="">-- فیلتر فرصت شغلی --</option>
+                        <option value="">{{ t.filter_job_placeholder }}</option>
                         {% for job in jobs %}
                             <option value="{{ job.id }}" {% if selected_job_id|stringformat:"s" == job.id|stringformat:"s" %}selected{% endif %}>{{ job.title }} ({{ job.code }})</option>
                         {% endfor %}
@@ -219,7 +219,7 @@
                 <!-- فیلتر دپارتمان -->
                 <div class="col-md-2">
                     <select name="department" id="dept-select" class="form-select text-sm">
-                        <option value="">-- فیلتر دپارتمان --</option>
+                        <option value="">{{ t.filter_dept_placeholder }}</option>
                         {% for dept in departments %}
                             <option value="{{ dept }}" {% if selected_dept == dept %}selected{% endif %}>{{ dept }}</option>
                         {% endfor %}
@@ -228,8 +228,8 @@
                 
                 <!-- دکمه‌ها -->
                 <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" id="submit-filter-btn" class="btn btn-primary-custom flex-grow-1 font-semibold text-sm">اعمال</button>
-                    <a href="{% url 'candidates_by_stage_list' %}" id="reset-filter-btn" class="btn btn-outline-secondary font-semibold text-sm" title="پاک کردن فیلترها">✖</a>
+                    <button type="submit" id="submit-filter-btn" class="btn btn-primary-custom flex-grow-1 font-semibold text-sm">{{ t.apply_btn }}</button>
+                    <a href="{% url 'candidates_by_stage_list' %}" id="reset-filter-btn" class="btn btn-outline-secondary font-semibold text-sm" title="{% if current_language_code == 'en' %}Clear Filters{% elif current_language_code == 'tr' %}Filtreleri Temizle{% elif current_language_code == 'ar' %}مسح التصفية{% else %}پاک کردن فیلترها{% endif %}">✖</a>
                 </div>
             </div>
         </form>
@@ -243,15 +243,15 @@
             <table class="table table-hover align-middle mb-0" id="selected-table">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">نام و نام خانوادگی</th>
-                        <th>کد ملی</th>
-                        <th>اطلاعات تماس</th>
-                        <th>فرصت شغلی</th>
-                        <th>دپارتمان / واحد</th>
-                        <th>مرحله ارزیابی جاری</th>
-                        <th class="text-center">امتیاز کل</th>
-                        <th>آخرین فعالیت</th>
-                        <th class="pe-4 text-end">عملیات</th>
+                        <th class="ps-4">{{ t.cand_name_th }}</th>
+                        <th>{% if current_language_code == 'en' %}National ID{% elif current_language_code == 'tr' %}Kimlik No{% elif current_language_code == 'ar' %}الرقم القومي{% else %}کد ملی{% endif %}</th>
+                        <th>{{ t.cand_contact_th }}</th>
+                        <th>{% if current_language_code == 'en' %}Job Opportunity{% elif current_language_code == 'tr' %}İş Fırsatı{% elif current_language_code == 'ar' %}فرصة عمل{% else %}فرصت شغلی{% endif %}</th>
+                        <th>{{ t.dept_th }}</th>
+                        <th>{{ t.table_th_stage }}</th>
+                        <th class="text-center">{{ t.table_th_score }}</th>
+                        <th>{{ t.table_th_last_activity }}</th>
+                        <th class="pe-4 text-end">{{ t.actions_th }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -278,7 +278,7 @@
                             <a href="{% url 'job_pipeline' app.job.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary text-sm d-block">
                                 {{ app.job.title }}
                             </a>
-                            <span class="badge bg-primary bg-opacity-10 text-primary font-semibold text-xxs mt-1">کد شغل: {{ app.job.code }}</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary font-semibold text-xxs mt-1">{% if current_language_code == 'en' %}Job Code:{% elif current_language_code == 'tr' %}İş Kodu:{% elif current_language_code == 'ar' %}رمز الوظيفة:{% else %}کد شغل:{% endif %} {{ app.job.code }}</span>
                         </td>
                         
                         <!-- دپارتمان -->
@@ -300,7 +300,7 @@
                                     {{ app.current_stage.name }}
                                 </span>
                             {% else %}
-                                <span class="badge bg-light text-muted">شروع فرآیند</span>
+                                <span class="badge bg-light text-muted">{{ t.start_process }}</span>
                             {% endif %}
                         </td>
                         
@@ -324,15 +324,15 @@
                         <!-- عملیات -->
                         <td class="pe-4 text-end">
                             <div class="d-flex gap-1 justify-content-end">
-                                <a href="{% url 'job_pipeline' app.job.id %}" class="btn btn-xs btn-outline-primary font-semibold">پایپلاین ارزیابی</a>
-                                <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info font-semibold">مشاهده پرونده</a>
+                                <a href="{% url 'job_pipeline' app.job.id %}" class="btn btn-xs btn-outline-primary font-semibold">{{ t.pipeline }}</a>
+                                <a href="{% url 'candidate_detail' app.candidate.id %}" class="btn btn-xs btn-outline-info font-semibold">{{ t.view_profile_btn }}</a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="9" class="text-center py-5 text-muted text-xs">
-                            هیچ کاندیدایی در حال ارزیابی با مشخصات وارد شده یافت نشد.
+                            {{ t.empty_track_list }}
                         </td>
                     </tr>
                     {% endfor %}
@@ -344,7 +344,7 @@
         {% if is_paginated %}
         <div class="card-footer bg-white border-top border-slate py-3 d-flex justify-content-between align-items-center" id="pagination-footer">
             <div class="text-xs text-muted">
-                نمایش {{ page_obj.start_index }} تا {{ page_obj.end_index }} از {{ paginator.count }} متقاضی در حال ارزیابی
+                {% if current_language_code == 'en' %}Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} candidates in assessment{% elif current_language_code == 'tr' %}{{ page_obj.start_index }} - {{ page_obj.end_index }} arası gösteriliyor (Toplam {{ paginator.count }} değerlendirilen aday){% elif current_language_code == 'ar' %}عرض من {{ page_obj.start_index }} إلى {{ page_obj.end_index }} من {{ paginator.count }} متقدم تحت التقييم{% else %}نمایش {{ page_obj.start_index }} تا {{ page_obj.end_index }} از {{ paginator.count }} متقاضی در حال ارزیابی{% endif %}
             </div>
             <nav aria-label="Candidates by Stage Pagination">
                 <ul class="pagination pagination-sm mb-0 gap-1">
@@ -414,12 +414,15 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        const listCard = document.getElementById('list-card');
-        if (listCard) {
-            convertDigitsToPersian(listCard);
+        const langCode = "{{ current_language_code }}";
+        if (langCode === 'fa' || langCode === 'ar') {
+            const listCard = document.getElementById('list-card');
+            if (listCard) {
+                convertDigitsToPersian(listCard);
+            }
+            const kpis = document.querySelectorAll('[id$="-kpi"]');
+            kpis.forEach(el => convertDigitsToPersian(el));
         }
-        const kpis = document.querySelectorAll('[id$="-kpi"]');
-        kpis.forEach(el => convertDigitsToPersian(el));
     });
 </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load jalali_tags %}
-{% block title %}داشبورد برنامه‌ریزی جذب | سامانه پیجو{% endblock %}
+{% block title %}{{ t.planning_title }} | {{ t.sidebar_title }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -60,21 +60,21 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-end mb-4">
     <div>
-        <h3 class="font-bold text-secondary mb-1">برنامه‌ریزی و ظرفیت‌سنجی جذب</h3>
-        <p class="text-muted text-sm m-0">مدیریت تقویم استخدام، کنترل تعهدات SLA مراحل و بررسی ظرفیت ماهانه ارزیاب‌ها</p>
+        <h3 class="font-bold text-secondary mb-1">{{ t.planning_title }}</h3>
+        <p class="text-muted text-sm m-0">{{ t.planning_sub }}</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'planning_conflicts' %}" class="btn btn-outline-warning font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
-            🔍 پایش همزمانی و تداخل‌ها
+            {{ t.planning_gantt_conflict }}
         </a>
         <a href="{% url 'planning_calendar' %}" class="btn btn-outline-primary font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
-            📅 تقویم برنامه‌ریزی جذب
+            {{ t.planning_calendar_btn }}
         </a>
         <a href="{% url 'planning_export_excel' %}" class="btn btn-outline-success font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
-            📥 خروجی اکسل برنامه‌ها
+            {{ t.planning_excel_btn }}
         </a>
         <a href="{% url 'planning_config' %}" class="btn btn-outline-secondary font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
-            ⚙️ تنظیمات SLA و ظرفیت‌ها
+            {{ t.planning_config_btn }}
         </a>
     </div>
 </div>
@@ -84,35 +84,35 @@
     <div class="col-md-3">
         <div class="card kpi-card border-0 p-4 shadow-xs">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted text-xs font-semibold">برنامه‌های فعال</span>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-2 py-1 text-xxs font-bold">ACTIVE</span>
+                <span class="text-muted text-xs font-semibold">{{ t.kpi_active_plans }}</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-2 py-1 text-xxs font-bold">{{ t.planning_active_badge }}</span>
             </div>
-            <h2 class="font-bold text-secondary m-0">{{ active_plans.count }} <small class="text-xs text-muted font-normal">فرصت شغلی</small></h2>
+            <h2 class="font-bold text-secondary m-0">{{ active_plans.count }} <small class="text-xs text-muted font-normal">{% if current_language_code == 'en' %} job(s){% elif current_language_code == 'tr' %} iş fırsatı{% elif current_language_code == 'ar' %} فرصة عمل{% else %} فرصت شغلی{% endif %}</small></h2>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card kpi-card border-0 p-4 shadow-xs">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted text-xs font-semibold">خارج از SLA (دارای تأخیر)</span>
-                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2 py-1 text-xxs font-bold">DELAYED</span>
+                <span class="text-muted text-xs font-semibold">{{ t.kpi_delayed_plans }}</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2 py-1 text-xxs font-bold">{{ t.planning_delayed_badge }}</span>
             </div>
-            <h2 class="font-bold text-danger m-0">{{ delayed_count }} <small class="text-xs text-muted font-normal">فرصت شغلی</small></h2>
+            <h2 class="font-bold text-danger m-0">{{ delayed_count }} <small class="text-xs text-muted font-normal">{% if current_language_code == 'en' %} job(s){% elif current_language_code == 'tr' %} iş fırsatı{% elif current_language_code == 'ar' %} فرصة عمل{% else %} فرصت شغلی{% endif %}</small></h2>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card kpi-card border-0 p-4 shadow-xs">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted text-xs font-semibold">برنامه‌های پیش‌نویس</span>
-                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 text-xxs font-bold">DRAFT</span>
+                <span class="text-muted text-xs font-semibold">{{ t.kpi_draft_plans }}</span>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 text-xxs font-bold">{{ t.planning_draft_badge }}</span>
             </div>
-            <h2 class="font-bold text-secondary m-0">{{ draft_plans.count }} <small class="text-xs text-muted font-normal">برنامه</small></h2>
+            <h2 class="font-bold text-secondary m-0">{{ draft_plans.count }} <small class="text-xs text-muted font-normal">{% if current_language_code == 'en' %} plan(s){% elif current_language_code == 'tr' %} plan{% elif current_language_code == 'ar' %} خطة{% else %} برنامه{% endif %}</small></h2>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card kpi-card border-0 p-4 shadow-xs">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted text-xs font-semibold">تاریخ امروز (شمسی)</span>
-                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-10 px-2 py-1 text-xxs font-bold">TODAY</span>
+                <span class="text-muted text-xs font-semibold">{{ t.kpi_today_jalali }}</span>
+                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-10 px-2 py-1 text-xxs font-bold">{{ t.planning_today_badge }}</span>
             </div>
             <h4 class="font-bold text-secondary m-0 mt-1.5">{{ today_jalali }}</h4>
         </div>
@@ -124,7 +124,9 @@
     <div class="col-lg-8">
         <div class="card kpi-card border-0 p-4 h-100 shadow-xs" id="capacity-gauges-card">
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                <h5 class="font-bold text-secondary m-0">پایش ظرفیت مراحل ارزیابی در ماه ({{ current_month_name }})</h5>
+                <h5 class="font-bold text-secondary m-0">
+                    {% if current_language_code == 'en' %}Monthly Assessment Stage Capacity ({{ current_month_name }}){% elif current_language_code == 'tr' %}Aylık Değerlendirme Aşaması Kapasitesi ({{ current_month_name }}){% elif current_language_code == 'ar' %}متابعة قدرة مراحل التقييم لشهر ({{ current_month_name }}){% else %}پایش ظرفیت مراحل ارزیابی در ماه ({{ current_month_name }}){% endif %}
+                </h5>
                 <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-xs btn-outline-secondary font-bold px-2 py-1" 
                             style="border-radius: 6px; font-size: 10px;"
@@ -132,7 +134,7 @@
                             hx-target="#capacity-gauges-card" 
                             hx-select="#capacity-gauges-card"
                             hx-swap="outerHTML">
-                        ◀ ماه قبل
+                        {{ t.planning_prev_month }}
                     </button>
                     <span class="badge bg-light text-secondary border px-2 py-1.5 font-bold" style="font-size: 10.5px; border-radius: 6px;">
                         {{ current_month_name }}
@@ -143,7 +145,7 @@
                             hx-target="#capacity-gauges-card" 
                             hx-select="#capacity-gauges-card"
                             hx-swap="outerHTML">
-                        ماه بعد ▶
+                        {{ t.planning_next_month }}
                     </button>
                 </div>
             </div>
@@ -154,7 +156,9 @@
                     <div class="p-3 border rounded-3 bg-light bg-opacity-50">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="font-semibold text-xs text-secondary">{{ stat.label }}</span>
-                            <span class="text-xxs text-muted font-bold">{{ stat.consumed }} / {{ stat.limit }} متقاضی</span>
+                            <span class="text-xxs text-muted font-bold">
+                                {% if current_language_code == 'en' %}{{ stat.consumed }} / {{ stat.limit }} candidates{% elif current_language_code == 'tr' %}{{ stat.consumed }} / {{ stat.limit }} aday{% elif current_language_code == 'ar' %}{{ stat.consumed }} / {{ stat.limit }} متقدم{% else %}{{ stat.consumed }} / {{ stat.limit }} متقاضی{% endif %}
+                            </span>
                         </div>
                         <div class="progress" style="height: 10px; border-radius: 5px;">
                             <div class="progress-bar {% if stat.percentage > 90 %}bg-danger{% elif stat.percentage > 70 %}bg-warning{% else %}bg-success{% endif %}" 
@@ -165,8 +169,12 @@
                                  aria-valuemax="100"></div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-2" style="font-size: 10px;">
-                            <span class="text-muted">ظرفیت باقیمانده: <strong>{{ stat.remaining }} نفر</strong></span>
-                            <span class="font-bold {% if stat.percentage > 90 %}text-danger{% else %}text-secondary{% endif %}">{{ stat.percentage }}٪ مصرف شده</span>
+                            <span class="text-muted">
+                                {% if current_language_code == 'en' %}Remaining Capacity: <strong>{{ stat.remaining }} person(s)</strong>{% elif current_language_code == 'tr' %}Kalan Kapasite: <strong>{{ stat.remaining }} kişi</strong>{% elif current_language_code == 'ar' %}القدرة المتبقية: <strong>{{ stat.remaining }} شخص</strong>{% else %}ظرفیت باقیمانده: <strong>{{ stat.remaining }} نفر</strong>{% endif %}
+                            </span>
+                            <span class="font-bold {% if stat.percentage > 90 %}text-danger{% else %}text-secondary{% endif %}">
+                                {% if current_language_code == 'en' %}{{ stat.percentage }}% consumed{% elif current_language_code == 'tr' %}%{{ stat.percentage }} tüketildi{% elif current_language_code == 'ar' %}تم استهلاك {{ stat.percentage }}٪{% else %}{{ stat.percentage }}٪ مصرف شده{% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -179,15 +187,15 @@
     <div class="col-lg-4">
         <!-- کارت برنامه زمانبندی هفته آینده -->
         <div class="card kpi-card border-0 p-4 shadow-xs mb-4">
-            <h5 class="font-bold text-secondary mb-1">📅 دستور کار ۷ روز آینده</h5>
-            <p class="text-muted text-xxs mb-2">شروع و پایان مراحل ارزیابی بر اساس برنامه‌ریزی‌های فعال در یک هفته پیش‌رو</p>
+            <h5 class="font-bold text-secondary mb-1">{{ t.planning_agenda_title }}</h5>
+            <p class="text-muted text-xxs mb-2">{{ t.planning_agenda_sub }}</p>
             
             <div class="d-flex gap-2 mb-3">
                 <a href="{% url 'planning_agenda_export_excel' %}" class="btn btn-xs btn-outline-success font-bold px-2 py-1" style="border-radius: 6px; font-size: 10px;">
-                    📥 خروجی اکسل هفتگی
+                    {{ t.planning_agenda_excel }}
                 </a>
                 <a href="{% url 'planning_agenda_print' %}" target="_blank" class="btn btn-xs btn-outline-primary font-bold px-2 py-1" style="border-radius: 6px; font-size: 10px;">
-                    🖨 چاپ / PDF هفتگی
+                    {{ t.planning_agenda_print }}
                 </a>
             </div>
             
@@ -201,10 +209,10 @@
                         {% for event in day.events %}
                         <div class="p-2 mb-2 bg-light rounded-3 d-flex align-items-start gap-2" style="border-radius: 8px; font-size: 11px;">
                             <span class="badge bg-{{ event.badge_color }} bg-opacity-10 text-{{ event.badge_color }} px-1.5 py-0.5 text-xxs font-bold mt-0.5">
-                                {% if event.type == 'START' %}شروع{% else %}پایان{% endif %}
+                                {% if event.type == 'START' %}{{ t.planning_agenda_start }}{% else %}{{ t.planning_agenda_end }}{% endif %}
                             </span>
                             <div class="text-secondary" style="line-height: 1.4;">
-                                مرحله <strong class="text-dark">{{ event.stage_name }}</strong> برای شغل <strong>{{ event.job_title }}</strong>
+                                {% if current_language_code == 'en' %}Stage <strong class="text-dark">{{ event.stage_name }}</strong> for job <strong>{{ event.job_title }}</strong>{% elif current_language_code == 'tr' %}<strong class="text-dark">{{ event.job_title }}</strong> işi için <strong class="text-dark">{{ event.stage_name }}</strong> aşaması{% elif current_language_code == 'ar' %}المرحلة <strong class="text-dark">{{ event.stage_name }}</strong> للوظيفة <strong>{{ event.job_title }}</strong>{% else %}مرحله <strong class="text-dark">{{ event.stage_name }}</strong> برای شغل <strong>{{ event.job_title }}</strong>{% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -212,7 +220,7 @@
                 </div>
                 {% empty %}
                 <div class="text-center text-muted text-xs py-5">
-                    <p class="m-0">هیچ رویدادی برای ۷ روز آینده زمانبندی نشده است.</p>
+                    <p class="m-0">{{ t.planning_no_agenda }}</p>
                 </div>
                 {% endfor %}
             </div>
@@ -220,22 +228,24 @@
 
         <!-- فرصت‌های شغلی بدون برنامه زمانبندی -->
         <div class="card kpi-card border-0 p-4 shadow-xs">
-            <h5 class="font-bold text-secondary mb-1">مشاغل بدون برنامه‌ریزی</h5>
-            <p class="text-muted text-xxs mb-3">فرصت‌های شغلی فعالی که هنوز برنامه زمانبندی جذب آن‌ها ثبت نشده است.</p>
+            <h5 class="font-bold text-secondary mb-1">{{ t.planning_unplanned_jobs_title }}</h5>
+            <p class="text-muted text-xxs mb-3">{{ t.planning_unplanned_jobs_sub }}</p>
             
             <div class="overflow-y-auto pe-1" style="max-height: 230px;">
                 {% for job in unplanned_jobs %}
                 <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded border border-slate-light" style="border-radius: 8px;">
                     <div>
                         <span class="font-semibold text-xs text-secondary d-block">{{ job.title }}</span>
-                        <small class="text-muted text-xxs">کد: {{ job.code }} | تعداد جذب: {{ job.headcount }}</small>
+                        <small class="text-muted text-xxs">
+                            {% if current_language_code == 'en' %}Code: {{ job.code }} | Target headcount: {{ job.headcount }}{% elif current_language_code == 'tr' %}Kod: {{ job.code }} | Hedef kontenjan: {{ job.headcount }}{% elif current_language_code == 'ar' %}الرمز: {{ job.code }} | العدد المطلوب: {{ job.headcount }}{% else %}کد: {{ job.code }} | تعداد جذب: {{ job.headcount }}{% endif %}
+                        </small>
                     </div>
                     <a href="{% url 'job_planning' job.id %}" class="btn btn-xs btn-primary font-bold px-2 py-1" style="font-size: 10px; border-radius: 6px;">
-                        📅 برنامه‌ریزی
+                        {{ t.planning_unplanned_btn }}
                     </a>
                 </div>
                 {% empty %}
-                <div class="text-center text-muted text-xs py-4">همه فرصت‌های شغلی فعال برنامه‌ریزی شده‌اند.</div>
+                <div class="text-center text-muted text-xs py-4">{{ t.planning_all_planned_msg }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -245,9 +255,9 @@
 <!-- جدول برنامه‌های فعال و پیش‌بینی زمانبندی -->
 <div class="card kpi-card border-0 shadow-xs">
     <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <h5 class="font-bold text-secondary m-0">برنامه‌های استخدام فعال و تقویم فرآیندها</h5>
+        <h5 class="font-bold text-secondary m-0">{{ t.planning_active_plans_title }}</h5>
         {% if search_query or selected_dept or sort_by != '-created_at' %}
-            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 px-2 py-1 text-xxs font-bold">فیلتر فعال</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 px-2 py-1 text-xxs font-bold">{{ t.planning_filter_active_badge }}</span>
         {% endif %}
     </div>
     <div class="card-body p-4">
@@ -261,12 +271,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
                             </svg>
                         </span>
-                        <input type="text" name="q" value="{{ search_query }}" class="form-control bg-light border-start-0 text-xs" placeholder="جستجوی عنوان شغل یا کد شغل..." style="border-radius: 8px 0 0 8px;">
+                        <input type="text" name="q" value="{{ search_query }}" class="form-control bg-light border-start-0 text-xs" placeholder="{{ t.planning_search_placeholder }}" style="border-radius: 8px 0 0 8px;">
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <select name="department" class="form-select bg-light text-xs" style="border-radius: 8px;">
-                        <option value="">همه دپارتمان‌ها / واحدها</option>
+                        <option value="">{{ t.planning_all_depts_placeholder }}</option>
                         {% for dept in departments %}
                             <option value="{{ dept }}" {% if selected_dept == dept %}selected{% endif %}>{{ dept }}</option>
                         {% endfor %}
@@ -274,20 +284,20 @@
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <select name="sort_by" class="form-select bg-light text-xs" style="border-radius: 8px;">
-                        <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>جدیدترین برنامه‌ها</option>
-                        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>قدیمی‌ترین برنامه‌ها</option>
-                        <option value="start_date" {% if sort_by == 'start_date' %}selected{% endif %}>تاریخ شروع فرآیند (قدیمی به جدید)</option>
-                        <option value="-start_date" {% if sort_by == '-start_date' %}selected{% endif %}>تاریخ شروع فرآیند (جدید به قدیمی)</option>
-                        <option value="predicted_end_date" {% if sort_by == 'predicted_end_date' %}selected{% endif %}>پایان پیش‌بینی‌شده (صعودی)</option>
-                        <option value="-predicted_end_date" {% if sort_by == '-predicted_end_date' %}selected{% endif %}>پایان پیش‌بینی‌شده (نزولی)</option>
-                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>عنوان شغل (الفبا)</option>
-                        <option value="headcount" {% if sort_by == 'headcount' %}selected{% endif %}>ظرفیت جذب (بیشترین)</option>
+                        <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>{{ t.planning_sort_newest }}</option>
+                        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>{{ t.planning_sort_oldest }}</option>
+                        <option value="start_date" {% if sort_by == 'start_date' %}selected{% endif %}>{{ t.planning_sort_start_asc }}</option>
+                        <option value="-start_date" {% if sort_by == '-start_date' %}selected{% endif %}>{{ t.planning_sort_start_desc }}</option>
+                        <option value="predicted_end_date" {% if sort_by == 'predicted_end_date' %}selected{% endif %}>{{ t.planning_sort_end_asc }}</option>
+                        <option value="-predicted_end_date" {% if sort_by == '-predicted_end_date' %}selected{% endif %}>{{ t.planning_sort_end_desc }}</option>
+                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>{{ t.planning_sort_title }}</option>
+                        <option value="headcount" {% if sort_by == 'headcount' %}selected{% endif %}>{{ t.planning_sort_headcount }}</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-6 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary font-bold text-xs w-100 py-2" style="border-radius: 8px;">اعمال فیلتر</button>
+                    <button type="submit" class="btn btn-primary font-bold text-xs w-100 py-2" style="border-radius: 8px;">{{ t.planning_filter_submit }}</button>
                     {% if search_query or selected_dept or sort_by != '-created_at' %}
-                        <a href="." class="btn btn-outline-secondary font-bold text-xs py-2 px-3" style="border-radius: 8px;" title="پاک کردن فیلترها">✕</a>
+                        <a href="." class="btn btn-outline-secondary font-bold text-xs py-2 px-3" style="border-radius: 8px;" title="✕">✕</a>
                     {% endif %}
                 </div>
             </form>
@@ -301,17 +311,23 @@
                         <span class="text-xs text-muted font-normal">({{ plan.job.code }})</span>
                     </h6>
                     <div class="d-flex align-items-center gap-3 mt-1.5" style="font-size: 11px;">
-                        <span>تعداد موردنیاز: <strong class="text-primary">{{ plan.job.headcount }} نفر</strong></span>
-                        <span>شروع: <strong>{{ plan.start_date|to_jalali }}</strong></span>
-                        <span>پایان پیش‌بینی‌شده: <strong class="text-success">{{ plan.predicted_end_date|to_jalali }}</strong></span>
+                        <span>
+                            {% if current_language_code == 'en' %}Target Headcount: <strong class="text-primary">{{ plan.job.headcount }} person(s)</strong>{% elif current_language_code == 'tr' %}Hedef Kontenjan: <strong class="text-primary">{{ plan.job.headcount }} kişi</strong>{% elif current_language_code == 'ar' %}العدد المطلوب: <strong class="text-primary">{{ plan.job.headcount }} شخص</strong>{% else %}تعداد موردنیاز: <strong class="text-primary">{{ plan.job.headcount }} نفر</strong>{% endif %}
+                        </span>
+                        <span>
+                            {% if current_language_code == 'en' %}Start: <strong>{{ plan.start_date|to_jalali }}</strong>{% elif current_language_code == 'tr' %}Başlangıç: <strong>{{ plan.start_date|to_jalali }}</strong>{% elif current_language_code == 'ar' %}البدء: <strong>{{ plan.start_date|to_jalali }}</strong>{% else %}شروع: <strong>{{ plan.start_date|to_jalali }}</strong>{% endif %}
+                        </span>
+                        <span>
+                            {% if current_language_code == 'en' %}Predicted End: <strong class="text-success">{{ plan.predicted_end_date|to_jalali }}</strong>{% elif current_language_code == 'tr' %}Tahmini Bitiş: <strong class="text-success">{{ plan.predicted_end_date|to_jalali }}</strong>{% elif current_language_code == 'ar' %}النهاية المتوقعة: <strong class="text-success">{{ plan.predicted_end_date|to_jalali }}</strong>{% else %}پایان پیش‌بینی‌شده: <strong class="text-success">{{ plan.predicted_end_date|to_jalali }}</strong>{% endif %}
+                        </span>
                     </div>
                 </div>
                 <div class="col-lg-8 text-lg-end mt-2 mt-lg-0">
                     <a href="{% url 'job_planning' plan.job.id %}" class="btn btn-xs btn-outline-secondary font-bold px-3 py-1.5" style="border-radius: 6px; font-size: 11px;">
-                        📝 ویرایش زمانبندی
+                        {{ t.planning_edit_btn }}
                     </a>
                     <a href="{% url 'job_pipeline' plan.job.id %}" class="btn btn-xs btn-outline-primary font-bold px-3 py-1.5 ms-1" style="border-radius: 6px; font-size: 11px;">
-                        📊 ورود به پایپلاین ارزیابی
+                        {{ t.planning_pipeline_btn }}
                     </a>
                 </div>
             </div>
@@ -331,8 +347,8 @@
                                 {% elif s_plan.stage_type == 'ASSESSMENT' %}bg-assessment
                                 {% else %}bg-other{% endif %}"
                                  style="right: calc({{ forloop.counter0 }} * (100% / {{ plans_list|length }})); width: calc(100% / {{ plans_list|length }});"
-                                 title="مرحله: {{ s_plan.stage.name }} | شروع: {{ s_plan.planned_start_date|to_jalali }} | پایان: {{ s_plan.planned_end_date|to_jalali }} ({{ s_plan.sla_days }} روز کاری)">
-                                {{ s_plan.stage.name }} ({{ s_plan.planned_start_date|to_jalali }} تا {{ s_plan.planned_end_date|to_jalali }})
+                                 title="{% if current_language_code == 'en' %}Stage: {{ s_plan.stage.name }} | Start: {{ s_plan.planned_start_date|to_jalali }} | End: {{ s_plan.planned_end_date|to_jalali }} ({{ s_plan.sla_days }} business days){% elif current_language_code == 'tr' %}Aşama: {{ s_plan.stage.name }} | Başlangıç: {{ s_plan.planned_start_date|to_jalali }} | Bitiş: {{ s_plan.planned_end_date|to_jalali }} ({{ s_plan.sla_days }} iş günü){% elif current_language_code == 'ar' %}المرحلة: {{ s_plan.stage.name }} | البدء: {{ s_plan.planned_start_date|to_jalali }} | الانتهاء: {{ s_plan.planned_end_date|to_jalali }} ({{ s_plan.sla_days }} يوم عمل){% else %}مرحله: {{ s_plan.stage.name }} | شروع: {{ s_plan.planned_start_date|to_jalali }} | پایان: {{ s_plan.planned_end_date|to_jalali }} ({{ s_plan.sla_days }} روز کاری){% endif %}">
+                                {{ s_plan.stage.name }} ({{ s_plan.planned_start_date|to_jalali }} {% if current_language_code == 'en' %}to{% elif current_language_code == 'tr' %}ile{% elif current_language_code == 'ar' %}إلى{% else %}تا{% endif %} {{ s_plan.planned_end_date|to_jalali }})
                             </div>
                         {% endfor %}
                         {% endwith %}
@@ -342,8 +358,8 @@
         </div>
         {% empty %}
         <div class="text-center text-muted py-5">
-            <p class="m-0">هیچ برنامه زمانبندی استخدام فعالی در سیستم ثبت نشده است.</p>
-            <p class="text-xs mt-1">فرصت‌های شغلی را از جدول سمت راست بالای صفحه برنامه‌ریزی کنید.</p>
+            <p class="m-0">{{ t.planning_empty_plans_msg }}</p>
+            <p class="text-xs mt-1">{{ t.planning_empty_plans_sub }}</p>
         </div>
         {% endfor %}
     </div>

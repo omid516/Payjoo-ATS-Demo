@@ -255,7 +255,7 @@ def adjust_weights_to_step(weights, step=5, target_sum=100, limits=None):
     return rounded
 
 
-def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_scores=None, round_to_five=False, active_stages=None, deactivated_stages=None):
+def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_scores=None, round_to_five=False, active_stages=None, deactivated_stages=None, bypass_limits=False):
     """
     Takes a list/queryset of JobOpportunityCompetency and calculates:
     - required stages and their weights (summing to 100%)
@@ -274,13 +274,22 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
     """
     # 1. Define Stage Constraints
     # Stage limits: (min, max)
-    STAGE_LIMITS = {
-        'SCREENING': (0, 0),
-        'EXAM': (20, 50),
-        'SKILL_TEST': (20, 40),
-        'INTERVIEW': (10, 25),
-        'ASSESSMENT': (15, 40)
-    }
+    if bypass_limits:
+        STAGE_LIMITS = {
+            'SCREENING': (0, 0),
+            'EXAM': (0, 100),
+            'SKILL_TEST': (0, 100),
+            'INTERVIEW': (0, 100),
+            'ASSESSMENT': (0, 100)
+        }
+    else:
+        STAGE_LIMITS = {
+            'SCREENING': (0, 0),
+            'EXAM': (20, 50),
+            'SKILL_TEST': (20, 40),
+            'INTERVIEW': (10, 25),
+            'ASSESSMENT': (15, 40)
+        }
     
     STAGE_NAMES = {
         'SCREENING': 'غربالگری اولیه',

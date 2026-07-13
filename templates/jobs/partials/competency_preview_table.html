@@ -82,7 +82,11 @@
                             {% endif %}
                         </div>
                         {% if sdata.is_active %}
-                        <span class="text-xxs text-muted d-block mt-1 font-semibold" style="font-size: 8.5px;">مجاز: {{ sdata.min_limit }}٪ تا {{ sdata.max_limit }}٪</span>
+                            {% if sdata.min_limit == 0 and sdata.max_limit == 100 %}
+                            <span class="text-xxs text-success d-block mt-1 font-semibold" style="font-size: 8.5px;">🔓 بدون محدودیت رنج اوزان</span>
+                            {% else %}
+                            <span class="text-xxs text-muted d-block mt-1 font-semibold" style="font-size: 8.5px;">مجاز: {{ sdata.min_limit }}٪ تا {{ sdata.max_limit }}٪</span>
+                            {% endif %}
                         {% else %}
                         <span class="text-xxs text-danger d-block mt-1 font-semibold" style="font-size: 8.5px;">غیرفعال</span>
                         {% endif %}

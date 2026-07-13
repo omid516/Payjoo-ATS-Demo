@@ -838,6 +838,41 @@ class CompetencyEngineTests(TestCase):
         if 'ASSESSMENT' in stages:
             self.assertTrue(15 <= stages['ASSESSMENT']['weight'] <= 40)
 
+    def test_calculate_assessment_plan_bypass_limits(self):
+        """تست عملکرد موتور ارزیابی با بایپس کردن رنج محدودیت اوزان مراحل"""
+        from apps.jobs.utils import calculate_assessment_plan
+        
+        jc1 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc1, code=self.cc1.code, title=self.cc1.title,
+            competency_type=self.cc1.competency_type, importance=self.cc1.importance, level=self.cc1.level
+        )
+        jc2 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc2, code=self.cc2.code, title=self.cc2.title,
+            competency_type=self.cc2.competency_type, importance=self.cc2.importance, level=self.cc2.level
+        )
+        jc3 = JobOpportunityCompetency.objects.create(
+            job=self.job, central_competency=self.cc3, code=self.cc3.code, title=self.cc3.title,
+            competency_type=self.cc3.competency_type, importance=self.cc3.importance, level=self.cc3.level
+        )
+        
+        custom_weights = {
+            'EXAM': 70,
+            'SKILL_TEST': 10,
+            'INTERVIEW': 20
+        }
+        res = calculate_assessment_plan(
+            [jc1, jc2, jc3],
+            custom_weights=custom_weights,
+            bypass_limits=True,
+            deactivated_stages=['ASSESSMENT']
+        )
+        stages = res['stages']
+        
+        self.assertEqual(res['errors'], [])
+        self.assertEqual(stages['EXAM']['weight'], 70)
+        self.assertEqual(stages['SKILL_TEST']['weight'], 10)
+        self.assertEqual(stages['INTERVIEW']['weight'], 20)
+
     def test_excel_import_logic(self):
         """تست همگام‌سازی و ایمپورت اکسل شایستگی‌ها"""
         import tempfile
@@ -996,6 +1031,25 @@ class CompetencyEngineTests(TestCase):
         } # sum = 80
         res_sum = calculate_assessment_plan([self.cc1, self.cc2], custom_weights=custom_weights_sum)
         self.assertIn("مجموع اوزان مراحل ارزیابی باید دقیقاً ۱۰۰٪ باشد. (مجموع فعلی: 80٪)", res_sum['errors'])
+
+        # 4. Test view-level save with bypass_limits=True and invalid weights
+        url = reverse('job_competency_config', kwargs={'job_id': self.job.id})
+        data = {
+            'action': 'save',
+            'selected_competencies': [self.cc1.id, self.cc2.id],
+            'stage_weight_EXAM': 70,
+            'stage_weight_SKILL_TEST': 10,
+            'stage_weight_INTERVIEW': 20,
+            'bypass_limits': 'on'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302) # successfully saved and redirected
+        self.job.refresh_from_db()
+        self.assertTrue(self.job.bypass_limits)
+        stages = {s.stage_type: s.weight for s in self.job.stages.filter(is_deleted=False)}
+        self.assertEqual(stages['EXAM'], 70)
+        self.assertEqual(stages['SKILL_TEST'], 10)
+        self.assertEqual(stages['INTERVIEW'], 20)
 
     def test_workflow_template_recommendation_and_save(self):
         """تست پیشنهاد الگوی فرآیند استخدام منطبق و ثبت آن روی فرصت شغلی"""
@@ -2155,6 +2209,73 @@ class JobOpportunityStageSyncTests(TestCase):
         # 4. Re-fetch app to verify its current_stage is now updated to INTERVIEW
         self.app.refresh_from_db()
         self.assertEqual(self.app.current_stage, stage_interview)
+
+
+class CompetencyModelViewsTests(TestCase):
+    def setUp(self):
+        from apps.accounts.models import UserProfile
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.user = User.objects.create_user(username='testadmin', password='password123', email='test@example.com')
+        self.profile = self.user.profile
+        self.profile.role = UserProfile.ROLE_ADMIN
+        self.profile.save()
+        self.client.login(username='testadmin', password='password123')
+        
+        from apps.jobs.models import CompetencyModel
+        self.model = CompetencyModel.objects.create(name="مدل ارزیابی پایه", description="توضیحات مدل")
+
+    def test_list_view_without_htmx_with_model_id(self):
+        """تست اینکه درخواست غیر HTMX با model_id کل قالب را لود کند نه پارشیال را"""
+        url = reverse('competency_model_list')
+        response = self.client.get(url, {'model_id': self.model.id})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/competency_model_list.html')
+        self.assertContains(response, "مدل‌های شایستگی سازمانی")
+        self.assertEqual(response.context['selected_model'], self.model)
+
+    def test_list_view_with_htmx_with_model_id(self):
+        """تست اینکه درخواست HTMX با model_id فقط قالب پارشیال جزئیات را رندر کند"""
+        url = reverse('competency_model_list')
+        response = self.client.get(url, {'model_id': self.model.id}, headers={'HX-Request': 'true'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/partials/competency_model_detail.html')
+        self.assertContains(response, self.model.name)
+        self.assertNotContains(response, "مدل‌های شایستگی سازمانی")
+
+    def test_item_add_without_htmx_redirects(self):
+        """تست اینکه افزودن شایستگی بدون HTMX کاربر را ریدایرکت کند"""
+        url = reverse('competency_model_item_manage', kwargs={'model_id': self.model.id})
+        data = {
+            'title': 'شایستگی تست جدید',
+            'competency_type': 'SK',
+            'importance': '2',
+            'level': '3'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        expected_redirect = reverse('competency_model_list') + f'?model_id={self.model.id}'
+        self.assertRedirects(response, expected_redirect)
+        
+        self.assertEqual(self.model.items.filter(is_deleted=False).count(), 1)
+        item = self.model.items.filter(is_deleted=False).first()
+        self.assertEqual(item.title, 'شایستگی تست جدید')
+        self.assertEqual(item.competency_type, 'SK')
+
+    def test_item_add_with_htmx_returns_partial(self):
+        """تست اینکه افزودن شایستگی با HTMX مستقیما پارشیال را رندر کند"""
+        url = reverse('competency_model_item_manage', kwargs={'model_id': self.model.id})
+        data = {
+            'title': 'شایستگی مهارتی دوم',
+            'competency_type': 'AB',
+            'importance': '1',
+            'level': '2'
+        }
+        response = self.client.post(url, data, headers={'HX-Request': 'true'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'jobs/partials/competency_model_detail.html')
+        self.assertContains(response, 'شایستگی مهارتی دوم')
+        self.assertEqual(self.model.items.filter(is_deleted=False).count(), 1)
 
 
 

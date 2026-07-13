@@ -105,6 +105,7 @@ class JobOpportunity(SoftDeleteModel):
     assigned_recruiter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_jobs', verbose_name="کارشناس جذب مسئول")
     workflow = models.ForeignKey(WorkflowTemplate, on_delete=models.SET_NULL, null=True, blank=True, related_name='jobs', verbose_name="الگوی فرآیند استخدامی")
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_RECEIVED, verbose_name="وضعیت فرصت شغلی")
+    bypass_limits = models.BooleanField(default=False, verbose_name="بایپس کردن رنج")
 
     SOURCE_ATS = 'ATS'
     SOURCE_IMPORT = 'IMPORT'

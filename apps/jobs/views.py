@@ -1812,7 +1812,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     active_stages_in_db.add(stage.stage_type)
             
             # Find recommended stages
-            plan_temp = calculate_assessment_plan(selected_comps)
+            plan_temp = calculate_assessment_plan(selected_comps, bypass_limits=job.bypass_limits)
             for k, s in plan_temp['stages'].items():
                 if k != 'SCREENING' and s.get('is_active', False) and k not in active_stages_in_db:
                     deactivated_stages.append(k)
@@ -1826,7 +1826,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             custom_weights=custom_weights,
             custom_passing_scores=custom_passing_scores,
             round_to_five=round_to_five,
-            deactivated_stages=deactivated_stages
+            deactivated_stages=deactivated_stages,
+            bypass_limits=job.bypass_limits
         )
         active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
         from .utils import suggest_workflow_templates
@@ -1847,6 +1848,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             'suggested_workflows': suggested_workflows,
             'selected_workflow_id': selected_workflow_id,
             'round_to_five': round_to_five,
+            'bypass_limits': job.bypass_limits,
             'competency_models': competency_models,
             'deactivated_stages_str': deactivated_stages_str
         }
@@ -1922,6 +1924,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
+            bypass_limits = request.POST.get('bypass_limits') == 'on'
             deactivated_stages_raw = request.POST.get('deactivated_stages', '').strip()
             deactivated_stages = [s.strip() for s in deactivated_stages_raw.split(',') if s.strip()]
 
@@ -1930,7 +1933,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 custom_weights=custom_weights,
                 custom_passing_scores=custom_passing_scores,
                 round_to_five=round_to_five,
-                deactivated_stages=deactivated_stages
+                deactivated_stages=deactivated_stages,
+                bypass_limits=bypass_limits
             )
             
             active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
@@ -1943,7 +1947,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'errors': plan_res.get('errors', []),
                 'suggested_workflows': suggested_workflows,
                 'selected_workflow_id': selected_workflow_id,
-                'deactivated_stages_str': deactivated_stages_raw
+                'deactivated_stages_str': deactivated_stages_raw,
+                'bypass_limits': bypass_limits
             }
             # Renders only the preview table part
             return render(request, 'jobs/partials/competency_preview_table.html', context)
@@ -2011,6 +2016,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
+            bypass_limits = request.POST.get('bypass_limits') == 'on'
             deactivated_stages_raw = request.POST.get('deactivated_stages', '').strip()
             deactivated_stages = [s.strip() for s in deactivated_stages_raw.split(',') if s.strip()]
 
@@ -2019,7 +2025,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 custom_weights=custom_weights,
                 custom_passing_scores=custom_passing_scores,
                 round_to_five=round_to_five,
-                deactivated_stages=deactivated_stages
+                deactivated_stages=deactivated_stages,
+                bypass_limits=bypass_limits
             )
             stages_data = plan_res['stages']
             
@@ -2057,6 +2064,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     'suggested_workflows': suggested_workflows,
                     'selected_workflow_id': request.POST.get('workflow_template_id'),
                     'round_to_five': round_to_five,
+                    'bypass_limits': bypass_limits,
                     'deactivated_stages_str': deactivated_stages_raw
                 }
                 return render(request, self.template_name, context)
@@ -2077,6 +2085,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 if job.status == JobOpportunity.STATUS_RECEIVED:
                     job.status = JobOpportunity.STATUS_PLANNING
                 
+                job.bypass_limits = bypass_limits
                 job.save()
 
                 # Soft delete current job competencies
@@ -2718,7 +2727,7 @@ class CompetencyModelListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
             context = {'action': 'edit', 'model': model_obj}
             return render(request, 'jobs/partials/competency_model_form.html', context)
             
-        elif model_id:
+        elif model_id and request.headers.get('HX-Request') == 'true':
             model_obj = get_object_or_404(CompetencyModel, id=model_id, is_deleted=False)
             items = model_obj.items.filter(is_deleted=False)
             context = {
@@ -2830,6 +2839,9 @@ class CompetencyModelItemManageView(LoginRequiredMixin, RoleRequiredMixin, View)
                 code=code
             )
             
+        if request.headers.get('HX-Request') != 'true':
+            return redirect(reverse('competency_model_list') + f'?model_id={model_obj.id}')
+
         items = model_obj.items.filter(is_deleted=False)
         context = {
             'model': model_obj,

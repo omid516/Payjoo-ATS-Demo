@@ -161,11 +161,17 @@
                 <p class="text-muted text-xs mb-3">فرآیند ارزیابی، اوزان مراحل و حد نصاب‌ها به صورت خودکار بر اساس شایستگی‌های انتخابی محاسبه می‌شوند.</p>
                 
                 <!-- گزینه‌های محاسباتی -->
-                <div class="mb-3.5 p-2.5 bg-light bg-opacity-75 border border-light rounded-3 d-flex align-items-center mb-3">
+                <div class="mb-3.5 p-2.5 bg-light bg-opacity-75 border border-light rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
                     <div class="form-check form-switch m-0 d-flex align-items-center gap-2" style="direction: rtl;">
                         <input class="form-check-input ms-0 me-2" type="checkbox" name="round_to_five" id="round_to_five" {% if round_to_five %}checked{% endif %} onchange="triggerPreviewUpdate(true)" style="cursor: pointer;">
                         <label class="form-check-label text-xs font-bold text-secondary" for="round_to_five" style="cursor: pointer;">
                             ⚖️ رند کردن اوزان شایستگی‌ها و مراحل به مضرب ۵
+                        </label>
+                    </div>
+                    <div class="form-check form-switch m-0 d-flex align-items-center gap-2" style="direction: rtl;">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" name="bypass_limits" id="bypass_limits" {% if bypass_limits %}checked{% endif %} onchange="triggerPreviewUpdate(true)" style="cursor: pointer;">
+                        <label class="form-check-label text-xs font-bold text-secondary" for="bypass_limits" style="cursor: pointer;">
+                            🔓 بایپس کردن رنج محدودیت اوزان مراحل
                         </label>
                     </div>
                 </div>
@@ -201,7 +207,7 @@
 <div id="htmx-preview-trigger"
      hx-post="{% url 'job_competency_config' job.id %}"
      hx-target="#preview-table-container"
-     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name^='stage_active_'], [name='workflow_template_id'], [name='custom_competencies'], [name='round_to_five'], [name='deactivated_stages']"
+     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name^='stage_active_'], [name='workflow_template_id'], [name='custom_competencies'], [name='round_to_five'], [name='bypass_limits'], [name='deactivated_stages']"
      hx-vals="js:{action: 'preview', recalculate_weights: getRecalculateWeights()}"
      hx-trigger="updatePreview">
 </div>

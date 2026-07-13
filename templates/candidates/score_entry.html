@@ -81,7 +81,7 @@
                     <option value="">{{ t.se_select_placeholder }}</option>
                     {% for job in jobs %}
                         <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
-                            [{{ job.code }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' or job.status == 'SUSPENDED' %}({{ job.get_status_display }}){% endif %}
+                            [{{ job.code }} | ش.درخواست: {{ job.request_number }}] {{ job.title }} {% if job.status == 'CLOSED' or job.status == 'CANCELLED' or job.status == 'SUSPENDED' %}({{ job.get_status_display }}){% endif %}
                         </option>
                     {% endfor %}
                 </select>

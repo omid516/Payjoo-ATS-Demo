@@ -1,7 +1,11 @@
 {% load jalali_tags %}
 <tr id="score-row-{{ app.id }}" class="align-middle">
+    <!-- Row Index -->
+    <td class="ps-3 text-center font-bold text-slate-500 text-sm">
+        {% if row_index %}{{ row_index }}{% elif forloop.counter %}{{ forloop.counter }}{% else %}-{% endif %}
+    </td>
     <!-- Candidate Info -->
-    <td class="ps-4">
+    <td class="ps-2">
         <div class="font-semibold text-secondary">
             {{ app.candidate.first_name }} {{ app.candidate.last_name }}
         </div>

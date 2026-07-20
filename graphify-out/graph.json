@@ -197,8 +197,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": "usercreationform"
     },
     {
@@ -230,8 +230,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_clean_username",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".clean_username()"
     },
     {
@@ -241,8 +241,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_clean",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".clean()"
     },
     {
@@ -252,8 +252,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_save",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".save()"
     },
     {
@@ -285,8 +285,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "apps_accounts_forms_userupdateform_clean",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".clean()"
     },
     {
@@ -296,8 +296,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "apps_accounts_forms_userupdateform_save",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".save()"
     },
     {
@@ -428,8 +428,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_accounts_models",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": "models.py"
     },
     {
@@ -450,8 +450,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_accounts_models_meta",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": "meta"
     },
     {
@@ -692,8 +692,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_accounts_tests",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": "tests.py"
     },
     {
@@ -1352,8 +1352,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_accounts_views_customloginview",
-      "community": 222,
-      "community_name": "UserProfile",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": "customloginview"
     },
     {
@@ -1363,8 +1363,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "djangologinview",
-      "community": 222,
-      "community_name": "UserProfile",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": "djangologinview"
     },
     {
@@ -1374,8 +1374,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_accounts_views_customloginview_get_success_url",
-      "community": 222,
-      "community_name": "UserProfile",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".get_success_url()"
     },
     {
@@ -1473,8 +1473,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "apps_accounts_views_usercreateview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 54,
+      "community_name": "Static: Bootstrap Bundle Sn",
       "norm_label": "usercreateview"
     },
     {
@@ -1484,8 +1484,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_createview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 54,
+      "community_name": "Static: Bootstrap Bundle Sn",
       "norm_label": "createview"
     },
     {
@@ -1495,8 +1495,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "apps_accounts_views_usercreateview_form_valid",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 54,
+      "community_name": "Static: Bootstrap Bundle Sn",
       "norm_label": ".form_valid()"
     },
     {
@@ -1561,8 +1561,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "apps_accounts_views_dashboardview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "dashboardview"
     },
     {
@@ -1572,8 +1572,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_templateview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "templateview"
     },
     {
@@ -1957,8 +1957,8 @@
       "source_location": "L1640",
       "_origin": "ast",
       "id": "apps_accounts_views_userpreferencesview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "userpreferencesview"
     },
     {
@@ -6346,8 +6346,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_extract_keywords",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 65,
+      "community_name": "JobOpportunityBulkStatusTests",
       "norm_label": ".extract_keywords()"
     },
     {
@@ -6357,8 +6357,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_compute_job_match",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 65,
+      "community_name": "JobOpportunityBulkStatusTests",
       "norm_label": ".compute_job_match()"
     },
     {
@@ -6368,8 +6368,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_get_queryset",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 65,
+      "community_name": "JobOpportunityBulkStatusTests",
       "norm_label": ".get_queryset()"
     },
     {
@@ -7226,8 +7226,8 @@
       "source_location": "L1322",
       "_origin": "ast",
       "id": "apps_candidates_views_scoreentrylistview_post",
-      "community": 6,
-      "community_name": "Jobs: Jobs Candidates Get",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".post()"
     },
     {
@@ -7589,8 +7589,8 @@
       "source_location": "L2683",
       "_origin": "ast",
       "id": "apps_candidates_views_exportinterviewsexcelview_get",
-      "community": 226,
-      "community_name": "check_stage_access",
+      "community": 34,
+      "community_name": "Candidates: Get Candidates Core",
       "norm_label": ".get()"
     },
     {
@@ -8491,8 +8491,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_core_middleware",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "middleware.py"
     },
     {
@@ -8502,8 +8502,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_core_middleware_auditmiddleware",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "auditmiddleware"
     },
     {
@@ -8513,8 +8513,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "middlewaremixin",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "middlewaremixin"
     },
     {
@@ -8524,8 +8524,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "apps_core_middleware_auditmiddleware_process_request",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".process_request()"
     },
     {
@@ -8535,8 +8535,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_core_middleware_auditmiddleware_process_response",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".process_response()"
     },
     {
@@ -8546,8 +8546,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_core_middleware_get_current_user",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "get_current_user()"
     },
     {
@@ -8557,8 +8557,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "apps_core_middleware_get_current_ip",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "get_current_ip()"
     },
     {
@@ -8601,8 +8601,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_core_models",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "models.py"
     },
     {
@@ -8612,8 +8612,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_core_models_softdeletequeryset",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "softdeletequeryset"
     },
     {
@@ -8623,8 +8623,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_core_models_softdeletequeryset_delete",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".delete()"
     },
     {
@@ -8634,8 +8634,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "apps_core_models_softdeletequeryset_hard_delete",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".hard_delete()"
     },
     {
@@ -8645,8 +8645,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "apps_core_models_softdeletemanager",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "softdeletemanager"
     },
     {
@@ -8656,8 +8656,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "apps_core_models_softdeletemanager_get_queryset",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".get_queryset()"
     },
     {
@@ -8678,8 +8678,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "apps_core_models_meta",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "meta"
     },
     {
@@ -8689,8 +8689,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_core_models_softdeletemodel_delete",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".delete()"
     },
     {
@@ -8700,8 +8700,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "apps_core_models_softdeletemodel_hard_delete",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".hard_delete()"
     },
     {
@@ -8711,8 +8711,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_core_models_softdeletemodel_save",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".save()"
     },
     {
@@ -8722,8 +8722,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "apps_core_models_auditlog",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "auditlog"
     },
     {
@@ -8733,8 +8733,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "apps_core_models_auditlog_save",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".save()"
     },
     {
@@ -8744,8 +8744,8 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "apps_core_models_auditlog_delete",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": ".delete()"
     },
     {
@@ -8766,8 +8766,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_core_templatetags_jalali_tags",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "jalali_tags.py"
     },
     {
@@ -8788,8 +8788,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "apps_core_templatetags_jalali_tags_get_stage_state",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "get_stage_state()"
     },
     {
@@ -8799,8 +8799,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "apps_core_templatetags_jalali_tags_get_item",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "get_item()"
     },
     {
@@ -8810,8 +8810,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "apps_core_templatetags_jalali_tags_param_replace",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "param_replace()"
     },
     {
@@ -8821,8 +8821,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "apps_core_templatetags_jalali_tags_sort_url",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "sort_url()"
     },
     {
@@ -8898,8 +8898,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_core_utils",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "utils.py"
     },
     {
@@ -8909,8 +8909,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_core_utils_log_action",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "log_action()"
     },
     {
@@ -8931,8 +8931,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_core_utils_rationale_5",
-      "community": 22,
-      "community_name": "Candidates: Candidates Integrity Engine",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "\u0633\u0631\u0648\u06cc\u0633 \u062b\u0628\u062a \u062e\u0648\u062f\u06a9\u0627\u0631 \u0644\u0627\u06af \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0628\u0627 \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u0627\u0632 \u06a9\u0627\u0631\u0628\u0631 \u0648 \u0627\u06cc\u200c\u067e\u06cc \u062c\u0627\u0631\u06cc \u0633\u0634\u0646."
     },
     {
@@ -11329,8 +11329,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowtemplate",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "workflowtemplate"
     },
     {
@@ -11351,8 +11351,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowtemplate_str",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".__str__()"
     },
     {
@@ -11362,8 +11362,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "workflowstagetemplate"
     },
     {
@@ -11373,8 +11373,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate_str",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".__str__()"
     },
     {
@@ -11648,8 +11648,8 @@
       "source_location": "L620",
       "_origin": "ast",
       "id": "apps_jobs_models_competencymodel",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "competencymodel"
     },
     {
@@ -11659,8 +11659,8 @@
       "source_location": "L628",
       "_origin": "ast",
       "id": "apps_jobs_models_competencymodel_str",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".__str__()"
     },
     {
@@ -11791,8 +11791,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_jobs_tests",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "tests.py"
     },
     {
@@ -12044,8 +12044,8 @@
       "source_location": "L524",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunitybulkstatustests",
-      "community": 65,
-      "community_name": "JobOpportunityBulkStatusTests",
+      "community": 41,
+      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
       "norm_label": "jobopportunitybulkstatustests"
     },
     {
@@ -12055,8 +12055,8 @@
       "source_location": "L525",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunitybulkstatustests_setup",
-      "community": 65,
-      "community_name": "JobOpportunityBulkStatusTests",
+      "community": 41,
+      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
       "norm_label": ".setup()"
     },
     {
@@ -12066,8 +12066,8 @@
       "source_location": "L543",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunitybulkstatustests_test_bulk_status_update_anonymous_redirect",
-      "community": 65,
-      "community_name": "JobOpportunityBulkStatusTests",
+      "community": 41,
+      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
       "norm_label": ".test_bulk_status_update_anonymous_redirect()"
     },
     {
@@ -12077,8 +12077,8 @@
       "source_location": "L548",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunitybulkstatustests_test_bulk_status_update_unauthorized_user",
-      "community": 65,
-      "community_name": "JobOpportunityBulkStatusTests",
+      "community": 41,
+      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
       "norm_label": ".test_bulk_status_update_unauthorized_user()"
     },
     {
@@ -12088,8 +12088,8 @@
       "source_location": "L554",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunitybulkstatustests_test_bulk_status_update_success",
-      "community": 65,
-      "community_name": "JobOpportunityBulkStatusTests",
+      "community": 41,
+      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
       "norm_label": ".test_bulk_status_update_success()"
     },
     {
@@ -12605,8 +12605,8 @@
       "source_location": "L1730",
       "_origin": "ast",
       "id": "apps_jobs_tests_recruitmentpatternsimulatortests_test_ai_competency_filtering",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 37,
+      "community_name": "Jobs: Jobs Recruitmentpatternsimulatorte",
       "norm_label": ".test_ai_competency_filtering()"
     },
     {
@@ -12682,8 +12682,8 @@
       "source_location": "L1865",
       "_origin": "ast",
       "id": "apps_jobs_tests_aisettingviewandapitests_test_ai_settings_save",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 55,
+      "community_name": "Jobs: Jobs Aisettingviewandapitests Test",
       "norm_label": ".test_ai_settings_save()"
     },
     {
@@ -12726,8 +12726,8 @@
       "source_location": "L1959",
       "_origin": "ast",
       "id": "apps_jobs_tests_smarttalentmatchingtests",
-      "community": 41,
-      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
+      "community": 52,
+      "community_name": "Static: Bootstrap Bundle Ui",
       "norm_label": "smarttalentmatchingtests"
     },
     {
@@ -12737,8 +12737,8 @@
       "source_location": "L1960",
       "_origin": "ast",
       "id": "apps_jobs_tests_smarttalentmatchingtests_setup",
-      "community": 41,
-      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
+      "community": 52,
+      "community_name": "Static: Bootstrap Bundle Ui",
       "norm_label": ".setup()"
     },
     {
@@ -12748,8 +12748,8 @@
       "source_location": "L2053",
       "_origin": "ast",
       "id": "apps_jobs_tests_smarttalentmatchingtests_test_optimized_talent_matching",
-      "community": 41,
-      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
+      "community": 52,
+      "community_name": "Static: Bootstrap Bundle Ui",
       "norm_label": ".test_optimized_talent_matching()"
     },
     {
@@ -12759,8 +12759,8 @@
       "source_location": "L2074",
       "_origin": "ast",
       "id": "apps_jobs_tests_smarttalentmatchingtests_test_ai_match_talent_scores_endpoint_offline_fallback",
-      "community": 41,
-      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
+      "community": 52,
+      "community_name": "Static: Bootstrap Bundle Ui",
       "norm_label": ".test_ai_match_talent_scores_endpoint_offline_fallback()"
     },
     {
@@ -12770,8 +12770,8 @@
       "source_location": "L2092",
       "_origin": "ast",
       "id": "apps_jobs_tests_smarttalentmatchingtests_test_ai_match_talent_scores_endpoint_live",
-      "community": 41,
-      "community_name": "Jobs: Jobs Jobopportunitybulkstatustests",
+      "community": 52,
+      "community_name": "Static: Bootstrap Bundle Ui",
       "norm_label": ".test_ai_match_talent_scores_endpoint_live()"
     },
     {
@@ -13507,8 +13507,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_jobs_views",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "views.py"
     },
     {
@@ -13518,8 +13518,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "apps_jobs_views_normalize_digits",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "normalize_digits()"
     },
     {
@@ -13760,8 +13760,8 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteconfirmview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": ".get()"
     },
     {
@@ -13936,8 +13936,8 @@
       "source_location": "L480",
       "_origin": "ast",
       "id": "apps_jobs_views_exportjobsexcelview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -13958,8 +13958,8 @@
       "source_location": "L520",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowstagespreviewview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".get()"
     },
     {
@@ -14035,8 +14035,8 @@
       "source_location": "L571",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintadview_get_context_data",
-      "community": 4,
-      "community_name": "Candidates: Candidates License Core",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14057,8 +14057,8 @@
       "source_location": "L605",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitybulkstatusview_post",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -14090,8 +14090,8 @@
       "source_location": "L679",
       "_origin": "ast",
       "id": "apps_jobs_views_centralcompetencyuploadview_post",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".post()"
     },
     {
@@ -14178,8 +14178,8 @@
       "source_location": "L1170",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "recruitmentpatterndashboardview"
     },
     {
@@ -14189,8 +14189,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_jobs_views_py_templateview",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "templateview"
     },
     {
@@ -14343,8 +14343,8 @@
       "source_location": "L2271",
       "_origin": "ast",
       "id": "apps_jobs_views_searchpostsapiview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14365,8 +14365,8 @@
       "source_location": "L2309",
       "_origin": "ast",
       "id": "apps_jobs_views_searchpostsdetailapiview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14387,8 +14387,8 @@
       "source_location": "L2351",
       "_origin": "ast",
       "id": "apps_jobs_views_searchcompetenciesapiview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14464,8 +14464,8 @@
       "source_location": "L2490",
       "_origin": "ast",
       "id": "apps_jobs_views_aisettingview_post",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -14475,8 +14475,8 @@
       "source_location": "L2574",
       "_origin": "ast",
       "id": "apps_jobs_views_jobaistrategyprintview",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "jobaistrategyprintview"
     },
     {
@@ -14508,8 +14508,8 @@
       "source_location": "L2613",
       "_origin": "ast",
       "id": "apps_jobs_views_organizationsettingview_get",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14530,8 +14530,8 @@
       "source_location": "L2716",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodellistview",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "competencymodellistview"
     },
     {
@@ -14552,8 +14552,8 @@
       "source_location": "L2730",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodellistview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -14596,8 +14596,8 @@
       "source_location": "L2819",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodelitemmanageview",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "competencymodelitemmanageview"
     },
     {
@@ -14607,8 +14607,8 @@
       "source_location": "L2827",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodelitemmanageview_post",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -14640,8 +14640,8 @@
       "source_location": "L2901",
       "_origin": "ast",
       "id": "apps_jobs_views_generatejobspecsapiview",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "generatejobspecsapiview"
     },
     {
@@ -15773,8 +15773,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ats_urls",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "urls.py"
     },
     {
@@ -15784,8 +15784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ats_urls_rationale_1",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "url configuration for ats project."
     },
     {
@@ -16045,8 +16045,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_remove",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "remove()"
     },
     {
@@ -16364,8 +16364,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_queuecallback",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._queuecallback()"
     },
     {
@@ -16485,8 +16485,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_focusablechildren",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "focusablechildren()"
     },
     {
@@ -16529,8 +16529,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": "q"
     },
     {
@@ -16540,8 +16540,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_name",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": ".name()"
     },
     {
@@ -16551,8 +16551,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_close",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": ".close()"
     },
     {
@@ -16562,8 +16562,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_destroyelement",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": "._destroyelement()"
     },
     {
@@ -16573,8 +16573,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_jqueryinterface",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -16584,8 +16584,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y",
-      "community": 67,
-      "community_name": "Static: Bootstrap Bundle Y",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "y"
     },
     {
@@ -16595,8 +16595,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_name",
-      "community": 67,
-      "community_name": "Static: Bootstrap Bundle Y",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -16606,8 +16606,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_toggle",
-      "community": 67,
-      "community_name": "Static: Bootstrap Bundle Y",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".toggle()"
     },
     {
@@ -16617,8 +16617,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_jqueryinterface",
-      "community": 67,
-      "community_name": "Static: Bootstrap Bundle Y",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -16782,8 +16782,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_constructor",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".constructor()"
     },
     {
@@ -16848,8 +16848,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_prev",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 32,
+      "community_name": "Static: Bootstrap Bundle Es",
       "norm_label": ".prev()"
     },
     {
@@ -16925,8 +16925,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_addeventlisteners",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -16936,8 +16936,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_addtoucheventlisteners",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "._addtoucheventlisteners()"
     },
     {
@@ -17068,8 +17068,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_jqueryinterface",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 13,
+      "community_name": "Static: Bootstrap Bundle Qi",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -17244,8 +17244,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ue",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ue()"
     },
     {
@@ -17255,8 +17255,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_fe",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "fe()"
     },
     {
@@ -17266,8 +17266,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_pe",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "pe()"
     },
     {
@@ -17277,8 +17277,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_me",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "me()"
     },
     {
@@ -17288,8 +17288,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ge",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ge()"
     },
     {
@@ -17310,8 +17310,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ae",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ae()"
     },
     {
@@ -17321,8 +17321,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ee",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ee()"
     },
     {
@@ -17332,8 +17332,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_te",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "te()"
     },
     {
@@ -17343,8 +17343,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ce",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ce()"
     },
     {
@@ -17354,8 +17354,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_oe",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "oe()"
     },
     {
@@ -17365,8 +17365,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xe",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "xe()"
     },
     {
@@ -17376,8 +17376,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ke",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ke()"
     },
     {
@@ -17387,8 +17387,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_le",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "le()"
     },
     {
@@ -17398,8 +17398,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_se",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "se()"
     },
     {
@@ -17409,8 +17409,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_de",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "de()"
     },
     {
@@ -17420,8 +17420,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_e",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "$e()"
     },
     {
@@ -17453,8 +17453,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_je",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "je()"
     },
     {
@@ -17464,8 +17464,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_we",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "we()"
     },
     {
@@ -17497,8 +17497,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ye",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ye()"
     },
     {
@@ -17508,8 +17508,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ze",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ze()"
     },
     {
@@ -17519,8 +17519,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ti",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ti()"
     },
     {
@@ -17541,8 +17541,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ii",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ii()"
     },
     {
@@ -17585,8 +17585,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_di",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "di()"
     },
     {
@@ -17596,8 +17596,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ui()"
     },
     {
@@ -17607,8 +17607,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_pi",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "pi()"
     },
     {
@@ -17618,8 +17618,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_mi",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "mi()"
     },
     {
@@ -17882,8 +17882,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_default",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".default()"
     },
     {
@@ -17893,8 +17893,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_defaulttype",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".defaulttype()"
     },
     {
@@ -17904,8 +17904,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_name",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -17915,8 +17915,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_show",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".show()"
     },
     {
@@ -17926,8 +17926,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_hide",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".hide()"
     },
     {
@@ -17937,8 +17937,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_dispose",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".dispose()"
     },
     {
@@ -17948,8 +17948,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_getelement",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._getelement()"
     },
     {
@@ -17959,8 +17959,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_configaftermerge",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._configaftermerge()"
     },
     {
@@ -17970,8 +17970,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_append",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._append()"
     },
     {
@@ -17981,8 +17981,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_emulateanimation",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._emulateanimation()"
     },
     {
@@ -17992,8 +17992,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "sn"
     },
     {
@@ -18003,8 +18003,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_constructor",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".constructor()"
     },
     {
@@ -18014,8 +18014,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_default",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".default()"
     },
     {
@@ -18025,8 +18025,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_defaulttype",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18036,8 +18036,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_name",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -18047,8 +18047,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_activate",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".activate()"
     },
     {
@@ -18058,8 +18058,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_deactivate",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".deactivate()"
     },
     {
@@ -18069,8 +18069,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_handlefocusin",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._handlefocusin()"
     },
     {
@@ -18080,8 +18080,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_handlekeydown",
-      "community": 54,
-      "community_name": "Static: Bootstrap Bundle Sn",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._handlekeydown()"
     },
     {
@@ -18091,8 +18091,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "cn"
     },
     {
@@ -18102,8 +18102,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_constructor",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".constructor()"
     },
     {
@@ -18113,8 +18113,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_getwidth",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".getwidth()"
     },
     {
@@ -18124,8 +18124,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_hide",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".hide()"
     },
     {
@@ -18135,8 +18135,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_reset",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".reset()"
     },
     {
@@ -18146,8 +18146,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_isoverflowing",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".isoverflowing()"
     },
     {
@@ -18157,8 +18157,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_disableoverflow",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "._disableoverflow()"
     },
     {
@@ -18168,8 +18168,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_setelementattributes",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "._setelementattributes()"
     },
     {
@@ -18179,8 +18179,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_saveinitialattribute",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "._saveinitialattribute()"
     },
     {
@@ -18190,8 +18190,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_resetelementattributes",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "._resetelementattributes()"
     },
     {
@@ -18201,8 +18201,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_applymanipulationcallback",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": "._applymanipulationcallback()"
     },
     {
@@ -18212,8 +18212,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_on_constructor",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".constructor()"
     },
     {
@@ -18421,8 +18421,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "qn"
     },
     {
@@ -18432,8 +18432,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_constructor",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".constructor()"
     },
     {
@@ -18443,8 +18443,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_default",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".default()"
     },
     {
@@ -18454,8 +18454,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_defaulttype",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18465,8 +18465,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_name",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".name()"
     },
     {
@@ -18487,8 +18487,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_show",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".show()"
     },
     {
@@ -18498,8 +18498,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_hide",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".hide()"
     },
     {
@@ -18520,8 +18520,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializebackdrop",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._initializebackdrop()"
     },
     {
@@ -18531,8 +18531,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializefocustrap",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._initializefocustrap()"
     },
     {
@@ -18542,8 +18542,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_addeventlisteners",
-      "community": 19,
-      "community_name": "Static: Bootstrap Bundle Ao",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -18641,8 +18641,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_changecontent",
-      "community": 20,
-      "community_name": "Static: Bootstrap Bundle Jn",
+      "community": 30,
+      "community_name": "Static: Bootstrap Bundle Us",
       "norm_label": ".changecontent()"
     },
     {
@@ -18663,8 +18663,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_typecheckconfig",
-      "community": 20,
-      "community_name": "Static: Bootstrap Bundle Jn",
+      "community": 30,
+      "community_name": "Static: Bootstrap Bundle Us",
       "norm_label": "._typecheckconfig()"
     },
     {
@@ -18674,8 +18674,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_checkcontent",
-      "community": 20,
-      "community_name": "Static: Bootstrap Bundle Jn",
+      "community": 30,
+      "community_name": "Static: Bootstrap Bundle Us",
       "norm_label": "._checkcontent()"
     },
     {
@@ -18861,8 +18861,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_update",
-      "community": 52,
-      "community_name": "Static: Bootstrap Bundle Ui",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".update()"
     },
     {
@@ -18872,8 +18872,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_iswithcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._iswithcontent()"
     },
     {
@@ -18894,8 +18894,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_createtipelement",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._createtipelement()"
     },
     {
@@ -18916,8 +18916,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettemplatefactory",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._gettemplatefactory()"
     },
     {
@@ -18927,8 +18927,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_getcontentfortemplate",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._getcontentfortemplate()"
     },
     {
@@ -18938,8 +18938,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettitle",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._gettitle()"
     },
     {
@@ -19147,8 +19147,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "us"
     },
     {
@@ -19158,8 +19158,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_default",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".default()"
     },
     {
@@ -19169,8 +19169,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_defaulttype",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".defaulttype()"
     },
     {
@@ -19180,8 +19180,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_name",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".name()"
     },
     {
@@ -19191,8 +19191,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_iswithcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._iswithcontent()"
     },
     {
@@ -19202,8 +19202,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_getcontentfortemplate",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._getcontentfortemplate()"
     },
     {
@@ -19213,8 +19213,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_getcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "._getcontent()"
     },
     {
@@ -19224,8 +19224,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_jqueryinterface",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -19774,8 +19774,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_e",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "e()"
     },
     {
@@ -19807,8 +19807,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_o",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "o()"
     },
     {
@@ -19873,8 +19873,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ne",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ne()"
     },
     {
@@ -19906,8 +19906,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_s",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "s()"
     },
     {
@@ -19928,8 +19928,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ie",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "ie()"
     },
     {
@@ -19939,8 +19939,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_i",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "i()"
     },
     {
@@ -19950,8 +19950,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_k",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "k()"
     },
     {
@@ -19961,8 +19961,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_p",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "p()"
     },
     {
@@ -19972,8 +19972,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ae",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "ae()"
     },
     {
@@ -20005,8 +20005,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_x",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "x()"
     },
     {
@@ -20038,8 +20038,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_b",
-      "community": 43,
-      "community_name": "Accounts: Accounts Auditloglistview Disp",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "b()"
     },
     {
@@ -20060,8 +20060,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_f",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": "f()"
     },
     {
@@ -20071,8 +20071,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_v",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 22,
+      "community_name": "Candidates: Candidates Integrity Engine",
       "norm_label": "v()"
     },
     {
@@ -20126,8 +20126,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ue",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ue()"
     },
     {
@@ -20137,8 +20137,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ve",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "ve()"
     },
     {
@@ -20148,8 +20148,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_de",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "de()"
     },
     {
@@ -20159,8 +20159,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ge",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "ge()"
     },
     {
@@ -20170,8 +20170,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_me",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "me()"
     },
     {
@@ -20181,8 +20181,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xe",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "xe()"
     },
     {
@@ -20192,8 +20192,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ye",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ye()"
     },
     {
@@ -20247,8 +20247,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_he",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "he()"
     },
     {
@@ -20302,8 +20302,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_et",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "et()"
     },
     {
@@ -20313,8 +20313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_y",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "y()"
     },
     {
@@ -20324,8 +20324,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_tt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "tt()"
     },
     {
@@ -20335,8 +20335,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_nt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "nt()"
     },
     {
@@ -20346,8 +20346,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_it",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "it()"
     },
     {
@@ -20445,8 +20445,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_gt",
-      "community": 224,
-      "community_name": "re",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "gt()"
     },
     {
@@ -20456,8 +20456,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "pt()"
     },
     {
@@ -20467,8 +20467,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_mt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "mt()"
     },
     {
@@ -20478,8 +20478,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "xt()"
     },
     {
@@ -20489,8 +20489,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_yt",
-      "community": 38,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "yt()"
     },
     {
@@ -20500,8 +20500,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_bt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "bt()"
     },
     {
@@ -20511,8 +20511,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_wt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "wt()"
     },
     {
@@ -20544,8 +20544,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_kt",
-      "community": 224,
-      "community_name": "re",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "kt()"
     },
     {
@@ -20555,8 +20555,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_dt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "dt()"
     },
     {
@@ -20588,8 +20588,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_zt",
-      "community": 224,
-      "community_name": "re",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "zt()"
     },
     {
@@ -20632,8 +20632,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_rr",
-      "community": 224,
-      "community_name": "re",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "rr()"
     },
     {
@@ -20643,8 +20643,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_nr",
-      "community": 224,
-      "community_name": "re",
+      "community": 66,
+      "community_name": "nr",
       "norm_label": "nr()"
     },
     {
@@ -20654,8 +20654,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ir",
-      "community": 224,
-      "community_name": "re",
+      "community": 66,
+      "community_name": "nr",
       "norm_label": "ir()"
     },
     {
@@ -20665,8 +20665,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ar",
-      "community": 224,
-      "community_name": "re",
+      "community": 66,
+      "community_name": "nr",
       "norm_label": "ar()"
     },
     {
@@ -20676,8 +20676,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_or",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "or()"
     },
     {
@@ -20687,8 +20687,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_sr",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "sr()"
     },
     {
@@ -20698,8 +20698,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_lr",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "lr()"
     },
     {
@@ -20786,8 +20786,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pr",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "pr()"
     },
     {
@@ -20819,8 +20819,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_yr",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "yr()"
     },
     {
@@ -20874,8 +20874,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_jr",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "jr()"
     },
     {
@@ -21330,10 +21330,54 @@
       "norm_label": "1. \u0633\u06cc\u0633\u062a\u0645 \u062a\u0648\u0644\u06cc\u062f \u0647\u0648\u0634\u0645\u0646\u062f \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0631 \u0627\u0633\u0627\u0633 \u0628\u0646\u0686\u0645\u0627\u0631\u06a9\u200c\u0647\u0627\u06cc \u0645\u0631\u062c\u0639 \u0634\u063a\u0644\u06cc"
     },
     {
-      "label": "\ud83c\udfc6 \u062e\u0644\u0627\u0635\u0647 \u06a9\u0644\u06cc \u0648\u0636\u0639\u06cc\u062a \u067e\u0631\u0648\u0698\u0647",
+      "label": "\ud83d\udd22 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.9.0 (\u0627\u0641\u0632\u0648\u062f\u0646 \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u0628\u0647 \u062a\u0645\u0627\u0645 \u062c\u062f\u0627\u0648\u0644 \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
       "source_location": "L95",
+      "_origin": "ast",
+      "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "community": 221,
+      "community_name": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 Payjoo ATS",
+      "norm_label": "\ud83d\udd22 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.9.0 (\u0627\u0641\u0632\u0648\u062f\u0646 \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u0628\u0647 \u062a\u0645\u0627\u0645 \u062c\u062f\u0627\u0648\u0644 \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a)"
+    },
+    {
+      "label": "1. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0644\u06cc\u0633\u062a \u0627\u0635\u0644\u06cc \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u0628\u0627\u0646\u06a9 \u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc \u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L97",
+      "_origin": "ast",
+      "id": "release_notes_1_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0627\u0635\u0644\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u0628\u0627\u0646\u06a9_\u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc_\u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646",
+      "community": 221,
+      "community_name": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 Payjoo ATS",
+      "norm_label": "1. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0644\u06cc\u0633\u062a \u0627\u0635\u0644\u06cc \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u0628\u0627\u0646\u06a9 \u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc \u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646"
+    },
+    {
+      "label": "2. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0645\u0627\u062a\u0631\u06cc\u0633 \u0648\u0631\u0648\u062f \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "release_notes_2_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0645\u0627\u062a\u0631\u06cc\u0633_\u0648\u0631\u0648\u062f_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "community": 221,
+      "community_name": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 Payjoo ATS",
+      "norm_label": "2. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0645\u0627\u062a\u0631\u06cc\u0633 \u0648\u0631\u0648\u062f \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a"
+    },
+    {
+      "label": "3. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u062f\u0631 \u0644\u06cc\u0633\u062a \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0628\u0647 \u062a\u0641\u06a9\u06cc\u06a9 \u0645\u0631\u062d\u0644\u0647 \u0648 \u0645\u0646\u062a\u062e\u0628\u06cc\u0646",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "release_notes_3_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0628\u0647_\u062a\u0641\u06a9\u06cc\u06a9_\u0645\u0631\u062d\u0644\u0647_\u0648_\u0645\u0646\u062a\u062e\u0628\u06cc\u0646",
+      "community": 221,
+      "community_name": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 Payjoo ATS",
+      "norm_label": "3. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u062f\u0631 \u0644\u06cc\u0633\u062a \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0628\u0647 \u062a\u0641\u06a9\u06cc\u06a9 \u0645\u0631\u062d\u0644\u0647 \u0648 \u0645\u0646\u062a\u062e\u0628\u06cc\u0646"
+    },
+    {
+      "label": "\ud83c\udfc6 \u062e\u0644\u0627\u0635\u0647 \u06a9\u0644\u06cc \u0648\u0636\u0639\u06cc\u062a \u067e\u0631\u0648\u0698\u0647",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "release_notes_\u062e\u0644\u0627\u0635\u0647_\u06a9\u0644\u06cc_\u0648\u0636\u0639\u06cc\u062a_\u067e\u0631\u0648\u0698\u0647",
       "community": 221,
@@ -92327,6 +92371,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
+      "target": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
       "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
@@ -92338,7 +92393,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L95",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -92564,8 +92619,41 @@
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
       "target": "release_notes_1_\u0633\u06cc\u0633\u062a\u0645_\u062a\u0648\u0644\u06cc\u062f_\u0647\u0648\u0634\u0645\u0646\u062f_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0631_\u0627\u0633\u0627\u0633_\u0628\u0646\u0686\u0645\u0627\u0631\u06a9_\u0647\u0627\u06cc_\u0645\u0631\u062c\u0639_\u0634\u063a\u0644\u06cc",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "target": "release_notes_1_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0627\u0635\u0644\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u0628\u0627\u0646\u06a9_\u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc_\u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "target": "release_notes_2_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0645\u0627\u062a\u0631\u06cc\u0633_\u0648\u0631\u0648\u062f_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
+      "target": "release_notes_3_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0628\u0647_\u062a\u0641\u06a9\u06cc\u06a9_\u0645\u0631\u062d\u0644\u0647_\u0648_\u0645\u0646\u062a\u062e\u0628\u06cc\u0646",
+      "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "40d12a787c26dbfe4b14fe69a2324794a664949e"
+  "built_at_commit": "635e153c6ee5fdd30dcab446b357c0d75f83944c"
 }

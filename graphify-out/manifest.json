@@ -705,7 +705,7 @@
     "semantic_hash": "4448b880272ab42e190724fc682abafc"
   },
   "manage.py": {
-    "mtime": 1784580804.41691,
+    "mtime": 1784581402.523035,
     "ast_hash": "6e53a205bd6a4b28a7b7d7f2ca9e93ea",
     "semantic_hash": "6e53a205bd6a4b28a7b7d7f2ca9e93ea"
   },
@@ -880,9 +880,9 @@
     "semantic_hash": "7ea6a9f9641167f668aed8d4b84725ee"
   },
   "templates/candidates/candidate_list.html": {
-    "mtime": 1782830115.565764,
-    "ast_hash": "6ffac3d4bbb0131f265f90a61feaab30",
-    "semantic_hash": "6ffac3d4bbb0131f265f90a61feaab30"
+    "mtime": 1784581219.6794639,
+    "ast_hash": "7cce95893aa19f9ee6c12a11414c14c0",
+    "semantic_hash": ""
   },
   "templates/candidates/candidate_resume_print.html": {
     "mtime": 1784578875.5349598,
@@ -895,9 +895,9 @@
     "semantic_hash": ""
   },
   "templates/candidates/candidates_by_stage_list.html": {
-    "mtime": 1782830139.7136395,
-    "ast_hash": "55ef997e1655d1ae602885593449cee2",
-    "semantic_hash": "55ef997e1655d1ae602885593449cee2"
+    "mtime": 1784581235.696105,
+    "ast_hash": "2018ce9285d35f64a081bece6813991e",
+    "semantic_hash": ""
   },
   "templates/candidates/dashboard.html": {
     "mtime": 1780696176.56296,
@@ -960,14 +960,14 @@
     "semantic_hash": "158c04f5a92551e71a2a708ad474a4a0"
   },
   "templates/candidates/partials/score_entry_list.html": {
-    "mtime": 1783025326.7681198,
-    "ast_hash": "09f99c47d64c2bb7f73ffa888e5d2a28",
-    "semantic_hash": "09f99c47d64c2bb7f73ffa888e5d2a28"
+    "mtime": 1784581264.0619287,
+    "ast_hash": "48840ecda26ef503b98091ae58934c70",
+    "semantic_hash": ""
   },
   "templates/candidates/partials/score_entry_row.html": {
-    "mtime": 1782466965.1010265,
-    "ast_hash": "a9791b56f47df0c81161486a0c4da0b3",
-    "semantic_hash": "a9791b56f47df0c81161486a0c4da0b3"
+    "mtime": 1784581343.5602198,
+    "ast_hash": "2502581fba75402931b8e169f2d4bf47",
+    "semantic_hash": ""
   },
   "templates/candidates/partials/score_entry_stages_select.html": {
     "mtime": 1780612489.6328344,
@@ -1015,8 +1015,8 @@
     "semantic_hash": "d9e95d2b49f188ba3650db2f814ebd72"
   },
   "templates/candidates/selected_candidates_list.html": {
-    "mtime": 1784578923.643133,
-    "ast_hash": "bdf020e8d2eff546699b0cb9accd87d9",
+    "mtime": 1784581250.1885486,
+    "ast_hash": "e5e0dae7a63e2c88503dce8dc116e800",
     "semantic_hash": ""
   },
   "templates/candidates/signup.html": {
@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "version.txt": {
-    "mtime": 1784580898.33281,
-    "ast_hash": "5dbcc382ed2dae515a76de652999ed92",
+    "mtime": 1784581416.0768085,
+    "ast_hash": "d16b8f0e3a892df62c1444dfc991ee4f",
     "semantic_hash": ""
   },
   "static/logo.png": {
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "RELEASE_NOTES.md": {
-    "mtime": 1784580917.2627268,
-    "ast_hash": "9d6971a4e0cd316e4bf96eb906a94ea2",
+    "mtime": 1784581434.4401004,
+    "ast_hash": "47ba56416108bf4f48010232a3bbefc4",
     "semantic_hash": ""
   },
   "apps/recruitment_planning/migrations/0004_add_iq_test_stage_type.py": {

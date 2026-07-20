@@ -92,9 +92,22 @@
 
 ---
 
+## 🔢 تغییرات نسخه 1.9.0 (افزودن ستون شماره ردیف به تمام جداول متقاضیان و ثبت نمرات)
+
+### 1. ستون شماره ردیف (#) در لیست اصلی متقاضیان و بانک اطلاعاتی داوطلبان
+* **توضیح:** ستون شماره ردیف (`#`) به جدول اصلی متقاضیان در [candidate_list.html](file:///Users/omidsalehi/Desktop/ATS/templates/candidates/candidate_list.html) اضافه شد. شماره ردیف‌ها با توجه به صفحه‌بندی فعال سیستم (Pagination) به صورت پیوسته و هوشمند محاسبه و نمایش داده می‌شوند.
+
+### 2. ستون شماره ردیف (#) در ماتریس ورود و ثبت نمرات
+* **توضیح:** ستون شماره ردیف (`#`) به جدول ماتریس ارزیابی و ثبت نمرات در [score_entry_list.html](file:///Users/omidsalehi/Desktop/ATS/templates/candidates/partials/score_entry_list.html) و ردیف‌های آن در [score_entry_row.html](file:///Users/omidsalehi/Desktop/ATS/templates/candidates/partials/score_entry_row.html) اضافه شد.
+
+### 3. ستون شماره ردیف در لیست متقاضیان به تفکیک مرحله و منتخبین
+* **توضیح:** ستون ردیف به جدول لیست متقاضیان به تفکیک مرحله در [candidates_by_stage_list.html](file:///Users/omidsalehi/Desktop/ATS/templates/candidates/candidates_by_stage_list.html) و جدول پذیرفته‌شدگان در [selected_candidates_list.html](file:///Users/omidsalehi/Desktop/ATS/templates/candidates/selected_candidates_list.html) اضافه شد.
+
+---
+
 ## 🏆 خلاصه کلی وضعیت پروژه
-* **نسخه جاری سیستم:** `1.8.1`
-* **تعداد ایژوهای حل‌شده:** ۱۲ از ۱۲ (۱۰۰٪) + قابلیت AI Job Specs Generation
+* **نسخه جاری سیستم:** `1.9.0`
+* **تعداد ایژوهای حل‌شده:** ۱۲ از ۱۲ (۱۰۰٪) + AI Job Specs + Row Numbering
 * **تعداد فازهای انجام‌شده:** ۴ از ۴ (۱۰۰٪)
-* **وضعیت یونیت‌تست‌ها:** ۹۷ تست ماژول jobs و accounts پاس شده (۱۰۰٪ موفق)
+* **وضعیت یونیت‌تست‌ها:** ۱۶۴ تست پاس شده (۱۰۰٪ موفق)
 * **مایگریشن‌های جدید دیتابیس:** `jobs.0032` و `recruitment_planning.0004` اجرا شدند.

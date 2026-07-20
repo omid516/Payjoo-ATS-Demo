@@ -162,7 +162,8 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light border-bottom border-slate">
                         <tr>
-                            <th class="ps-4 sortable-header text-secondary" style="min-width: 220px; user-select: none;">
+                            <th class="ps-3 text-center text-secondary" style="width: 50px; user-select: none;">#</th>
+                            <th class="ps-2 sortable-header text-secondary" style="min-width: 220px; user-select: none;">
                                 {% if current_language_code == 'en' %}Candidate Specifications{% elif current_language_code == 'tr' %}Aday Bilgileri{% elif current_language_code == 'ar' %}بيانات المتقدم{% else %}مشخصات متقاضی{% endif %} <span class="sort-icon text-muted ms-1">⇅</span>
                             </th>
                             {% for stage in stages %}
@@ -196,10 +197,10 @@
                     </thead>
                     <tbody>
                         {% for app in applications %}
-                            {% include "candidates/partials/score_entry_row.html" with app=app stages=stages %}
+                            {% include "candidates/partials/score_entry_row.html" with app=app stages=stages row_index=forloop.counter %}
                         {% empty %}
                             <tr>
-                                <td colspan="{{ stages|length|add:3 }}" class="text-center py-5 text-muted">
+                                <td colspan="{{ stages|length|add:4 }}" class="text-center py-5 text-muted">
                                     {% if current_language_code == 'en' %}No candidates found for this job opportunity.{% elif current_language_code == 'tr' %}Bu iş fırsatı için aday bulunamadı.{% elif current_language_code == 'ar' %}لم يتم العثور على أي متقدم لهذه الوظيفة.{% else %}هیچ متقاضی برای این فرصت شغلی یافت نشد.{% endif %}
                                 </td>
                             </tr>

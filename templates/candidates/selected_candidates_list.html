@@ -170,7 +170,8 @@
             <table class="table table-hover align-middle mb-0" id="selected-table">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">نام و نام خانوادگی</th>
+                        <th class="ps-3 text-center text-secondary" style="width: 50px;">#</th>
+                        <th class="ps-2">نام و نام خانوادگی</th>
                         <th>کد ملی</th>
                         <th>اطلاعات تماس</th>
                         <th>فرصت شغلی</th>
@@ -183,7 +184,10 @@
                 <tbody>
                     {% for app in applications %}
                     <tr id="app-row-{{ app.id }}" class="hover-row">
-                        <td class="ps-4">
+                        <td class="ps-3 text-center font-bold text-slate-500 text-sm">
+                            {% if page_obj %}{{ page_obj.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}
+                        </td>
+                        <td class="ps-2">
                             <a href="{% url 'candidate_detail' app.candidate.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary">
                                 {{ app.candidate.first_name }} {{ app.candidate.last_name }}
                             </a>

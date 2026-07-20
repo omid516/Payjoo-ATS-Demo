@@ -235,7 +235,8 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">{{ t.cand_name_th }}</th>
+                        <th class="ps-3 text-center text-secondary" style="width: 50px;">#</th>
+                        <th class="ps-2">{{ t.cand_name_th }}</th>
                         <th>{{ t.cand_national_id_th }}</th>
                         <th>{{ t.cand_contact_th }}</th>
                         <th>{{ t.cand_active_apps_th }}</th>
@@ -245,7 +246,10 @@
                 <tbody id="candidate-table-body">
                     {% for candidate in candidates %}
                     <tr id="candidate-{{ candidate.id }}">
-                        <td class="ps-4">
+                        <td class="ps-3 text-center font-bold text-slate-500 text-sm">
+                            {% if page_obj %}{{ page_obj.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}
+                        </td>
+                        <td class="ps-2">
                             <a href="{% url 'candidate_detail' candidate.id %}" class="font-bold text-secondary text-decoration-none hover-text-primary">
                                 {{ candidate.first_name }} {{ candidate.last_name }}
                             </a>

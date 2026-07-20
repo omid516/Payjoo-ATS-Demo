@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "version.txt": {
-    "mtime": 1784580817.9610167,
-    "ast_hash": "4fda350b2148254bcd9e67bbdbecdc93",
+    "mtime": 1784580898.33281,
+    "ast_hash": "5dbcc382ed2dae515a76de652999ed92",
     "semantic_hash": ""
   },
   "static/logo.png": {
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "RELEASE_NOTES.md": {
-    "mtime": 1784580826.7229638,
-    "ast_hash": "3efbbca4b1c6c13d0c480b1912d8c0fd",
+    "mtime": 1784580917.2627268,
+    "ast_hash": "9d6971a4e0cd316e4bf96eb906a94ea2",
     "semantic_hash": ""
   },
   "apps/recruitment_planning/migrations/0004_add_iq_test_stage_type.py": {

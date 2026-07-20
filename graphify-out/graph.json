@@ -197,8 +197,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "usercreationform"
     },
     {
@@ -230,8 +230,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_clean_username",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".clean_username()"
     },
     {
@@ -241,8 +241,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_clean",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".clean()"
     },
     {
@@ -252,8 +252,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "apps_accounts_forms_usercreationform_save",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".save()"
     },
     {
@@ -263,8 +263,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "apps_accounts_forms_userupdateform",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "userupdateform"
     },
     {
@@ -285,8 +285,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "apps_accounts_forms_userupdateform_clean",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".clean()"
     },
     {
@@ -296,8 +296,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "apps_accounts_forms_userupdateform_save",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".save()"
     },
     {
@@ -769,8 +769,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "apps_accounts_tests_userroleandpermissiontests_test_candidate_exclusion_from_user_management",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 27,
+      "community_name": "Accounts: Accounts Userroleandpermission",
       "norm_label": ".test_candidate_exclusion_from_user_management()"
     },
     {
@@ -1088,8 +1088,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "apps_accounts_tests_rationale_77",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 27,
+      "community_name": "Accounts: Accounts Userroleandpermission",
       "norm_label": "\u062a\u0633\u062a \u0639\u062f\u0645 \u0646\u0645\u0627\u06cc\u0634 \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u062f\u0631 \u0644\u06cc\u0633\u062a \u06a9\u0627\u0631\u0628\u0631\u0627\u0646 \u0648 \u0641\u0631\u0645\u200c\u0647\u0627\u06cc \u062b\u0628\u062a\u200c\u0646\u0627\u0645/\u0648\u06cc\u0631\u0627\u06cc\u0634"
     },
     {
@@ -1352,8 +1352,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_accounts_views_customloginview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": "customloginview"
     },
     {
@@ -1363,8 +1363,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "djangologinview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": "djangologinview"
     },
     {
@@ -1374,8 +1374,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_accounts_views_customloginview_get_success_url",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 222,
+      "community_name": "UserProfile",
       "norm_label": ".get_success_url()"
     },
     {
@@ -1429,8 +1429,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_accounts_views_userlistview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "userlistview"
     },
     {
@@ -1451,8 +1451,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_listview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "listview"
     },
     {
@@ -1462,8 +1462,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_accounts_views_userlistview_get_queryset",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".get_queryset()"
     },
     {
@@ -1495,8 +1495,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "apps_accounts_views_usercreateview_form_valid",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": ".form_valid()"
     },
     {
@@ -1550,8 +1550,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "apps_accounts_views_userdeleteview_delete",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": ".delete()"
     },
     {
@@ -1561,8 +1561,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "apps_accounts_views_dashboardview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "dashboardview"
     },
     {
@@ -1572,8 +1572,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_templateview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "templateview"
     },
     {
@@ -1649,8 +1649,8 @@
       "source_location": "L719",
       "_origin": "ast",
       "id": "apps_accounts_views_systembackupview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "systembackupview"
     },
     {
@@ -1825,8 +1825,8 @@
       "source_location": "L1223",
       "_origin": "ast",
       "id": "apps_accounts_views_render_template_text",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": "render_template_text()"
     },
     {
@@ -1836,8 +1836,8 @@
       "source_location": "L1263",
       "_origin": "ast",
       "id": "apps_accounts_views_smspaneldashboardview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "smspaneldashboardview"
     },
     {
@@ -1880,8 +1880,8 @@
       "source_location": "L1325",
       "_origin": "ast",
       "id": "apps_accounts_views_jobstagesoptionsview_get",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": ".get()"
     },
     {
@@ -1902,8 +1902,8 @@
       "source_location": "L1339",
       "_origin": "ast",
       "id": "apps_accounts_views_smscandidatespreviewview_get",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": ".get()"
     },
     {
@@ -1924,8 +1924,8 @@
       "source_location": "L1459",
       "_origin": "ast",
       "id": "apps_accounts_views_smsexportexcelview_post",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 33,
+      "community_name": "Accounts: Accounts Get Context",
       "norm_label": ".post()"
     },
     {
@@ -1957,8 +1957,8 @@
       "source_location": "L1640",
       "_origin": "ast",
       "id": "apps_accounts_views_userpreferencesview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "userpreferencesview"
     },
     {
@@ -11362,8 +11362,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "workflowstagetemplate"
     },
     {
@@ -11373,8 +11373,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate_str",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".__str__()"
     },
     {
@@ -11626,8 +11626,8 @@
       "source_location": "L583",
       "_origin": "ast",
       "id": "apps_jobs_models_jobopportunitycompetency",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "jobopportunitycompetency"
     },
     {
@@ -11637,8 +11637,8 @@
       "source_location": "L616",
       "_origin": "ast",
       "id": "apps_jobs_models_jobopportunitycompetency_str",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".__str__()"
     },
     {
@@ -11714,8 +11714,8 @@
       "source_location": "L677",
       "_origin": "ast",
       "id": "apps_jobs_models_aisetting_get_active_setting",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".get_active_setting()"
     },
     {
@@ -11791,8 +11791,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_jobs_tests",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "tests.py"
     },
     {
@@ -12605,8 +12605,8 @@
       "source_location": "L1730",
       "_origin": "ast",
       "id": "apps_jobs_tests_recruitmentpatternsimulatortests_test_ai_competency_filtering",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".test_ai_competency_filtering()"
     },
     {
@@ -12682,8 +12682,8 @@
       "source_location": "L1865",
       "_origin": "ast",
       "id": "apps_jobs_tests_aisettingviewandapitests_test_ai_settings_save",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".test_ai_settings_save()"
     },
     {
@@ -13507,8 +13507,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_jobs_views",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "views.py"
     },
     {
@@ -13518,8 +13518,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "apps_jobs_views_normalize_digits",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "normalize_digits()"
     },
     {
@@ -13760,8 +13760,8 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteconfirmview_get",
-      "community": 6,
-      "community_name": "Jobs: Jobs Candidates Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -13771,8 +13771,8 @@
       "source_location": "L349",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview",
-      "community": 66,
-      "community_name": "Jobs: Jobs Searchcompetenciesapitests Te",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "jobopportunitydeleteview"
     },
     {
@@ -13782,8 +13782,8 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_delete",
-      "community": 66,
-      "community_name": "Jobs: Jobs Searchcompetenciesapitests Te",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".delete()"
     },
     {
@@ -13793,8 +13793,8 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_post",
-      "community": 66,
-      "community_name": "Jobs: Jobs Searchcompetenciesapitests Te",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".post()"
     },
     {
@@ -13804,8 +13804,8 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_do_delete",
-      "community": 66,
-      "community_name": "Jobs: Jobs Searchcompetenciesapitests Te",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "._do_delete()"
     },
     {
@@ -13815,8 +13815,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowtemplatelistview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "workflowtemplatelistview"
     },
     {
@@ -13826,8 +13826,8 @@
       "source_location": "L400",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowtemplatelistview_get_queryset",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_queryset()"
     },
     {
@@ -13914,8 +13914,8 @@
       "source_location": "L464",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowtemplatedeleteview_delete",
-      "community": 66,
-      "community_name": "Jobs: Jobs Searchcompetenciesapitests Te",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".delete()"
     },
     {
@@ -13936,8 +13936,8 @@
       "source_location": "L480",
       "_origin": "ast",
       "id": "apps_jobs_views_exportjobsexcelview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -13958,8 +13958,8 @@
       "source_location": "L520",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowstagespreviewview_get",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -13969,8 +13969,8 @@
       "source_location": "L535",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintdocview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": "jobopportunityprintdocview"
     },
     {
@@ -13980,8 +13980,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_jobs_views_py_detailview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": "detailview"
     },
     {
@@ -13991,8 +13991,8 @@
       "source_location": "L546",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintdocview_get_queryset",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_queryset()"
     },
     {
@@ -14002,8 +14002,8 @@
       "source_location": "L549",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintdocview_get_context_data",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14013,8 +14013,8 @@
       "source_location": "L555",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintadview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": "jobopportunityprintadview"
     },
     {
@@ -14024,8 +14024,8 @@
       "source_location": "L568",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintadview_get_queryset",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_queryset()"
     },
     {
@@ -14057,8 +14057,8 @@
       "source_location": "L605",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitybulkstatusview_post",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".post()"
     },
     {
@@ -14090,8 +14090,8 @@
       "source_location": "L679",
       "_origin": "ast",
       "id": "apps_jobs_views_centralcompetencyuploadview_post",
-      "community": 14,
-      "community_name": "Jobs: Jobs Utils Get",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".post()"
     },
     {
@@ -14134,8 +14134,8 @@
       "source_location": "L786",
       "_origin": "ast",
       "id": "apps_jobs_views_clean_str",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "clean_str()"
     },
     {
@@ -14145,8 +14145,8 @@
       "source_location": "L794",
       "_origin": "ast",
       "id": "apps_jobs_views_is_functional_competency",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "is_functional_competency()"
     },
     {
@@ -14156,8 +14156,8 @@
       "source_location": "L814",
       "_origin": "ast",
       "id": "apps_jobs_views_get_job_category_from_title",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "get_job_category_from_title()"
     },
     {
@@ -14167,8 +14167,8 @@
       "source_location": "L832",
       "_origin": "ast",
       "id": "apps_jobs_views_get_ai_recommendation",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "get_ai_recommendation()"
     },
     {
@@ -14178,8 +14178,8 @@
       "source_location": "L1170",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "recruitmentpatterndashboardview"
     },
     {
@@ -14189,8 +14189,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_jobs_views_py_templateview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "templateview"
     },
     {
@@ -14200,8 +14200,8 @@
       "source_location": "L1181",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".get()"
     },
     {
@@ -14211,8 +14211,8 @@
       "source_location": "L1581",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview_get_context_data",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14266,8 +14266,8 @@
       "source_location": "L2196",
       "_origin": "ast",
       "id": "apps_jobs_views_jobassessmentplanprintview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": "jobassessmentplanprintview"
     },
     {
@@ -14277,8 +14277,8 @@
       "source_location": "L2210",
       "_origin": "ast",
       "id": "apps_jobs_views_jobassessmentplanprintview_get_queryset",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_queryset()"
     },
     {
@@ -14288,8 +14288,8 @@
       "source_location": "L2213",
       "_origin": "ast",
       "id": "apps_jobs_views_jobassessmentplanprintview_get_context_data",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14299,8 +14299,8 @@
       "source_location": "L2220",
       "_origin": "ast",
       "id": "apps_jobs_views_jobexamspecificationprintview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": "jobexamspecificationprintview"
     },
     {
@@ -14310,8 +14310,8 @@
       "source_location": "L2234",
       "_origin": "ast",
       "id": "apps_jobs_views_jobexamspecificationprintview_get_queryset",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_queryset()"
     },
     {
@@ -14321,8 +14321,8 @@
       "source_location": "L2237",
       "_origin": "ast",
       "id": "apps_jobs_views_jobexamspecificationprintview_get_context_data",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 58,
+      "community_name": "Core: Core Templatetags Jalali",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14343,8 +14343,8 @@
       "source_location": "L2271",
       "_origin": "ast",
       "id": "apps_jobs_views_searchpostsapiview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -14365,8 +14365,8 @@
       "source_location": "L2309",
       "_origin": "ast",
       "id": "apps_jobs_views_searchpostsdetailapiview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -14387,8 +14387,8 @@
       "source_location": "L2351",
       "_origin": "ast",
       "id": "apps_jobs_views_searchcompetenciesapiview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -14464,8 +14464,8 @@
       "source_location": "L2490",
       "_origin": "ast",
       "id": "apps_jobs_views_aisettingview_post",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".post()"
     },
     {
@@ -14475,8 +14475,8 @@
       "source_location": "L2574",
       "_origin": "ast",
       "id": "apps_jobs_views_jobaistrategyprintview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "jobaistrategyprintview"
     },
     {
@@ -14486,8 +14486,8 @@
       "source_location": "L2582",
       "_origin": "ast",
       "id": "apps_jobs_views_jobaistrategyprintview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".get()"
     },
     {
@@ -14508,8 +14508,8 @@
       "source_location": "L2613",
       "_origin": "ast",
       "id": "apps_jobs_views_organizationsettingview_get",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".get()"
     },
     {
@@ -14530,8 +14530,8 @@
       "source_location": "L2716",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodellistview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "competencymodellistview"
     },
     {
@@ -14585,8 +14585,8 @@
       "source_location": "L2781",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodelmanageview_post",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".post()"
     },
     {
@@ -14596,8 +14596,8 @@
       "source_location": "L2819",
       "_origin": "ast",
       "id": "apps_jobs_views_competencymodelitemmanageview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "competencymodelitemmanageview"
     },
     {
@@ -14640,8 +14640,8 @@
       "source_location": "L2901",
       "_origin": "ast",
       "id": "apps_jobs_views_generatejobspecsapiview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "generatejobspecsapiview"
     },
     {
@@ -14651,8 +14651,8 @@
       "source_location": "L2910",
       "_origin": "ast",
       "id": "apps_jobs_views_generatejobspecsapiview_post",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": ".post()"
     },
     {
@@ -14662,8 +14662,8 @@
       "source_location": "L833",
       "_origin": "ast",
       "id": "apps_jobs_views_rationale_833",
-      "community": 7,
-      "community_name": "Jobs: Jobs Get Context",
+      "community": 14,
+      "community_name": "Jobs: Jobs Utils Get",
       "norm_label": "helper to fetch ai recruitment strategies with caching and offline fallback."
     },
     {
@@ -15773,8 +15773,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ats_urls",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "urls.py"
     },
     {
@@ -15784,8 +15784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ats_urls_rationale_1",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "url configuration for ats project."
     },
     {
@@ -16364,8 +16364,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_queuecallback",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._queuecallback()"
     },
     {
@@ -16529,8 +16529,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q",
-      "community": 227,
-      "community_name": "Q",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": "q"
     },
     {
@@ -16540,8 +16540,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_name",
-      "community": 227,
-      "community_name": "Q",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": ".name()"
     },
     {
@@ -16551,8 +16551,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_close",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".close()"
     },
     {
@@ -16562,8 +16562,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_destroyelement",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._destroyelement()"
     },
     {
@@ -16573,8 +16573,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_jqueryinterface",
-      "community": 227,
-      "community_name": "Q",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -18212,8 +18212,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_on_constructor",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".constructor()"
     },
     {
@@ -18421,8 +18421,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "qn"
     },
     {
@@ -18432,8 +18432,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_constructor",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".constructor()"
     },
     {
@@ -18443,8 +18443,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_default",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".default()"
     },
     {
@@ -18454,8 +18454,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_defaulttype",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18465,8 +18465,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_name",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".name()"
     },
     {
@@ -18487,8 +18487,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_show",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".show()"
     },
     {
@@ -18498,8 +18498,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_hide",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".hide()"
     },
     {
@@ -18520,8 +18520,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializebackdrop",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._initializebackdrop()"
     },
     {
@@ -18531,8 +18531,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializefocustrap",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._initializefocustrap()"
     },
     {
@@ -18542,8 +18542,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_addeventlisteners",
-      "community": 58,
-      "community_name": "Core: Core Templatetags Jalali",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -19763,8 +19763,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "htmx.min.js"
     },
     {
@@ -19774,8 +19774,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_e",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "e()"
     },
     {
@@ -19807,8 +19807,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_o",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "o()"
     },
     {
@@ -19851,8 +19851,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_c",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 43,
+      "community_name": "Accounts: Accounts Auditloglistview Disp",
       "norm_label": "c()"
     },
     {
@@ -19862,8 +19862,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_l",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "l()"
     },
     {
@@ -19895,8 +19895,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_a",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "a()"
     },
     {
@@ -19917,8 +19917,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_n",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "n()"
     },
     {
@@ -19928,8 +19928,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ie",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 42,
+      "community_name": "Accounts: Accounts Init Persianloginform",
       "norm_label": "ie()"
     },
     {
@@ -20005,8 +20005,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_x",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "x()"
     },
     {
@@ -20060,8 +20060,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_f",
-      "community": 227,
-      "community_name": "Q",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": "f()"
     },
     {
@@ -20093,8 +20093,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_z",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "z()"
     },
     {
@@ -20104,8 +20104,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_w",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "w()"
     },
     {
@@ -20258,8 +20258,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ke",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "ke()"
     },
     {
@@ -20269,8 +20269,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pe",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "pe()"
     },
     {
@@ -20280,8 +20280,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_fe",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "fe()"
     },
     {
@@ -20313,8 +20313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_y",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "y()"
     },
     {
@@ -20324,8 +20324,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_tt",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "tt()"
     },
     {
@@ -20335,8 +20335,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_nt",
-      "community": 39,
-      "community_name": "Static: Bootstrap Bundle St",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "nt()"
     },
     {
@@ -20456,8 +20456,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pt",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "pt()"
     },
     {
@@ -20467,8 +20467,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_mt",
-      "community": 227,
-      "community_name": "Q",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "mt()"
     },
     {
@@ -20478,8 +20478,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xt",
-      "community": 227,
-      "community_name": "Q",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "xt()"
     },
     {
@@ -20511,8 +20511,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_wt",
-      "community": 227,
-      "community_name": "Q",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "wt()"
     },
     {
@@ -20555,8 +20555,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_dt",
-      "community": 227,
-      "community_name": "Q",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "dt()"
     },
     {
@@ -20643,8 +20643,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_nr",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "nr()"
     },
     {
@@ -20654,8 +20654,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ir",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ir()"
     },
     {
@@ -20665,8 +20665,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ar",
-      "community": 1,
-      "community_name": "Static: Htmx Bootstrap Bundle",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ar()"
     },
     {
@@ -20720,8 +20720,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_fr",
-      "community": 224,
-      "community_name": "re",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "fr()"
     },
     {
@@ -20775,8 +20775,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_gr",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "gr()"
     },
     {
@@ -21308,15 +21308,15 @@
       "norm_label": "3. \u0645\u0627\u06cc\u06af\u0631\u06cc\u0634\u0646 \u062c\u062f\u06cc\u062f \u062f\u06cc\u062a\u0627\u0628\u06cc\u0633"
     },
     {
-      "label": "\ud83e\udd16 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.8.0 (\u062a\u0648\u0644\u06cc\u062f \u062e\u0648\u062f\u06a9\u0627\u0631 \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0627 AI)",
+      "label": "\ud83e\udd16 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.8.1 (\u062a\u0648\u0644\u06cc\u062f \u062e\u0648\u062f\u06a9\u0627\u0631 \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0627 AI)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
       "source_location": "L86",
       "_origin": "ast",
-      "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_0_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
+      "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
       "community": 221,
       "community_name": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 Payjoo ATS",
-      "norm_label": "\ud83e\udd16 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.8.0 (\u062a\u0648\u0644\u06cc\u062f \u062e\u0648\u062f\u06a9\u0627\u0631 \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0627 ai)"
+      "norm_label": "\ud83e\udd16 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.8.1 (\u062a\u0648\u0644\u06cc\u062f \u062e\u0648\u062f\u06a9\u0627\u0631 \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0627 ai)"
     },
     {
       "label": "1. \u0633\u06cc\u0633\u062a\u0645 \u062a\u0648\u0644\u06cc\u062f \u0647\u0648\u0634\u0645\u0646\u062f \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0631 \u0627\u0633\u0627\u0633 \u0628\u0646\u0686\u0645\u0627\u0631\u06a9\u200c\u0647\u0627\u06cc \u0645\u0631\u062c\u0639 \u0634\u063a\u0644\u06cc",
@@ -92320,7 +92320,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
-      "target": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_0_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
+      "target": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
       "confidence_score": 1.0
     },
     {
@@ -92561,11 +92561,11 @@
       "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_0_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
+      "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
       "target": "release_notes_1_\u0633\u06cc\u0633\u062a\u0645_\u062a\u0648\u0644\u06cc\u062f_\u0647\u0648\u0634\u0645\u0646\u062f_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0631_\u0627\u0633\u0627\u0633_\u0628\u0646\u0686\u0645\u0627\u0631\u06a9_\u0647\u0627\u06cc_\u0645\u0631\u062c\u0639_\u0634\u063a\u0644\u06cc",
       "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d15bbafaf20c1a47ec0958c7706db592b4a8e1be"
+  "built_at_commit": "40d12a787c26dbfe4b14fe69a2324794a664949e"
 }

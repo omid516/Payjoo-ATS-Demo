@@ -76,21 +76,28 @@
                     <div class="text-danger text-xs mt-1">{{ form.title.errors.0 }}</div>
                     {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label font-medium text-secondary">{{ t.jf_dept }}</label>
                     {{ form.department }}
                     {% if form.department.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.department.errors.0 }}</div>
                     {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label font-medium text-secondary">{{ t.jf_unit }}</label>
                     {{ form.unit }}
                     {% if form.unit.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.unit.errors.0 }}</div>
                     {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label class="form-label font-medium text-secondary">کارخانه / محل استقرار</label>
+                    {{ form.factory_name }}
+                    {% if form.factory_name.errors %}
+                    <div class="text-danger text-xs mt-1">{{ form.factory_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
                     <label class="form-label font-medium text-secondary">{{ t.jf_cat }}</label>
                     {{ form.job_category }}
                     {% if form.job_category.errors %}

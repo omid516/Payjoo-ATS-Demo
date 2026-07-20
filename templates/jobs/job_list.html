@@ -197,6 +197,26 @@
                             </a>
                         </th>
                         <th class="align-middle">
+                            <a href="{% sort_url 'request_number' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
+                                {{ t.request_th }}
+                                {% if current_sort == 'request_number' %}
+                                    {% if current_order == 'asc' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-custom animate-bounce-subtle">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    {% endif %}
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-muted opacity-40">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="align-middle">
                             <a href="{% sort_url 'title' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
                                 {{ t.title_th }}
                                 {% if current_sort == 'title' %}
@@ -325,14 +345,19 @@
                     {% for job in jobs %}
                     <tr id="job-{{ job.id }}">
                         <td class="ps-4">
-                            <span class="font-medium text-primary d-block">{{ job.code }}</span>
-                            <span class="text-muted text-xs">{{ t.request_lbl }} {{ job.request_number }}</span>
+                            <span class="font-bold text-primary">{{ job.code }}</span>
+                        </td>
+                        <td>
+                            <span class="font-medium text-secondary text-xs">{{ job.request_number }}</span>
                         </td>
                         <td class="font-semibold">{{ job.title }}</td>
                         <td>
                             <span>{{ job.department }}</span>
                             {% if job.unit %}
                             <small class="text-muted d-block">{{ job.unit }}</small>
+                            {% endif %}
+                            {% if job.factory_name %}
+                            <small class="text-primary opacity-75 d-block font-semibold" style="font-size: 10px;">🏭 {{ job.factory_name }}</small>
                             {% endif %}
                             {% if job.job_category %}
                             <span class="badge bg-light text-secondary text-xxs mt-1 px-1.5 py-0.5 rounded font-normal d-inline-block border">{{ job.job_category }}</span>
@@ -478,7 +503,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
+                        <td colspan="9" class="text-center py-5 text-muted">
                             {% if current_language_code == 'en' %}No job opportunities defined in the system.{% elif current_language_code == 'tr' %}Sistemde tanımlanmış iş fırsatı yok.{% elif current_language_code == 'ar' %}لم يتم تعريف أي فرص عمل في النظام.{% else %}هیچ فرصت شغلی در سیستم تعریف نشده است.{% endif %}
                         </td>
                     </tr>
@@ -489,11 +514,30 @@
     </div>
     
     <!-- بخش صفحه‌بندی (Pagination) -->
-    {% if is_paginated %}
     <div class="card-footer bg-white border-top py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-        <div class="text-xs text-muted font-medium">
-            {% if current_language_code == 'en' %}Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of total {{ paginator.count }} jobs{% elif current_language_code == 'tr' %}{{ page_obj.start_index }} - {{ page_obj.end_index }} arası gösteriliyor (Toplam {{ paginator.count }} iş){% elif current_language_code == 'ar' %}عرض الصفوف من {{ page_obj.start_index }} إلى {{ page_obj.end_index }} من إجمالي {{ paginator.count }} فرص عمل{% else %}نمایش ردیف‌های {{ page_obj.start_index }} تا {{ page_obj.end_index }} از مجموع {{ paginator.count }} فرصت شغلی{% endif %}
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="text-xs text-muted font-medium">
+                {% if is_paginated %}
+                {% if current_language_code == 'en' %}Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of total {{ paginator.count }} jobs{% elif current_language_code == 'tr' %}{{ page_obj.start_index }} - {{ page_obj.end_index }} arası gösteriliyor (Toplam {{ paginator.count }} iş){% elif current_language_code == 'ar' %}عرض الصفوف من {{ page_obj.start_index }} إلى {{ page_obj.end_index }} من إجمالي {{ paginator.count }} فرص عمل{% else %}نمایش ردیف‌های {{ page_obj.start_index }} تا {{ page_obj.end_index }} از مجموع {{ paginator.count }} فرصت شغلی{% endif %}
+                {% else %}
+                {% if current_language_code == 'en' %}Total of {{ jobs|length }} job(s) found.{% elif current_language_code == 'tr' %}Toplam {{ jobs|length }} iş fırsatı bulundu.{% elif current_language_code == 'ar' %}تم العثور على إجمالي {{ jobs|length }} فرصة عمل.{% else %}مجموعاً {{ jobs|length }} فرصت شغلی یافت شد.{% endif %}
+                {% endif %}
+            </div>
+            <!-- منوی انتخاب تعداد ردیف در هر صفحه -->
+            <div class="d-flex align-items-center gap-1.5 border-start ps-3">
+                <label for="pageSizeSelect" class="text-xs text-muted font-medium mb-0">
+                    {% if current_language_code == 'en' %}Rows:{% elif current_language_code == 'tr' %}ردیف:{% elif current_language_code == 'ar' %}الصفوف:{% else %}تعداد ردیف:{% endif %}
+                </label>
+                <select id="pageSizeSelect" class="form-select form-select-sm text-xs py-1 px-2 font-semibold" style="width: auto; border-radius: 6px;" onchange="changePageSize(this.value)">
+                    <option value="10" {% if page_size == 10 %}selected{% endif %}>۱۰</option>
+                    <option value="25" {% if page_size == 25 %}selected{% endif %}>۲۵</option>
+                    <option value="50" {% if page_size == 50 %}selected{% endif %}>۵۰</option>
+                    <option value="100" {% if page_size == 100 %}selected{% endif %}>۱۰۰</option>
+                </select>
+            </div>
         </div>
+
+        {% if is_paginated %}
         <nav aria-label="Page navigation">
             <ul class="pagination pagination-sm m-0 gap-1">
                 <!-- دکمه قبلی -->
@@ -532,12 +576,6 @@
                 {% endif %}
             </ul>
         </nav>
-    </div>
-    {% else %}
-    <div class="card-footer bg-white border-top py-3">
-        <div class="text-xs text-muted font-medium text-center text-md-start">
-            {% if current_language_code == 'en' %}Total of {{ jobs|length }} job(s) found.{% elif current_language_code == 'tr' %}Toplam {{ jobs|length }} iş fırsatı bulundu.{% elif current_language_code == 'ar' %}تم العثور على إجمالي {{ jobs|length }} فرصة عمل.{% else %}مجموعاً {{ jobs|length }} فرصت شغلی یافت شد.{% endif %}
-        </div>
     </div>
     {% endif %}
 </div>
@@ -598,6 +636,14 @@
             });
         });
     });
+
+    // Change page size and reload with preserved query params
+    function changePageSize(size) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page_size', size);
+        urlParams.set('page', '1');
+        window.location.search = urlParams.toString();
+    }
 
     // Close delete modal on HTMX custom event
     document.addEventListener('close-modal', function() {

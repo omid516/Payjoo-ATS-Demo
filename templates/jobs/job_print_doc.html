@@ -44,57 +44,72 @@
             color: #1e293b;
         }
         .signature-box {
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 1.2rem;
-            height: 150px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem 0.8rem;
+            min-height: 155px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            background-color: #fafafa;
         }
         .signature-title {
             font-weight: 700;
-            font-size: 0.85rem;
-            color: #334155;
+            font-size: 0.82rem;
+            color: #1e293b;
         }
         .signature-note {
             font-size: 0.75rem;
             color: #94a3b8;
         }
+        @page {
+            size: A4 portrait;
+            margin: 12mm 15mm;
+        }
         @media print {
             body {
                 padding: 0;
                 background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .print-container {
                 border: none;
                 padding: 0;
                 max-width: 100%;
+                box-shadow: none;
             }
             .no-print {
                 display: none !important;
+            }
+            .page-break-avoid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .signature-box {
+                border-color: #475569;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="container my-3 no-print text-center">
+<div class="container my-3 no-print d-flex justify-content-center align-items-center gap-2">
     <button onclick="window.print()" class="btn btn-primary px-4 py-2 font-semibold rounded-pill shadow-sm">
         🖨️ چاپ و صدور برگه سند آزمون
     </button>
-    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2 font-semibold rounded-pill shadow-sm ms-2">
+    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2 font-semibold rounded-pill shadow-sm">
         بازگشت به لیست
     </a>
 </div>
 
 <div class="print-container">
     <!-- Header -->
-    <div class="doc-header d-flex justify-content-between align-items-center">
+    <div class="doc-header d-flex justify-content-between align-items-center page-break-avoid">
         <div>
-            <h4 class="fw-bold text-secondary m-0">سامانه جذب و استخدام پیجو (Payjo)</h4>
-            <span class="text-xs text-muted d-block mt-1">شناسه فرصت شغلی: {{ job.code }}</span>
+            <h4 class="fw-bold text-dark m-0">{{ organization_name }}</h4>
+            <span class="text-xs text-muted d-block mt-1">شناسه یکتای سند: DOC-{{ job.code }}-{{ job.id }}</span>
         </div>
         <div class="text-end">
             <h5 class="fw-bold text-dark m-0">سند آزمون استخدامی</h5>
@@ -103,152 +118,162 @@
     </div>
 
     <!-- Job Details Grid -->
-    <h6 class="fw-bold text-secondary mb-3">۱. مشخصات عمومی ردیف استخدامی</h6>
-    <table class="table table-bordered table-details align-middle text-sm mb-4">
-        <tbody>
-            <tr>
-                <th>عنوان شغل</th>
-                <td>{{ job.title }}</td>
-                <th>کد شغل</th>
-                <td>{{ job.code }}</td>
-            </tr>
-            <tr>
-                <th>شماره درخواست</th>
-                <td>{{ job.request_number }}</td>
-                <th>رده شغلی</th>
-                <td>{{ job.job_category|default:"-" }}</td>
-            </tr>
-            <tr>
-                <th>بخش / دپارتمان</th>
-                <td>{{ job.department }}</td>
-                <th>واحد سازمانی</th>
-                <td>{{ job.unit|default:"-" }}</td>
-            </tr>
-            <tr>
-                <th>ظرفیت جذب (تعداد)</th>
-                <td>{{ job.headcount }} نفر</td>
-                <th>نوع استخدام</th>
-                <td>{{ job.get_recruitment_type_display }}</td>
-            </tr>
-            <tr>
-                <th>کارشناس جذب مسئول</th>
-                <td>{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</td>
-                <th>الگوی فرآیند</th>
-                <td>{{ job.workflow.name|default:"تخصیص دستی" }}</td>
-            </tr>
-            {% if job.recruitment_plan %}
-            <tr>
-                <th>تاریخ شروع جذب (برنامه‌ریزی)</th>
-                <td>{{ job.recruitment_plan.start_date|to_jalali }}</td>
-                <th>تاریخ پیش‌بینی پایان جذب</th>
-                <td>{{ job.recruitment_plan.predicted_end_date|to_jalali }}</td>
-            </tr>
-            {% endif %}
-        </tbody>
-    </table>
-
-    <!-- Job Description and Requirements -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <h6 class="fw-bold text-secondary mb-2">۲. شرح شغل (وظایف و مسئولیت‌ها)</h6>
-            <div class="p-3 bg-light rounded text-sm text-justify whitespace-pre-line" style="min-height: 80px; border: 1px solid #e2e8f0;">
-                {{ job.description }}
-            </div>
-        </div>
-        {% if job.requirements %}
-        <div class="col-12">
-            <h6 class="fw-bold text-secondary mb-2">۳. شرایط احراز (سوابق و شایستگی‌ها)</h6>
-            <div class="p-3 bg-light rounded text-sm text-justify whitespace-pre-line" style="min-height: 80px; border: 1px solid #e2e8f0;">
-                {{ job.requirements }}
-            </div>
-        </div>
-        {% endif %}
+    <div class="page-break-avoid mb-4">
+        <h6 class="fw-bold text-secondary mb-3">۱. مشخصات عمومی ردیف استخدامی</h6>
+        <table class="table table-bordered table-details align-middle text-sm mb-0">
+            <tbody>
+                <tr>
+                    <th>عنوان شغل</th>
+                    <td>{{ job.title }}</td>
+                    <th>کد شغل</th>
+                    <td>{{ job.code }}</td>
+                </tr>
+                <tr>
+                    <th>شماره درخواست</th>
+                    <td>{{ job.request_number }}</td>
+                    <th>رده شغلی</th>
+                    <td>{{ job.job_category|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>بخش / دپارتمان</th>
+                    <td>{{ job.department }}{% if job.factory_name %} (کارخانه: {{ job.factory_name }}){% endif %}</td>
+                    <th>واحد سازمانی</th>
+                    <td>{{ job.unit|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>ظرفیت جذب (تعداد)</th>
+                    <td>{{ job.headcount }} نفر</td>
+                    <th>نوع استخدام</th>
+                    <td>{{ job.get_recruitment_type_display }}</td>
+                </tr>
+                <tr>
+                    <th>کارشناس جذب مسئول</th>
+                    <td>{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</td>
+                    <th>الگوی فرآیند</th>
+                    <td>{{ job.workflow.name|default:"تخصیص دستی" }}</td>
+                </tr>
+                {% if job.recruitment_plan %}
+                <tr>
+                    <th>پلن جذب مرتبط</th>
+                    <td>{{ job.recruitment_plan.title }} (کد: {{ job.recruitment_plan.code }})</td>
+                    <th>تاریخ شروع جذب (برنامه‌ریزی)</th>
+                    <td>{{ job.recruitment_plan.start_date|to_jalali }} تا {{ job.recruitment_plan.predicted_end_date|to_jalali }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- Competencies List -->
-    <h6 class="fw-bold text-secondary mb-3">۴. شایستگی‌های منتخب ردیف استخدامی</h6>
-    <div class="d-flex flex-wrap gap-2 mb-4 p-3 bg-light rounded-3 border border-light">
-        {% for comp in selected_competencies %}
-            <span class="badge bg-white text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 font-semibold" style="font-size: 0.8rem; border-radius: 4px; font-weight: 500;">
-                {{ comp.title }}
-            </span>
-        {% empty %}
-            <span class="text-muted text-sm">هیچ شایستگی انتخاب نشده است.</span>
-        {% endfor %}
+    {% if job.description %}
+    <div class="mb-4 page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-2">۲. شرح مختصر وظایف و مسئولیت‌ها</h6>
+        <div class="p-3 bg-light rounded border text-sm text-secondary">
+            {{ job.description|linebreaks }}
+        </div>
     </div>
+    {% endif %}
 
-    <!-- Evaluation Stages -->
-    <h6 class="fw-bold text-secondary mb-3">۵. فرآیند ارزیابی و ضریب اوزان مراحل</h6>
-    <table class="table table-bordered stage-table align-middle text-center text-sm mb-5">
-        <thead>
-            <tr>
-                <th style="width: 8%;">ردیف</th>
-                <th class="text-start">نام مرحله ارزیابی</th>
-                {% if job.recruitment_plan %}
-                <th style="width: 18%;">شروع برنامه‌ریزی</th>
-                <th style="width: 18%;">پایان برنامه‌ریزی</th>
-                <th style="width: 12%;">SLA (روز کاری)</th>
-                {% endif %}
-                <th style="width: 14%;">ضریب وزنی</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stage in job.stages.all %}
-            <tr>
-                <td>{{ stage.sequence }}</td>
-                <td class="text-start">
-                    <div class="font-semibold">{{ stage.name }}</div>
-                    {% if stage.interviewers.all %}
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-top: 4px;">
-                        <span>مصاحبه‌گران: </span>
-                        {% for mapping in stage.interviewers.all %}
-                            {{ mapping.user.get_full_name|default:mapping.user.username }}{% if not forloop.last %}، {% endif %}
-                        {% endfor %}
-                    </div>
+    {% if job.requirements %}
+    <div class="mb-4 page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-2">۳. شرایط احراز و مهارت‌های مورد نیاز</h6>
+        <div class="p-3 bg-light rounded border text-sm text-secondary">
+            {{ job.requirements|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if job.notes %}
+    <div class="mb-4 page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-2">۴. یادداشت‌های اداری و داخلی</h6>
+        <div class="p-3 bg-light rounded border text-sm text-secondary">
+            {{ job.notes|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Assessment Stages Table -->
+    <div class="page-break-avoid mb-4">
+        <h6 class="fw-bold text-secondary mb-3">۵. مراحل و ضرایب فرآیند ارزیابی</h6>
+        <table class="table table-bordered stage-table align-middle text-sm mb-0 text-center">
+            <thead>
+                <tr>
+                    <th>ردیف</th>
+                    <th>عنوان مرحله ارزیابی</th>
+                    {% if job.recruitment_plan %}
+                    <th>تاریخ شروع برنامه‌ریزی</th>
+                    <th>تاریخ پایان برنامه‌ریزی</th>
+                    <th>مهلت زمان (SLA)</th>
                     {% endif %}
-                </td>
-                {% if job.recruitment_plan %}
-                {% with stage_plan=stage.planning_states.all.0 %}
-                <td>
-                    {{ stage_plan.planned_start_date|to_jalali|default:"-" }}
-                    {% if stage_plan.capacity_shifted %}
-                    <small class="text-warning d-block fw-bold" style="font-size: 9px; margin-top: 2px;">(جابجایی ظرفیت)</small>
+                    <th>وزن ارزیابی (درصد)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stage in job.stages.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="text-start">
+                        <div class="font-semibold">{{ stage.name }}</div>
+                        {% if stage.interviewers.all %}
+                        <div style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-top: 4px;">
+                            <span>مصاحبه‌گران: </span>
+                            {% for mapping in stage.interviewers.all %}
+                                {{ mapping.user.get_full_name|default:mapping.user.username }}{% if not forloop.last %}، {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% if job.recruitment_plan %}
+                    {% with stage_plan=stage.planning_states.all.0 %}
+                    <td>
+                        {{ stage_plan.planned_start_date|to_jalali|default:"-" }}
+                        {% if stage_plan.capacity_shifted %}
+                        <small class="text-warning d-block fw-bold" style="font-size: 9px; margin-top: 2px;">(جابجایی ظرفیت)</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ stage_plan.planned_end_date|to_jalali|default:"-" }}</td>
+                    <td>{{ stage_plan.sla_days|default:"-" }} روز</td>
+                    {% endwith %}
                     {% endif %}
-                </td>
-                <td>{{ stage_plan.planned_end_date|to_jalali|default:"-" }}</td>
-                <td>{{ stage_plan.sla_days|default:"-" }} روز</td>
-                {% endwith %}
-                {% endif %}
-                <td>{{ stage.weight }}٪</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="{% if job.recruitment_plan %}6{% else %}3{% endif %}" class="text-muted">هیچ مرحله ارزیابی ثبت نشده است.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <td>{{ stage.weight }}٪</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if job.recruitment_plan %}6{% else %}3{% endif %}" class="text-muted">هیچ مرحله ارزیابی ثبت نشده است.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Signature Area -->
-    <h6 class="fw-bold text-secondary mb-3">۶. گردش تاییدات و تایید نهایی مدیر ناحیه</h6>
-    <div class="row g-3">
-        <div class="col-4">
-            <div class="signature-box">
-                <span class="signature-title">کارشناس تامین سرمایه انسانی</span>
-                <span class="text-xs text-muted" style="font-weight: 500; margin-top: -10px;">{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</span>
-                <span class="signature-note">امضا و تاریخ</span>
+    <div class="page-break-avoid mt-4">
+        <h6 class="fw-bold text-secondary mb-3">۶. تأیید و امضا</h6>
+        <div class="row g-3 text-center">
+            <div class="col-4">
+                <div class="signature-box">
+                    <span class="signature-title">کارشناس تأمین سرمایه انسانی</span>
+                    <span class="text-xs text-muted">
+                        {% if job.assigned_recruiter %}
+                            {{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
-        </div>
-        <div class="col-4">
-            <div class="signature-box">
-                <span class="signature-title">رئیس واحد تامین سرمایه انسانی</span>
-                <span class="signature-note">امضا و تاریخ</span>
+            <div class="col-4">
+                <div class="signature-box">
+                    <span class="signature-title">رئیس واحد تأمین سرمایه انسانی</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
-        </div>
-        <div class="col-4">
-            <div class="signature-box">
-                <span class="signature-title">مدیر ناحیه</span>
-                <span class="signature-note">امضا و تاریخ</span>
+            <div class="col-4">
+                <div class="signature-box">
+                    <span class="signature-title">مدیر ناحیه / معاونت متقاضی</span>
+                    <span class="text-xs text-muted">{{ job.department|default:"-" }}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
         </div>
     </div>

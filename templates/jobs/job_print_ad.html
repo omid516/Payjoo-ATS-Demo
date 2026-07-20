@@ -376,7 +376,7 @@
             {% if org_setting.logo %}
                 <img src="{{ org_setting.logo.url }}" alt="{{ org_setting.name }}" style="max-height: 60px; max-width: 150px; object-fit: contain;">
             {% else %}
-                <img src="/static/logo.png" alt="سامانه پیجو" style="max-height: 60px; max-width: 150px; object-fit: contain; opacity: 0.85;">
+                <img src="/static/logo.png" alt="{{ organization_name }}" style="max-height: 60px; max-width: 150px; object-fit: contain; opacity: 0.85;">
             {% endif %}
             <div>
                 <h5 class="fw-bold m-0 text-secondary" style="font-size: 1.05rem;">{{ org_setting.name }}</h5>
@@ -563,7 +563,7 @@
 
     <!-- Footer -->
     <div class="ad-footer">
-        <span>منتشر شده توسط {{ org_setting.name }} — سامانه جذب و استخدام و مدیریت استعداد (Payjoo ATS)</span>
+        <span>منتشر شده توسط {{ organization_name }}</span>
     </div>
 
 

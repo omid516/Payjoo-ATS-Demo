@@ -15,7 +15,7 @@ class JobOpportunityForm(forms.ModelForm):
     class Meta:
         model = JobOpportunity
         fields = [
-            'request_number', 'title', 'code', 'department', 'unit', 'job_category',
+            'request_number', 'title', 'code', 'department', 'unit', 'factory_name', 'job_category',
             'headcount', 'recruitment_type', 'assigned_recruiter',
             'workflow', 'status', 'start_date', 'end_date', 'description', 'requirements', 'notes'
         ]
@@ -24,6 +24,7 @@ class JobOpportunityForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: کارشناس ارشد برنامه‌نویسی Python'}),
             'department': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: مهندسی نرم‌افزار'}),
             'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: بخش توسعه فرانت‌اند'}),
+            'factory_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: مجتمع فولاد مبارکه / کارخانه نورد سرد'}),
             'job_category': forms.Select(attrs={'class': 'form-select'}),
             'headcount': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'recruitment_type': forms.Select(attrs={'class': 'form-select'}),

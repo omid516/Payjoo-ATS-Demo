@@ -228,7 +228,7 @@
     <!-- هدر گزارش -->
     <div class="report-header d-flex justify-content-between align-items-center">
         <div>
-            <h4>سامانه مدیریت استعداد پیجو (Payjoo ATS)</h4>
+            <h4>{{ organization_name }}</h4>
             <span class="text-xs text-muted d-block mt-1">شناسنامه فرصت شغلی و نتایج فرآیند ارزیابی</span>
         </div>
         <div class="text-end">
@@ -254,7 +254,7 @@
             </tr>
             <tr>
                 <th>دپارتمان / واحد</th>
-                <td>{{ job.department }} / {{ job.unit|default:"-" }}</td>
+                <td>{{ job.department }} / {{ job.unit|default:"-" }}{% if job.factory_name %} ({{ job.factory_name }}){% endif %}</td>
                 <th>ظرفیت جذب (تعداد)</th>
                 <td>{{ job.headcount }} نفر</td>
                 <th>نوع استخدام</th>

@@ -101,6 +101,17 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
 
         return super().dispatch(request, *args, **kwargs)
 
+    def get_paginate_by(self, queryset):
+        page_size = self.request.GET.get('page_size')
+        if page_size:
+            try:
+                size = int(page_size)
+                if size in [10, 25, 50, 100]:
+                    return size
+            except (ValueError, TypeError):
+                pass
+        return self.paginate_by
+
     def get_queryset(self):
         from django.db.models import Count, Q
         queryset = JobOpportunity.objects.filter(is_deleted=False)
@@ -111,6 +122,7 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         
         sort_mapping = {
             'code': ['code'],
+            'request_number': ['request_number'],
             'title': ['title'],
             'department': ['department', 'unit'],
             'headcount': ['headcount'],
@@ -140,9 +152,10 @@ class JobOpportunityListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Pass current sorting details to template
+        # Pass current sorting and page size details to template
         context['current_sort'] = self.request.GET.get('sort', 'created_at').strip()
         context['current_order'] = self.request.GET.get('order', 'desc').strip()
+        context['page_size'] = self.get_paginate_by(self.get_queryset())
         
         # Clean current parameters to attach to pagination links
         query_params = self.request.GET.copy()

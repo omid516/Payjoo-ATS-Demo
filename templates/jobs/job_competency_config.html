@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}پیکربندی شایستگی‌ها و سند Assessment Plan | سامانه پیجو{% endblock %}
+{% block title %}پیکربندی شایستگی‌ها و سند Assessment Plan | {{ organization_name }}{% endblock %}
 
 {% block extra_head %}
 <!-- Tom Select CSS -->
@@ -100,44 +100,47 @@
                 </div>
                 
                 <div class="border border-light rounded-3 bg-light bg-opacity-25 p-3 d-flex flex-column" style="min-height: 180px;">
-                    <div id="custom-comps-container" class="d-flex flex-column gap-2">
+                    <ul id="custom-comps-container" class="list-unstyled mb-0 d-flex flex-column gap-2 p-0">
                         <!-- شایستگی‌های دستی از پیش ذخیره شده یا افزوده‌شده در این فیلدها رندر می‌شوند -->
                         {% for comp in custom_competencies_list %}
-                        <div class="custom-comp-item d-flex align-items-center justify-content-between p-2.5 bg-white border border-light rounded-3 hover-shadow-xs">
+                        <li class="custom-comp-item d-flex align-items-center justify-content-between p-2.5 bg-white border border-light rounded-3 hover-shadow-xs">
                             <input type="hidden" name="custom_competencies" value='{"title": "{{ comp.title }}", "competency_type": "{{ comp.competency_type }}", "importance": {{ comp.importance }}, "level": {{ comp.level }}, "code": "{{ comp.code|default:'' }}", "model_name": "{{ comp.model_name|default:'' }}"}'>
-                            <div class="flex-grow-1">
-                                <div class="text-xs font-bold text-dark mb-1">
-                                    {{ comp.title }}
-                                    {% if comp.model_name %}
-                                    <span class="badge bg-info bg-opacity-10 text-info font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">مدل: {{ comp.model_name }}</span>
-                                    {% else %}
-                                    <span class="badge bg-warning bg-opacity-10 text-warning font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">دستی</span>
-                                    {% endif %}
-                                </div>
-                                <div class="d-flex gap-1 flex-wrap">
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">
-                                        {% if comp.competency_type == 'KN' %}دانش
-                                        {% elif comp.competency_type == 'SK' %}مهارت
-                                        {% elif comp.competency_type == 'AB' %}توانایی
-                                        {% elif comp.competency_type == 'GE' %}رفتاری
-                                        {% elif comp.competency_type == 'ST' %}ارزش‌ها و سبک‌ها
-                                        {% elif comp.competency_type == 'PR' %}گردشکار و فرآیندها
-                                        {% elif comp.competency_type == 'CQ' %}گواهینامه‌ها و صلاحیت‌ها
-                                        {% elif comp.competency_type == 'IN' %}علایق حرفه‌ای
-                                        {% else %}{{ comp.competency_type }}{% endif %}
-                                    </span>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح: 
-                                        {% if comp.level == 1 %}آشنایی
-                                        {% elif comp.level == 2 %}توانایی
-                                        {% elif comp.level == 3 %}تسلط
-                                        {% else %}{{ comp.level }}{% endif %}
-                                    </span>
-                                    <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت: 
-                                        {% if comp.importance == 1 %}محوری
-                                        {% elif comp.importance == 2 %}تکلیف محور
-                                        {% elif comp.importance == 3 %}حداقلی
-                                        {% else %}{{ comp.importance }}{% endif %}
-                                    </span>
+                            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                <span class="text-primary font-bold" style="font-size: 1.2rem; line-height: 1;">•</span>
+                                <div class="flex-grow-1">
+                                    <div class="text-xs font-bold text-dark mb-1">
+                                        {{ comp.title }}
+                                        {% if comp.model_name %}
+                                        <span class="badge bg-info bg-opacity-10 text-info font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">مدل: {{ comp.model_name }}</span>
+                                        {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold ms-1" style="font-size: 9px; padding: 1px 4px;">دستی</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">
+                                            {% if comp.competency_type == 'KN' %}دانش
+                                            {% elif comp.competency_type == 'SK' %}مهارت
+                                            {% elif comp.competency_type == 'AB' %}توانایی
+                                            {% elif comp.competency_type == 'GE' %}رفتاری
+                                            {% elif comp.competency_type == 'ST' %}ارزش‌ها و سبک‌ها
+                                            {% elif comp.competency_type == 'PR' %}گردشکار و فرآیندها
+                                            {% elif comp.competency_type == 'CQ' %}گواهینامه‌ها و صلاحیت‌ها
+                                            {% elif comp.competency_type == 'IN' %}علایق حرفه‌ای
+                                            {% else %}{{ comp.competency_type }}{% endif %}
+                                        </span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح:
+                                            {% if comp.level == 1 %}آشنایی
+                                            {% elif comp.level == 2 %}توانایی
+                                            {% elif comp.level == 3 %}تسلط
+                                            {% else %}{{ comp.level }}{% endif %}
+                                        </span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت:
+                                            {% if comp.importance == 1 %}محوری
+                                            {% elif comp.importance == 2 %}تکلیف محور
+                                            {% elif comp.importance == 3 %}حداقلی
+                                            {% else %}{{ comp.importance }}{% endif %}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-link text-danger p-0 ms-2" onclick="removeCustomComp(this)">
@@ -145,11 +148,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                 </svg>
                             </button>
-                        </div>
+                        </li>
                         {% empty %}
                         <div class="text-center text-muted py-4 text-xs empty-custom-msg">هیچ شایستگی دستی ثبت نشده است.</div>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -467,10 +470,18 @@
 
     function filterPostCompetencies() {
         const checkedFilters = Array.from(document.querySelectorAll('.type-filter-checkbox:checked')).map(cb => cb.value);
+        const searchInput = document.getElementById('post-comp-search-input');
+        const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
         const items = document.querySelectorAll('.post-comp-item');
         items.forEach(item => {
             const type = item.getAttribute('data-type');
-            if (checkedFilters.includes(type)) {
+            const itemText = item.textContent.toLowerCase();
+
+            const matchesType = checkedFilters.includes(type);
+            const matchesSearch = !searchQuery || itemText.includes(searchQuery);
+
+            if (matchesType && matchesSearch) {
                 item.classList.remove('d-none');
             } else {
                 item.classList.add('d-none');
@@ -533,17 +544,20 @@
         
         const container = document.getElementById('custom-comps-container');
         const itemHtml = `
-            <div class="custom-comp-item d-flex align-items-center justify-content-between p-2.5 bg-white border border-light rounded-3 hover-shadow-xs">
+            <li class="custom-comp-item d-flex align-items-center justify-content-between p-2.5 bg-white border border-light rounded-3 hover-shadow-xs">
                 <input type="hidden" name="custom_competencies" value='${JSON.stringify(compData)}'>
-                <div class="flex-grow-1">
-                    <div class="text-xs font-bold text-dark mb-1">
-                        ${escapeHtml(title)}
-                        ${badgeMarkup}
-                    </div>
-                    <div class="d-flex gap-1 flex-wrap">
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">${typeLabels[typeVal] || typeVal}</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح: ${lvlLabels[levelVal] || levelVal}</span>
-                        <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت: ${impLabels[importanceVal] || importanceVal}</span>
+                <div class="d-flex align-items-center gap-2 flex-grow-1">
+                    <span class="text-primary font-bold" style="font-size: 1.2rem; line-height: 1;">•</span>
+                    <div class="flex-grow-1">
+                        <div class="text-xs font-bold text-dark mb-1">
+                            ${escapeHtml(title)}
+                            ${badgeMarkup}
+                        </div>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">${typeLabels[typeVal] || typeVal}</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">سطح: ${lvlLabels[levelVal] || levelVal}</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning font-bold text-xxs" style="font-size: 9px; padding: 1.5px 4.5px;">اهمیت: ${impLabels[importanceVal] || importanceVal}</span>
+                        </div>
                     </div>
                 </div>
                 <button type="button" class="btn btn-link text-danger p-0 ms-2" onclick="removeCustomComp(this)">
@@ -551,7 +565,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
                 </button>
-            </div>
+            </li>
         `;
         
         container.insertAdjacentHTML('beforeend', itemHtml);

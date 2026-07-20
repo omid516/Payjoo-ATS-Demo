@@ -7,6 +7,7 @@ STAGE_TYPE_CHOICES = [
     ('SCREENING', 'غربالگری'),
     ('EXAM', 'آزمون کتبی'),
     ('SKILL_TEST', 'آزمون مهارتی'),
+    ('IQ_TEST', 'تست هوش'),
     ('INTERVIEW', 'مصاحبه'),
     ('ASSESSMENT', 'کانون ارزیابی'),
     ('OTHER', 'سایر'),
@@ -49,6 +50,7 @@ class JobOpportunity(SoftDeleteModel):
     STATUS_SCREENING = 'SCREENING'
     STATUS_EXAM = 'EXAM'
     STATUS_SKILL_TEST = 'SKILL_TEST'
+    STATUS_IQ_TEST = 'IQ_TEST'
     STATUS_INTERVIEW = 'INTERVIEW'
     STATUS_ASSESSMENT = 'ASSESSMENT'
     STATUS_FINAL_SELECTION = 'FINAL_SELECTION'
@@ -64,6 +66,7 @@ class JobOpportunity(SoftDeleteModel):
         (STATUS_SCREENING, 'غربالگری اولیه'),
         (STATUS_EXAM, 'آزمون کتبی'),
         (STATUS_SKILL_TEST, 'آزمون مهارتی'),
+        (STATUS_IQ_TEST, 'تست هوش'),
         (STATUS_INTERVIEW, 'مصاحبه حضوری'),
         (STATUS_ASSESSMENT, 'کانون ارزیابی'),
         (STATUS_FINAL_SELECTION, 'انتخاب نهایی'),
@@ -84,6 +87,7 @@ class JobOpportunity(SoftDeleteModel):
     code = models.CharField(max_length=50, verbose_name="کد شغل")
     department = models.CharField(max_length=100, verbose_name="بخش / دپارتمان")
     unit = models.CharField(max_length=100, blank=True, verbose_name="واحد سازمانی")
+    factory_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="کارخانه / محل استقرار")
     CATEGORY_CHOICES = [
         ('اپراتور - تعمیرکار', 'اپراتور - تعمیرکار'),
         ('کاردان', 'کاردان'),
@@ -132,10 +136,10 @@ class JobOpportunity(SoftDeleteModel):
                 violation_error_message="یک فرصت شغلی فعال با این شماره درخواست از قبل وجود دارد."
             ),
             models.UniqueConstraint(
-                fields=['code'],
+                fields=['request_number', 'code'],
                 condition=models.Q(is_deleted=False),
-                name='unique_code_active',
-                violation_error_message="یک فرصت شغلی فعال با این کد شغل از قبل وجود دارد."
+                name='unique_request_number_code_active',
+                violation_error_message="یک فرصت شغلی فعال با این ترکیب شماره درخواست و کد شغل از قبل وجود دارد."
             )
         ]
 
@@ -190,6 +194,8 @@ class JobOpportunity(SoftDeleteModel):
             return self.STATUS_SCREENING
         elif any(kw in name_lower for kw in ["مهارتی", "skill_test", "عملی"]):
             return self.STATUS_SKILL_TEST
+        elif any(kw in name_lower for kw in ["هوش", "iq"]):
+            return self.STATUS_IQ_TEST
         elif any(kw in name_lower for kw in ["آزمون", "امتحان", "کتبی", "exam", "test"]):
             return self.STATUS_EXAM
         elif any(kw in name_lower for kw in ["مصاحبه", "interview"]):
@@ -249,7 +255,7 @@ class JobOpportunity(SoftDeleteModel):
 
         # 3. If there are no active/selected applications, and current status is a pipeline/closed status, revert to PUBLISHED
         pipeline_statuses = [
-            self.STATUS_SCREENING, self.STATUS_EXAM, self.STATUS_SKILL_TEST,
+            self.STATUS_SCREENING, self.STATUS_EXAM, self.STATUS_SKILL_TEST, self.STATUS_IQ_TEST,
             self.STATUS_INTERVIEW, self.STATUS_ASSESSMENT,
             self.STATUS_FINAL_SELECTION, self.STATUS_CLOSED
         ]
@@ -269,7 +275,9 @@ class JobOpportunity(SoftDeleteModel):
         super().save(*args, **kwargs)
         
         if workflow_changed:
-            self.stages.filter(is_deleted=False).update(is_deleted=True)
+            old_stages = list(self.stages.filter(is_deleted=False))
+            for stg in old_stages:
+                stg.delete()
             
         # اگر فرصت شغلی جدید باشد یا الگوی فرآیند تغییر کرده باشد یا هیچ مرحله فعالی نداشته باشد و الگوی فرآیند انتخاب شده باشد، مراحل پیش‌فرض از روی الگو کپی می‌شوند
         if self.workflow and (is_new or workflow_changed or not self.stages.filter(is_deleted=False).exists()):
@@ -694,7 +702,7 @@ class AIPostRecommendation(SoftDeleteModel):
 
 
 class OrganizationSetting(SoftDeleteModel):
-    name = models.CharField(max_length=200, default="سامانه جذب و استخدام پیجو", verbose_name="نام سازمان")
+    name = models.CharField(max_length=200, default="سیستم جذب", verbose_name="نام سازمان")
     logo = models.FileField(upload_to='org_logos/', blank=True, null=True, verbose_name="لوگوی سازمان")
 
     # ۱. ثبت‌نام و ورود اولیه به سامانه (ثبت‌نام)
@@ -749,7 +757,7 @@ class OrganizationSetting(SoftDeleteModel):
     )
     exam_sms_enabled = models.BooleanField(default=True, verbose_name="ارسال پیامک دعوت به آزمون فعال باشد")
     exam_sms_body = models.TextField(
-        default="متقاضی گرامی {{ candidate_name }}، دعوت‌نامه شرکت در آزمون کتبی شغل \"{{ job_title }}\" برای شما صادر شد.\nزمان آزمون: {{ date }} ساعت {{ time }}\nجزییات بیشتر و لینک شرکت در آزمون در ایمیل شما و پنل پیجو:\n{{ link }}",
+        default="متقاضی گرامی {{ candidate_name }}، دعوت‌نامه شرکت در آزمون کتبی شغل \"{{ job_title }}\" برای شما صادر شد.\nزمان آزمون: {{ date }} ساعت {{ time }}\nجزییات بیشتر و لینک شرکت در آزمون در پنل {{ company_name }}:\n{{ link }}",
         verbose_name="متن پیامک دعوت به آزمون"
     )
 
@@ -876,6 +884,5 @@ class OrganizationSetting(SoftDeleteModel):
     def get_active_setting(cls):
         setting = cls.objects.filter(is_deleted=False).first()
         if not setting:
-            setting = cls.objects.create(name="سامانه جذب و استخدام پیجو")
+            setting = cls.objects.create(name="سیستم جذب")
         return setting
-

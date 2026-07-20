@@ -54,20 +54,20 @@
             font-weight: 700;
         }
         .signature-box {
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 1rem;
-            height: 140px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 0.9rem 0.6rem;
+            min-height: 145px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            background-color: #f8fafc;
+            background-color: #fafafa;
         }
         .signature-title {
             font-weight: 700;
-            font-size: 0.85rem;
-            color: #334155;
+            font-size: 0.82rem;
+            color: #1e293b;
         }
         .signature-note {
             font-size: 0.75rem;
@@ -80,10 +80,16 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+        @page {
+            size: A4 portrait;
+            margin: 12mm 15mm;
+        }
         @media print {
             body {
                 padding: 0;
                 background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .print-container {
                 border: none;
@@ -94,8 +100,12 @@
             .no-print {
                 display: none !important;
             }
-            .page-break {
-                page-break-before: always;
+            .page-break-avoid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .signature-box {
+                border-color: #475569;
             }
         }
     </style>
@@ -112,16 +122,16 @@
             <h6 class="m-0 fw-bold text-secondary">تنظیمات پویای سند آزمون:</h6>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <label for="totalQuestionsInput" class="form-label m-0 text-sm fw-medium">تعداد کل سوالات پیشنهادی:</label>
+            <label for="totalQuestionsInput" class="form-label m-0 text-sm fw-medium">تعداد کل سوالات:</label>
             <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 80px;" value="50" min="10" max="200" onchange="recalculateQuestions()">
         </div>
         <div class="d-flex align-items-center gap-2">
-            <label for="timePerQuestionInput" class="form-label m-0 text-sm fw-medium">زمان به ازای هر سوال (دقیقه):</label>
+            <label for="timePerQuestionInput" class="form-label m-0 text-sm fw-medium">زمان هر سوال (دقیقه):</label>
             <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 70px;" value="1.5" step="0.1" min="0.5" max="5.0" onchange="recalculateQuestions()">
         </div>
-        <div>
+        <div class="d-flex align-items-center gap-2">
             <button onclick="window.print()" class="btn btn-primary btn-sm px-4 py-1.5 rounded-pill shadow-sm">
-                🖨️ چاپ و صدور سند مشخصات آزمون
+                🖨️ چاپ سند A4
             </button>
         </div>
     </div>
@@ -131,7 +141,7 @@
     <!-- Header -->
     <div class="doc-header d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="fw-bold text-primary m-0">سامانه جذب و استخدام پیجو (Payjo)</h4>
+            <h4 class="fw-bold text-primary m-0">{{ organization_name }}</h4>
             <span class="text-xs text-muted d-block mt-1">شناسه فرصت شغلی: {{ job.code }}</span>
         </div>
         <div class="text-end">
@@ -270,36 +280,36 @@
     </div>
 
     <!-- Section 4: Signature Workflows -->
-    <h6 class="fw-bold text-secondary mb-3">۴. گردش تاییدات قانونی سند مشخصات آزمون</h6>
-    <div class="row g-3">
-        <div class="col-3">
-            <div class="signature-box">
-                <span class="signature-title">کارشناس تامین سرمایه انسانی</span>
-                <span class="text-xs text-muted" style="font-weight: 500; margin-top: -5px;">
-                    {% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}
-                </span>
-                <span class="signature-note">امضا و تاریخ</span>
+    <div class="page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-3">۴. گردش تاییدات قانونی سند مشخصات آزمون</h6>
+        <div class="row g-2 text-center">
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۱. کارشناس تامین سرمایه</span>
+                    <span class="text-xs text-muted font-semibold">{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}کارشناس مسئول{% endif %}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="signature-box">
-                <span class="signature-title">رئیس واحد تامین سرمایه انسانی</span>
-                <br>
-                <span class="signature-note">امضا و تاریخ</span>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۲. رئیس واحد تامین سرمایه</span>
+                    <span class="text-xs text-muted font-semibold">ریاست واحد جذب</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="signature-box">
-                <span class="signature-title">مدیر کل یا مدیر ناحیه متقاضی</span>
-                <span class="text-xs text-muted" style="font-weight: 500; margin-top: -5px;">{{ job.department }}</span>
-                <span class="signature-note">امضا و تاریخ</span>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۳. مدیر ناحیه متقاضی</span>
+                    <span class="text-xs text-muted font-semibold">{{ job.department|default:"مدیریت مربوطه" }}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="signature-box">
-                <span class="signature-title">نماینده رسمی مرکز آزمون</span>
-                <br>
-                <span class="signature-note">امضا و تاریخ</span>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۴. نماینده مرکز آزمون</span>
+                    <span class="text-xs text-muted font-semibold">ارزیابی و آزمون</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}ورود به سامانه پیجو{% endblock %}
+{% block title %}ورود به {{ organization_name }}{% endblock %}
 
 {% block content %}
 <div class="login-wrapper w-100 min-vh-100 position-relative overflow-hidden d-flex align-items-center justify-content-center">
@@ -21,19 +21,19 @@
 
                 <!-- Top Logo -->
                 <div class="position-relative z-2">
-                    <img src="/static/logo.png" alt="لوگو پیجو" style="height: 40px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
+                    <img src="/static/logo.png" alt="لوگوی {{ organization_name }}" style="height: 40px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 
                 <!-- Framed Floating Splash Image -->
                 <div class="d-flex align-items-center justify-content-center my-4 position-relative z-2">
                     <div class="splash-box p-4 d-flex align-items-center justify-content-center">
-                        <img src="/static/splash.png" alt="پیش‌نمایش پیجو" class="splash-img">
+                        <img src="/static/splash.png" alt="پیش‌نمایش {{ organization_name }}" class="splash-img">
                     </div>
                 </div>
                 
                 <!-- Title & Tagline -->
                 <div class="position-relative z-2" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-                    <h3 class="font-bold mb-1.5" style="font-size: 1.4rem;">سامانه هوشمند جذب و استخدام پیجو</h3>
+                    <h3 class="font-bold mb-1.5" style="font-size: 1.4rem;">{{ organization_name }}</h3>
                     <p class="text-xs text-slate-300 m-0 leading-relaxed">ارزیابی تخصصی کاندیداها و انطباق شایستگی‌ها بر پایه هوش مصنوعی</p>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                 <div class="w-100" style="max-width: 360px;">
                     <!-- Mobile Top Logo (Shown only on small screens) -->
                     <div class="text-center mb-4 d-md-none">
-                        <img src="/static/logo.png" alt="سامانه پیجو" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 12px;" class="mx-auto">
+                        <img src="/static/logo.png" alt="{{ organization_name }}" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 12px;" class="mx-auto">
                     </div>
 
                     <div class="mb-4">

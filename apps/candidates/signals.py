@@ -311,7 +311,7 @@ def send_gateway_sms(org_setting, phone_number, message):
 
 def render_notification_template(template_text, candidate, job, stage_name=None, date=None, time=None, link=None, recruiter_name=None):
     org_setting = OrganizationSetting.get_active_setting()
-    company_name = org_setting.name if org_setting else "سامانه پیجو"
+    company_name = org_setting.name if org_setting else "سیستم جذب"
     
     candidate_name = f"{candidate.first_name} {candidate.last_name}"
     

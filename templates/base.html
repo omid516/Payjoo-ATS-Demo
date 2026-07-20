@@ -443,7 +443,7 @@
                             {% if user.profile.can_view_audit_logs %}
                             <li>
                                 <a href="{% url 'audit_log_list' %}" class="nav-link {% if 'audit-logs' in request.path %}active text-white{% endif %}">
-                                    لاگ‌های ممیزی (Audit Logs)
+                                    {{ t.audit_logs }}
                                 </a>
                             </li>
                             {% endif %}

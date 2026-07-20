@@ -656,12 +656,21 @@ class JobOpportunityDeletionAndReuseTests(TestCase):
             department='فناوری'
         )
 
-        # Test duplicate code
+        # Test duplicate code under DIFFERENT request_number is allowed (Issue #1 requirement)
+        job_same_code = JobOpportunity.objects.create(
+            request_number='REQ-DUP-02',
+            title='شغل دیگر با همان کد',
+            code='CODE-DUP-01',
+            department='فناوری'
+        )
+        self.assertIsNotNone(job_same_code.pk)
+
+        # Test duplicate (request_number, code) compound uniqueness
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 JobOpportunity.objects.create(
-                    request_number='REQ-DUP-02',
-                    title='شغل دیگر با همان کد',
+                    request_number='REQ-DUP-01',
+                    title='شغل دیگر با همان شماره درخواست و کد',
                     code='CODE-DUP-01',
                     department='فناوری'
                 )

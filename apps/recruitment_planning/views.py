@@ -133,7 +133,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 delayed_plans.append(plan)
 
         # Capacity gauges for current month
-        stage_types = ['SCREENING', 'EXAM', 'SKILL_TEST', 'INTERVIEW', 'ASSESSMENT']
+        stage_types = ['SCREENING', 'EXAM', 'SKILL_TEST', 'IQ_TEST', 'INTERVIEW', 'ASSESSMENT']
         capacity_stats = []
         configs = {c.stage_type: c for c in StageTypeConfiguration.objects.filter(is_deleted=False)}
         
@@ -152,6 +152,7 @@ class PlanningDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'SCREENING': 'غربالگری اولیه',
                 'EXAM': 'آزمون کتبی',
                 'SKILL_TEST': 'آزمون مهارتی',
+                'IQ_TEST': 'تست هوش',
                 'INTERVIEW': 'مصاحبه حضوری',
                 'ASSESSMENT': 'کانون ارزیابی'
             }
@@ -1751,7 +1752,6 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             'active_tab': request.GET.get('tab', 'charts'),
         }
         return render(request, 'recruitment_planning/analytics.html', context)
-
 
 
 

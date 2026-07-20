@@ -128,6 +128,7 @@ def calculate_recruitment_schedule(job, start_date, overrides=None):
                     'SCREENING': 5,
                     'EXAM': 15,
                     'SKILL_TEST': 15,
+                    'IQ_TEST': 10,
                     'INTERVIEW': 10,
                     'ASSESSMENT': 15,
                     'OTHER': 5
@@ -267,4 +268,3 @@ def get_consumed_capacity(stage_type, g_start, g_end, year, month, exclude_job=N
         return active_apps.filter(job__status=stage_type).count()
     else:
         return stage_plans.aggregate(total=Sum('plan__job__headcount'))['total'] or 0
-

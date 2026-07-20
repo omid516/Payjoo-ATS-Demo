@@ -30,7 +30,8 @@ from .views import (
     CompetencyModelDetailApiView,
     CompetencyModelListView,
     CompetencyModelManageView,
-    CompetencyModelItemManageView
+    CompetencyModelItemManageView,
+    GenerateJobSpecsApiView
 )
 
 
@@ -65,6 +66,7 @@ urlpatterns = [
     path('api/posts/detail/', SearchPostsDetailApiView.as_view(), name='post_detail_api'),
     path('api/competencies/search/', SearchCompetenciesApiView.as_view(), name='search_competencies_api'),
     path('api/competency-models/<int:model_id>/', CompetencyModelDetailApiView.as_view(), name='competency_model_detail_api'),
+    path('api/generate-job-specs/', GenerateJobSpecsApiView.as_view(), name='generate_job_specs_api'),
     path('<int:job_id>/competencies/', JobCompetencyConfigView.as_view(), name='job_competency_config'),
     path('<int:job_id>/assessment-plan/print/', JobAssessmentPlanPrintView.as_view(), name='job_assessment_plan_print'),
     path('<int:job_id>/exam-specification/print/', JobExamSpecificationPrintView.as_view(), name='job_exam_specification_print'),

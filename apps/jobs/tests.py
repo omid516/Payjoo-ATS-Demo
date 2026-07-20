@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from datetime import date, datetime
 import jdatetime
+import json
 
 from apps.jobs.models import (
     WorkflowTemplate, WorkflowStageTemplate, JobOpportunity, JobOpportunityStage,
@@ -2285,6 +2286,42 @@ class CompetencyModelViewsTests(TestCase):
         self.assertTemplateUsed(response, 'jobs/partials/competency_model_detail.html')
         self.assertContains(response, 'شایستگی مهارتی دوم')
         self.assertEqual(self.model.items.filter(is_deleted=False).count(), 1)
+
+
+class GenerateJobSpecsApiViewTests(TestCase):
+    def setUp(self):
+        import json
+        from django.contrib.auth.models import User
+        from apps.accounts.models import UserProfile
+        self.user = User.objects.create_user(username='hr_spec_ai', password='password123')
+        self.profile = getattr(self.user, 'profile', None)
+        if not self.profile:
+            self.profile = UserProfile.objects.create(user=self.user, role=UserProfile.ROLE_RECRUITMENT_SPECIALIST)
+        else:
+            self.profile.role = UserProfile.ROLE_RECRUITMENT_SPECIALIST
+            self.profile.save()
+        self.client.login(username='hr_spec_ai', password='password123')
+
+    def test_generate_job_specs_without_title_fails(self):
+        """تست اینکه بدون عنوان شغل خطای 400 بازگردانده می‌شود"""
+        url = reverse('generate_job_specs_api')
+        response = self.client.post(url, json.dumps({}), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_generate_job_specs_fallback_success(self):
+        """تست اینکه با دادن عنوان شغل شرح شغل و شرایط احراز بنچمارک تولید می‌شود"""
+        url = reverse('generate_job_specs_api')
+        data = {
+            'title': 'مهندس نرم‌افزار پایتون',
+            'department': 'فناوری اطلاعات',
+            'job_category': 'EX'
+        }
+        response = self.client.post(url, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        res_json = response.json()
+        self.assertTrue(res_json['success'])
+        self.assertIn('هدف اصلی شغل:', res_json['description'])
+        self.assertIn('شرایط احراز و تحصیلات:', res_json['requirements'])
 
 
 

@@ -2897,3 +2897,137 @@ class CompetencyModelDetailApiView(LoginRequiredMixin, RoleRequiredMixin, View):
         }
         return JsonResponse(data)
 
+
+class GenerateJobSpecsApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+    ]
+
+    def post(self, request, *args, **kwargs):
+        import json, urllib.request
+        from django.http import JsonResponse
+        from apps.jobs.models import AISetting
+
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.POST
+
+        title = str(data.get('title', '')).strip()
+        department = str(data.get('department', '')).strip()
+        unit = str(data.get('unit', '')).strip()
+        job_category = str(data.get('job_category', '')).strip()
+        factory_name = str(data.get('factory_name', '')).strip()
+        target_field = str(data.get('target_field', 'all')).strip()
+
+        if not title:
+            return JsonResponse({
+                'success': False,
+                'error': 'لطفاً ابتدا عنوان فرصت شغلی را وارد نمایید.'
+            }, status=400)
+
+        ai_setting = AISetting.get_active_setting()
+        description = ""
+        requirements = ""
+        is_live = False
+
+        if ai_setting and ai_setting.api_key:
+            try:
+                system_prompt = (
+                    "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌های منابع انسانی و متخصص طبقه‌بندی مشاغل صنعتی و سازمانی هستید.\n"
+                    "وظیفه شما این است که بر اساس عنوان شغل ورودی و بنچمارک‌های مرجع بین‌المللی مانند O*NET Online, SHL UCF, Lominger و استانداردهای مدیریت منابع انسانی صنایع پیشرفته (مانند صنعت فولاد و تولید)، پیش‌نویس جامع و کاملاً حرفه‌ای برای 'شرح وظایف و مسئولیت‌های کلیدی' (Job Description) و 'شرایط احراز و مهارت‌های مورد نیاز' (Job Requirements) به زبان فارسی شیوا و ساختاریافته تولید کنید.\n\n"
+                    "قوانین محتوایی:\n"
+                    "1. شرح شغل (description): شامل هدف اصلی شغل، ۵ تا ۷ مسئولیت تخصصی و کلیدی با بولت-پوینت (•)، پاسخگویی‌های اصلی و تعاملات سازمانی متناظر با بنچمارک این رده شغلی باشد.\n"
+                    "2. شرایط احراز (requirements): شامل حداقل مدرک و رشته تحصیلی مرتبط، حداقل سابقه کار مفید، مهارت‌های تخصصی و نرم‌افزاری لازم، مهارت‌های رفتاری/نرم و گواهینامه‌های الزامی مرتبط با صنعت باشد.\n\n"
+                    "پاسخ خود را دقیقاً در قالب JSON زیر بازگردانید و هیچ توضیح اضافه یا متنی خارج از JSON ارائه ندهید:\n"
+                    "{\n"
+                    "  \"description\": \"متن کامل شرح شغل و مسئولیت‌ها با بولت پوینت‌ها\",\n"
+                    "  \"requirements\": \"متن کامل شرایط احراز و مهارت‌ها با بولت پوینت‌ها\"\n"
+                    "}"
+                )
+
+                context_details = []
+                if department: context_details.append(f"دپارتمان/بخش: {department}")
+                if unit: context_details.append(f"واحد سازمانی: {unit}")
+                if job_category: context_details.append(f"رده شغلی: {job_category}")
+                if factory_name: context_details.append(f"محل استقرار/کارخانه: {factory_name}")
+                context_str = " | ".join(context_details) if context_details else "بدون پارامتر جانبی"
+
+                user_prompt = f"عنوان شغل: {title}\nاطلاعات تکمیلی: {context_str}"
+
+                payload = {
+                    "model": ai_setting.model_name,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "temperature": 0.6,
+                    "response_format": {"type": "json_object"}
+                }
+
+                url = f"{ai_setting.base_url.rstrip('/')}/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {ai_setting.api_key}",
+                    "Content-Type": "application/json"
+                }
+
+                req_data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(url, data=req_data, headers=headers, method='POST')
+
+                with urllib.request.urlopen(req, timeout=12) as response:
+                    if response.status == 200:
+                        res_body = response.read().decode('utf-8')
+                        res_json = json.loads(res_body)
+                        content = res_json['choices'][0]['message']['content']
+                        parsed_content = json.loads(content)
+
+                        description = parsed_content.get('description', '').strip()
+                        requirements = parsed_content.get('requirements', '').strip()
+                        is_live = True
+            except Exception:
+                is_live = False
+
+        # Fallback benchmark generator if AI API was not used or failed
+        if not description or not requirements:
+            dept_info = f" در بخش {department}" if department else ""
+            factory_info = f" (محل استقرار: {factory_name})" if factory_name else ""
+            
+            if not description:
+                description = (
+                    f"هدف اصلی شغل:\n"
+                    f"برنامه‌ریزی، راهبری و اجرای عملیاتی وظایف تخصصی پست {title}{dept_info} مطابق با استانداردهای سازمانی و بنچمارک‌های مرجع شغلی{factory_info}.\n\n"
+                    f"مسئولیت‌ها و وظایف اصلی:\n"
+                    f"• نظارت و اجرای فرآیندهای تخصصی مربوط به {title} بر اساس آیین‌نامه‌ها و گردشکارهای مصوب.\n"
+                    f"• تحلیل چالش‌های فنی/عملیاتی دپارتمان و ارائه‌راهکارهای بهینه‌سازی فرآیندها.\n"
+                    f"• تهیه گزارش‌های دوره‌ای عملکرد و تحلیل شاخص‌های کلیدی (KPIs) ردیف شغلی.\n"
+                    f"• همکاری و هماهنگی مؤثر با سایر واحدهای سازمانی جهت پیشبرد اهداف عملیاتی.\n"
+                    f"• رعایت کامل الزامات ایمنی (HSE)، ضوابط کیفیت و استانداردهای فنی مربوطه."
+                )
+
+            if not requirements:
+                requirements = (
+                    f"شرایط احراز و تحصیلات:\n"
+                    f"• مدرک تحصیلی: حداقل کارشناسی در رشته‌های مرتبط با {title} یا مهندسی/مدیریت.\n"
+                    f"• سوابق کاری: حداقل ۳ سال سابقه کار تخصصی مرتبط با ردیف شغلی در صنایع یا سازمان‌های معتبر.\n\n"
+                    f"دانش و مهارت‌های تخصصی:\n"
+                    f"• تسلط بر اصول، مفاهیم و استانداردهای تخصصی حوزه {title}.\n"
+                    f"• آشنایی کامل با نرم‌افزارهای تخصصی و ابزارهای تحلیلی مربوطه.\n"
+                    f"• آشنایی با قوانین، دستورالعمل‌ها و فرآیندهای کاری صنعت.\n\n"
+                    f"مهارت‌های رفتاری و فردی:\n"
+                    f"• تفکر تحلیلی و مهارت حل مسئله در شرایط بحرانی.\n"
+                    f"• برقراری ارتباط مؤثر و توانایی کار تیمی.\n"
+                    f"• مسئولیت‌پذیری، انضباط کاری و مدیریت زمان."
+                )
+
+        return JsonResponse({
+            'success': True,
+            'title': title,
+            'description': description,
+            'requirements': requirements,
+            'is_live': is_live
+        })
+

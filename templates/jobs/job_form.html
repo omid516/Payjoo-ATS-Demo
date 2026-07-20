@@ -165,23 +165,39 @@
             </div>
 
             <!-- Section 3: Descriptions -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">
-                {% if current_language_code == 'en' %}3. Job Description, Requirements & Notes{% elif current_language_code == 'tr' %}3. İş Tanımı, Gereksinimler & Notlar{% elif current_language_code == 'ar' %}٣. شرح الوظيفة، الشروط والملاحظات{% else %}۳. شرح شغل، شرایط احراز و یادداشت‌ها{% endif %}
-            </h5>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-slate gap-2">
+                <h5 class="font-semibold text-secondary m-0">
+                    {% if current_language_code == 'en' %}3. Job Description, Requirements & Notes{% elif current_language_code == 'tr' %}3. İş Tanımı, Gereksinimler & Notlar{% elif current_language_code == 'ar' %}٣. شرح الوظيفة، الشروط والملاحظات{% else %}۳. شرح شغل، شرایط احراز و یادداشت‌ها{% endif %}
+                </h5>
+                <button type="button" id="btn-generate-ai-all" onclick="generateAISpecs('all')" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1.5 shadow-sm px-3 py-1.5" style="border-radius: 20px;">
+                    <span>✨</span>
+                    <span class="fw-bold">تولید هوشمند شرح شغل و شرایط احراز با AI (بنچمارک جهانی)</span>
+                </button>
+            </div>
             <div class="row g-3 mb-4">
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">
-                        {% if current_language_code == 'en' %}Job Description{% elif current_language_code == 'tr' %}İş Tanımı{% elif current_language_code == 'ar' %}شرح الوظيفة{% else %}شرح شغل{% endif %}
-                    </label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label font-medium text-secondary mb-0">
+                            {% if current_language_code == 'en' %}Job Description{% elif current_language_code == 'tr' %}İş Tanımı{% elif current_language_code == 'ar' %}شرح الوظيفة{% else %}شرح شغل{% endif %}
+                        </label>
+                        <button type="button" onclick="generateAISpecs('description')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                            <span>✨</span> پیشنهاد با AI
+                        </button>
+                    </div>
                     {{ form.description }}
                     {% if form.description.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.description.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">
-                        {% if current_language_code == 'en' %}Requirements{% elif current_language_code == 'tr' %}Gereksinimler{% elif current_language_code == 'ar' %}شروط التأهيل{% else %}شرایط احراز{% endif %}
-                    </label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label font-medium text-secondary mb-0">
+                            {% if current_language_code == 'en' %}Requirements{% elif current_language_code == 'tr' %}Gereksinimler{% elif current_language_code == 'ar' %}شروط التأهيل{% else %}شرایط احراز{% endif %}
+                        </label>
+                        <button type="button" onclick="generateAISpecs('requirements')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                            <span>✨</span> پیشنهاد با AI
+                        </button>
+                    </div>
                     {{ form.requirements }}
                     {% if form.requirements.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.requirements.errors.0 }}</div>
@@ -500,5 +516,76 @@
         attachWeightListeners();
         updateSum();
     });
+
+    function generateAISpecs(targetField) {
+        const titleInput = document.getElementById('id_title');
+        const title = titleInput ? titleInput.value.trim() : '';
+
+        if (!title) {
+            alert('لطفاً ابتدا «عنوان شغل» را در فرم بالا وارد نمایید تا هوش مصنوعی بر اساس بنچمارک آن، شرح شغل و شرایط احراز را استخراج کند.');
+            if (titleInput) titleInput.focus();
+            return;
+        }
+
+        const department = document.getElementById('id_department') ? document.getElementById('id_department').value.trim() : '';
+        const unit = document.getElementById('id_unit') ? document.getElementById('id_unit').value.trim() : '';
+        const category = document.getElementById('id_job_category') ? document.getElementById('id_job_category').value.trim() : '';
+        const factory = document.getElementById('id_factory_name') ? document.getElementById('id_factory_name').value.trim() : '';
+
+        const btnAll = document.getElementById('btn-generate-ai-all');
+        if (btnAll) {
+            btnAll.disabled = true;
+            btnAll.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> در حال تحلیل بنچمارک‌های مرجع و تولید با AI...';
+        }
+
+        fetch("{% url 'generate_job_specs_api' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                title: title,
+                department: department,
+                unit: unit,
+                job_category: category,
+                factory_name: factory,
+                target_field: targetField
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (targetField === 'all' || targetField === 'description') {
+                    const descArea = document.getElementById('id_description');
+                    if (descArea && data.description) {
+                        descArea.value = data.description;
+                        descArea.style.borderColor = '#10b981';
+                    }
+                }
+                if (targetField === 'all' || targetField === 'requirements') {
+                    const reqArea = document.getElementById('id_requirements');
+                    if (reqArea && data.requirements) {
+                        reqArea.value = data.requirements;
+                        reqArea.style.borderColor = '#10b981';
+                    }
+                }
+                const sourceText = data.is_live ? 'مدل هوش مصنوعی زنده' : 'موتور بنچمارک استاندارد منابع انسانی';
+                alert(`✨ پیش‌نویس شرح شغل و شرایط احراز برای «${data.title}» بر اساس بنچمارک‌های مرجع (${sourceText}) با موفقیت درج گردید.`);
+            } else {
+                alert(data.error || 'خطا در برقراری ارتباط با سرویس هوش مصنوعی.');
+            }
+        })
+        .catch(err => {
+            console.error('AI Gen Error:', err);
+            alert('خطا در شبکه یا پاسخ سرویس.');
+        })
+        .finally(() => {
+            if (btnAll) {
+                btnAll.disabled = false;
+                btnAll.innerHTML = '<span>✨</span> <span class="fw-bold">تولید هوشمند شرح شغل و شرایط احراز با AI (بنچمارک جهانی)</span>';
+            }
+        });
+    }
 </script>
 {% endblock %}

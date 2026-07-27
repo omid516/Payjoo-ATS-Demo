@@ -190,6 +190,20 @@
                     {% endif %}
                 </div>
                 <div class="col-12">
+                    <label class="form-label font-medium text-secondary mb-1">نوع شغل و اهمیت سازمانی (تأثیر استراتژیک، ارزش‌آفرینی و جذب متصدی)</label>
+                    {{ form.job_type_details }}
+                    {% if form.job_type_details.errors %}
+                    <div class="text-danger text-xs mt-1">{{ form.job_type_details.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label font-medium text-secondary mb-1">نتایج و پیامدهای مورد انتظار شغل</label>
+                    {{ form.expected_results }}
+                    {% if form.expected_results.errors %}
+                    <div class="text-danger text-xs mt-1">{{ form.expected_results.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label font-medium text-secondary mb-0">
                             {% if current_language_code == 'en' %}Requirements{% elif current_language_code == 'tr' %}Gereksinimler{% elif current_language_code == 'ar' %}شروط التأهيل{% else %}شرایط احراز{% endif %}
@@ -368,6 +382,15 @@
                                 }
                                 if (data.job_category) {
                                     document.getElementById('id_job_category').value = data.job_category;
+                                }
+                                if (data.description) {
+                                    document.getElementById('id_description').value = data.description;
+                                }
+                                if (data.requirements) {
+                                    document.getElementById('id_job_type_details').value = data.requirements;
+                                }
+                                if (data.notes) {
+                                    document.getElementById('id_expected_results').value = data.notes;
                                 }
                             }
                         }).catch(err => {

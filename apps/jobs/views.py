@@ -9,8 +9,8 @@ from django.utils import timezone
 
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.accounts.models import UserProfile
-from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, CompetencyModel
-from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet
+from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, CompetencyModel, JobDescriptionTemplate
+from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet, JobDescriptionTemplateForm
 
 def normalize_digits(s):
     if not s:
@@ -703,6 +703,164 @@ class CentralCompetencyUploadView(LoginRequiredMixin, RoleRequiredMixin, View):
             return render(request, self.template_name)
         finally:
             # Cleanup temp file
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+
+class ImportJobDescriptionsView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+    template_name = 'jobs/import_descriptions.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        if 'excel_file' not in request.FILES:
+            messages.error(request, "لطفاً یک فایل اکسل انتخاب کنید.")
+            return render(request, self.template_name)
+
+        excel_file = request.FILES['excel_file']
+        if not excel_file.name.endswith(('.xlsx', '.xls')):
+            messages.error(request, "فرمت فایل باید اکسل (.xlsx, .xls) باشد.")
+            return render(request, self.template_name)
+
+        # Save temporarily
+        fs = FileSystemStorage(location=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../scratch'))
+        filename = fs.save(excel_file.name, excel_file)
+        file_path = fs.path(filename)
+
+        try:
+            import openpyxl
+            from apps.jobs.models import JobDescriptionTemplate
+            from django.db import transaction
+
+            wb = openpyxl.load_workbook(file_path, data_only=True)
+            if 'Sheet1' not in wb.sheetnames:
+                messages.error(request, "شیت Sheet1 در فایل اکسل یافت نشد.")
+                return render(request, self.template_name)
+
+            ws = wb['Sheet1']
+            rows = list(ws.iter_rows(values_only=True))
+            if len(rows) <= 1:
+                messages.error(request, "فایل اکسل فاقد داده برای پردازش است.")
+                return render(request, self.template_name)
+
+            data_rows = rows[1:]
+            
+            created_count = 0
+            updated_count = 0
+            skipped_count = 0
+            
+            with transaction.atomic():
+                for idx, r in enumerate(data_rows, start=2):
+                    if len(r) < 22:
+                        continue
+                    job_code = str(r[1]).strip() if r[1] is not None else None
+                    if not job_code:
+                        continue
+
+                    title = str(r[2]).strip() if r[2] is not None else ""
+                    job_level_type_1 = str(r[3]).strip() if r[3] is not None else ""
+                    sub_department_name = str(r[5]).strip() if r[5] is not None else ""
+                    job_family = str(r[7]).strip() if r[7] is not None else ""
+                    job_level_type_2 = str(r[8]).strip() if r[8] is not None else ""
+                    job_category = str(r[9]).strip() if r[9] is not None else ""
+                    job_nature = str(r[10]).strip() if r[10] is not None else ""
+                    department = str(r[12]).strip() if r[12] is not None else ""
+                    deputy = str(r[14]).strip() if r[14] is not None else ""
+                    higher_post_code = str(r[15]).strip() if r[15] is not None else ""
+                    higher_post_title = str(r[16]).strip() if r[16] is not None else ""
+                    description = str(r[17]).strip() if r[17] is not None else ""
+                    job_type_details = str(r[18]).strip() if r[18] is not None else ""
+                    related_jobs = str(r[19]).strip() if r[19] is not None else ""
+                    general_goal = str(r[20]).strip() if r[20] is not None else ""
+                    expected_results = str(r[21]).strip() if r[21] is not None else ""
+
+                    # Find existing template
+                    existing = JobDescriptionTemplate.objects.filter(job_code=job_code, is_deleted=False).first()
+                    
+                    if not existing:
+                        JobDescriptionTemplate.objects.create(
+                            job_code=job_code,
+                            title=title,
+                            job_level_type_1=job_level_type_1,
+                            sub_department_name=sub_department_name,
+                            job_family=job_family,
+                            job_level_type_2=job_level_type_2,
+                            job_category=job_category,
+                            job_nature=job_nature,
+                            department=department,
+                            deputy=deputy,
+                            higher_post_code=higher_post_code,
+                            higher_post_title=higher_post_title,
+                            description=description,
+                            job_type_details=job_type_details,
+                            related_jobs=related_jobs,
+                            general_goal=general_goal,
+                            expected_results=expected_results,
+                        )
+                        created_count += 1
+                    else:
+                        # Check if any field differs
+                        has_changes = (
+                            existing.title != title or
+                            existing.job_level_type_1 != job_level_type_1 or
+                            existing.sub_department_name != sub_department_name or
+                            existing.job_family != job_family or
+                            existing.job_level_type_2 != job_level_type_2 or
+                            existing.job_category != job_category or
+                            existing.job_nature != job_nature or
+                            existing.department != department or
+                            existing.deputy != deputy or
+                            existing.higher_post_code != higher_post_code or
+                            existing.higher_post_title != higher_post_title or
+                            existing.description != description or
+                            existing.job_type_details != job_type_details or
+                            existing.related_jobs != related_jobs or
+                            existing.general_goal != general_goal or
+                            existing.expected_results != expected_results
+                        )
+                        if has_changes:
+                            existing.title = title
+                            existing.job_level_type_1 = job_level_type_1
+                            existing.sub_department_name = sub_department_name
+                            existing.job_family = job_family
+                            existing.job_level_type_2 = job_level_type_2
+                            existing.job_category = job_category
+                            existing.job_nature = job_nature
+                            existing.department = department
+                            existing.deputy = deputy
+                            existing.higher_post_code = higher_post_code
+                            existing.higher_post_title = higher_post_title
+                            existing.description = description
+                            existing.job_type_details = job_type_details
+                            existing.related_jobs = related_jobs
+                            existing.general_goal = general_goal
+                            existing.expected_results = expected_results
+                            existing.save()
+                            updated_count += 1
+                        else:
+                            skipped_count += 1
+
+            context = {
+                'processed': True,
+                'total': len(data_rows),
+                'created': created_count,
+                'updated': updated_count,
+                'skipped': skipped_count,
+            }
+            messages.success(request, "فایل اکسل شرح وظایف با موفقیت پردازش و همگام‌سازی شد.")
+            return render(request, self.template_name, context)
+
+        except Exception as e:
+            messages.error(request, f"خطا در پردازش فایل اکسل: {str(e)}")
+            return render(request, self.template_name)
+        finally:
             if os.path.exists(file_path):
                 os.remove(file_path)
 
@@ -2308,33 +2466,76 @@ class SearchPostsDetailApiView(LoginRequiredMixin, RoleRequiredMixin, View):
 
     def get(self, request):
         post_code = request.GET.get('post_code', '').strip()
-        from apps.jobs.models import CentralCompetency
+        from apps.jobs.models import CentralCompetency, JobDescriptionTemplate
+        
         comp = CentralCompetency.objects.filter(post_code=post_code, is_deleted=False).first()
-        if not comp:
+        desc_template = JobDescriptionTemplate.objects.filter(job_code=post_code, is_deleted=False).first()
+        
+        if not comp and not desc_template:
             import json
             return HttpResponse(json.dumps({'error': 'Not found'}), status=404, content_type='application/json')
         
-        # Map job category from post_title
-        title = comp.post_title or ''
-        job_category = ''
-        if 'کارشناس مدیریت' in title:
-            job_category = 'کارشناس مدیریت'
-        elif 'کارشناس مسئول' in title:
-            job_category = 'کارشناس مسئول'
-        elif 'کارشناس' in title:
-            job_category = 'کارشناس'
-        elif 'کاردان مسئول' in title:
-            job_category = 'کاردان مسئول'
-        elif 'کاردان' in title:
-            job_category = 'کاردان'
-        elif 'اپراتور' in title or 'تعمیرکار' in title:
-            job_category = 'اپراتور - تعمیرکار'
+        title = ""
+        department = ""
+        unit = ""
+        job_category = ""
+        
+        if comp:
+            title = comp.post_title or ''
+            department = comp.management_name or ''
+            unit = comp.section_name or ''
+            
+            # Map job category from post_title
+            if 'کارشناس مدیریت' in title:
+                job_category = 'کارشناس مدیریت'
+            elif 'کارشناس مسئول' in title:
+                job_category = 'کارشناس مسئول'
+            elif 'کارشناس' in title:
+                job_category = 'کارشناس'
+            elif 'کاردان مسئول' in title:
+                job_category = 'کاردان مسئول'
+            elif 'کاردان' in title:
+                job_category = 'کاردان'
+            elif 'اپراتور' in title or 'تعمیرکار' in title:
+                job_category = 'اپراتور - تعمیرکار'
+        
+        description_text = ""
+        requirements_text = ""
+        notes_text = ""
+        
+        if desc_template:
+            if not title:
+                title = desc_template.title or ""
+            if not department:
+                department = desc_template.department or ""
+            if not unit:
+                unit = desc_template.sub_department_name or ""
+            if not job_category:
+                job_category = desc_template.job_category or ""
+            
+            # Format description text (Goal + duties)
+            desc_parts = []
+            if desc_template.general_goal:
+                desc_parts.append(f"هدف و تعریف کلی شغل:\n{desc_template.general_goal}")
+            if desc_template.description:
+                desc_parts.append(f"شرح وظایف و مسئولیت‌های اصلی:\n{desc_template.description}")
+            description_text = "\n\n".join(desc_parts)
+            
+            # Format requirements text
+            requirements_text = desc_template.job_type_details or ""
+            
+            # Format notes (Expected results)
+            if desc_template.expected_results:
+                notes_text = f"نتایج و پیامدهای مورد انتظار شغل:\n{desc_template.expected_results}"
             
         data = {
-            'title': comp.post_title or '',
-            'department': comp.management_name or '',
-            'unit': comp.section_name or '',
-            'job_category': job_category
+            'title': title,
+            'department': department,
+            'unit': unit,
+            'job_category': job_category,
+            'description': description_text,
+            'requirements': requirements_text,
+            'notes': notes_text
         }
         import json
         return HttpResponse(json.dumps(data), content_type='application/json')
@@ -3030,4 +3231,58 @@ class GenerateJobSpecsApiView(LoginRequiredMixin, RoleRequiredMixin, View):
             'requirements': requirements,
             'is_live': is_live
         })
+
+
+class JobDescriptionListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = JobDescriptionTemplate
+    template_name = 'jobs/job_description_list.html'
+    context_object_name = 'descriptions'
+    paginate_by = 25
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_queryset(self):
+        from django.db.models import Q
+        from apps.jobs.models import JobDescriptionTemplate
+        queryset = JobDescriptionTemplate.objects.filter(is_deleted=False)
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(job_code__icontains=q) |
+                Q(title__icontains=q) |
+                Q(department__icontains=q) |
+                Q(sub_department_name__icontains=q)
+            )
+        return queryset.order_by('job_code')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '').strip()
+        return context
+
+
+class JobDescriptionUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
+    model = JobDescriptionTemplate
+    form_class = JobDescriptionTemplateForm
+    template_name = 'jobs/job_description_form.html'
+    success_url = reverse_lazy('job_description_list')
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        messages.success(self.request, "شرح وظایف استاندارد با موفقیت ویرایش شد.")
+        return super().form_valid(form)
+
+
 

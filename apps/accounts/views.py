@@ -756,6 +756,8 @@ class DownloadBackupView(LoginRequiredMixin, RoleRequiredMixin, View):
         # Copy db to temp copy
         temp_db_copy = temp_dir / 'db.sqlite3'
         try:
+            from django.db import connections
+            connections.close_all()
             if os.path.exists(db_path):
                 shutil.copy2(db_path, temp_db_copy)
             else:

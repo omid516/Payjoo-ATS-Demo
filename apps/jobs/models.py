@@ -119,6 +119,8 @@ class JobOpportunity(SoftDeleteModel):
     ]
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default=SOURCE_ATS, verbose_name="منبع ایجاد")
     description = models.TextField(blank=True, verbose_name="شرح شغل")
+    job_type_details = models.TextField(blank=True, null=True, verbose_name="نوع شغل و اهمیت سازمانی")
+    expected_results = models.TextField(blank=True, null=True, verbose_name="نتایج و پیامدهای مورد انتظار")
     requirements = models.TextField(blank=True, verbose_name="شرایط احراز")
     start_date = models.DateField(null=True, blank=True, verbose_name="تاریخ شروع")
     end_date = models.DateField(null=True, blank=True, verbose_name="تاریخ پایان")
@@ -886,3 +888,31 @@ class OrganizationSetting(SoftDeleteModel):
         if not setting:
             setting = cls.objects.create(name="سیستم جذب")
         return setting
+
+
+class JobDescriptionTemplate(SoftDeleteModel):
+    job_code = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="کد شغل")
+    title = models.CharField(max_length=200, verbose_name="عنوان شغل")
+    job_level_type_1 = models.CharField(max_length=100, blank=True, null=True, verbose_name="رده شغلی نوع ۱")
+    sub_department_name = models.CharField(max_length=200, blank=True, null=True, verbose_name="نام زیربخش")
+    job_family = models.CharField(max_length=200, blank=True, null=True, verbose_name="خانواده شغلی")
+    job_level_type_2 = models.CharField(max_length=100, blank=True, null=True, verbose_name="رده شغلی نوع ۲")
+    job_category = models.CharField(max_length=200, blank=True, null=True, verbose_name="رده شغلی")
+    job_nature = models.CharField(max_length=100, blank=True, null=True, verbose_name="ماهیت شغل")
+    department = models.CharField(max_length=200, blank=True, null=True, verbose_name="بخش / دپارتمان")
+    deputy = models.CharField(max_length=200, blank=True, null=True, verbose_name="معاونت")
+    higher_post_code = models.CharField(max_length=50, blank=True, null=True, verbose_name="کد پست بالاتر")
+    higher_post_title = models.CharField(max_length=200, blank=True, null=True, verbose_name="عنوان پست بالاتر")
+    description = models.TextField(blank=True, null=True, verbose_name="شرح وظایف اصلاح‌شده")
+    job_type_details = models.TextField(blank=True, null=True, verbose_name="مشخصات و الزامات شغل")
+    related_jobs = models.TextField(blank=True, null=True, verbose_name="مشاغل مرتبط")
+    general_goal = models.TextField(blank=True, null=True, verbose_name="هدف و تعریف کلی شغل")
+    expected_results = models.TextField(blank=True, null=True, verbose_name="نتایج و پیامدهای مورد انتظار")
+
+    class Meta:
+        verbose_name = "شرح وظایف استاندارد"
+        verbose_name_plural = "شرح وظایف‌های استاندارد"
+
+    def __str__(self):
+        return f"{self.title} ({self.job_code})"
+

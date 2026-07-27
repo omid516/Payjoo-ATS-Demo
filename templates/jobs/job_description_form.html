@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}ویرایش شرح وظایف استاندارد | {{ organization_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-2" style="max-width: 950px;">
+    <!-- Breadcrumb -->
+    <div class="mb-3">
+        <a href="{% url 'job_description_list' %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius: 20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+            بازگشت به لیست شرح وظایف
+        </a>
+    </div>
+
+    <!-- Title Header -->
+    <div class="mb-4">
+        <h4 class="font-bold text-secondary mb-1">✏️ ویرایش شرح وظایف استاندارد</h4>
+        <p class="text-muted text-xs m-0">در حال ویرایش قالب استاندارد پست سازمانی با عنوان **{{ object.title }}** (کد پست: {{ object.job_code }})</p>
+    </div>
+
+    <form method="post" class="m-0">
+        {% csrf_token %}
+        
+        <!-- Section 1: Classification & Organization Info -->
+        <div class="card premium-card border-0 shadow-sm p-4 mb-4" style="border-radius: 16px;">
+            <h5 class="font-bold text-secondary mb-3 pb-2 border-bottom border-light">🏷️ مشخصات و رده‌بندی سازمانی</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">کد پست سازمانی (غیرقابل ویرایش)</label>
+                    {{ form.job_code }}
+                    {% if form.job_code.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.job_code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label text-xs font-bold text-muted mb-1">عنوان پست سازمانی</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">معاونت</label>
+                    {{ form.deputy }}
+                    {% if form.deputy.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.deputy.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">بخش / دپارتمان</label>
+                    {{ form.department }}
+                    {% if form.department.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.department.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">نام زیربخش / گروه</label>
+                    {{ form.sub_department_name }}
+                    {% if form.sub_department_name.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.sub_department_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">خانواده شغلی</label>
+                    {{ form.job_family }}
+                    {% if form.job_family.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.job_family.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">رده شغلی</label>
+                    {{ form.job_category }}
+                    {% if form.job_category.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.job_category.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">ماهیت شغل</label>
+                    {{ form.job_nature }}
+                    {% if form.job_nature.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.job_nature.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">کد پست رده بالاتر</label>
+                    {{ form.higher_post_code }}
+                    {% if form.higher_post_code.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.higher_post_code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">عنوان پست رده بالاتر</label>
+                    {{ form.higher_post_title }}
+                    {% if form.higher_post_title.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.higher_post_title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-xs font-bold text-muted mb-1">مشاغل مرتبط</label>
+                    {{ form.related_jobs }}
+                    {% if form.related_jobs.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.related_jobs.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Detailed Goal and Descriptions -->
+        <div class="card premium-card border-0 shadow-sm p-4 mb-4" style="border-radius: 16px;">
+            <h5 class="font-bold text-secondary mb-3 pb-2 border-bottom border-light">🎯 اهداف و شرح وظایف شغلی</h5>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label text-xs font-bold text-muted mb-1">هدف و تعریف کلی شغل</label>
+                    {{ form.general_goal }}
+                    {% if form.general_goal.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.general_goal.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label text-xs font-bold text-muted mb-1">شرح وظایف و مسئولیت‌های کلیدی</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Strategic Importance & Expected Results -->
+        <div class="card premium-card border-0 shadow-sm p-4 mb-4" style="border-radius: 16px;">
+            <h5 class="font-bold text-secondary mb-3 pb-2 border-bottom border-light">📊 اهمیت استراتژیک و پیامدها</h5>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label text-xs font-bold text-muted mb-1">مشخصات، اهمیت استراتژیک، ارزش‌آفرینی و جذب متصدی (نوع شغل و اهمیت سازمانی)</label>
+                    {{ form.job_type_details }}
+                    {% if form.job_type_details.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.job_type_details.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label text-xs font-bold text-muted mb-1">نتایج و پیامدهای مورد انتظار شغل</label>
+                    {{ form.expected_results }}
+                    {% if form.expected_results.errors %}
+                    <div class="text-danger text-xxs mt-1">{{ form.expected_results.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end gap-2 mb-5">
+            <a href="{% url 'job_description_list' %}" class="btn btn-outline-secondary px-4 py-2 font-bold text-sm" style="border-radius: 8px;">انصراف</a>
+            <button type="submit" class="btn btn-primary px-4 py-2 font-bold text-sm" style="border-radius: 8px;">ذخیره تغییرات قالب شغلی</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

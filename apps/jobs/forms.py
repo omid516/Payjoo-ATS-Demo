@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
-from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, AISetting, OrganizationSetting
+from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, AISetting, OrganizationSetting, JobDescriptionTemplate
 
 class JobOpportunityForm(forms.ModelForm):
     start_date = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control date-picker', 'placeholder': '۱۴۰۲/۰۱/۰۱'}))
@@ -17,7 +17,7 @@ class JobOpportunityForm(forms.ModelForm):
         fields = [
             'request_number', 'title', 'code', 'department', 'unit', 'factory_name', 'job_category',
             'headcount', 'recruitment_type', 'assigned_recruiter',
-            'workflow', 'status', 'start_date', 'end_date', 'description', 'requirements', 'notes'
+            'workflow', 'status', 'start_date', 'end_date', 'description', 'job_type_details', 'expected_results', 'requirements', 'notes'
         ]
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: REQ-1402-001'}),
@@ -32,6 +32,8 @@ class JobOpportunityForm(forms.ModelForm):
             'workflow': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'شرح وظایف و مسئولیت‌های شغلی'}),
+            'job_type_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'مشخصات، اهمیت استراتژیک، ارزش‌آفرینی و جذب متصدی'}),
+            'expected_results': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'نتایج و پیامدهای مورد انتظار شغل'}),
             'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'سوابق کار، مهارت‌های تخصصی و مدارک تحصیلی مورد نیاز'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'یادداشت‌های اداری و داخلی جذب'}),
         }
@@ -300,4 +302,32 @@ class OrganizationSettingForm(forms.ModelForm):
             'sms_sender_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 100020003000'}),
             'sms_custom_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://api.yourdomain.com/send-sms'}),
         }
+
+
+class JobDescriptionTemplateForm(forms.ModelForm):
+    class Meta:
+        model = JobDescriptionTemplate
+        fields = [
+            'job_code', 'title', 'deputy', 'department', 'sub_department_name', 'job_family',
+            'job_category', 'job_nature', 'higher_post_code', 'higher_post_title',
+            'related_jobs', 'general_goal', 'description', 'job_type_details', 'expected_results'
+        ]
+        widgets = {
+            'job_code': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'deputy': forms.TextInput(attrs={'class': 'form-control'}),
+            'department': forms.TextInput(attrs={'class': 'form-control'}),
+            'sub_department_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'job_family': forms.TextInput(attrs={'class': 'form-control'}),
+            'job_category': forms.TextInput(attrs={'class': 'form-control'}),
+            'job_nature': forms.TextInput(attrs={'class': 'form-control'}),
+            'higher_post_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'higher_post_title': forms.TextInput(attrs={'class': 'form-control'}),
+            'related_jobs': forms.TextInput(attrs={'class': 'form-control'}),
+            'general_goal': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'job_type_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'expected_results': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
 

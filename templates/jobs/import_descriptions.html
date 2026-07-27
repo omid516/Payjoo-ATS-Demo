@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}بارگذاری اکسل شرح وظایف استاندارد | {{ organization_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .upload-container {
+        max-width: 700px;
+        margin: 40px auto;
+    }
+    .upload-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dropzone {
+        border: 2px dashed #0284c7;
+        border-radius: 12px;
+        background: rgba(2, 132, 199, 0.02);
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    .dropzone:hover, .dropzone.dragover {
+        background: rgba(2, 132, 199, 0.05);
+        border-color: #0369a1;
+    }
+    .dropzone-icon {
+        width: 64px;
+        height: 64px;
+        color: #0284c7;
+        margin-bottom: 16px;
+    }
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .selected-file-box {
+        display: none;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+    }
+    .stat-card {
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .stat-number {
+        font-size: 1.85rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="mb-3">
+        <a href="{% url 'job_description_list' %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius: 20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+            بازگشت به لیست شرح وظایف
+        </a>
+    </div>
+    <div class="card upload-card p-5 border-0">
+        <h4 class="font-bold text-secondary text-center mb-2">📥 آپلود و همگام‌سازی فایل شرح وظایف</h4>
+        <p class="text-muted text-center text-sm mb-4">برای به‌روزرسانی یا ایجاد کدهای شرح وظایف استاندارد، فایل اکسل را آپلود کنید.</p>
+
+        {% if processed %}
+        <!-- Sync Report Dashboard -->
+        <div class="alert alert-success p-3 text-sm mb-4 border-0" style="border-radius: 12px;">
+            ✨ پردازش فایل اکسل با موفقیت انجام شد. خلاصه عملیات همگام‌سازی در جدول زیر نمایش داده شده است.
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-4">
+                <div class="stat-card bg-success bg-opacity-10 text-success">
+                    <div class="stat-number">{{ created }}</div>
+                    <div class="text-xs font-bold mt-1">اضافه شده (جدید)</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-card bg-warning bg-opacity-10 text-warning">
+                    <div class="stat-number">{{ updated }}</div>
+                    <div class="text-xs font-bold mt-1">بروزرسانی شده</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-card bg-secondary bg-opacity-10 text-secondary">
+                    <div class="stat-number">{{ skipped }}</div>
+                    <div class="text-xs font-bold mt-1">رد شده (بدون تغییر)</div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="border rounded p-3 bg-light text-center text-xs font-bold text-muted">
+                    مجموع ردیف‌های پردازش شده: {{ total }} ردیف
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form action="{% url 'job_import_descriptions' %}" method="post" enctype="multipart/form-data" class="m-0" id="upload-form">
+            {% csrf_token %}
+            
+            <div class="dropzone" id="dropzone-area">
+                <svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <h6 class="font-bold text-secondary mb-1">فایل اکسل شرح وظایف (Job.xlsx) را اینجا رها کنید</h6>
+                <p class="text-muted text-xs mb-0">یا جهت انتخاب دستی کلیک کنید (.xlsx, .xls)</p>
+                <input type="file" name="excel_file" id="file-input" class="file-input" accept=".xlsx, .xls" required>
+            </div>
+
+            <div class="selected-file-box" id="file-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-success flex-shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="text-xs font-bold text-secondary text-truncate" id="file-name">filename.xlsx</div>
+                    <div class="text-xxs text-muted" id="file-size">0 KB</div>
+                </div>
+                <button type="button" class="btn btn-xs btn-outline-danger" onclick="resetFile();">حذف</button>
+            </div>
+
+            <div class="mt-4 pt-2">
+                <button type="submit" class="btn btn-primary w-100 py-2.5 font-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;" id="submit-btn">
+                    شروع همگام‌سازی شرح وظایف استاندارد
+                </button>
+                <div id="loader" class="text-center mt-3 d-none">
+                    <div class="spinner-border text-primary spinner-border-sm mb-1" role="status"></div>
+                    <div class="text-xxs text-muted">سیستم در حال خواندن، مقایسه داده‌ها و اعمال تغییرات است. لطفاً منتظر بمانید...</div>
+                </div>
+            </div>
+        </form>
+
+        <div class="mt-4 pt-4 border-top text-xxs text-muted">
+            <h6 class="font-bold mb-1">💡 راهنمای ساختار فایل آپلود:</h6>
+            <p class="mb-1">فایل آپلود شده باید شامل شیت **Sheet1** و دارای ستون‌های زیر باشد:</p>
+            <ul class="mb-0 ps-3">
+                <li>ستون ۲ (Col 1): **JobCodeNew** (کد پست سازمانی جهت بررسی تکراری بودن)</li>
+                <li>ستون ۳ (Col 2): **JobTitle** (عنوان شغل)</li>
+                <li>ستون ۱۸ (Col 17): **Revised_Job_Des** (شرح وظایف)</li>
+                <li>ستون ۱۹ (Col 18): **نوع شغل (تأثیر استراتژیک...)** (مشخصات و اهمیت شغل)</li>
+                <li>ستون ۲۱ (Col 20): **هدف و تعریف کلی شغل** (هدف شغل)</li>
+                <li>ستون ۲۲ (Col 21): **نتایج و پیامدهای مورد انتظار شغل** (نتایج مورد انتظار)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropzone = document.getElementById('dropzone-area');
+    const fileInput = document.getElementById('file-input');
+    const fileBox = document.getElementById('file-box');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const uploadForm = document.getElementById('upload-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const loader = document.getElementById('loader');
+
+    // Drag and drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            fileInput.files = files;
+            updateFileInfo();
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        updateFileInfo();
+    });
+
+    function updateFileInfo() {
+        if (fileInput.files.length) {
+            const file = fileInput.files[0];
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+            fileBox.style.display = 'flex';
+            dropzone.style.display = 'none';
+        }
+    }
+
+    function resetFile() {
+        fileInput.value = '';
+        fileBox.style.display = 'none';
+        dropzone.style.display = 'block';
+    }
+
+    uploadForm.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        loader.classList.remove('d-none');
+    });
+</script>
+{% endblock %}

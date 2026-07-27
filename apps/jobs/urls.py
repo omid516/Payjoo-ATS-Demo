@@ -16,6 +16,9 @@ from .views import (
     JobOpportunityBulkStatusView,
     CentralCompetencyListView,
     CentralCompetencyUploadView,
+    ImportJobDescriptionsView,
+    JobDescriptionListView,
+    JobDescriptionUpdateView,
     RecruitmentPatternDashboardView,
     JobCompetencyConfigView,
     JobAssessmentPlanPrintView,
@@ -37,6 +40,9 @@ from .views import (
 
 urlpatterns = [
     path('', JobOpportunityListView.as_view(), name='job_list'),
+    path('descriptions/', JobDescriptionListView.as_view(), name='job_description_list'),
+    path('descriptions/<int:pk>/edit/', JobDescriptionUpdateView.as_view(), name='job_description_edit'),
+    path('descriptions/import/', ImportJobDescriptionsView.as_view(), name='job_import_descriptions'),
     path('add/', JobOpportunityCreateView.as_view(), name='job_add'),
     path('<int:pk>/edit/', JobOpportunityUpdateView.as_view(), name='job_edit'),
     path('<int:pk>/delete/', JobOpportunityDeleteView.as_view(), name='job_delete'),

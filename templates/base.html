@@ -273,11 +273,16 @@
                         </svg>
                     </a>
                     
-                    <div class="collapse {% if 'competencies' in request.path or 'patterns' in request.path or 'upload' in request.path or 'custom-report' in request.path or 'models' in request.path %}show{% endif %}" id="competency-menu">
+                    <div class="collapse {% if 'competencies' in request.path or 'patterns' in request.path or 'upload' in request.path or 'custom-report' in request.path or 'models' in request.path or 'descriptions' in request.path %}show{% endif %}" id="competency-menu">
                         <ul class="nav flex-column ps-3 mt-1 gap-1 submenu-list">
                             <li>
                                 <a href="{% url 'competency_list' %}" class="nav-link {% if 'competencies' in request.path and 'patterns' not in request.path and 'upload' not in request.path and 'custom-report' not in request.path and 'models' not in request.path %}active text-white{% endif %}">
                                     {{ t.competency_bank }}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'job_description_list' %}" class="nav-link {% if 'descriptions' in request.path %}active text-white{% endif %}">
+                                    شرح وظایف استاندارد
                                 </a>
                             </li>
                             <li>

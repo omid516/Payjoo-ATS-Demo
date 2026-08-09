@@ -899,6 +899,40 @@
         container.appendChild(img);
     }
 
+    function toPersianDigits(str) {
+        if (str === null || str === undefined) return "";
+        str = String(str);
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return str.replace(/[0-9]/g, function(w) {
+            return persianDigits[+w];
+        });
+    }
+
+    function convertToPersianNumbers(element) {
+        if (!element) return;
+        
+        // Translate text nodes
+        if (element.nodeType === Node.TEXT_NODE) {
+            element.nodeValue = toPersianDigits(element.nodeValue);
+            return;
+        }
+        
+        // Translate inputs
+        if (element.nodeName === 'INPUT' && element.type === 'text' && element.id !== 'input-apply-url') {
+            element.value = toPersianDigits(element.value);
+        }
+        
+        // Exclude specific elements like QR wrapper and apply url
+        if (element.id === 'display-apply-url' || (element.classList && element.classList.contains('qr-wrapper'))) {
+            return;
+        }
+        
+        // Recurse
+        for (let child of element.childNodes) {
+            convertToPersianNumbers(child);
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         var urlInput = document.getElementById("input-apply-url");
         var titleInput = document.getElementById("input-ad-title");
@@ -921,11 +955,11 @@
             var startVal = startInput.value.trim();
             var endVal = endInput.value.trim();
             
-            if (displayMetaStart) displayMetaStart.textContent = startVal ? "شروع ثبت‌نام: " + startVal : "";
-            if (displayMetaEnd) displayMetaEnd.textContent = endVal ? "پایان ثبت‌نام: " + endVal : "";
+            if (displayMetaStart) displayMetaStart.textContent = startVal ? toPersianDigits("شروع ثبت‌نام: " + startVal) : "";
+            if (displayMetaEnd) displayMetaEnd.textContent = endVal ? toPersianDigits("پایان ثبت‌نام: " + endVal) : "";
             
-            if (displayCtaStart) displayCtaStart.textContent = startVal || "-";
-            if (displayCtaEnd) displayCtaEnd.textContent = endVal || "-";
+            if (displayCtaStart) displayCtaStart.textContent = startVal ? toPersianDigits(startVal) : "-";
+            if (displayCtaEnd) displayCtaEnd.textContent = endVal ? toPersianDigits(endVal) : "-";
         }
 
         // Bullet point formatter
@@ -971,6 +1005,9 @@
         formatAsBulletList('ad-requirements-box');
         formatAsBulletList('ad-notes-box');
         
+        // Convert all existing numbers to Persian on load
+        convertToPersianNumbers(document.body);
+        
         // Listeners for Interactive Controls
         urlInput.addEventListener("input", function() {
             var val = urlInput.value.trim();
@@ -989,8 +1026,15 @@
             displayTitle.textContent = val;
         });
 
-        startInput.addEventListener("input", updateDateTimes);
-        endInput.addEventListener("input", updateDateTimes);
+        startInput.addEventListener("input", function() {
+            startInput.value = toPersianDigits(startInput.value);
+            updateDateTimes();
+        });
+        
+        endInput.addEventListener("input", function() {
+            endInput.value = toPersianDigits(endInput.value);
+            updateDateTimes();
+        });
 
         showCtaCheckbox.addEventListener("change", function() {
             if (showCtaCheckbox.checked) {

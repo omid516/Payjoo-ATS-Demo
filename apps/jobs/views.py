@@ -3233,6 +3233,92 @@ class GenerateJobSpecsApiView(LoginRequiredMixin, RoleRequiredMixin, View):
         })
 
 
+class SummarizeTextApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+    ]
+
+    def post(self, request, *args, **kwargs):
+        import json, urllib.request
+        from django.http import JsonResponse
+        from apps.jobs.models import AISetting
+
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.POST
+
+        text = str(data.get('text', '')).strip()
+
+        if not text:
+            return JsonResponse({
+                'success': False,
+                'error': 'لطفاً ابتدا متنی را برای خلاصه‌سازی وارد نمایید.'
+            }, status=400)
+
+        ai_setting = AISetting.get_active_setting()
+        summary = ""
+
+        if ai_setting and ai_setting.api_key:
+            try:
+                system_prompt = (
+                    "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌های منابع انسانی هستید.\n"
+                    "وظیفه شما خلاصه‌سازی، کوتاه‌تر کردن و بهینه‌سازی متن ورودی مربوط به شناسنامه شغلی است.\n"
+                    "متن خلاصه شده باید بسیار مختصر، مفید، خوانا، بدون زواید و به زبان فارسی شیوا باشد.\n"
+                    "سعی کنید نکات و بندهای اصلی حفظ شوند اما در حجم بسیار کمتری ارائه شوند.\n"
+                    "مهم: پاسخ شما باید فقط و فقط شامل متن نهایی خلاصه‌شده باشد و هیچ توضیح، مقدمه، مؤخره یا متنی خارج از خلاصه ارائه ندهید."
+                )
+
+                payload = {
+                    "model": ai_setting.model_name,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": text}
+                    ],
+                    "temperature": 0.4,
+                }
+
+                url = f"{ai_setting.base_url.rstrip('/')}/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {ai_setting.api_key}",
+                    "Content-Type": "application/json"
+                }
+
+                req_data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(url, data=req_data, headers=headers, method='POST')
+
+                with urllib.request.urlopen(req, timeout=12) as response:
+                    if response.status == 200:
+                        res_body = response.read().decode('utf-8')
+                        res_json = json.loads(res_body)
+                        summary = res_json['choices'][0]['message']['content'].strip()
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'خطا در پاسخ سرویس هوش مصنوعی: {str(e)}'
+                }, status=500)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'سرویس هوش مصنوعی فعال نیست یا تنظیم نشده است. لطفا تنظیمات AI را بررسی کنید.'
+            }, status=400)
+
+        if not summary:
+            return JsonResponse({
+                'success': False,
+                'error': 'امکان خلاصه‌سازی متن فراهم نشد یا پاسخ خالی دریافت گردید.'
+            }, status=500)
+
+        return JsonResponse({
+            'success': True,
+            'summary': summary
+        })
+
+
 class JobDescriptionListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     model = JobDescriptionTemplate
     template_name = 'jobs/job_description_list.html'

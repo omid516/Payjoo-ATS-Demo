@@ -1956,6 +1956,77 @@ class AISettingViewAndApiTests(TestCase):
             mock_urlopen.assert_called_once()
 
 
+class AISummarizationApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.admin = User.objects.create_superuser(username='sum_admin', password='password123')
+        self.admin.profile.role = 'ADMIN'
+        self.admin.profile.save()
+
+        self.candidate_user = User.objects.create_user(username='sum_candidate', password='password123')
+        self.candidate_user.profile.role = 'CANDIDATE'
+        self.candidate_user.profile.save()
+
+        self.specialist = User.objects.create_user(username='sum_specialist', password='password123')
+        self.specialist.profile.role = 'RECRUITMENT_SPECIALIST'
+        self.specialist.profile.save()
+
+    def test_summarize_api_anonymous_denied(self):
+        url = reverse('summarize_text_api')
+        response = self.client.post(url, {'text': 'Some long job description text.'}, content_type='application/json')
+        # LoginRequiredMixin redirects or returns 302
+        self.assertEqual(response.status_code, 302)
+
+    def test_summarize_api_role_denied(self):
+        self.client.login(username='sum_candidate', password='password123')
+        url = reverse('summarize_text_api')
+        response = self.client.post(url, {'text': 'Some long job description text.'}, content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_summarize_api_empty_text(self):
+        self.client.login(username='sum_specialist', password='password123')
+        url = reverse('summarize_text_api')
+        response = self.client.post(url, {'text': ''}, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content.decode('utf-8'), {
+            'success': False,
+            'error': 'لطفاً ابتدا متنی را برای خلاصه‌سازی وارد نمایید.'
+        })
+
+    def test_summarize_api_no_ai_setting(self):
+        self.client.login(username='sum_specialist', password='password123')
+        url = reverse('summarize_text_api')
+        response = self.client.post(url, {'text': 'This is a long description that needs summarizing.'}, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('سرویس هوش مصنوعی فعال نیست', response.json().get('error', ''))
+
+    def test_summarize_api_mock_success(self):
+        from apps.jobs.models import AISetting
+        AISetting.objects.create(
+            api_key='test-sum-key',
+            base_url='https://api.avalai.ir/v1',
+            model_name='gpt-4o',
+            is_active=True
+        )
+        self.client.login(username='sum_specialist', password='password123')
+        url = reverse('summarize_text_api')
+
+        from unittest.mock import patch, MagicMock
+        mock_response = MagicMock()
+        mock_response.__enter__.return_value = mock_response
+        mock_response.status = 200
+        mock_response.read.return_value = '{"choices": [{"message": {"content": "خلاصه شده"}}]}'.encode('utf-8')
+
+        with patch('urllib.request.urlopen', return_value=mock_response) as mock_urlopen:
+            response = self.client.post(url, {'text': 'This is a long description.'}, content_type='application/json')
+            self.assertEqual(response.status_code, 200)
+            self.assertJSONEqual(response.content.decode('utf-8'), {
+                'success': True,
+                'summary': 'خلاصه شده'
+            })
+            mock_urlopen.assert_called_once()
+
+
 class SmartTalentMatchingTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User

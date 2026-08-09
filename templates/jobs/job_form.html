@@ -180,9 +180,14 @@
                         <label class="form-label font-medium text-secondary mb-0">
                             {% if current_language_code == 'en' %}Job Description{% elif current_language_code == 'tr' %}İş Tanımı{% elif current_language_code == 'ar' %}شرح الوظيفة{% else %}شرح شغل{% endif %}
                         </label>
-                        <button type="button" onclick="generateAISpecs('description')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
-                            <span>✨</span> پیشنهاد با AI
-                        </button>
+                        <div class="d-flex gap-1.5">
+                            <button type="button" onclick="generateAISpecs('description')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                                <span>✨</span> پیشنهاد با AI
+                            </button>
+                            <button type="button" onclick="summarizeField('id_description', this)" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                                <span>✂️</span> خلاصه‌سازی با AI
+                            </button>
+                        </div>
                     </div>
                     {{ form.description }}
                     {% if form.description.errors %}
@@ -190,14 +195,24 @@
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary mb-1">نوع شغل و اهمیت سازمانی (تأثیر استراتژیک، ارزش‌آفرینی و جذب متصدی)</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label font-medium text-secondary mb-0">نوع شغل و اهمیت سازمانی (تأثیر استراتژیک، ارزش‌آفرینی و جذب متصدی)</label>
+                        <button type="button" onclick="summarizeField('id_job_type_details', this)" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                            <span>✂️</span> خلاصه‌سازی با AI
+                        </button>
+                    </div>
                     {{ form.job_type_details }}
                     {% if form.job_type_details.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.job_type_details.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary mb-1">نتایج و پیامدهای مورد انتظار شغل</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label font-medium text-secondary mb-0">نتایج و پیامدهای مورد انتظار شغل</label>
+                        <button type="button" onclick="summarizeField('id_expected_results', this)" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                            <span>✂️</span> خلاصه‌سازی با AI
+                        </button>
+                    </div>
                     {{ form.expected_results }}
                     {% if form.expected_results.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.expected_results.errors.0 }}</div>
@@ -208,9 +223,14 @@
                         <label class="form-label font-medium text-secondary mb-0">
                             {% if current_language_code == 'en' %}Requirements{% elif current_language_code == 'tr' %}Gereksinimler{% elif current_language_code == 'ar' %}شروط التأهيل{% else %}شرایط احراز{% endif %}
                         </label>
-                        <button type="button" onclick="generateAISpecs('requirements')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
-                            <span>✨</span> پیشنهاد با AI
-                        </button>
+                        <div class="d-flex gap-1.5">
+                            <button type="button" onclick="generateAISpecs('requirements')" class="btn btn-xs btn-outline-success d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                                <span>✨</span> پیشنهاد با AI
+                            </button>
+                            <button type="button" onclick="summarizeField('id_requirements', this)" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                                <span>✂️</span> خلاصه‌سازی با AI
+                            </button>
+                        </div>
                     </div>
                     {{ form.requirements }}
                     {% if form.requirements.errors %}
@@ -218,9 +238,14 @@
                     {% endif %}
                 </div>
                 <div class="col-12">
-                    <label class="form-label font-medium text-secondary">
-                        {% if current_language_code == 'en' %}Internal & Office Notes{% elif current_language_code == 'tr' %}Dahili & Ofis Notları{% elif current_language_code == 'ar' %}ملاحظات داخلية وإدارية{% else %}یادداشت‌های داخلی و اداری{% endif %}
-                    </label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label font-medium text-secondary mb-0">
+                            {% if current_language_code == 'en' %}Internal & Office Notes{% elif current_language_code == 'tr' %}Dahili & Ofis Notları{% elif current_language_code == 'ar' %}ملاحظات داخلية وإدارية{% else %}یادداشت‌های داخلی و اداری{% endif %}
+                        </label>
+                        <button type="button" onclick="summarizeField('id_notes', this)" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 py-0.5 px-2 font-medium" style="font-size: 11px; border-radius: 12px;">
+                            <span>✂️</span> خلاصه‌سازی با AI
+                        </button>
+                    </div>
                     {{ form.notes }}
                     {% if form.notes.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.notes.errors.0 }}</div>
@@ -608,6 +633,56 @@
                 btnAll.disabled = false;
                 btnAll.innerHTML = '<span>✨</span> <span class="fw-bold">تولید هوشمند شرح شغل و شرایط احراز با AI (بنچمارک جهانی)</span>';
             }
+        });
+    }
+
+    function summarizeField(fieldId, btnEl) {
+        const textarea = document.getElementById(fieldId);
+        if (!textarea) return;
+
+        const text = textarea.value.trim();
+        if (!text) {
+            alert('لطفاً ابتدا متنی را در این بخش وارد نمایید تا هوش مصنوعی آن را خلاصه‌تر کند.');
+            textarea.focus();
+            return;
+        }
+
+        const originalHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> در حال خلاصه...';
+
+        fetch("{% url 'summarize_text_api' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ text: text })
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(errData => { throw new Error(errData.error || 'خطا در پاسخ سرور'); });
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success && data.summary) {
+                textarea.value = data.summary;
+                // Highlight textarea border to indicate change
+                const originalBorder = textarea.style.borderColor;
+                textarea.style.borderColor = '#3b82f6';
+                setTimeout(() => { textarea.style.borderColor = originalBorder; }, 2000);
+            } else {
+                alert(data.error || 'خطا در خلاصه‌سازی متن.');
+            }
+        })
+        .catch(err => {
+            console.error('Summarize Error:', err);
+            alert(err.message || 'خطا در شبکه یا پاسخ سرویس خلاصه‌سازی.');
+        })
+        .finally(() => {
+            btnEl.disabled = false;
+            btnEl.innerHTML = originalHtml;
         });
     }
 </script>

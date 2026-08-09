@@ -579,6 +579,18 @@
                 <label for="input-apply-url" class="control-label">آدرس پرتال ثبت‌نام:</label>
                 <input type="text" id="input-apply-url" class="control-input" value="{{ apply_url }}" placeholder="https://careers.msc.ir">
             </div>
+
+            <!-- Custom Start Date/Time Input -->
+            <div class="control-field">
+                <label for="input-start-datetime" class="control-label">شروع ثبت‌نام:</label>
+                <input type="text" id="input-start-datetime" class="control-input" style="width: 170px;" value="{% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}۱۴۰۲/۰۱/۰۱ ساعت ۰۸:۰۰{% endif %}">
+            </div>
+
+            <!-- Custom End Date/Time Input -->
+            <div class="control-field">
+                <label for="input-end-datetime" class="control-label">پایان ثبت‌نام:</label>
+                <input type="text" id="input-end-datetime" class="control-input" style="width: 170px;" value="{% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}۱۴۰۲/۱۲/۲۹ ساعت ۲۴:۰۰{% endif %}">
+            </div>
             
             <!-- Show/Hide apply box toggle -->
             <div class="control-field form-check form-switch p-0 m-0">
@@ -633,6 +645,8 @@
             <div class="ad-meta-info">
                 <span>شناسه فرصت شغلی: {{ job.code }}</span>
                 <span>تاریخ انتشار: {{ job.created_at|default:job.updated_at|to_jalali }}</span>
+                <span id="display-meta-start">شروع ثبت‌نام: {% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}۱۴۰۲/۰۱/۰۱ ساعت ۰۸:۰۰{% endif %}</span>
+                <span id="display-meta-end">پایان ثبت‌نام: {% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}۱۴۰۲/۱۲/۲۹ ساعت ۲۴:۰۰{% endif %}</span>
             </div>
         </div>
 
@@ -680,7 +694,7 @@
                 </div>
                 <h4 class="section-title">هدف و گزیده شرح وظایف شغل</h4>
             </div>
-            <div class="section-content-box">
+            <div class="section-content-box" id="ad-description-box">
                 {{ job.description }}
             </div>
         </div>
@@ -696,7 +710,7 @@
                 </div>
                 <h4 class="section-title">شرایط احراز شغل (تحصیلات و سوابق)</h4>
             </div>
-            <div class="section-content-box">
+            <div class="section-content-box" id="ad-requirements-box">
                 {{ job.requirements }}
             </div>
         </div>
@@ -713,17 +727,30 @@
                 </div>
                 <h4 class="section-title">شایستگی‌های مورد انتظار</h4>
             </div>
-            <div class="row g-2 mt-1">
+            <div class="row g-3 mt-1">
                 <!-- Knowledge (KN) -->
                 {% if grouped_competencies.knowledge %}
-                <div class="col-12 comp-group">
-                    <div class="comp-group-title">📘 دانش‌های تخصصی:</div>
-                    <div>
+                <div class="col-12 comp-group mb-2">
+                    <div class="comp-group-title border-bottom pb-1.5 mb-2">📘 دانش‌های تخصصی:</div>
+                    <div class="row g-2">
                         {% for comp in grouped_competencies.knowledge %}
-                        <span class="comp-badge badge-kn">
-                            {{ comp.title }}
-                            <span class="comp-info-tag">{{ comp.get_level_display }}</span>
-                        </span>
+                        <div class="col-12 col-sm-6">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2" style="font-size: 0.85rem;">
+                                <div>
+                                    <span class="fw-bold text-dark">{{ comp.title }}</span>
+                                    <span class="badge bg-light text-secondary border ms-1" style="font-size: 0.72rem;">{{ comp.get_level_display }}</span>
+                                </div>
+                                <div class="text-warning fw-bold" style="font-size: 0.95rem;" title="اهمیت: {{ comp.get_importance_display }}">
+                                    {% if comp.importance == 1 %}
+                                        <span>★★★</span>
+                                    {% elif comp.importance == 2 %}
+                                        <span>★★☆</span>
+                                    {% else %}
+                                        <span>★☆☆</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -731,14 +758,27 @@
 
                 <!-- Skills (SK) -->
                 {% if grouped_competencies.skills %}
-                <div class="col-12 comp-group">
-                    <div class="comp-group-title">🛠️ مهارت‌های عملی و شغلی:</div>
-                    <div>
+                <div class="col-12 comp-group mb-2">
+                    <div class="comp-group-title border-bottom pb-1.5 mb-2">🛠️ مهارت‌های عملی و شغلی:</div>
+                    <div class="row g-2">
                         {% for comp in grouped_competencies.skills %}
-                        <span class="comp-badge badge-sk">
-                            {{ comp.title }}
-                            <span class="comp-info-tag">{{ comp.get_level_display }}</span>
-                        </span>
+                        <div class="col-12 col-sm-6">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2" style="font-size: 0.85rem;">
+                                <div>
+                                    <span class="fw-bold text-dark">{{ comp.title }}</span>
+                                    <span class="badge bg-light text-secondary border ms-1" style="font-size: 0.72rem;">{{ comp.get_level_display }}</span>
+                                </div>
+                                <div class="text-warning fw-bold" style="font-size: 0.95rem;" title="اهمیت: {{ comp.get_importance_display }}">
+                                    {% if comp.importance == 1 %}
+                                        <span>★★★</span>
+                                    {% elif comp.importance == 2 %}
+                                        <span>★★☆</span>
+                                    {% else %}
+                                        <span>★☆☆</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -746,20 +786,46 @@
 
                 <!-- Behavioral (GE) / Abilities (AB) -->
                 {% if grouped_competencies.behavioral or grouped_competencies.abilities %}
-                <div class="col-12 comp-group">
-                    <div class="comp-group-title">🎯 شایستگی‌های رفتاری و عمومی:</div>
-                    <div>
+                <div class="col-12 comp-group mb-2">
+                    <div class="comp-group-title border-bottom pb-1.5 mb-2">🎯 شایستگی‌های رفتاری و عمومی:</div>
+                    <div class="row g-2">
                         {% for comp in grouped_competencies.behavioral %}
-                        <span class="comp-badge badge-ge">
-                            {{ comp.title }}
-                            <span class="comp-info-tag">اهمیت: {{ comp.get_importance_display }}</span>
-                        </span>
+                        <div class="col-12 col-sm-6">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2" style="font-size: 0.85rem;">
+                                <div>
+                                    <span class="fw-bold text-dark">{{ comp.title }}</span>
+                                    <span class="badge bg-light text-secondary border ms-1" style="font-size: 0.72rem;">{{ comp.get_level_display }}</span>
+                                </div>
+                                <div class="text-warning fw-bold" style="font-size: 0.95rem;" title="اهمیت: {{ comp.get_importance_display }}">
+                                    {% if comp.importance == 1 %}
+                                        <span>★★★</span>
+                                    {% elif comp.importance == 2 %}
+                                        <span>★★☆</span>
+                                    {% else %}
+                                        <span>★☆☆</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                         {% for comp in grouped_competencies.abilities %}
-                        <span class="comp-badge badge-ab">
-                            {{ comp.title }}
-                            <span class="comp-info-tag">{{ comp.get_level_display }}</span>
-                        </span>
+                        <div class="col-12 col-sm-6">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2" style="font-size: 0.85rem;">
+                                <div>
+                                    <span class="fw-bold text-dark">{{ comp.title }}</span>
+                                    <span class="badge bg-light text-secondary border ms-1" style="font-size: 0.72rem;">{{ comp.get_level_display }}</span>
+                                </div>
+                                <div class="text-warning fw-bold" style="font-size: 0.95rem;" title="اهمیت: {{ comp.get_importance_display }}">
+                                    {% if comp.importance == 1 %}
+                                        <span>★★★</span>
+                                    {% elif comp.importance == 2 %}
+                                        <span>★★☆</span>
+                                    {% else %}
+                                        <span>★☆☆</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -779,7 +845,7 @@
                 </div>
                 <h4 class="section-title">شرایط و ضوابط تکمیلی</h4>
             </div>
-            <div class="section-content-box">
+            <div class="section-content-box" id="ad-notes-box">
                 {{ job.notes }}
             </div>
         </div>
@@ -799,7 +865,19 @@
                         متقاضیان محترم می‌توانند با اسکن کد QR مقابل توسط تلفن همراه، یا مراجعه مستقیم به آدرس اینترنتی زیر، وارد سامانه جذب شده و نسبت به ثبت‌نام و بارگذاری رزومه خود اقدام نمایند.
                     </p>
                     <span class="apply-url-label">آدرس پرتال ثبت‌نام:</span>
-                    <div id="display-apply-url" class="apply-url-box">{{ apply_url }}</div>
+                    <div id="display-apply-url" class="apply-url-box mb-3">{{ apply_url }}</div>
+
+                    <!-- Date & Time of Registration -->
+                    <div class="d-flex flex-wrap gap-4 p-3 bg-light border rounded-3 align-items-center mb-1" style="font-size: 0.85rem;">
+                        <div>
+                            <span class="text-muted fw-bold">📅 شروع ثبت‌نام:</span>
+                            <span class="fw-bold text-dark ms-1" id="display-cta-start">-</span>
+                        </div>
+                        <div class="border-start ps-4">
+                            <span class="text-muted fw-bold">⏳ پایان ثبت‌نام:</span>
+                            <span class="fw-bold text-danger ms-1" id="display-cta-end">-</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-12 col-md-4 text-center mt-3 mt-md-0">
                     <div class="qr-wrapper">
@@ -866,8 +944,57 @@
         var displayTitle = document.getElementById("display-ad-title");
         var ctaCard = document.getElementById("apply-cta-card");
         
-        // Initial Generation
+        // Date and Time inputs
+        var startInput = document.getElementById("input-start-datetime");
+        var endInput = document.getElementById("input-end-datetime");
+        
+        var displayMetaStart = document.getElementById("display-meta-start");
+        var displayMetaEnd = document.getElementById("display-meta-end");
+        var displayCtaStart = document.getElementById("display-cta-start");
+        var displayCtaEnd = document.getElementById("display-cta-end");
+        
+        function updateDateTimes() {
+            var startVal = startInput.value.trim();
+            var endVal = endInput.value.trim();
+            
+            if (displayMetaStart) displayMetaStart.textContent = startVal ? "شروع ثبت‌نام: " + startVal : "";
+            if (displayMetaEnd) displayMetaEnd.textContent = endVal ? "پایان ثبت‌نام: " + endVal : "";
+            
+            if (displayCtaStart) displayCtaStart.textContent = startVal || "-";
+            if (displayCtaEnd) displayCtaEnd.textContent = endVal || "-";
+        }
+
+        // Bullet point formatter
+        function formatAsBulletList(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const rawText = el.innerText.trim();
+            if (!rawText) return;
+            
+            // Split by newlines
+            const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            // Build list
+            let html = '<ul class="custom-bullet-list">';
+            lines.forEach(line => {
+                // Remove existing bullet characters at beginning of the line
+                let cleanLine = line.replace(/^[•\-\*\u2022\u25e6\d+\.\s]+/, '').trim();
+                if (cleanLine) {
+                    html += `<li>${cleanLine}</li>`;
+                }
+            });
+            html += '</ul>';
+            
+            el.innerHTML = html;
+        }
+
+        // Initial Generation and formatting
         generateQR(urlInput.value);
+        updateDateTimes();
+        formatAsBulletList('ad-description-box');
+        formatAsBulletList('ad-requirements-box');
+        formatAsBulletList('ad-notes-box');
         
         // Listeners for Interactive Controls
         urlInput.addEventListener("input", function() {
@@ -886,6 +1013,9 @@
             }
             displayTitle.textContent = val;
         });
+
+        startInput.addEventListener("input", updateDateTimes);
+        endInput.addEventListener("input", updateDateTimes);
 
         showCtaCheckbox.addEventListener("change", function() {
             if (showCtaCheckbox.checked) {

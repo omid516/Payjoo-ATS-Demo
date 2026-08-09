@@ -2026,6 +2026,32 @@ class AISummarizationApiTests(TestCase):
             })
             mock_urlopen.assert_called_once()
 
+    def test_summarize_api_mock_beautify_success(self):
+        from apps.jobs.models import AISetting
+        AISetting.objects.create(
+            api_key='test-sum-key',
+            base_url='https://api.avalai.ir/v1',
+            model_name='gpt-4o',
+            is_active=True
+        )
+        self.client.login(username='sum_specialist', password='password123')
+        url = reverse('summarize_text_api')
+
+        from unittest.mock import patch, MagicMock
+        mock_response = MagicMock()
+        mock_response.__enter__.return_value = mock_response
+        mock_response.status = 200
+        mock_response.read.return_value = '{"choices": [{"message": {"content": "• زیبانویسی شده"}}]}'.encode('utf-8')
+
+        with patch('urllib.request.urlopen', return_value=mock_response) as mock_urlopen:
+            response = self.client.post(url, {'text': 'This is a long description.', 'action': 'bullet'}, content_type='application/json')
+            self.assertEqual(response.status_code, 200)
+            self.assertJSONEqual(response.content.decode('utf-8'), {
+                'success': True,
+                'summary': '• زیبانویسی شده'
+            })
+            mock_urlopen.assert_called_once()
+
 
 class SmartTalentMatchingTests(TestCase):
     def setUp(self):

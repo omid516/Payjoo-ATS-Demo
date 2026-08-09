@@ -570,16 +570,19 @@ class JobOpportunityPrintAdView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        competencies = self.object.selected_competencies.filter(is_deleted=False)
+        competencies = list(self.object.selected_competencies.filter(is_deleted=False))
+        for comp in competencies:
+            # Formula: level + 3 - importance gives a combined rating of 1 to 5 stars
+            stars_count = max(1, min(5, (comp.level or 1) + 3 - (comp.importance or 3)))
+            comp.stars_display = "★" * stars_count + "☆" * (5 - stars_count)
+            
         context['selected_competencies'] = competencies
-        
-        # Group competencies for modern, structured UI sections
         context['grouped_competencies'] = {
-            'knowledge': competencies.filter(competency_type='KN'),
-            'skills': competencies.filter(competency_type='SK'),
-            'abilities': competencies.filter(competency_type='AB'),
-            'behavioral': competencies.filter(competency_type='GE'),
-            'others': competencies.exclude(competency_type__in=['KN', 'SK', 'AB', 'GE'])
+            'knowledge': [c for c in competencies if c.competency_type == 'KN'],
+            'skills': [c for c in competencies if c.competency_type == 'SK'],
+            'abilities': [c for c in competencies if c.competency_type == 'AB'],
+            'behavioral': [c for c in competencies if c.competency_type == 'GE'],
+            'others': [c for c in competencies if c.competency_type not in ['KN', 'SK', 'AB', 'GE']]
         }
         
         from django.urls import reverse

@@ -586,6 +586,12 @@ class JobOpportunityPrintAdView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
         relative_url = reverse('careers_apply', args=[self.object.pk])
         context['apply_url'] = self.request.build_absolute_uri(relative_url)
 
+        import jdatetime
+        today_j = jdatetime.date.today()
+        one_week_later_j = today_j + jdatetime.timedelta(days=7)
+        context['default_start_date_jalali'] = today_j.strftime('%Y/%m/%d')
+        context['default_end_date_jalali'] = one_week_later_j.strftime('%Y/%m/%d')
+
         from apps.jobs.models import OrganizationSetting
         context['org_setting'] = OrganizationSetting.get_active_setting()
         return context
@@ -3253,13 +3259,11 @@ class SummarizeTextApiView(LoginRequiredMixin, RoleRequiredMixin, View):
             data = request.POST
 
         text = str(data.get('text', '')).strip()
-        action = str(data.get('action', 'summarize')).strip()
 
         if not text:
-            error_msg = 'لطفاً ابتدا متنی را برای زیبانویسی وارد نمایید.' if action == 'bullet' else 'لطفاً ابتدا متنی را برای خلاصه‌سازی وارد نمایید.'
             return JsonResponse({
                 'success': False,
-                'error': error_msg
+                'error': 'لطفاً ابتدا متنی را برای خلاصه‌سازی وارد نمایید.'
             }, status=400)
 
         ai_setting = AISetting.get_active_setting()
@@ -3267,25 +3271,13 @@ class SummarizeTextApiView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         if ai_setting and ai_setting.api_key:
             try:
-                if action == 'bullet':
-                    system_prompt = (
-                        "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌های منابع انسانی و ویراستار متون اداری و سازمانی هستید.\n"
-                        "وظیفه شما این است که متن ورودی مربوط به شناسنامه شغلی را زیبانویسی، ویرایش، فاصله‌گذاری و ساختاردهی کنید تا ظاهری کاملاً شکیل، مرتب و خوانا پیدا کند.\n"
-                        "قوانین محتوایی:\n"
-                        "۱. جملات طولانی و متوالی را بشکنید و آن‌ها را به صورت بندهای مجزا و لیست‌های نقطه‌گلوله‌ای (•) مرتب و زیبانویسی کنید.\n"
-                        "۲. لحن متن باید کاملاً رسمی، حرفه‌ای، شیک و ادبیات اداری فاخر و روان فارسی باشد.\n"
-                        "۳. بین بندها یا بخش‌های اصلی فاصله‌گذاری مناسب (خط خالی یا اینتر) قرار دهید تا خواندن آن آسان شود.\n"
-                        "۴. اطلاعات مهم و مفاهیم اصلی را حذف نکنید، بلکه ساختار نمایش آن را به زیباترین شکل ممکن اصلاح کنید.\n"
-                        "۵. پاسخ شما باید فقط و فقط شامل متن نهایی ویرایش شده و زیبانویسی شده باشد و هیچ توضیح، مقدمه، مؤخره یا متنی خارج از آن بازنگردانید."
-                    )
-                else:
-                    system_prompt = (
-                        "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌های منابع انسانی هستید.\n"
-                        "وظیفه شما خلاصه‌سازی، کوتاه‌تر کردن و بهینه‌سازی متن ورودی مربوط به شناسنامه شغلی است.\n"
-                        "متن خلاصه شده باید بسیار مختصر، مفید، خوانا، بدون زواید و به زبان فارسی شیوا باشد.\n"
-                        "سعی کنید نکات و بندهای اصلی حفظ شوند اما در حجم بسیار کمتری ارائه شوند.\n"
-                        "مهم: پاسخ شما باید فقط و فقط شامل متن نهایی خلاصه‌شده باشد و هیچ توضیح، مقدمه، مؤخره یا متنی خارج از خلاصه ارائه ندهید."
-                    )
+                system_prompt = (
+                    "شما یک مستشار ارشد جذب و ارزیابی شایستگی‌های منابع انسانی هستید.\n"
+                    "وظیفه شما خلاصه‌سازی، کوتاه‌تر کردن و بهینه‌سازی متن ورودی مربوط به شناسنامه شغلی است.\n"
+                    "متن خلاصه شده باید بسیار مختصر، مفید، خوانا، بدون زواید و به زبان فارسی شیوا باشد.\n"
+                    "سعی کنید نکات و بندهای اصلی حفظ شوند اما در حجم بسیار کمتری ارائه شوند.\n"
+                    "مهم: پاسخ شما باید فقط و فقط شامل متن نهایی خلاصه‌شده باشد و هیچ توضیح، مقدمه، مؤخره یا متنی خارج از خلاصه ارائه ندهید."
+                )
 
                 payload = {
                     "model": ai_setting.model_name,

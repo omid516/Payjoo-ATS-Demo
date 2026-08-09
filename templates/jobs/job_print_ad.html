@@ -583,13 +583,13 @@
             <!-- Custom Start Date/Time Input -->
             <div class="control-field">
                 <label for="input-start-datetime" class="control-label">شروع ثبت‌نام:</label>
-                <input type="text" id="input-start-datetime" class="control-input" style="width: 170px;" value="{% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}۱۴۰۲/۰۱/۰۱ ساعت ۰۸:۰۰{% endif %}">
+                <input type="text" id="input-start-datetime" class="control-input" style="width: 170px;" value="{% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}{{ default_start_date_jalali }} ساعت 08:00{% endif %}">
             </div>
 
             <!-- Custom End Date/Time Input -->
             <div class="control-field">
                 <label for="input-end-datetime" class="control-label">پایان ثبت‌نام:</label>
-                <input type="text" id="input-end-datetime" class="control-input" style="width: 170px;" value="{% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}۱۴۰۲/۱۲/۲۹ ساعت ۲۴:۰۰{% endif %}">
+                <input type="text" id="input-end-datetime" class="control-input" style="width: 170px;" value="{% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}{{ default_end_date_jalali }} ساعت ۲۴:۰۰{% endif %}">
             </div>
             
             <!-- Show/Hide apply box toggle -->
@@ -645,8 +645,8 @@
             <div class="ad-meta-info">
                 <span>شناسه فرصت شغلی: {{ job.code }}</span>
                 <span>تاریخ انتشار: {{ job.created_at|default:job.updated_at|to_jalali }}</span>
-                <span id="display-meta-start">شروع ثبت‌نام: {% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}۱۴۰۲/۰۱/۰۱ ساعت ۰۸:۰۰{% endif %}</span>
-                <span id="display-meta-end">پایان ثبت‌نام: {% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}۱۴۰۲/۱۲/۲۹ ساعت ۲۴:۰۰{% endif %}</span>
+                <span id="display-meta-start">شروع ثبت‌نام: {% if job.start_date %}{{ job.start_date|to_jalali }} ساعت 08:00{% else %}{{ default_start_date_jalali }} ساعت 08:00{% endif %}</span>
+                <span id="display-meta-end">پایان ثبت‌نام: {% if job.end_date %}{{ job.end_date|to_jalali }} ساعت ۲۴:۰۰{% else %}{{ default_end_date_jalali }} ساعت ۲۴:۰۰{% endif %}</span>
             </div>
         </div>
 

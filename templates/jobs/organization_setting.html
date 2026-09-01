@@ -185,6 +185,24 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- آدرس پیش‌فرض پرتال آگهی‌ها -->
+                            <div class="col-md-12 mt-4">
+                                <label for="id_default_ad_url" class="form-label font-semibold text-xs text-secondary mb-1.5">آدرس پیش‌فرض پرتال ثبت‌نام / آگهی‌های استخدامی:</label>
+                                {{ form.default_ad_url }}
+                                <div class="form-text text-xxs text-muted mt-1">
+                                    این آدرس به‌عنوان آدرس پایه و پیش‌فرض در تمامی آگهی‌ها، پوسترهای چاپ استخدامی و کدهای QR استفاده می‌شود (مثال: <code>https://careers.msc.ir</code>). همچنین در تنظیمات هر آگهی شغلی، امکان تغییر و شخصی‌سازی این آدرس وجود دارد.
+                                </div>
+                            </div>
+
+                            <!-- شرایط عمومی احراز داوطلبان -->
+                            <div class="col-md-12 mt-4">
+                                <label for="id_general_requirements" class="form-label font-semibold text-xs text-secondary mb-1.5">شرایط عمومی احراز داوطلبان (پیش‌فرض تمامی آگهی‌ها):</label>
+                                {{ form.general_requirements }}
+                                <div class="form-text text-xxs text-muted mt-1">
+                                    این شرایط عمومی (شامل تابعیت، عدم سوء پیشینه، نظام وظیفه، تعهدات سازمانی و...) به‌صورت خودکار در زیر تمامی شرایط اختصاصی آگهی‌های استخدامی درج می‌شود. هر بند را در یک خط جداگانه بنویسید.
+                                </div>
+                            </div>
                         </div>
                     </div>
 

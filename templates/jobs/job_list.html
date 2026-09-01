@@ -184,7 +184,8 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4 align-middle">
+                        <th class="ps-3 text-center text-secondary font-semibold text-xs" style="width: 50px;">#</th>
+                        <th class="ps-2 align-middle">
                             <a href="{% sort_url 'code' %}" class="d-inline-flex align-items-center gap-1 text-decoration-none text-secondary hover-primary transition-all font-semibold">
                                 {{ t.code_th }}
                                 {% if current_sort == 'code' %}
@@ -352,7 +353,10 @@
                 <tbody id="job-table-body">
                     {% for job in jobs %}
                     <tr id="job-{{ job.id }}">
-                        <td class="ps-4">
+                        <td class="ps-3 text-center font-bold text-slate-500 text-sm align-middle">
+                            {% if page_obj %}{{ page_obj.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}
+                        </td>
+                        <td class="ps-2">
                             <span class="font-bold text-primary">{{ job.code }}</span>
                         </td>
                         <td>
@@ -511,7 +515,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">
+                        <td colspan="10" class="text-center py-5 text-muted">
                             {% if current_language_code == 'en' %}No job opportunities defined in the system.{% elif current_language_code == 'tr' %}Sistemde tanımlanmış iş fırsatı yok.{% elif current_language_code == 'ar' %}لم يتم تعريف أي فرص عمل في النظام.{% else %}هیچ فرصت شغلی در سیستم تعریف نشده است.{% endif %}
                         </td>
                     </tr>

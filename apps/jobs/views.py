@@ -585,9 +585,7 @@ class JobOpportunityPrintAdView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
             'others': [c for c in competencies if c.competency_type not in ['KN', 'SK', 'AB', 'GE']]
         }
         
-        from django.urls import reverse
-        relative_url = reverse('careers_apply', args=[self.object.pk])
-        context['apply_url'] = self.request.build_absolute_uri(relative_url)
+        context['apply_url'] = self.object.get_effective_apply_url(request=self.request)
 
         import jdatetime
         today_j = jdatetime.date.today()

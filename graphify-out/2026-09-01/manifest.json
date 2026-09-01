@@ -410,8 +410,8 @@
     "semantic_hash": "43b42909c85c830f9eaa7a6f0ce58c77"
   },
   "apps/jobs/forms.py": {
-    "mtime": 1788243038.2789073,
-    "ast_hash": "c3cf81b91b8a1443097cc8d251ad6087",
+    "mtime": 1788242374.0389652,
+    "ast_hash": "26d072fa45088ea4ef0204094636fdff",
     "semantic_hash": ""
   },
   "apps/jobs/management/__init__.py": {
@@ -590,13 +590,13 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "apps/jobs/models.py": {
-    "mtime": 1788243027.4588196,
-    "ast_hash": "ec9e6bbf42445106b65e4f8f5c37487f",
+    "mtime": 1788242353.9675891,
+    "ast_hash": "91b485c21120adc9a7ba780d9c26af69",
     "semantic_hash": ""
   },
   "apps/jobs/tests.py": {
-    "mtime": 1788243113.3976486,
-    "ast_hash": "0ab9415d9533ab3df6e60bad0d00b58c",
+    "mtime": 1788242464.8648622,
+    "ast_hash": "e638f446bceb68d86ede01f47593ad62",
     "semantic_hash": ""
   },
   "apps/jobs/urls.py": {
@@ -1125,8 +1125,8 @@
     "semantic_hash": "905475a43a06982958485820563a9b04"
   },
   "templates/jobs/job_print_ad.html": {
-    "mtime": 1788243087.0921576,
-    "ast_hash": "fae10014449b58e49ad65cbb106522ee",
+    "mtime": 1786271352.0,
+    "ast_hash": "519c90b08835d03fe049366c86d457c2",
     "semantic_hash": ""
   },
   "templates/jobs/job_print_doc.html": {
@@ -1140,8 +1140,8 @@
     "semantic_hash": ""
   },
   "templates/jobs/organization_setting.html": {
-    "mtime": 1788243048.6718438,
-    "ast_hash": "00bd1a086882a22a574d75709fae20cb",
+    "mtime": 1788242405.054279,
+    "ast_hash": "270e0991865a94e503c660ea8c18bd4c",
     "semantic_hash": ""
   },
   "templates/jobs/partials/ai_recruitment_strategy.html": {
@@ -1322,11 +1322,6 @@
   "templates/jobs/job_description_list.html": {
     "mtime": 1786271352.0,
     "ast_hash": "d92f4a818baa00290b325009bc12d660",
-    "semantic_hash": ""
-  },
-  "apps/jobs/migrations/0036_organizationsetting_general_requirements.py": {
-    "mtime": 1788243093.8146956,
-    "ast_hash": "40dc83023aad8e51a54e98d62f7c77e6",
     "semantic_hash": ""
   }
 }

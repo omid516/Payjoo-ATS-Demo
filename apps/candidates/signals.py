@@ -323,10 +323,11 @@ def render_notification_template(template_text, candidate, job, stage_name=None,
     if not recruiter_name:
         recruiter_name = "کارشناس جذب"
     if not link:
+        base_host = org_setting.default_ad_url.strip().rstrip('/') if (org_setting and org_setting.default_ad_url and org_setting.default_ad_url.strip()) else "http://127.0.0.1:8000"
         try:
-            link = "http://127.0.0.1:8000" + reverse('candidate_dashboard')
+            link = base_host + reverse('candidate_dashboard')
         except Exception:
-            link = "http://127.0.0.1:8000/candidates/dashboard/"
+            link = f"{base_host}/candidates/dashboard/"
             
     context = {
         '{{ candidate_name }}': candidate_name,

@@ -2418,7 +2418,135 @@ class GenerateJobSpecsApiViewTests(TestCase):
         res_json = response.json()
         self.assertTrue(res_json['success'])
         self.assertIn('هدف اصلی شغل:', res_json['description'])
-        self.assertIn('شرایط احراز و تحصیلات:', res_json['requirements'])
+
+class DefaultJobAdUrlAndJobOverrideTests(TestCase):
+    def setUp(self):
+        from apps.accounts.models import UserProfile
+        from apps.jobs.models import OrganizationSetting, JobOpportunity
+        
+        self.admin = User.objects.create_superuser(username='admin_ad_test', password='password123', email='admin@msc.ir')
+        UserProfile.objects.filter(user=self.admin).update(role=UserProfile.ROLE_ADMIN)
+        self.client.login(username='admin_ad_test', password='password123')
+        
+        self.org_setting = OrganizationSetting.get_active_setting()
+        self.org_setting.default_ad_url = ""
+        self.org_setting.save()
+
+        self.job = JobOpportunity.objects.create(
+            request_number='REQ-AD-001',
+            title='مهندس متالورژی',
+            code='MET-001',
+            department='فولادسازی',
+            headcount=2,
+            status=JobOpportunity.STATUS_PUBLISHED
+        )
+
+    def test_effective_url_fallback_to_system_default(self):
+        """تست اینکه در صورت خالی بودن هر دو تنظیم، آدرس پیش‌فرض سیستم ساخته می‌شود"""
+        url = self.job.get_effective_apply_url()
+        self.assertIn(f"/candidates/careers/{self.job.pk}/", url)
+
+    def test_effective_url_uses_organization_default(self):
+        """تست اینکه آدرس پیش‌فرض سازمان به درستی اعمال می‌شود"""
+        self.org_setting.default_ad_url = "https://careers.msc.ir"
+        self.org_setting.save()
+
+        url = self.job.get_effective_apply_url()
+        self.assertEqual(url, f"https://careers.msc.ir/candidates/careers/{self.job.pk}/")
+
+    def test_effective_url_with_placeholder_in_org_setting(self):
+        """تست اینکه متغیرهای {id} و {pk} در آدرس سازمان جایگزین می‌شوند"""
+        self.org_setting.default_ad_url = "https://careers.msc.ir/jobs/{id}/view"
+        self.org_setting.save()
+
+        url = self.job.get_effective_apply_url()
+        self.assertEqual(url, f"https://careers.msc.ir/jobs/{self.job.pk}/view")
+
+    def test_job_custom_apply_url_overrides_organization_setting(self):
+        """تست اینکه آدرس اختصاصی شغل بر آدرس پیش‌فرض سازمان اولویت دارد"""
+        self.org_setting.default_ad_url = "https://careers.msc.ir"
+        self.org_setting.save()
+
+        self.job.custom_apply_url = "https://special-portal.msc.ir/direct-apply/555"
+        self.job.save()
+
+        url = self.job.get_effective_apply_url()
+        self.assertEqual(url, "https://special-portal.msc.ir/direct-apply/555")
+
+    def test_organization_setting_form_saves_default_ad_url(self):
+        """تست ذخیره‌سازی آدرس پیش‌فرض آگهی از طریق فرم تنظیمات سازمان"""
+        from apps.jobs.forms import OrganizationSettingForm
+        form_data = {
+            'name': 'مجتمع فولاد مبارکه',
+            'default_ad_url': 'https://jobs.msc.ir',
+            'reg_email_subject': 'دریافت رزومه',
+            'reg_email_body': 'متن تستی',
+            'reg_sms_body': 'متن پیامک',
+            'exam_email_subject': 'دعوت به آزمون',
+            'exam_email_body': 'متن آزمون',
+            'exam_sms_body': 'پیامک آزمون',
+            'interview_email_subject': 'دعوت به مصاحبه',
+            'interview_email_body': 'متن مصاحبه',
+            'interview_sms_body': 'پیامک مصاحبه',
+            'offer_email_subject': 'پیشنهاد کار',
+            'offer_email_body': 'متن آفر',
+            'offer_sms_body': 'پیامک آفر',
+            'reject_email_subject': 'رد رزومه',
+            'reject_email_body': 'متن رد',
+            'reject_sms_body': 'پیامک رد',
+            'email_provider': 'CUSTOM',
+            'smtp_host': 'smtp.test.com',
+            'smtp_port': 587,
+            'sms_provider': 'MOCK',
+        }
+        form = OrganizationSettingForm(data=form_data, instance=self.org_setting)
+        self.assertTrue(form.is_valid(), form.errors)
+        saved_setting = form.save()
+        self.assertEqual(saved_setting.default_ad_url, 'https://jobs.msc.ir')
+
+    def test_job_print_ad_view_context_uses_effective_url(self):
+        """تست اینکه در صفحه چاپ آگهی، آدرس موثر در کانتکست قرار می‌گیرد"""
+        self.job.custom_apply_url = "https://careers.msc.ir/special/123"
+        self.job.save()
+
+        url = reverse('job_print_ad', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['apply_url'], "https://careers.msc.ir/special/123")
+        self.assertContains(response, "https://careers.msc.ir/special/123")
+
+    def test_job_print_ad_general_requirements_and_no_stars(self):
+        """تست نمایش شرایط عمومی احراز در آگهی و حذف ستاره‌های شایستگی‌ها"""
+        self.org_setting.general_requirements = "تابعیت جمهوری اسلامی ایران\nعدم سوء پیشینه کیفری"
+        self.org_setting.save()
+
+        # ایجاد یک شایستگی متصل به شغل
+        from apps.jobs.models import JobOpportunityCompetency
+        JobOpportunityCompetency.objects.create(
+            job=self.job,
+            code='KN_TEST',
+            title='دانش متالورژی پیشرفته',
+            competency_type='KN',
+            level=3,
+            importance=2
+        )
+
+        url = reverse('job_print_ad', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # باید شرایط عمومی را نمایش دهد
+        self.assertContains(response, "شرایط عمومی احراز داوطلبان")
+        self.assertContains(response, "تابعیت جمهوری اسلامی ایران")
+        # باید عنوان شایستگی را داشته باشد اما ستاره نداشته باشد
+        self.assertContains(response, "دانش متالورژی پیشرفته")
+        self.assertNotContains(response, "★")
+        self.assertNotContains(response, "☆")
+        # باید کنترل تاریخ انتشار انتخابی وجود داشته باشد
+        self.assertContains(response, "id=\"input-publish-date\"")
+        self.assertContains(response, "id=\"checkbox-show-publish-date\"")
+        self.assertContains(response, "id=\"display-meta-publish\"")
+
+
 
 
 

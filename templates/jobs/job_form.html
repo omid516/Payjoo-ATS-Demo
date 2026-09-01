@@ -162,6 +162,14 @@
                     <div class="text-danger text-xs mt-1">{{ form.end_date.errors.0 }}</div>
                     {% endif %}
                 </div>
+                <div class="col-12">
+                    <label class="form-label font-medium text-secondary">آدرس اختصاصی پرتال ثبت‌نام / آگهی (اختیاری)</label>
+                    {{ form.custom_apply_url }}
+                    <small class="text-muted text-xs d-block mt-1">در صورت خالی بودن، سامانه به‌صورت پیش‌فرض از آدرس تعریف‌شده در تنظیمات سازمان استفاده خواهد کرد.</small>
+                    {% if form.custom_apply_url.errors %}
+                    <div class="text-danger text-xs mt-1">{{ form.custom_apply_url.errors.0 }}</div>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Section 3: Descriptions -->

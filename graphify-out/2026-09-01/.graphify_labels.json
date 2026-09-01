@@ -270,16 +270,5 @@
   "268": "inspect_all_sheets.py",
   "269": "inspect_competencies_file.py",
   "270": "inspect_excel_mapping.py",
-  "271": "inspect_unique_values.py",
-  "272": "Es",
-  "273": ".get_context_data",
-  "274": "xt",
-  "275": "generate_license_key",
-  "276": "JobOpportunityDeleteView",
-  "277": "models.py",
-  "278": "LogicalDateAnomalyCheck",
-  "279": "StatusSyncCompletedCheck",
-  "280": ".get_queryset",
-  "281": "0036_organizationsetting_general_requirements.py",
-  "282": ".scan"
+  "271": "inspect_unique_values.py"
 }

@@ -124,6 +124,7 @@ class JobOpportunity(SoftDeleteModel):
     requirements = models.TextField(blank=True, verbose_name="شرایط احراز")
     start_date = models.DateField(null=True, blank=True, verbose_name="تاریخ شروع")
     end_date = models.DateField(null=True, blank=True, verbose_name="تاریخ پایان")
+    custom_apply_url = models.CharField(max_length=500, blank=True, default="", verbose_name="آدرس اختصاصی پرتال ثبت‌نام / آگهی")
     notes = models.TextField(blank=True, verbose_name="یادداشت‌های داخلی")
 
     class Meta:
@@ -147,6 +148,26 @@ class JobOpportunity(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.title} ({self.code})"
+
+    def get_effective_apply_url(self, request=None):
+        if self.custom_apply_url and self.custom_apply_url.strip():
+            return self.custom_apply_url.strip()
+        
+        from apps.jobs.models import OrganizationSetting
+        org_setting = OrganizationSetting.get_active_setting()
+        if org_setting and org_setting.default_ad_url and org_setting.default_ad_url.strip():
+            base_url = org_setting.default_ad_url.strip().rstrip('/')
+            if '{id}' in base_url or '{pk}' in base_url:
+                return base_url.replace('{id}', str(self.pk)).replace('{pk}', str(self.pk))
+            if '/careers/' in base_url or '/jobs/' in base_url:
+                return f"{base_url}/{self.pk}/" if not base_url.endswith(f"/{self.pk}") else base_url
+            return f"{base_url}/candidates/careers/{self.pk}/"
+        
+        from django.urls import reverse
+        rel_url = reverse('careers_apply', args=[self.pk])
+        if request:
+            return request.build_absolute_uri(rel_url)
+        return f"http://127.0.0.1:8000{rel_url}"
 
     @property
     def has_all_evaluations_completed(self):
@@ -706,6 +727,8 @@ class AIPostRecommendation(SoftDeleteModel):
 class OrganizationSetting(SoftDeleteModel):
     name = models.CharField(max_length=200, default="سیستم جذب", verbose_name="نام سازمان")
     logo = models.FileField(upload_to='org_logos/', blank=True, null=True, verbose_name="لوگوی سازمان")
+    default_ad_url = models.CharField(max_length=500, blank=True, default="", verbose_name="آدرس پیش‌فرض پرتال ثبت‌نام / آگهی‌های استخدامی")
+    general_requirements = models.TextField(blank=True, default="", verbose_name="شرایط عمومی احراز (پیش‌فرض تمامی آگهی‌ها)")
 
     # ۱. ثبت‌نام و ورود اولیه به سامانه (ثبت‌نام)
     reg_email_enabled = models.BooleanField(default=True, verbose_name="ارسال ایمیل ثبت‌نام فعال باشد")

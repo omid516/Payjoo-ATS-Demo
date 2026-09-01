@@ -17,7 +17,7 @@ class JobOpportunityForm(forms.ModelForm):
         fields = [
             'request_number', 'title', 'code', 'department', 'unit', 'factory_name', 'job_category',
             'headcount', 'recruitment_type', 'assigned_recruiter',
-            'workflow', 'status', 'start_date', 'end_date', 'description', 'job_type_details', 'expected_results', 'requirements', 'notes'
+            'workflow', 'status', 'start_date', 'end_date', 'custom_apply_url', 'description', 'job_type_details', 'expected_results', 'requirements', 'notes'
         ]
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: REQ-1402-001'}),
@@ -31,6 +31,7 @@ class JobOpportunityForm(forms.ModelForm):
             'assigned_recruiter': forms.Select(attrs={'class': 'form-select'}),
             'workflow': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
+            'custom_apply_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: https://careers.msc.ir/jobs/101 (اختیاری - در صورت خالی بودن از آدرس پیش‌فرض سازمان استفاده می‌شود)'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'شرح وظایف و مسئولیت‌های شغلی'}),
             'job_type_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'مشخصات، اهمیت استراتژیک، ارزش‌آفرینی و جذب متصدی'}),
             'expected_results': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'نتایج و پیامدهای مورد انتظار شغل'}),
@@ -241,7 +242,7 @@ class OrganizationSettingForm(forms.ModelForm):
     class Meta:
         model = OrganizationSetting
         fields = [
-            'name', 'logo',
+            'name', 'logo', 'default_ad_url', 'general_requirements',
             'reg_email_enabled', 'reg_email_subject', 'reg_email_body', 'reg_sms_enabled', 'reg_sms_body',
             'exam_email_enabled', 'exam_email_subject', 'exam_email_body', 'exam_sms_enabled', 'exam_sms_body',
             'interview_email_enabled', 'interview_email_subject', 'interview_email_body', 'interview_sms_enabled', 'interview_sms_body',
@@ -254,6 +255,8 @@ class OrganizationSettingForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: هلدینگ توسعه فناوری اطلاعات'}),
             'logo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'default_ad_url': forms.TextInput(attrs={'class': 'form-control text-start font-monospace', 'style': 'direction: ltr;', 'placeholder': 'https://careers.msc.ir'}),
+            'general_requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': 'شرایط عمومی احراز داوطلبان که در تمامی آگهی‌های استخدامی سازمان درج می‌شود (مانند تابعیت، عدم سوء پیشینه، کارت پایان خدمت و...)'}),
             'license_key': forms.Textarea(attrs={'class': 'form-control text-start font-monospace', 'rows': 4, 'style': 'font-size: 11px; direction: ltr;', 'placeholder': 'Paste your base64 license key here...'}),
             
             # Booleans

@@ -428,8 +428,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_py",
-      "community": 277,
-      "community_name": "models.py",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "models.py"
     },
     {
@@ -439,8 +439,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "userprofile"
     },
     {
@@ -450,8 +450,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_meta",
-      "community": 277,
-      "community_name": "models.py",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "meta"
     },
     {
@@ -461,8 +461,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_save",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".save()"
     },
     {
@@ -472,8 +472,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_can_manage_jobs",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".can_manage_jobs()"
     },
     {
@@ -483,8 +483,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_is_recruitment_staff",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".is_recruitment_staff()"
     },
     {
@@ -494,8 +494,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_can_enter_exam_scores",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".can_enter_exam_scores()"
     },
     {
@@ -505,8 +505,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_can_view_interviews",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".can_view_interviews()"
     },
     {
@@ -516,8 +516,8 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_can_view_audit_logs",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".can_view_audit_logs()"
     },
     {
@@ -527,8 +527,8 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_models_userprofile_str",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": ".__str__()"
     },
     {
@@ -670,8 +670,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_signals_py",
-      "community": 277,
-      "community_name": "models.py",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "signals.py"
     },
     {
@@ -681,8 +681,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_signals_create_or_update_user_profile",
-      "community": 277,
-      "community_name": "models.py",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "create_or_update_user_profile()"
     },
     {
@@ -2441,8 +2441,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_baseintegritycheck_scan",
-      "community": 282,
-      "community_name": ".scan",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2584,8 +2584,8 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_logicaldateanomalycheck",
-      "community": 278,
-      "community_name": "LogicalDateAnomalyCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "logicaldateanomalycheck"
     },
     {
@@ -2595,8 +2595,8 @@
       "source_location": "L336",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_logicaldateanomalycheck_scan",
-      "community": 278,
-      "community_name": "LogicalDateAnomalyCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2606,8 +2606,8 @@
       "source_location": "L376",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_logicaldateanomalycheck_resolve",
-      "community": 278,
-      "community_name": "LogicalDateAnomalyCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2617,8 +2617,8 @@
       "source_location": "L381",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussynccompletedcheck",
-      "community": 279,
-      "community_name": "StatusSyncCompletedCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "statussynccompletedcheck"
     },
     {
@@ -2628,8 +2628,8 @@
       "source_location": "L388",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussynccompletedcheck_scan",
-      "community": 279,
-      "community_name": "StatusSyncCompletedCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2639,8 +2639,8 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussynccompletedcheck_resolve",
-      "community": 279,
-      "community_name": "StatusSyncCompletedCheck",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2804,8 +2804,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_rationale_21",
-      "community": 282,
-      "community_name": ".scan",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "executes the query and returns a list of discrepancies.         each item is a d"
     },
     {
@@ -6346,8 +6346,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatelistview_extract_keywords",
-      "community": 280,
-      "community_name": ".get_queryset",
+      "community": 23,
+      "community_name": "Jobs: Jobs Import Management",
       "norm_label": ".extract_keywords()"
     },
     {
@@ -6357,8 +6357,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatelistview_compute_job_match",
-      "community": 280,
-      "community_name": ".get_queryset",
+      "community": 23,
+      "community_name": "Jobs: Jobs Import Management",
       "norm_label": ".compute_job_match()"
     },
     {
@@ -6368,8 +6368,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatelistview_get_queryset",
-      "community": 280,
-      "community_name": ".get_queryset",
+      "community": 23,
+      "community_name": "Jobs: Jobs Import Management",
       "norm_label": ".get_queryset()"
     },
     {
@@ -6379,8 +6379,8 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatelistview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6445,8 +6445,8 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatedetailview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6489,8 +6489,8 @@
       "source_location": "L330",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatecreateview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6500,8 +6500,8 @@
       "source_location": "L340",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatecreateview_form_valid",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".form_valid()"
     },
     {
@@ -6533,8 +6533,8 @@
       "source_location": "L366",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidateupdateview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6544,8 +6544,8 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidateupdateview_form_valid",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".form_valid()"
     },
     {
@@ -6599,8 +6599,8 @@
       "source_location": "L431",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_jobapplicationcreateview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6643,8 +6643,8 @@
       "source_location": "L460",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_jobopportunitypipelineview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6786,8 +6786,8 @@
       "source_location": "L661",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_careerslistview_get_context_data",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -7479,8 +7479,8 @@
       "source_location": "L2437",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_jobopportunityfinalrankingview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -7710,8 +7710,8 @@
       "source_location": "L3141",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatepasswordchangeview_get_success_url",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_success_url()"
     },
     {
@@ -7974,8 +7974,8 @@
       "source_location": "L4052",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_dataintegritydashboardview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 44,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L4236",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_selectedcandidateslistview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "L4379",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_views_candidatesbystagelistview_get_context_data",
-      "community": 273,
-      "community_name": ".get_context_data",
+      "community": 0,
+      "community_name": "Candidates: Candidates Get Str",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8425,8 +8425,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_license_generate_license_key",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "generate_license_key()"
     },
     {
@@ -8480,8 +8480,8 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_license_rationale_211",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "generates a cryptographically signed license key."
     },
     {
@@ -8667,8 +8667,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_models_softdeletemodel",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "softdeletemodel"
     },
     {
@@ -8832,8 +8832,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_tests_py",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "tests.py"
     },
     {
@@ -8843,8 +8843,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_tests_licensetestcase",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "licensetestcase"
     },
     {
@@ -8865,8 +8865,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_tests_licensetestcase_setup",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".setup()"
     },
     {
@@ -8876,8 +8876,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_tests_licensetestcase_test_generate_and_verify_license",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".test_generate_and_verify_license()"
     },
     {
@@ -8887,8 +8887,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_tests_licensetestcase_test_free_limit_defaults",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": ".test_free_limit_defaults()"
     },
     {
@@ -10347,7 +10347,7 @@
       "label": "JobDescriptionTemplateForm",
       "file_type": "code",
       "source_file": "apps/jobs/forms.py",
-      "source_location": "L310",
+      "source_location": "L309",
       "_origin": "ast",
       "id": "apps_jobs_forms_jobdescriptiontemplateform",
       "community": 5,
@@ -11378,28 +11378,6 @@
       "norm_label": "migration"
     },
     {
-      "label": "0036_organizationsetting_general_requirements.py",
-      "file_type": "code",
-      "source_file": "apps/jobs/migrations/0036_organizationsetting_general_requirements.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "apps_jobs_migrations_0036_organizationsetting_general_requirements",
-      "community": 281,
-      "community_name": "0036_organizationsetting_general_requirements.py",
-      "norm_label": "0036_organizationsetting_general_requirements.py"
-    },
-    {
-      "label": "Migration",
-      "file_type": "code",
-      "source_file": "apps/jobs/migrations/0036_organizationsetting_general_requirements.py",
-      "source_location": "L6",
-      "_origin": "ast",
-      "id": "apps_jobs_migrations_0036_organizationsetting_general_requirements_migration",
-      "community": 281,
-      "community_name": "0036_organizationsetting_general_requirements.py",
-      "norm_label": "migration"
-    },
-    {
       "label": "__init__.py",
       "file_type": "code",
       "source_file": "apps/jobs/migrations/__init__.py",
@@ -11417,8 +11395,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_jobs_models",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "models.py"
     },
     {
@@ -11439,8 +11417,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "apps_jobs_models_meta",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "meta"
     },
     {
@@ -11461,8 +11439,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "workflowstagetemplate"
     },
     {
@@ -11472,8 +11450,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "apps_jobs_models_workflowstagetemplate_str",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".__str__()"
     },
     {
@@ -11714,8 +11692,8 @@
       "source_location": "L552",
       "_origin": "ast",
       "id": "apps_jobs_models_centralcompetency",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "centralcompetency"
     },
     {
@@ -11725,8 +11703,8 @@
       "source_location": "L602",
       "_origin": "ast",
       "id": "apps_jobs_models_centralcompetency_str",
-      "community": 9,
-      "community_name": "Jobs: Jobs Admin Str",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": ".__str__()"
     },
     {
@@ -11824,8 +11802,8 @@
       "source_location": "L700",
       "_origin": "ast",
       "id": "apps_jobs_models_aisetting_get_active_setting",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_active_setting()"
     },
     {
@@ -11835,8 +11813,8 @@
       "source_location": "L704",
       "_origin": "ast",
       "id": "apps_jobs_models_aipostrecommendation",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "aipostrecommendation"
     },
     {
@@ -11846,8 +11824,8 @@
       "source_location": "L723",
       "_origin": "ast",
       "id": "apps_jobs_models_aipostrecommendation_str",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": ".__str__()"
     },
     {
@@ -11865,7 +11843,7 @@
       "label": ".__str__()",
       "file_type": "code",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L905",
+      "source_location": "L904",
       "_origin": "ast",
       "id": "apps_jobs_models_organizationsetting_str",
       "community": 8,
@@ -11876,7 +11854,7 @@
       "label": ".get_active_setting()",
       "file_type": "code",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L909",
+      "source_location": "L908",
       "_origin": "ast",
       "id": "apps_jobs_models_organizationsetting_get_active_setting",
       "community": 4,
@@ -11887,7 +11865,7 @@
       "label": "JobDescriptionTemplate",
       "file_type": "code",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L916",
+      "source_location": "L915",
       "_origin": "ast",
       "id": "apps_jobs_models_jobdescriptiontemplate",
       "community": 5,
@@ -11898,7 +11876,7 @@
       "label": ".__str__()",
       "file_type": "code",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L939",
+      "source_location": "L938",
       "_origin": "ast",
       "id": "apps_jobs_models_jobdescriptiontemplate_str",
       "community": 5,
@@ -12022,8 +12000,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "apps_jobs_tests_jobopportunityandworkflowtests_test_jalali_date_template_filter",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 10,
+      "community_name": "Jobs: Jobs Jobopportunityandworkflowtest",
       "norm_label": ".test_jalali_date_template_filter()"
     },
     {
@@ -12407,8 +12385,8 @@
       "source_location": "L886",
       "_origin": "ast",
       "id": "apps_jobs_tests_competencyenginetests_test_excel_import_logic",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": ".test_excel_import_logic()"
     },
     {
@@ -12605,8 +12583,8 @@
       "source_location": "L1459",
       "_origin": "ast",
       "id": "apps_jobs_tests_assessmentplanroundingtests",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 8,
+      "community_name": "Jobs: Jobs Accounts Userprofile",
       "norm_label": "assessmentplanroundingtests"
     },
     {
@@ -12616,8 +12594,8 @@
       "source_location": "L1460",
       "_origin": "ast",
       "id": "apps_jobs_tests_assessmentplanroundingtests_test_calculate_assessment_plan_rounding_to_five",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": ".test_calculate_assessment_plan_rounding_to_five()"
     },
     {
@@ -12737,8 +12715,8 @@
       "source_location": "L1730",
       "_origin": "ast",
       "id": "apps_jobs_tests_recruitmentpatternsimulatortests_test_ai_competency_filtering",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".test_ai_competency_filtering()"
     },
     {
@@ -12814,8 +12792,8 @@
       "source_location": "L1865",
       "_origin": "ast",
       "id": "apps_jobs_tests_aisettingviewandapitests_test_ai_settings_save",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".test_ai_settings_save()"
     },
     {
@@ -13226,17 +13204,6 @@
       "norm_label": ".test_job_print_ad_view_context_uses_effective_url()"
     },
     {
-      "label": ".test_job_print_ad_general_requirements_and_no_stars()",
-      "file_type": "code",
-      "source_file": "apps/jobs/tests.py",
-      "source_location": "L2518",
-      "_origin": "ast",
-      "id": "apps_jobs_tests_defaultjobadurlandjoboverridetests_test_job_print_ad_general_requirements_and_no_stars",
-      "community": 32,
-      "community_name": "Static: Bootstrap Bundle Es",
-      "norm_label": ".test_job_print_ad_general_requirements_and_no_stars()"
-    },
-    {
       "label": "\u062a\u0633\u062a \u0627\u06cc\u062c\u0627\u062f \u0645\u0648\u0641\u0642\u06cc\u062a\u200c\u0622\u0645\u06cc\u0632 \u0642\u0627\u0644\u0628 \u0641\u0631\u0622\u06cc\u0646\u062f \u06a9\u0627\u0631\u06cc \u0648 \u0645\u0631\u0627\u062d\u0644 \u067e\u06cc\u0634\u200c\u0641\u0631\u0636 \u0622\u0646",
       "file_type": "rationale",
       "source_file": "apps/jobs/tests.py",
@@ -13298,8 +13265,8 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "apps_jobs_tests_rationale_171",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 10,
+      "community_name": "Jobs: Jobs Jobopportunityandworkflowtest",
       "norm_label": "\u062a\u0633\u062a \u0639\u0645\u0644\u06a9\u0631\u062f \u0635\u062d\u06cc\u062d \u0641\u06cc\u0644\u062a\u0631 \u062a\u0628\u062f\u06cc\u0644 \u062a\u0627\u0631\u06cc\u062e \u0628\u0647 \u0634\u0645\u0633\u06cc"
     },
     {
@@ -13507,8 +13474,8 @@
       "source_location": "L887",
       "_origin": "ast",
       "id": "apps_jobs_tests_rationale_887",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "\u062a\u0633\u062a \u0647\u0645\u06af\u0627\u0645\u200c\u0633\u0627\u0632\u06cc \u0648 \u0627\u06cc\u0645\u067e\u0648\u0631\u062a \u0627\u06a9\u0633\u0644 \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627"
     },
     {
@@ -13754,17 +13721,6 @@
       "norm_label": "\u062a\u0633\u062a \u0627\u06cc\u0646\u06a9\u0647 \u062f\u0631 \u0635\u0641\u062d\u0647 \u0686\u0627\u067e \u0627\u06af\u0647\u06cc\u060c \u0627\u062f\u0631\u0633 \u0645\u0648\u062b\u0631 \u062f\u0631 \u06a9\u0627\u0646\u062a\u06a9\u0633\u062a \u0642\u0631\u0627\u0631 \u0645\u06cc\u200c\u06af\u06cc\u0631\u062f"
     },
     {
-      "label": "\u062a\u0633\u062a \u0646\u0645\u0627\u06cc\u0634 \u0634\u0631\u0627\u06cc\u0637 \u0639\u0645\u0648\u0645\u06cc \u0627\u062d\u0631\u0627\u0632 \u062f\u0631 \u0622\u06af\u0647\u06cc \u0648 \u062d\u0630\u0641 \u0633\u062a\u0627\u0631\u0647\u200c\u0647\u0627\u06cc \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627",
-      "file_type": "rationale",
-      "source_file": "apps/jobs/tests.py",
-      "source_location": "L2519",
-      "_origin": "ast",
-      "id": "apps_jobs_tests_rationale_2519",
-      "community": 32,
-      "community_name": "Static: Bootstrap Bundle Es",
-      "norm_label": "\u062a\u0633\u062a \u0646\u0645\u0627\u06cc\u0634 \u0634\u0631\u0627\u06cc\u0637 \u0639\u0645\u0648\u0645\u06cc \u0627\u062d\u0631\u0627\u0632 \u062f\u0631 \u0627\u06af\u0647\u06cc \u0648 \u062d\u0630\u0641 \u0633\u062a\u0627\u0631\u0647\u200c\u0647\u0627\u06cc \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627"
-    },
-    {
       "label": "urls.py",
       "file_type": "code",
       "source_file": "apps/jobs/urls.py",
@@ -13782,8 +13738,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_py",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "utils.py"
     },
     {
@@ -13793,8 +13749,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_normalize_persian_digits",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "normalize_persian_digits()"
     },
     {
@@ -13804,8 +13760,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_clean_cell_value",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "clean_cell_value()"
     },
     {
@@ -13815,8 +13771,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_parse_competencies_excel",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "parse_competencies_excel()"
     },
     {
@@ -13826,8 +13782,8 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_adjust_weights_to_step",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "adjust_weights_to_step()"
     },
     {
@@ -13837,8 +13793,8 @@
       "source_location": "L258",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_calculate_assessment_plan",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "calculate_assessment_plan()"
     },
     {
@@ -13848,8 +13804,8 @@
       "source_location": "L544",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_suggest_workflow_templates",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "suggest_workflow_templates()"
     },
     {
@@ -13859,8 +13815,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_rationale_20",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "parses \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc \u0647\u0627.xlsx and imports/updates the centralcompetency table.     retu"
     },
     {
@@ -13870,8 +13826,8 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_rationale_203",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "rounds a dictionary of {key: float_weight} to the nearest multiple of 'step'"
     },
     {
@@ -13881,8 +13837,8 @@
       "source_location": "L259",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_rationale_259",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": "takes a list/queryset of jobopportunitycompetency and calculates:     - required"
     },
     {
@@ -13892,8 +13848,8 @@
       "source_location": "L545",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_jobs_utils_rationale_545",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "given a set or list of active stage types (e.g. {'exam', 'interview'}),     find"
     },
     {
@@ -13958,8 +13914,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_jobs_views_py_listview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "listview"
     },
     {
@@ -14035,8 +13991,8 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitycreateview_dispatch",
-      "community": 57,
-      "community_name": "JobOpportunityCreateView",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".dispatch()"
     },
     {
@@ -14167,8 +14123,8 @@
       "source_location": "L349",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview",
-      "community": 276,
-      "community_name": "JobOpportunityDeleteView",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": "jobopportunitydeleteview"
     },
     {
@@ -14178,8 +14134,8 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_delete",
-      "community": 276,
-      "community_name": "JobOpportunityDeleteView",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": ".delete()"
     },
     {
@@ -14189,8 +14145,8 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_post",
-      "community": 276,
-      "community_name": "JobOpportunityDeleteView",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": ".post()"
     },
     {
@@ -14200,8 +14156,8 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunitydeleteview_do_delete",
-      "community": 276,
-      "community_name": "JobOpportunityDeleteView",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": "._do_delete()"
     },
     {
@@ -14310,8 +14266,8 @@
       "source_location": "L464",
       "_origin": "ast",
       "id": "apps_jobs_views_workflowtemplatedeleteview_delete",
-      "community": 276,
-      "community_name": "JobOpportunityDeleteView",
+      "community": 6,
+      "community_name": "Jobs: Jobs Candidates Get",
       "norm_label": ".delete()"
     },
     {
@@ -14431,8 +14387,8 @@
       "source_location": "L571",
       "_origin": "ast",
       "id": "apps_jobs_views_jobopportunityprintadview_get_context_data",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 4,
+      "community_name": "Candidates: Candidates License Core",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14486,8 +14442,8 @@
       "source_location": "L686",
       "_origin": "ast",
       "id": "apps_jobs_views_centralcompetencyuploadview_post",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": ".post()"
     },
     {
@@ -14541,8 +14497,8 @@
       "source_location": "L889",
       "_origin": "ast",
       "id": "apps_jobs_views_centralcompetencylistview_get_queryset",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 15,
+      "community_name": "Jobs: Jobs Competencyenginetests Test",
       "norm_label": ".get_queryset()"
     },
     {
@@ -14563,8 +14519,8 @@
       "source_location": "L951",
       "_origin": "ast",
       "id": "apps_jobs_views_clean_str",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "clean_str()"
     },
     {
@@ -14574,8 +14530,8 @@
       "source_location": "L959",
       "_origin": "ast",
       "id": "apps_jobs_views_is_functional_competency",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "is_functional_competency()"
     },
     {
@@ -14585,8 +14541,8 @@
       "source_location": "L979",
       "_origin": "ast",
       "id": "apps_jobs_views_get_job_category_from_title",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "get_job_category_from_title()"
     },
     {
@@ -14596,8 +14552,8 @@
       "source_location": "L997",
       "_origin": "ast",
       "id": "apps_jobs_views_get_ai_recommendation",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "get_ai_recommendation()"
     },
     {
@@ -14607,8 +14563,8 @@
       "source_location": "L1335",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "recruitmentpatterndashboardview"
     },
     {
@@ -14618,8 +14574,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_jobs_views_py_templateview",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 5,
+      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
       "norm_label": "templateview"
     },
     {
@@ -14629,8 +14585,8 @@
       "source_location": "L1346",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview_get",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14640,8 +14596,8 @@
       "source_location": "L1746",
       "_origin": "ast",
       "id": "apps_jobs_views_recruitmentpatterndashboardview_get_context_data",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14651,8 +14607,8 @@
       "source_location": "L1891",
       "_origin": "ast",
       "id": "apps_jobs_views_jobcompetencyconfigview",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "jobcompetencyconfigview"
     },
     {
@@ -14662,8 +14618,8 @@
       "source_location": "L1900",
       "_origin": "ast",
       "id": "apps_jobs_views_jobcompetencyconfigview_get_job",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_job()"
     },
     {
@@ -14673,8 +14629,8 @@
       "source_location": "L1903",
       "_origin": "ast",
       "id": "apps_jobs_views_jobcompetencyconfigview_get",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -14684,8 +14640,8 @@
       "source_location": "L2035",
       "_origin": "ast",
       "id": "apps_jobs_views_jobcompetencyconfigview_post",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -14827,8 +14783,8 @@
       "source_location": "L2589",
       "_origin": "ast",
       "id": "apps_jobs_views_customcompetenciesreportview",
-      "community": 5,
-      "community_name": "Jobs: Jobs Jobopportunityform Jobopportu",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "customcompetenciesreportview"
     },
     {
@@ -14849,8 +14805,8 @@
       "source_location": "L2628",
       "_origin": "ast",
       "id": "apps_jobs_views_customcompetenciesreportview_get_context_data",
-      "community": 57,
-      "community_name": "JobOpportunityCreateView",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_context_data()"
     },
     {
@@ -14915,8 +14871,8 @@
       "source_location": "L2790",
       "_origin": "ast",
       "id": "apps_jobs_views_jobaistrategyprintview_get",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get()"
     },
     {
@@ -15080,8 +15036,8 @@
       "source_location": "L3118",
       "_origin": "ast",
       "id": "apps_jobs_views_generatejobspecsapiview_post",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -15102,8 +15058,8 @@
       "source_location": "L3252",
       "_origin": "ast",
       "id": "apps_jobs_views_summarizetextapiview_post",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".post()"
     },
     {
@@ -15168,8 +15124,8 @@
       "source_location": "L998",
       "_origin": "ast",
       "id": "apps_jobs_views_rationale_998",
-      "community": 46,
-      "community_name": "Candidates: Import Candidates Management",
+      "community": 7,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "helper to fetch ai recruitment strategies with caching and offline fallback."
     },
     {
@@ -16169,8 +16125,8 @@
       "source_location": "L1222",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_editjobstageplanview_post",
-      "community": 6,
-      "community_name": "Jobs: Jobs Candidates Get",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".post()"
     },
     {
@@ -16323,8 +16279,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_create_demo_db_py",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "create_demo_db.py"
     },
     {
@@ -16408,8 +16364,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_scratch_check_competency_db_py",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "check_competency_db.py"
     },
     {
@@ -16419,8 +16375,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_scratch_check_workflow_db_py",
-      "community": 8,
-      "community_name": "Jobs: Jobs Accounts Userprofile",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
       "norm_label": "check_workflow_db.py"
     },
     {
@@ -16507,8 +16463,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_scratch_test_license_script_py",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "test_license_script.py"
     },
     {
@@ -16518,8 +16474,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_scratch_test_license_script_test",
-      "community": 275,
-      "community_name": "generate_license_key",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "test()"
     },
     {
@@ -16551,8 +16507,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_remove",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 30,
+      "community_name": "Static: Bootstrap Bundle Us",
       "norm_label": "remove()"
     },
     {
@@ -16870,8 +16826,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_queuecallback",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._queuecallback()"
     },
     {
@@ -16958,8 +16914,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_parents",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "parents()"
     },
     {
@@ -17002,8 +16958,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_getselectorfromelement",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "getselectorfromelement()"
     },
     {
@@ -17035,8 +16991,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q",
-      "community": 274,
-      "community_name": "xt",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": "q"
     },
     {
@@ -17046,8 +17002,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_name",
-      "community": 274,
-      "community_name": "xt",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": ".name()"
     },
     {
@@ -17057,8 +17013,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_close",
-      "community": 274,
-      "community_name": "xt",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".close()"
     },
     {
@@ -17068,8 +17024,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_destroyelement",
-      "community": 274,
-      "community_name": "xt",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._destroyelement()"
     },
     {
@@ -17079,8 +17035,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_jqueryinterface",
-      "community": 274,
-      "community_name": "xt",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -17354,8 +17310,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_prev",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".prev()"
     },
     {
@@ -17574,8 +17530,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_jqueryinterface",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -18102,8 +18058,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": "ui()"
     },
     {
@@ -18201,8 +18157,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qi_show",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".show()"
     },
     {
@@ -18267,8 +18223,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qi_createpopper",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._createpopper()"
     },
     {
@@ -18388,8 +18344,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_default",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".default()"
     },
     {
@@ -18399,8 +18355,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_defaulttype",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18410,8 +18366,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_name",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".name()"
     },
     {
@@ -18421,8 +18377,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_show",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".show()"
     },
     {
@@ -18432,8 +18388,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_hide",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".hide()"
     },
     {
@@ -18443,8 +18399,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_dispose",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": ".dispose()"
     },
     {
@@ -18454,8 +18410,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_getelement",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": "._getelement()"
     },
     {
@@ -18465,8 +18421,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_configaftermerge",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": "._configaftermerge()"
     },
     {
@@ -18476,8 +18432,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_append",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": "._append()"
     },
     {
@@ -18487,8 +18443,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_emulateanimation",
-      "community": 12,
-      "community_name": "Static: Bootstrap Bundle Be",
+      "community": 46,
+      "community_name": "Candidates: Import Candidates Management",
       "norm_label": "._emulateanimation()"
     },
     {
@@ -19147,8 +19103,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_changecontent",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".changecontent()"
     },
     {
@@ -19169,8 +19125,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_typecheckconfig",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": "._typecheckconfig()"
     },
     {
@@ -19180,8 +19136,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_jn_checkcontent",
-      "community": 30,
-      "community_name": "Static: Bootstrap Bundle Us",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": "._checkcontent()"
     },
     {
@@ -19345,8 +19301,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_show",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".show()"
     },
     {
@@ -19356,8 +19312,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_hide",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".hide()"
     },
     {
@@ -19367,8 +19323,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_update",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".update()"
     },
     {
@@ -19389,8 +19345,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettipelement",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._gettipelement()"
     },
     {
@@ -19488,8 +19444,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_createpopper",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._createpopper()"
     },
     {
@@ -19521,8 +19477,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_getpopperconfig",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._getpopperconfig()"
     },
     {
@@ -19565,8 +19521,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_leave",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._leave()"
     },
     {
@@ -19576,8 +19532,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_settimeout",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._settimeout()"
     },
     {
@@ -19587,8 +19543,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_iswithactivetrigger",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._iswithactivetrigger()"
     },
     {
@@ -19730,8 +19686,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_jqueryinterface",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -19741,8 +19697,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "es"
     },
     {
@@ -19752,8 +19708,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_constructor",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".constructor()"
     },
     {
@@ -19763,8 +19719,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_default",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".default()"
     },
     {
@@ -19774,8 +19730,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_defaulttype",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".defaulttype()"
     },
     {
@@ -19785,8 +19741,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_name",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -19796,8 +19752,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_refresh",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".refresh()"
     },
     {
@@ -19829,8 +19785,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_maybeenablesmoothscroll",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._maybeenablesmoothscroll()"
     },
     {
@@ -19840,8 +19796,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_getnewobserver",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._getnewobserver()"
     },
     {
@@ -19851,8 +19807,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_observercallback",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._observercallback()"
     },
     {
@@ -19862,8 +19818,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_initializetargetsandobservables",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._initializetargetsandobservables()"
     },
     {
@@ -19873,8 +19829,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_process",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._process()"
     },
     {
@@ -19884,8 +19840,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_activateparents",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._activateparents()"
     },
     {
@@ -19895,8 +19851,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_clearactiveclass",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._clearactiveclass()"
     },
     {
@@ -19906,8 +19862,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_es_jqueryinterface",
-      "community": 272,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -20489,8 +20445,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_m",
-      "community": 274,
-      "community_name": "xt",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "m()"
     },
     {
@@ -20566,8 +20522,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_f",
-      "community": 274,
-      "community_name": "xt",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": "f()"
     },
     {
@@ -20731,8 +20687,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ce",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "ce()"
     },
     {
@@ -20797,8 +20753,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_je",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "je()"
     },
     {
@@ -20808,8 +20764,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_et",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 39,
+      "community_name": "Static: Bootstrap Bundle St",
       "norm_label": "et()"
     },
     {
@@ -20973,8 +20929,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_mt",
-      "community": 274,
-      "community_name": "xt",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "mt()"
     },
     {
@@ -20984,8 +20940,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xt",
-      "community": 274,
-      "community_name": "xt",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "xt()"
     },
     {
@@ -21017,8 +20973,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_wt",
-      "community": 274,
-      "community_name": "xt",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "wt()"
     },
     {
@@ -21061,8 +21017,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_dt",
-      "community": 274,
-      "community_name": "xt",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "dt()"
     },
     {
@@ -21138,8 +21094,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_rr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 224,
+      "community_name": "re",
       "norm_label": "rr()"
     },
     {
@@ -21281,8 +21237,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_gr",
-      "community": 34,
-      "community_name": "Candidates: Get Candidates Core",
+      "community": 50,
+      "community_name": "Static: Bootstrap Bundle Cn",
       "norm_label": "gr()"
     },
     {
@@ -53920,7 +53876,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L916",
+      "source_location": "L915",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models_jobdescriptiontemplate",
@@ -57213,7 +57169,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/forms.py",
-      "source_location": "L310",
+      "source_location": "L309",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_forms",
@@ -57246,7 +57202,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/forms.py",
-      "source_location": "L311",
+      "source_location": "L310",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_forms",
@@ -60395,17 +60351,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "apps/jobs/migrations/0036_organizationsetting_general_requirements.py",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_jobs_migrations_0036_organizationsetting_general_requirements",
-      "target": "apps_jobs_migrations_0036_organizationsetting_general_requirements_migration",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
       "source_location": "L704",
       "weight": 1.0,
@@ -60473,7 +60418,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L916",
+      "source_location": "L915",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models",
@@ -60528,7 +60473,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L935",
+      "source_location": "L934",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models",
@@ -64758,7 +64703,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L909",
+      "source_location": "L908",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models_organizationsetting",
@@ -64769,7 +64714,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L905",
+      "source_location": "L904",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models_organizationsetting",
@@ -64852,7 +64797,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/models.py",
-      "source_location": "L939",
+      "source_location": "L938",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_jobs_models_jobdescriptiontemplate",
@@ -67330,17 +67275,6 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/jobs/tests.py",
-      "source_location": "L2518",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_jobs_tests_defaultjobadurlandjoboverridetests",
-      "target": "apps_jobs_tests_defaultjobadurlandjoboverridetests_test_job_print_ad_general_requirements_and_no_stars",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/jobs/tests.py",
       "source_location": "L2507",
       "weight": 1.0,
       "_origin": "ast",
@@ -67423,17 +67357,6 @@
       "_origin": "ast",
       "source": "apps_jobs_tests_rationale_2508",
       "target": "apps_jobs_tests_defaultjobadurlandjoboverridetests_test_job_print_ad_view_context_uses_effective_url",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "rationale_for",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/jobs/tests.py",
-      "source_location": "L2519",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_jobs_tests_rationale_2519",
-      "target": "apps_jobs_tests_defaultjobadurlandjoboverridetests_test_job_print_ad_general_requirements_and_no_stars",
       "confidence_score": 1.0
     },
     {

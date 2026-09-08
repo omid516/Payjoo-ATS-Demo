@@ -38,8 +38,13 @@
         }
         .doc-header {
             border-bottom: 2px double #334155;
-            padding-bottom: 0.35rem;
+            padding-bottom: 0.4rem;
             margin-bottom: 0.5rem;
+        }
+        .header-logo {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
         }
         .control-panel {
             max-width: 900px;
@@ -57,11 +62,11 @@
             color: #334155;
             font-weight: 700;
             font-size: 0.76rem;
-            padding: 3px 6px !important;
+            padding: 3.5px 6px !important;
         }
         .table-details td {
             font-size: 0.76rem;
-            padding: 3px 6px !important;
+            padding: 3.5px 6px !important;
         }
         .competency-table {
             margin-bottom: 0.4rem !important;
@@ -95,8 +100,8 @@
         .signature-box {
             border: 1px dashed #cbd5e1;
             border-radius: 6px;
-            padding: 0.3rem 0.2rem;
-            min-height: 50px;
+            padding: 0.35rem 0.4rem;
+            min-height: 52px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -105,11 +110,11 @@
         }
         .signature-title {
             font-weight: 700;
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             color: #1e293b;
         }
         .signature-note {
-            font-size: 0.64rem;
+            font-size: 0.65rem;
             color: #94a3b8;
         }
         .instruction-box {
@@ -140,11 +145,7 @@
             margin: 0 1px;
         }
         .summary-box {
-            height: 40px;
-        }
-        .decision-bar {
-            font-size: 0.72rem;
-            padding: 3px 6px;
+            height: 44px;
         }
 
         /* ----------------------------------------------------
@@ -209,6 +210,9 @@
             padding: 4px 0;
         }
         /* Ultra compact inside A5 mode */
+        body.a5-mode .header-logo {
+            height: 28px;
+        }
         body.a5-mode .doc-header {
             padding-bottom: 0.2rem;
             margin-bottom: 0.3rem;
@@ -256,22 +260,18 @@
             font-size: 0.53rem;
         }
         body.a5-mode .summary-box {
-            height: 30px !important;
+            height: 34px !important;
             padding: 2px 4px !important;
         }
         body.a5-mode .summary-box strong {
             font-size: 0.54rem !important;
         }
-        body.a5-mode .decision-bar {
-            font-size: 0.56rem !important;
-            padding: 2px 4px !important;
-        }
         body.a5-mode .signature-box {
-            min-height: 40px;
-            padding: 0.15rem 0.1rem;
+            min-height: 42px;
+            padding: 0.2rem 0.2rem;
         }
         body.a5-mode .signature-title {
-            font-size: 0.56rem;
+            font-size: 0.58rem;
         }
         body.a5-mode .signature-note {
             font-size: 0.48rem;
@@ -365,7 +365,7 @@
                 ← لیست فرصت‌ها
             </a>
             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
-                🗣️ فرم مصاحبه تخصصی
+                🗣️ فرم ارزیابی مصاحبه
             </span>
         </div>
         
@@ -398,7 +398,7 @@
         </div>
     </div>
     <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between align-items-center">
-        <span>💡 <strong>راهنما:</strong> برای ویرایش هر عنوان، روی متن یا دکمه ✏️ کلیک کنید. با افزودن/حذف شایستگی‌ها، اوزان به صورت خودکار روی ۱۰۰٪ تنظیم می‌شوند.</span>
+        <span>💡 <strong>راهنما:</strong> برای ویرایش هر عنوان روی نام یا دکمه ✏️ کلیک کنید. نام ارزیاب در جدول بالای فرم درج می‌شود و در پایین فرم امضای ارزیاب و کارشناس تامین سرمایه انسانی قرار دارد.</span>
         <span id="currentLayoutIndicator" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded">حالت فعلی: A4 تک‌نسخه</span>
     </div>
 </div>
@@ -406,40 +406,44 @@
 <div id="printWrapper" class="print-wrapper">
     <!-- Sheet 1 (Master) -->
     <div id="sheet1" class="print-container print-sheet">
-        <!-- Header -->
+        <!-- Header with Organization Logo -->
         <div class="doc-header d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="fw-bold text-primary m-0" style="font-size: 0.95rem;">{{ org_setting.name|default:"شرکت فولاد مبارکه" }}</h4>
-                <span class="text-xxs text-muted d-block mt-0.5">مدیریت جذب و ارزیابی منابع انسانی | شناسه: {{ job.code }}</span>
+            <div class="d-flex align-items-center gap-2">
+                {% if org_setting.logo %}
+                    <img src="{{ org_setting.logo.url }}" alt="{{ org_setting.name }}" class="header-logo">
+                {% else %}
+                    <img src="/static/logo.png" alt="شرکت فولاد مبارکه" class="header-logo" onerror="this.style.display='none'">
+                {% endif %}
+                <div>
+                    <h4 class="fw-bold text-primary m-0" style="font-size: 0.95rem;">شرکت فولاد مبارکه</h4>
+                    <span class="text-xxs text-muted d-block mt-0.5">تامین سرمایه انسانی فولاد مبارکه | شناسه شغل: {{ job.code }}</span>
+                </div>
             </div>
             <div class="text-end">
                 <h5 class="fw-bold text-dark m-0" style="font-size: 0.9rem;">فرم ارزیابی مصاحبه تخصصی و شایستگی‌محور</h5>
-                <span class="text-xxs text-muted d-block mt-0.5">مخصوص اعضای کمیته مصاحبه (CBI Evaluation Sheet)</span>
+                <span class="text-xxs text-muted d-block mt-0.5">برگ ارزیابی انفرادی مصاحبه‌گر (CBI Evaluation Sheet)</span>
             </div>
         </div>
 
-        <!-- Section 1: Candidate & Job Details (Compact 3-Row Table) -->
-        <h6 class="fw-bold text-secondary mb-1 text-xs">۱. مشخصات داوطلب، شغل و ارزیابی</h6>
+        <!-- Section 1: Candidate, Job & Assessor Details (Compact 3-Row Table) -->
+        <h6 class="fw-bold text-secondary mb-1 text-xs">۱. مشخصات داوطلب، شغل و ارزیاب</h6>
         <table class="table table-bordered table-details align-middle text-xs mb-2">
             <tbody>
                 <tr>
                     <th style="width: 14%;">عنوان شغل</th>
                     <td style="width: 36%;" class="fw-bold text-dark">{{ job.title }} ({{ job.code }})</td>
-                    <th style="width: 16%;">نام و نام خانوادگی داوطلب</th>
+                    <th style="width: 16%;">نام داوطلب</th>
                     <td style="width: 34%;"><span class="blank-line w-100"></span></td>
                 </tr>
                 <tr>
                     <th>دپارتمان / رده</th>
                     <td>{{ job.department }}{% if job.unit %} - {{ job.unit }}{% endif %} / {{ job.job_category|default:"-" }}</td>
-                    <th>کد ملی / شماره پرونده</th>
+                    <th>کد ملی / پرونده</th>
                     <td><span class="blank-line w-100"></span></td>
                 </tr>
                 <tr>
-                    <th>سهم و حد نصاب</th>
-                    <td>
-                        سهم: <strong class="text-primary">{% for stage in interview_stages %}{{ stage.weight }}٪{% empty %}۲۵٪{% endfor %}</strong> | 
-                        حد نصاب: <strong class="text-success">{% for stage in interview_stages %}{{ stage.passing_score|stringformat:".0f" }}{% empty %}۶۰{% endfor %} از ۱۰۰</strong>
-                    </td>
+                    <th>نام و سمت ارزیاب</th>
+                    <td><span class="blank-line w-100"></span></td>
                     <th>تاریخ و ساعت مصاحبه</th>
                     <td><span class="blank-line w-100"></span></td>
                 </tr>
@@ -509,7 +513,7 @@
                 </tr>
                 {% endfor %}
                 <tr class="table-light fw-bold" id="totalRow">
-                    <td colspan="5" class="text-end">جمع کل اوزان و نمره نهایی:</td>
+                    <td colspan="5" class="text-end">جمع کل اوزان و نمره نهایی ارزیاب:</td>
                     <td class="text-primary text-center" id="totalWeightCell">۱۰۰٪</td>
                     <td colspan="2" class="text-start pe-2">
                         <span class="text-muted text-xxs">نمره کل مصاحبه (از ۱۰۰): </span>
@@ -532,55 +536,34 @@
             </div>
         </div>
 
-        <!-- Section 4: Strengths, Gaps & Final Decision -->
+        <!-- Section 4: Strengths & Gaps (Assessor Evaluation Notes) -->
         <div class="page-break-avoid mb-2">
-            <div class="row g-1 mb-1">
+            <div class="row g-1">
                 <div class="col-6">
                     <div class="border rounded p-1 bg-light bg-opacity-25 summary-box">
-                        <strong class="text-success text-xxs d-block mb-0.5">✅ نقاط قوت برجسته داوطلب:</strong>
+                        <strong class="text-success text-xxs d-block mb-0.5">✅ نقاط قوت برجسته داوطلب (ارزیاب):</strong>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="border rounded p-1 bg-light bg-opacity-25 summary-box">
-                        <strong class="text-warning text-xxs d-block mb-0.5">⚠️ حوزه‌های نیازمند آموزش (Gap):</strong>
+                        <strong class="text-warning text-xxs d-block mb-0.5">⚠️ حوزه‌های نیازمند آموزش و بهبود (Gap):</strong>
                     </div>
-                </div>
-            </div>
-
-            <div class="p-1 px-2 border rounded bg-white text-xxs d-flex align-items-center justify-content-between flex-wrap gap-1 decision-bar">
-                <span class="fw-bold text-dark">نظر نهایی کمیته:</span>
-                <div class="d-flex gap-2">
-                    <label class="d-flex align-items-center gap-1 m-0"><input type="checkbox"> [ ] پذیرش قطعی</label>
-                    <label class="d-flex align-items-center gap-1 m-0"><input type="checkbox"> [ ] پذیرش مشروط</label>
-                    <label class="d-flex align-items-center gap-1 m-0"><input type="checkbox"> [ ] عدم پذیرش (رد)</label>
                 </div>
             </div>
         </div>
 
-        <!-- Section 5: Signature Workflows -->
+        <!-- Section 5: Signature Workflows (2 Signatures) -->
         <div class="page-break-avoid">
-            <div class="row g-1 text-center">
-                <div class="col-3">
+            <div class="row g-2 text-center">
+                <div class="col-6">
                     <div class="signature-box">
-                        <span class="signature-title">۱. ارزیاب تخصصی ۱</span>
+                        <span class="signature-title">۱. کارشناس ارزیاب تخصصی (مصاحبه‌گر)</span>
                         <span class="signature-note">امضا و تاریخ</span>
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-6">
                     <div class="signature-box">
-                        <span class="signature-title">۲. ارزیاب تخصصی ۲</span>
-                        <span class="signature-note">امضا و تاریخ</span>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="signature-box">
-                        <span class="signature-title">۳. کارشناس جذب</span>
-                        <span class="signature-note">امضا و تاریخ</span>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="signature-box">
-                        <span class="signature-title">۴. سرپرست واحد</span>
+                        <span class="signature-title">۲. کارشناس تامین سرمایه انسانی</span>
                         <span class="signature-note">امضا و تاریخ</span>
                     </div>
                 </div>

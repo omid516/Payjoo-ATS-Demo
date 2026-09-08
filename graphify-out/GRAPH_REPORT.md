@@ -1,16 +1,16 @@
 # Graph Report - Payjoo-ATS-Demo-main  (2026-09-08)
 
 ## Corpus Check
-- 165 files · ~295,734 words
+- 165 files · ~296,676 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2017 nodes · 5962 edges · 264 communities (76 shown, 188 thin omitted)
+- 2017 nodes · 5962 edges · 264 communities (75 shown, 189 thin omitted)
 - Extraction: 54% EXTRACTED · 46% INFERRED · 0% AMBIGUOUS · INFERRED: 2728 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2b3d388b`
+- Built from commit: `1eccb3a8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -278,7 +278,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (264 total, 188 thin omitted)
+## Communities (264 total, 189 thin omitted)
 
 ### Community 0 - "Candidates: Candidates Get Str"
 Cohesion: 0.06
@@ -355,10 +355,6 @@ Nodes (16): Command, detect_workflow_col(), find_col_idx(), get_or_create_workfl
 ### Community 23 - "Jobs: Jobs Import Management"
 Cohesion: 0.10
 Nodes (10): get_kn_sk_ab_competencies_for_print(), JobOpportunityCreateView, JobOpportunityUpdateView, CreateView, UpdateView, برمی‌گرداند تمامی شایستگی‌های دانشی (KN) و مهارتی/توانایی (SK, AB) فرصت شغلی را, WorkflowTemplateCreateView, WorkflowTemplateUpdateView (+2 more)
-
-### Community 26 - "Static: Bootstrap Bundle On"
-Cohesion: 0.12
-Nodes (3): cn, on(), remove()
 
 ### Community 27 - "Accounts: Accounts Userroleandpermission"
 Cohesion: 0.12
@@ -471,7 +467,7 @@ Nodes (4): dict, دیکشنری سفارشی ترجمه با قابلیت فال
 ## Knowledge Gaps
 - **112 isolated node(s):** `Migration`, `Migration`, `Migration`, `Migration`, `Migration` (+107 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **188 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **189 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

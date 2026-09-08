@@ -2498,6 +2498,8 @@ class JobInterviewFormPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
         context['interviewers'] = self.object.stage_interviewers.filter(is_deleted=False).select_related('user')
         from apps.jobs.models import OrganizationSetting
         context['org_setting'] = OrganizationSetting.get_active_setting()
+        import jdatetime
+        context['today_jalali'] = jdatetime.date.today().strftime('%Y/%m/%d')
         return context
 
 

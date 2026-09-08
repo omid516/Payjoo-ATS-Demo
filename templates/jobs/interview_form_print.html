@@ -27,6 +27,37 @@
             line-height: 1.35;
             transition: background-color 0.2s;
         }
+
+        /* ----------------------------------------------------
+           Control Panel (Hidden on Print)
+           ---------------------------------------------------- */
+        .control-panel {
+            max-width: 960px;
+            margin: 0 auto 1.2rem auto;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 0.9rem 1.1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+        .control-input {
+            font-size: 0.76rem;
+            padding: 0.28rem 0.55rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+        }
+        .control-input:focus {
+            background-color: #ffffff;
+            border-color: #4f46e5;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+        }
+
+        /* ----------------------------------------------------
+           Sheet Container (A4 Portrait Base)
+           ---------------------------------------------------- */
         .print-container {
             max-width: 900px;
             margin: 0 auto;
@@ -35,6 +66,9 @@
             background: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .doc-header {
             border-bottom: 2px double #334155;
@@ -46,14 +80,6 @@
             width: auto;
             object-fit: contain;
         }
-        .control-panel {
-            max-width: 900px;
-            margin: 0 auto 1rem auto;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-        }
         .table-details {
             margin-bottom: 0.45rem !important;
         }
@@ -62,11 +88,11 @@
             color: #334155;
             font-weight: 700;
             font-size: 0.76rem;
-            padding: 3.5px 6px !important;
+            padding: 4px 6px !important;
         }
         .table-details td {
             font-size: 0.76rem;
-            padding: 3.5px 6px !important;
+            padding: 4px 6px !important;
         }
         .competency-table {
             margin-bottom: 0.4rem !important;
@@ -76,11 +102,11 @@
             color: #1e293b;
             font-weight: 700;
             font-size: 0.74rem;
-            padding: 3px 4px !important;
+            padding: 3.5px 5px !important;
         }
         .competency-table td {
             font-size: 0.73rem;
-            padding: 2.5px 4px !important;
+            padding: 3px 5px !important;
         }
         .comp-title-wrapper {
             display: flex;
@@ -100,8 +126,8 @@
         .signature-box {
             border: 1px dashed #cbd5e1;
             border-radius: 6px;
-            padding: 0.35rem 0.4rem;
-            min-height: 52px;
+            padding: 0.4rem 0.5rem;
+            min-height: 55px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -144,8 +170,82 @@
             color: #64748b;
             margin: 0 1px;
         }
+        
+        /* Summary & Feedback Boxes */
         .summary-box {
-            height: 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 8px;
+            background-color: #fafbfc;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 60px;
+            transition: all 0.2s;
+        }
+        .note-guide-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+            flex-grow: 1;
+        }
+        .note-guide-line {
+            border-bottom: 1px dashed #cbd5e1;
+            height: 1px;
+            width: 100%;
+        }
+        .evidence-line {
+            min-height: 16px;
+            border-bottom: 1px dotted #cbd5e1;
+        }
+
+        /* ----------------------------------------------------
+           Auto-Fit Height Modes (A4 Portrait)
+           ---------------------------------------------------- */
+        body.autofit-enabled .print-container {
+            min-height: 1020px; /* fills standard A4 view */
+        }
+        body.autofit-enabled .summary-box {
+            min-height: 85px;
+            flex-grow: 1;
+        }
+        body.autofit-enabled .summary-box .note-guide-lines {
+            gap: 16px;
+        }
+        body.autofit-enabled .competency-table td {
+            padding: 5px 5px !important;
+        }
+        body.autofit-enabled .evidence-line {
+            min-height: 22px;
+        }
+        body.autofit-enabled .signature-box {
+            min-height: 65px;
+        }
+
+        /* Density Presets */
+        body.density-compact .competency-table td,
+        body.density-compact .table-details td,
+        body.density-compact .table-details th {
+            padding: 2px 4px !important;
+        }
+        body.density-compact .summary-box {
+            min-height: 45px !important;
+        }
+        body.density-compact .signature-box {
+            min-height: 46px !important;
+        }
+
+        body.density-spacious .competency-table td,
+        body.density-spacious .table-details td,
+        body.density-spacious .table-details th {
+            padding: 6px 6px !important;
+        }
+        body.density-spacious .summary-box {
+            min-height: 110px !important;
+        }
+        body.density-spacious .signature-box {
+            min-height: 75px !important;
         }
 
         /* ----------------------------------------------------
@@ -177,6 +277,12 @@
             background: #ffffff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        body.a5-mode.autofit-enabled .print-sheet {
+            min-height: 690px; /* fills standard A5 landscape height */
         }
         body.a5-mode .a5-divider {
             width: 2.4%;
@@ -209,7 +315,8 @@
             background: #f1f5f9;
             padding: 4px 0;
         }
-        /* Ultra compact inside A5 mode */
+
+        /* Compact & Auto-Fit scaling in A5 mode */
         body.a5-mode .header-logo {
             height: 28px;
         }
@@ -236,7 +343,7 @@
         }
         body.a5-mode .table-details th,
         body.a5-mode .table-details td {
-            padding: 1.5px 3px !important;
+            padding: 2px 3px !important;
             font-size: 0.58rem !important;
         }
         body.a5-mode .competency-table {
@@ -244,7 +351,7 @@
         }
         body.a5-mode .competency-table th,
         body.a5-mode .competency-table td {
-            padding: 1.5px 2px !important;
+            padding: 2px 2.5px !important;
             font-size: 0.56rem !important;
         }
         body.a5-mode .score-circle {
@@ -260,14 +367,22 @@
             font-size: 0.53rem;
         }
         body.a5-mode .summary-box {
-            height: 34px !important;
-            padding: 2px 4px !important;
+            min-height: 48px;
+            padding: 3px 5px !important;
+        }
+        body.a5-mode.autofit-enabled .summary-box {
+            min-height: 64px !important;
+            flex-grow: 1;
         }
         body.a5-mode .summary-box strong {
             font-size: 0.54rem !important;
         }
+        body.a5-mode .note-guide-lines {
+            gap: 10px;
+            margin-top: 4px;
+        }
         body.a5-mode .signature-box {
-            min-height: 42px;
+            min-height: 44px;
             padding: 0.2rem 0.2rem;
         }
         body.a5-mode .signature-title {
@@ -299,6 +414,8 @@
                 border: none !important;
                 padding: 0 !important;
                 max-width: 100% !important;
+                height: 100% !important;
+                max-height: 100% !important;
                 box-shadow: none !important;
                 page-break-after: avoid !important;
                 page-break-inside: avoid !important;
@@ -335,7 +452,9 @@
             body.a5-mode .print-sheet {
                 width: 48.8% !important;
                 max-width: 48.8% !important;
-                padding: 1mm 2mm !important;
+                height: 100% !important;
+                max-height: 100% !important;
+                padding: 1.5mm 2.5mm !important;
                 border: none !important;
                 box-shadow: none !important;
                 page-break-after: avoid !important;
@@ -355,11 +474,12 @@
         }
     </style>
 </head>
-<body>
+<body class="autofit-enabled">
 
 <!-- Interactive Control Panel (Hidden on Print) -->
 <div class="control-panel no-print shadow-sm">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <!-- Top Toolbar: Navigation & Page Size -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pb-2.5 border-bottom">
         <div class="d-flex align-items-center gap-2">
             <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                 ← لیست فرصت‌ها
@@ -387,7 +507,7 @@
                 ➕ افزودن شایستگی
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm px-2.5 rounded-pill text-xs" onclick="addBlankManualRow()">
-                📝 سطر یادداشت دستی
+                📝 سطر دستی
             </button>
             <button type="button" onclick="resetCompetencyRows()" class="btn btn-outline-warning btn-sm px-2.5 rounded-pill text-xs">
                 🔄 بازنشانی
@@ -397,9 +517,83 @@
             </button>
         </div>
     </div>
-    <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between align-items-center">
-        <span>💡 <strong>راهنما:</strong> برای ویرایش هر عنوان روی نام یا دکمه ✏️ کلیک کنید. نام ارزیاب در جدول بالای فرم درج می‌شود و در پایین فرم امضای ارزیاب و کارشناس تامین سرمایه انسانی قرار دارد.</span>
-        <span id="currentLayoutIndicator" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded">حالت فعلی: A4 تک‌نسخه</span>
+
+    <!-- Middle Toolbar: Form Metadata Inputs (Date, Time, Assessor, Candidate) -->
+    <div class="row g-2 align-items-center mt-1 pt-1">
+        <!-- Date Input -->
+        <div class="col-12 col-md-3">
+            <div class="d-flex align-items-center gap-1.5">
+                <label for="inputInterviewDate" class="text-xs fw-bold text-secondary text-nowrap m-0">📅 تاریخ:</label>
+                <input type="text" id="inputInterviewDate" class="form-control form-control-sm control-input text-center" 
+                       value="{{ today_jalali }}" placeholder="۱۴۰۳/۰۶/۱۸" oninput="updateHeaderMetadata()">
+                <button type="button" class="btn btn-light btn-sm p-1 px-1.5 border text-xxs rounded" onclick="setTodayDate()" title="تنظیم به تاریخ امروز">
+                    امروز
+                </button>
+            </div>
+        </div>
+
+        <!-- Time Input -->
+        <div class="col-12 col-md-2">
+            <div class="d-flex align-items-center gap-1.5">
+                <label for="inputInterviewTime" class="text-xs fw-bold text-secondary text-nowrap m-0">⏰ ساعت:</label>
+                <input type="text" id="inputInterviewTime" class="form-control form-control-sm control-input text-center" 
+                       value="09:30" placeholder="09:30" oninput="updateHeaderMetadata()">
+            </div>
+        </div>
+
+        <!-- Assessor Name -->
+        <div class="col-12 col-md-3">
+            <div class="d-flex align-items-center gap-1.5">
+                <label for="inputAssessorName" class="text-xs fw-bold text-secondary text-nowrap m-0">👤 ارزیاب:</label>
+                <input type="text" id="inputAssessorName" class="form-control form-control-sm control-input" 
+                       placeholder="اختیاری (مثال: دکتر حسینی)" oninput="updateHeaderMetadata()">
+            </div>
+        </div>
+
+        <!-- Candidate Name -->
+        <div class="col-12 col-md-4">
+            <div class="d-flex align-items-center gap-1.5">
+                <label for="inputCandidateName" class="text-xs fw-bold text-secondary text-nowrap m-0">🎓 داوطلب:</label>
+                <input type="text" id="inputCandidateName" class="form-control form-control-sm control-input" 
+                       placeholder="اختیاری (مثال: علی اکبری)" oninput="updateHeaderMetadata()">
+                <button type="button" class="btn btn-outline-danger btn-sm p-1 px-2 border text-xxs rounded text-nowrap" onclick="clearFormMetadata()" title="پاک کردن مقادیر برای خط‌چین دستی">
+                    🗑️ خالی
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Toolbar: Auto-Fit & Density Controls -->
+    <div class="mt-2.5 pt-2 border-top d-flex flex-wrap align-items-center justify-content-between gap-2 text-xxs">
+        <div class="d-flex align-items-center gap-3">
+            <!-- Auto-Fit Toggle -->
+            <div class="form-check form-switch m-0 d-flex align-items-center gap-1.5">
+                <input class="form-check-input" type="checkbox" id="switchAutoFit" checked onchange="toggleAutoFit(this.checked)">
+                <label class="form-check-label fw-bold text-dark cursor-pointer" for="switchAutoFit">
+                    🎯 تطبیق خودکار و پر کردن هوشمند ارتفاع برگه (Auto-Fit)
+                </label>
+            </div>
+
+            <!-- Density Buttons -->
+            <div class="d-flex align-items-center gap-1 ms-md-2">
+                <span class="text-muted fw-bold">تراکم سطرها:</span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" id="btnDensityCompact" class="btn btn-outline-secondary btn-sm py-0 px-2 text-xxs" onclick="setDensity('compact')">
+                        فشرده
+                    </button>
+                    <button type="button" id="btnDensityStandard" class="btn btn-primary btn-sm py-0 px-2 text-xxs" onclick="setDensity('standard')">
+                        متعادل
+                    </button>
+                    <button type="button" id="btnDensitySpacious" class="btn btn-outline-secondary btn-sm py-0 px-2 text-xxs" onclick="setDensity('spacious')">
+                        جادار
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span id="currentLayoutIndicator" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded">حالت فعلی: A4 تک‌نسخه</span>
+        </div>
     </div>
 </div>
 
@@ -433,7 +627,10 @@
                     <th style="width: 14%;">عنوان شغل</th>
                     <td style="width: 36%;" class="fw-bold text-dark">{{ job.title }} ({{ job.code }})</td>
                     <th style="width: 16%;">نام داوطلب</th>
-                    <td style="width: 34%;"><span class="blank-line w-100"></span></td>
+                    <td style="width: 34%;" id="candidateNameCell">
+                        <span id="candidateNameVal" class="fw-semibold text-dark d-none"></span>
+                        <span class="blank-line w-100" id="candidateNameBlank"></span>
+                    </td>
                 </tr>
                 <tr>
                     <th>دپارتمان / رده</th>
@@ -443,9 +640,15 @@
                 </tr>
                 <tr>
                     <th>نام و سمت ارزیاب</th>
-                    <td><span class="blank-line w-100"></span></td>
+                    <td id="assessorNameCell">
+                        <span id="assessorNameVal" class="fw-semibold text-dark d-none"></span>
+                        <span class="blank-line w-100" id="assessorNameBlank"></span>
+                    </td>
                     <th>تاریخ و ساعت مصاحبه</th>
-                    <td><span class="blank-line w-100"></span></td>
+                    <td id="interviewDateTimeCell">
+                        <span id="interviewDateTimeVal" class="fw-bold text-dark">{{ today_jalali }} - ساعت ۰۹:۳۰</span>
+                        <span class="blank-line w-100 d-none" id="interviewDateTimeBlank"></span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -494,7 +697,7 @@
                         </div>
                     </td>
                     <td class="text-start">
-                        <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
+                        <div class="evidence-line"></div>
                     </td>
                     <td class="no-print">
                         <div class="d-flex justify-content-center align-items-center gap-1">
@@ -536,24 +739,34 @@
             </div>
         </div>
 
-        <!-- Section 4: Strengths & Gaps (Assessor Evaluation Notes) -->
-        <div class="page-break-avoid mb-2">
+        <!-- Section 4: Strengths & Gaps (Assessor Evaluation Notes with Lined Guides) -->
+        <div class="page-break-avoid mb-2" id="sectionNotesWrapper">
             <div class="row g-1">
                 <div class="col-6">
-                    <div class="border rounded p-1 bg-light bg-opacity-25 summary-box">
+                    <div class="summary-box">
                         <strong class="text-success text-xxs d-block mb-0.5">✅ نقاط قوت برجسته داوطلب (ارزیاب):</strong>
+                        <div class="note-guide-lines">
+                            <div class="note-guide-line"></div>
+                            <div class="note-guide-line"></div>
+                            <div class="note-guide-line"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="border rounded p-1 bg-light bg-opacity-25 summary-box">
+                    <div class="summary-box">
                         <strong class="text-warning text-xxs d-block mb-0.5">⚠️ حوزه‌های نیازمند آموزش و بهبود (Gap):</strong>
+                        <div class="note-guide-lines">
+                            <div class="note-guide-line"></div>
+                            <div class="note-guide-line"></div>
+                            <div class="note-guide-line"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Section 5: Signature Workflows (2 Signatures) -->
-        <div class="page-break-avoid">
+        <div class="page-break-avoid" id="sectionSignaturesWrapper">
             <div class="row g-2 text-center">
                 <div class="col-6">
                     <div class="signature-box">
@@ -707,14 +920,155 @@
     // Store original rows on page load for reset
     let originalRowsBackup = [];
     let currentLayout = 'A4'; // 'A4' or 'A5'
+    let currentDensity = 'standard'; // 'compact', 'standard', 'spacious'
+    let isAutoFit = true;
     let currentRowToEdit = null;
 
     window.addEventListener('DOMContentLoaded', () => {
         const rows = document.querySelectorAll('#sheet1 .comp-row');
         originalRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
         recalculateWeights();
+        updateHeaderMetadata();
     });
 
+    // ----------------------------------------------------
+    // Header Metadata Sync (Date, Time, Assessor, Candidate)
+    // ----------------------------------------------------
+    function updateHeaderMetadata() {
+        const dateVal = (document.getElementById('inputInterviewDate')?.value || '').trim();
+        const timeVal = (document.getElementById('inputInterviewTime')?.value || '').trim();
+        const assessorVal = (document.getElementById('inputAssessorName')?.value || '').trim();
+        const candidateVal = (document.getElementById('inputCandidateName')?.value || '').trim();
+
+        // Date & Time
+        const dtValEl = document.getElementById('interviewDateTimeVal');
+        const dtBlankEl = document.getElementById('interviewDateTimeBlank');
+        if (dateVal || timeVal) {
+            let combined = '';
+            if (dateVal && timeVal) combined = `${dateVal} - ساعت ${timeVal}`;
+            else if (dateVal) combined = dateVal;
+            else combined = `ساعت ${timeVal}`;
+
+            if (dtValEl) {
+                dtValEl.innerText = combined;
+                dtValEl.classList.remove('d-none');
+            }
+            if (dtBlankEl) dtBlankEl.classList.add('d-none');
+        } else {
+            if (dtValEl) dtValEl.classList.add('d-none');
+            if (dtBlankEl) dtBlankEl.classList.remove('d-none');
+        }
+
+        // Assessor
+        const assValEl = document.getElementById('assessorNameVal');
+        const assBlankEl = document.getElementById('assessorNameBlank');
+        if (assessorVal) {
+            if (assValEl) {
+                assValEl.innerText = assessorVal;
+                assValEl.classList.remove('d-none');
+            }
+            if (assBlankEl) assBlankEl.classList.add('d-none');
+        } else {
+            if (assValEl) assValEl.classList.add('d-none');
+            if (assBlankEl) assBlankEl.classList.remove('d-none');
+        }
+
+        // Candidate
+        const canValEl = document.getElementById('candidateNameVal');
+        const canBlankEl = document.getElementById('candidateNameBlank');
+        if (candidateVal) {
+            if (canValEl) {
+                canValEl.innerText = candidateVal;
+                canValEl.classList.remove('d-none');
+            }
+            if (canBlankEl) canBlankEl.classList.add('d-none');
+        } else {
+            if (canValEl) canValEl.classList.add('d-none');
+            if (canBlankEl) canBlankEl.classList.remove('d-none');
+        }
+
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
+    function setTodayDate() {
+        const dateInput = document.getElementById('inputInterviewDate');
+        const todayStr = '{{ today_jalali }}';
+        if (dateInput) {
+            dateInput.value = todayStr || getClientJalaliDate();
+            updateHeaderMetadata();
+        }
+    }
+
+    function clearFormMetadata() {
+        if (document.getElementById('inputInterviewDate')) document.getElementById('inputInterviewDate').value = '';
+        if (document.getElementById('inputInterviewTime')) document.getElementById('inputInterviewTime').value = '';
+        if (document.getElementById('inputAssessorName')) document.getElementById('inputAssessorName').value = '';
+        if (document.getElementById('inputCandidateName')) document.getElementById('inputCandidateName').value = '';
+        updateHeaderMetadata();
+    }
+
+    function getClientJalaliDate() {
+        try {
+            return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+        } catch (e) {
+            return '';
+        }
+    }
+
+    // ----------------------------------------------------
+    // Auto-Fit & Density Controls
+    // ----------------------------------------------------
+    function toggleAutoFit(enabled) {
+        isAutoFit = enabled;
+        if (enabled) {
+            document.body.classList.add('autofit-enabled');
+        } else {
+            document.body.classList.remove('autofit-enabled');
+        }
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
+    function setDensity(density) {
+        currentDensity = density;
+        document.body.classList.remove('density-compact', 'density-standard', 'density-spacious');
+        
+        const btnComp = document.getElementById('btnDensityCompact');
+        const btnStd = document.getElementById('btnDensityStandard');
+        const btnSpc = document.getElementById('btnDensitySpacious');
+        
+        [btnComp, btnStd, btnSpc].forEach(b => {
+            if (b) {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-outline-secondary');
+            }
+        });
+
+        if (density === 'compact') {
+            document.body.classList.add('density-compact');
+            btnComp?.classList.add('btn-primary');
+            btnComp?.classList.remove('btn-outline-secondary');
+        } else if (density === 'spacious') {
+            document.body.classList.add('density-spacious');
+            btnSpc?.classList.add('btn-primary');
+            btnSpc?.classList.remove('btn-outline-secondary');
+        } else {
+            document.body.classList.add('density-standard');
+            btnStd?.classList.add('btn-primary');
+            btnStd?.classList.remove('btn-outline-secondary');
+        }
+
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
+    // ----------------------------------------------------
+    // Layout Mode (A4 vs A5)
+    // ----------------------------------------------------
     function setLayoutMode(mode) {
         currentLayout = mode;
         const pageStyle = document.getElementById('pageStyle');
@@ -761,6 +1115,7 @@
         if (currentLayout !== 'A5') return;
         const sheet1 = document.getElementById('sheet1');
         const sheet2 = document.getElementById('sheet2');
+        if (!sheet1 || !sheet2) return;
         
         // Clone inner HTML from sheet 1 to sheet 2
         sheet2.innerHTML = sheet1.innerHTML;
@@ -772,12 +1127,23 @@
     }
 
     function triggerPrint() {
+        updateHeaderMetadata();
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
         window.print();
     }
 
+    window.onbeforeprint = () => {
+        updateHeaderMetadata();
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    };
+
+    // ----------------------------------------------------
+    // Competency Management (Add, Edit, Remove, Reset)
+    // ----------------------------------------------------
     function removeCompetencyRow(button) {
         const row = button.closest('.comp-row');
         if (row) {
@@ -870,7 +1236,7 @@
                 </div>
             </td>
             <td class="text-start">
-                <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
+                <div class="evidence-line"></div>
             </td>
             <td class="no-print">
                 <div class="d-flex justify-content-center align-items-center gap-1">
@@ -949,7 +1315,7 @@
                 </div>
             </td>
             <td class="text-start">
-                <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
+                <div class="evidence-line"></div>
             </td>
             <td class="no-print">
                 <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">

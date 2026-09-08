@@ -431,6 +431,10 @@ class JobOpportunityAndWorkflowTests(TestCase):
         # Also contains knowledge competency
         self.assertContains(response, 'مبانی ترمودینامیک و انتقال حرارت')
         self.assertContains(response, 'KNME0011')
+        self.assertIn('today_jalali', response.context)
+        self.assertContains(response, 'inputInterviewDate')
+        self.assertContains(response, 'inputInterviewTime')
+        self.assertContains(response, 'switchAutoFit')
 
     def test_job_add_competency_api_view(self):
         """تست افزودن شایستگی سفارشی به فرصت شغلی از طریق API"""

@@ -31,15 +31,15 @@
             max-width: 900px;
             margin: 0 auto;
             border: 1px solid #e2e8f0;
-            padding: 1.2rem 1.5rem;
+            padding: 1.1rem 1.4rem;
             background: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
         }
         .doc-header {
             border-bottom: 2px double #334155;
-            padding-bottom: 0.4rem;
-            margin-bottom: 0.6rem;
+            padding-bottom: 0.35rem;
+            margin-bottom: 0.5rem;
         }
         .control-panel {
             max-width: 900px;
@@ -50,7 +50,7 @@
             padding: 0.75rem 1rem;
         }
         .table-details {
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.45rem !important;
         }
         .table-details th {
             background-color: #f1f5f9;
@@ -64,7 +64,7 @@
             padding: 3px 6px !important;
         }
         .competency-table {
-            margin-bottom: 0.45rem !important;
+            margin-bottom: 0.4rem !important;
         }
         .competency-table th {
             background-color: #f8fafc;
@@ -75,13 +75,28 @@
         }
         .competency-table td {
             font-size: 0.73rem;
-            padding: 3px 4px !important;
+            padding: 2.5px 4px !important;
+        }
+        .comp-title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        .comp-title-text {
+            cursor: pointer;
+            border-bottom: 1px dashed transparent;
+            transition: all 0.15s;
+        }
+        .comp-title-text:hover {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
         }
         .signature-box {
             border: 1px dashed #cbd5e1;
             border-radius: 6px;
-            padding: 0.35rem 0.25rem;
-            min-height: 52px;
+            padding: 0.3rem 0.2rem;
+            min-height: 50px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -94,41 +109,41 @@
             color: #1e293b;
         }
         .signature-note {
-            font-size: 0.65rem;
+            font-size: 0.64rem;
             color: #94a3b8;
         }
         .instruction-box {
             background-color: #f8fafc;
             border-right: 3px solid #4f46e5;
             border-radius: 4px;
-            padding: 0.3rem 0.6rem;
-            margin-bottom: 0.45rem;
-            font-size: 0.68rem;
+            padding: 0.25rem 0.55rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.67rem;
         }
         .blank-line {
             display: inline-block;
             border-bottom: 1px dotted #94a3b8;
-            min-width: 90px;
+            min-width: 80px;
             height: 1.1rem;
             vertical-align: middle;
         }
         .score-circle {
             display: inline-block;
-            width: 18px;
-            height: 18px;
+            width: 17px;
+            height: 17px;
             border: 1px solid #cbd5e1;
             border-radius: 3px;
             text-align: center;
-            line-height: 16px;
-            font-size: 9.5px;
+            line-height: 15px;
+            font-size: 9px;
             color: #64748b;
             margin: 0 1px;
         }
         .summary-box {
-            height: 44px;
+            height: 40px;
         }
         .decision-bar {
-            font-size: 0.73rem;
+            font-size: 0.72rem;
             padding: 3px 6px;
         }
 
@@ -154,8 +169,8 @@
         body.a5-mode .print-sheet {
             width: 48.8%;
             max-width: 48.8%;
-            padding: 0.6rem 0.75rem;
-            font-size: 0.64rem;
+            padding: 0.55rem 0.7rem;
+            font-size: 0.63rem;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             background: #ffffff;
@@ -195,75 +210,75 @@
         }
         /* Ultra compact inside A5 mode */
         body.a5-mode .doc-header {
-            padding-bottom: 0.25rem;
-            margin-bottom: 0.35rem;
+            padding-bottom: 0.2rem;
+            margin-bottom: 0.3rem;
             border-bottom: 1.5px double #334155;
         }
         body.a5-mode .doc-header h4 {
-            font-size: 0.76rem !important;
+            font-size: 0.75rem !important;
         }
         body.a5-mode .doc-header h5 {
-            font-size: 0.72rem !important;
+            font-size: 0.71rem !important;
         }
         body.a5-mode .doc-header span {
-            font-size: 0.55rem !important;
+            font-size: 0.54rem !important;
         }
         body.a5-mode h6 {
-            font-size: 0.65rem !important;
-            margin-bottom: 0.15rem !important;
+            font-size: 0.64rem !important;
+            margin-bottom: 0.12rem !important;
         }
         body.a5-mode .table-details {
-            margin-bottom: 0.3rem !important;
+            margin-bottom: 0.25rem !important;
         }
         body.a5-mode .table-details th,
         body.a5-mode .table-details td {
             padding: 1.5px 3px !important;
-            font-size: 0.59rem !important;
+            font-size: 0.58rem !important;
         }
         body.a5-mode .competency-table {
-            margin-bottom: 0.3rem !important;
+            margin-bottom: 0.25rem !important;
         }
         body.a5-mode .competency-table th,
         body.a5-mode .competency-table td {
             padding: 1.5px 2px !important;
-            font-size: 0.57rem !important;
+            font-size: 0.56rem !important;
         }
         body.a5-mode .score-circle {
-            width: 14px;
-            height: 14px;
-            line-height: 12px;
-            font-size: 8px;
+            width: 13px;
+            height: 13px;
+            line-height: 11px;
+            font-size: 7.5px;
             margin: 0 0.5px;
         }
         body.a5-mode .instruction-box {
             padding: 0.2rem 0.4rem;
-            margin-bottom: 0.3rem;
-            font-size: 0.54rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.53rem;
         }
         body.a5-mode .summary-box {
-            height: 32px !important;
+            height: 30px !important;
             padding: 2px 4px !important;
         }
         body.a5-mode .summary-box strong {
-            font-size: 0.55rem !important;
+            font-size: 0.54rem !important;
         }
         body.a5-mode .decision-bar {
-            font-size: 0.58rem !important;
+            font-size: 0.56rem !important;
             padding: 2px 4px !important;
         }
         body.a5-mode .signature-box {
-            min-height: 42px;
-            padding: 0.2rem 0.15rem;
+            min-height: 40px;
+            padding: 0.15rem 0.1rem;
         }
         body.a5-mode .signature-title {
-            font-size: 0.58rem;
+            font-size: 0.56rem;
         }
         body.a5-mode .signature-note {
-            font-size: 0.5rem;
+            font-size: 0.48rem;
         }
         body.a5-mode .blank-line {
-            height: 0.8rem;
-            min-width: 40px;
+            height: 0.75rem;
+            min-width: 35px;
         }
 
         /* ----------------------------------------------------
@@ -347,7 +362,7 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div class="d-flex align-items-center gap-2">
             <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                ← بازگشت به لیست
+                ← لیست فرصت‌ها
             </a>
             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
                 🗣️ فرم مصاحبه تخصصی
@@ -356,10 +371,10 @@
         
         <!-- Page Size & Layout Toggle -->
         <div class="d-flex align-items-center gap-2">
-            <span class="text-xs text-muted fw-bold">چیدمان برگه:</span>
+            <span class="text-xs text-muted fw-bold">سایز برگه:</span>
             <div class="btn-group btn-group-sm" role="group" aria-label="سایز چاپ">
                 <button type="button" id="btnLayoutA4" class="btn btn-primary active px-3" onclick="setLayoutMode('A4')">
-                    📄 A4 عمودی (تک‌برگ تک‌صفحه‌ای)
+                    📄 A4 عمودی (تک‌نسخه)
                 </button>
                 <button type="button" id="btnLayoutA5" class="btn btn-outline-primary px-3" onclick="setLayoutMode('A5')">
                     📑 A5 افقی (۲ نسخه در ۱ برگ A4)
@@ -368,8 +383,12 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
-            <span class="text-xs text-muted">شایستگی‌ها: <strong id="compCountBadge" class="text-dark">{{ interview_competencies|length }}</strong></span>
-            <span class="text-xs text-muted">| اوزان: <strong id="totalWeightBadge" class="text-primary">۱۰۰٪</strong></span>
+            <button type="button" class="btn btn-outline-success btn-sm px-2.5 rounded-pill text-xs fw-bold" onclick="openAddCompetencyModal()">
+                ➕ افزودن شایستگی
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-2.5 rounded-pill text-xs" onclick="addBlankManualRow()">
+                📝 سطر یادداشت دستی
+            </button>
             <button type="button" onclick="resetCompetencyRows()" class="btn btn-outline-warning btn-sm px-2.5 rounded-pill text-xs">
                 🔄 بازنشانی
             </button>
@@ -379,7 +398,7 @@
         </div>
     </div>
     <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between align-items-center">
-        <span>💡 <strong>تضمین تک‌صفحه‌ای:</strong> هر دو حالت به گونه‌ای بهینه‌سازی شده‌اند که دقیقاً در <strong>۱ برگه چاپ</strong> قرار گیرند و به برگه دوم نروند.</span>
+        <span>💡 <strong>راهنما:</strong> برای ویرایش هر عنوان، روی متن یا دکمه ✏️ کلیک کنید. با افزودن/حذف شایستگی‌ها، اوزان به صورت خودکار روی ۱۰۰٪ تنظیم می‌شوند.</span>
         <span id="currentLayoutIndicator" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded">حالت فعلی: A4 تک‌نسخه</span>
     </div>
 </div>
@@ -443,21 +462,23 @@
                     <th style="width: 8%;">اهمیت</th>
                     <th style="width: 8%;">وزن</th>
                     <th style="width: 22%;">نمره داوطلب (۱ تا ۵)</th>
-                    <th style="width: 24%;">شواهد و ملاحظات ارزیاب</th>
-                    <th style="width: 4%;" class="no-print">✕</th>
+                    <th style="width: 22%;">شواهد و ملاحظات ارزیاب</th>
+                    <th style="width: 6%;" class="no-print">عملیات</th>
                 </tr>
             </thead>
             <tbody id="competencyTableBody">
                 {% for comp in interview_competencies %}
-                <tr class="comp-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}" data-code="{{ comp.code }}">
+                <tr class="comp-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}" data-code="{{ comp.code }}" data-name="{{ comp.name }}" data-type="{{ comp.type }}" data-level="{{ comp.level }}" data-importance="{{ comp.importance }}">
                     <td class="row-num fw-bold text-secondary">{{ forloop.counter }}</td>
-                    <td class="font-monospace text-xxs text-muted">{{ comp.code }}</td>
+                    <td class="font-monospace text-xxs text-muted comp-code-cell">{{ comp.code }}</td>
                     <td class="text-start font-semibold">
-                        <div>{{ comp.name }}</div>
-                        <span class="text-muted text-xxs d-block" style="font-size: 0.65rem;">نوع: {{ comp.type }}</span>
+                        <div class="comp-title-wrapper">
+                            <span class="comp-title-text" onclick="editCompetencyRow(this)" title="جهت ویرایش عنوان کلیک کنید">{{ comp.name }}</span>
+                        </div>
+                        <span class="text-muted text-xxs d-block comp-type-label" style="font-size: 0.64rem;">نوع: {{ comp.type }}</span>
                     </td>
-                    <td class="fw-bold text-secondary">{{ comp.level }}</td>
-                    <td>{{ comp.importance }}</td>
+                    <td class="fw-bold text-secondary comp-level-cell">{{ comp.level }}</td>
+                    <td class="comp-importance-cell">{{ comp.importance }}</td>
                     <td class="fw-bold text-primary comp-weight-cell">{{ comp.weight }}٪</td>
                     <td>
                         <div class="d-flex justify-content-center align-items-center gap-1">
@@ -472,9 +493,14 @@
                         <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
                     </td>
                     <td class="no-print">
-                        <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف از چاپ">
-                            ✕
-                        </button>
+                        <div class="d-flex justify-content-center align-items-center gap-1">
+                            <button type="button" class="btn btn-outline-primary btn-sm p-0 px-1 text-xxs" onclick="editCompetencyRow(this)" title="ویرایش">
+                                ✏️
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
+                                ✕
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
@@ -576,10 +602,129 @@
     </div>
 </div>
 
+<!-- Modal: Add Competency -->
+<div class="modal fade" id="addCompetencyModal" tabindex="-1" aria-labelledby="addCompetencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-xs">
+            <div class="modal-header py-2.5 bg-light">
+                <h6 class="modal-title fw-bold text-primary m-0" id="addCompetencyModalLabel">➕ افزودن شایستگی به فرم مصاحبه</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <form id="addCompetencyForm" onsubmit="event.preventDefault(); submitAddCompetency();">
+                    {% csrf_token %}
+                    <div class="mb-2.5">
+                        <label class="form-label fw-bold text-dark">عنوان شایستگی / سرفصل ارزیابی <span class="text-danger">*</span></label>
+                        <input type="text" id="newCompTitle" class="form-control form-control-sm" placeholder="مثلاً: تحلیل ارتعاشات تجهیزات دوار" required>
+                    </div>
+                    <div class="row g-2 mb-2.5">
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">نوع شایستگی</label>
+                            <select id="newCompType" class="form-select form-select-sm">
+                                <option value="SK" selected>مهارتی (SK)</option>
+                                <option value="KN">دانشی (KN)</option>
+                                <option value="AB">توانایی (AB)</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">سطح مورد انتظار</label>
+                            <select id="newCompLevel" class="form-select form-select-sm">
+                                <option value="1">آشنایی</option>
+                                <option value="2" selected>توانایی</option>
+                                <option value="3">تسلط</option>
+                                <option value="4">خبرگی</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">اهمیت برای پست</label>
+                            <select id="newCompImportance" class="form-select form-select-sm">
+                                <option value="3" selected>حداقلی (ضروری)</option>
+                                <option value="2">مهم</option>
+                                <option value="1">محوری</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-check p-0 pe-4 mt-2">
+                        <input class="form-check-input ms-2" type="checkbox" id="saveToJobProfile">
+                        <label class="form-check-label text-muted text-xxs" for="saveToJobProfile">
+                            ذخیره دائمی این شایستگی در شناسنامه فرصت شغلی (Job Profile)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2 bg-light">
+                <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill fw-bold" onclick="submitAddCompetency()">
+                    ✅ افزودن به جدول
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Competency -->
+<div class="modal fade" id="editCompetencyModal" tabindex="-1" aria-labelledby="editCompetencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-xs">
+            <div class="modal-header py-2.5 bg-light">
+                <h6 class="modal-title fw-bold text-primary m-0" id="editCompetencyModalLabel">✏️ ویرایش شایستگی مصاحبه</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <form id="editCompetencyForm" onsubmit="event.preventDefault(); submitEditCompetency();">
+                    <input type="hidden" id="editRowIndex">
+                    <div class="mb-2.5">
+                        <label class="form-label fw-bold text-dark">عنوان شایستگی <span class="text-danger">*</span></label>
+                        <input type="text" id="editCompTitle" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">نوع</label>
+                            <select id="editCompType" class="form-select form-select-sm">
+                                <option value="مهارت">مهارتی</option>
+                                <option value="دانش">دانشی</option>
+                                <option value="توانایی">توانایی</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">سطح تسلط</label>
+                            <select id="editCompLevel" class="form-select form-select-sm">
+                                <option value="آشنایی">آشنایی</option>
+                                <option value="توانایی">توانایی</option>
+                                <option value="تسلط">تسلط</option>
+                                <option value="خبرگی">خبرگی</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-dark">اهمیت</label>
+                            <select id="editCompImportance" class="form-select form-select-sm">
+                                <option value="حداقلی">حداقلی</option>
+                                <option value="مهم">مهم</option>
+                                <option value="محوری">محوری</option>
+                                <option value="تکلیف محور">تکلیف محور</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2 bg-light">
+                <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill fw-bold" onclick="submitEditCompetency()">
+                    💾 ذخیره تغییرات
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     // Store original rows on page load for reset
     let originalRowsBackup = [];
     let currentLayout = 'A4'; // 'A4' or 'A5'
+    let currentRowToEdit = null;
 
     window.addEventListener('DOMContentLoaded', () => {
         const rows = document.querySelectorAll('#sheet1 .comp-row');
@@ -637,7 +782,7 @@
         // Clone inner HTML from sheet 1 to sheet 2
         sheet2.innerHTML = sheet1.innerHTML;
         
-        // In sheet 2, remove the action buttons from DOM to avoid duplicate actions
+        // In sheet 2, remove the action buttons from DOM
         sheet2.querySelectorAll('.no-print').forEach(el => {
             el.innerHTML = '';
         });
@@ -680,19 +825,234 @@
         }
     }
 
+    function openAddCompetencyModal() {
+        document.getElementById('newCompTitle').value = '';
+        document.getElementById('saveToJobProfile').checked = false;
+        const modalEl = document.getElementById('addCompetencyModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function submitAddCompetency() {
+        const title = document.getElementById('newCompTitle').value.trim();
+        if (!title) return;
+
+        const typeCode = document.getElementById('newCompType').value;
+        const typeDisplay = typeCode === 'SK' ? 'مهارت' : (typeCode === 'KN' ? 'دانش' : 'توانایی');
+        
+        const levelCode = document.getElementById('newCompLevel').value;
+        const levelDisplay = levelCode === '1' ? 'آشنایی' : (levelCode === '2' ? 'توانایی' : (levelCode === '3' ? 'تسلط' : 'خبرگی'));
+        
+        const importanceCode = document.getElementById('newCompImportance').value;
+        const importanceDisplay = importanceCode === '3' ? 'حداقلی' : (importanceCode === '2' ? 'مهم' : 'محوری');
+        
+        const saveToDb = document.getElementById('saveToJobProfile').checked;
+        const generatedCode = 'AD-' + Math.floor(1000 + Math.random() * 9000);
+
+        // Append row to sheet1
+        const tbody = document.querySelector('#sheet1 #competencyTableBody');
+        const totalRow = document.querySelector('#sheet1 #totalRow');
+        const emptyRow = document.querySelector('#sheet1 #emptyRow');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.className = 'comp-row';
+        tr.setAttribute('data-original-weight', '15');
+        tr.setAttribute('data-weight', '15');
+        tr.setAttribute('data-code', generatedCode);
+        tr.setAttribute('data-name', title);
+        tr.setAttribute('data-type', typeDisplay);
+        tr.setAttribute('data-level', levelDisplay);
+        tr.setAttribute('data-importance', importanceDisplay);
+
+        tr.innerHTML = `
+            <td class="row-num fw-bold text-secondary"></td>
+            <td class="font-monospace text-xxs text-muted comp-code-cell">${generatedCode}</td>
+            <td class="text-start font-semibold">
+                <div class="comp-title-wrapper">
+                    <span class="comp-title-text" onclick="editCompetencyRow(this)" title="جهت ویرایش عنوان کلیک کنید">${title}</span>
+                </div>
+                <span class="text-muted text-xxs d-block comp-type-label" style="font-size: 0.64rem;">نوع: ${typeDisplay}</span>
+            </td>
+            <td class="fw-bold text-secondary comp-level-cell">${levelDisplay}</td>
+            <td class="comp-importance-cell">${importanceDisplay}</td>
+            <td class="fw-bold text-primary comp-weight-cell">10٪</td>
+            <td>
+                <div class="d-flex justify-content-center align-items-center gap-1">
+                    <span class="score-circle">۱</span>
+                    <span class="score-circle">۲</span>
+                    <span class="score-circle">۳</span>
+                    <span class="score-circle">۴</span>
+                    <span class="score-circle">۵</span>
+                </div>
+            </td>
+            <td class="text-start">
+                <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
+            </td>
+            <td class="no-print">
+                <div class="d-flex justify-content-center align-items-center gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-sm p-0 px-1 text-xxs" onclick="editCompetencyRow(this)" title="ویرایش">
+                        ✏️
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
+                        ✕
+                    </button>
+                </div>
+            </td>
+        `;
+
+        tbody.insertBefore(tr, totalRow);
+        recalculateWeights();
+
+        // Optional Backend Persistence
+        if (saveToDb) {
+            fetch("{% url 'job_add_competency_api' job.id %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    competency_type: typeCode,
+                    level: levelCode,
+                    importance: importanceCode
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    tr.querySelector('.comp-code-cell').innerText = data.code;
+                }
+            }).catch(err => console.error(err));
+        }
+
+        const modalEl = document.getElementById('addCompetencyModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
+    function addBlankManualRow() {
+        const tbody = document.querySelector('#sheet1 #competencyTableBody');
+        const totalRow = document.querySelector('#sheet1 #totalRow');
+        const emptyRow = document.querySelector('#sheet1 #emptyRow');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.className = 'comp-row blank-manual-row';
+        tr.setAttribute('data-original-weight', '10');
+        tr.setAttribute('data-weight', '10');
+        tr.setAttribute('data-code', 'MANUAL');
+
+        tr.innerHTML = `
+            <td class="row-num fw-bold text-secondary"></td>
+            <td class="font-monospace text-xxs text-muted comp-code-cell">-</td>
+            <td class="text-start font-semibold">
+                <span class="blank-line w-100" style="border-bottom: 1px dotted #475569; display: block; height: 16px;"></span>
+                <span class="text-muted text-xxs d-block" style="font-size: 0.62rem;">(سرفصل دستی مصاحبه‌کننده)</span>
+            </td>
+            <td class="fw-bold text-secondary comp-level-cell">-</td>
+            <td class="comp-importance-cell">-</td>
+            <td class="fw-bold text-primary comp-weight-cell">0٪</td>
+            <td>
+                <div class="d-flex justify-content-center align-items-center gap-1">
+                    <span class="score-circle">۱</span>
+                    <span class="score-circle">۲</span>
+                    <span class="score-circle">۳</span>
+                    <span class="score-circle">۴</span>
+                    <span class="score-circle">۵</span>
+                </div>
+            </td>
+            <td class="text-start">
+                <div style="min-height: 20px; border-bottom: 1px dotted #cbd5e1;"></div>
+            </td>
+            <td class="no-print">
+                <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
+                    ✕
+                </button>
+            </td>
+        `;
+
+        tbody.insertBefore(tr, totalRow);
+        recalculateWeights();
+
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
+    function editCompetencyRow(element) {
+        currentRowToEdit = element.closest('.comp-row');
+        if (!currentRowToEdit) return;
+
+        const titleText = currentRowToEdit.querySelector('.comp-title-text');
+        const currentTitle = titleText ? titleText.innerText.trim() : (currentRowToEdit.getAttribute('data-name') || '');
+        const currentLevel = currentRowToEdit.querySelector('.comp-level-cell').innerText.trim();
+        const currentImportance = currentRowToEdit.querySelector('.comp-importance-cell').innerText.trim();
+
+        document.getElementById('editCompTitle').value = currentTitle;
+        
+        const levelSelect = document.getElementById('editCompLevel');
+        for (let opt of levelSelect.options) {
+            if (opt.value === currentLevel) opt.selected = true;
+        }
+
+        const impSelect = document.getElementById('editCompImportance');
+        for (let opt of impSelect.options) {
+            if (opt.value === currentImportance) opt.selected = true;
+        }
+
+        const modalEl = document.getElementById('editCompetencyModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function submitEditCompetency() {
+        if (!currentRowToEdit) return;
+
+        const newTitle = document.getElementById('editCompTitle').value.trim();
+        if (!newTitle) return;
+
+        const newType = document.getElementById('editCompType').value;
+        const newLevel = document.getElementById('editCompLevel').value;
+        const newImportance = document.getElementById('editCompImportance').value;
+
+        // Update DOM
+        const titleEl = currentRowToEdit.querySelector('.comp-title-text');
+        if (titleEl) titleEl.innerText = newTitle;
+        
+        const typeLabel = currentRowToEdit.querySelector('.comp-type-label');
+        if (typeLabel) typeLabel.innerText = 'نوع: ' + newType;
+
+        const levelCell = currentRowToEdit.querySelector('.comp-level-cell');
+        if (levelCell) levelCell.innerText = newLevel;
+
+        const impCell = currentRowToEdit.querySelector('.comp-importance-cell');
+        if (impCell) impCell.innerText = newImportance;
+
+        currentRowToEdit.setAttribute('data-name', newTitle);
+        currentRowToEdit.setAttribute('data-level', newLevel);
+        currentRowToEdit.setAttribute('data-importance', newImportance);
+
+        const modalEl = document.getElementById('editCompetencyModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
     function recalculateWeights() {
         const rows = document.querySelectorAll('#sheet1 .comp-row');
         const count = rows.length;
         
-        const countBadge = document.getElementById('compCountBadge');
-        const totalWeightBadge = document.getElementById('totalWeightBadge');
         const totalWeightCell = document.querySelector('#sheet1 #totalWeightCell');
         
-        if (countBadge) countBadge.innerText = count;
-
         if (count === 0) {
             if (totalWeightCell) totalWeightCell.innerText = '۰٪';
-            if (totalWeightBadge) totalWeightBadge.innerText = '۰٪';
             return;
         }
 
@@ -751,7 +1111,6 @@
         });
 
         if (totalWeightCell) totalWeightCell.innerText = '۱۰۰٪';
-        if (totalWeightBadge) totalWeightBadge.innerText = '۱۰۰٪';
     }
 </script>
 </body>

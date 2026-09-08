@@ -432,6 +432,36 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response, 'مبانی ترمودینامیک و انتقال حرارت')
         self.assertContains(response, 'KNME0011')
 
+    def test_job_add_competency_api_view(self):
+        """تست افزودن شایستگی سفارشی به فرصت شغلی از طریق API"""
+        job = JobOpportunity.objects.create(
+            request_number='REQ-1402-995',
+            title='مهندس برق',
+            code='EE-995',
+            department='نورد گرم'
+        )
+        self.client.login(username='recruiter_test', password='password123')
+        url = reverse('job_add_competency_api', kwargs={'job_id': job.pk})
+        payload = {
+            'title': 'تسلط بر درایوهای فرکانس متغیر (VFD)',
+            'competency_type': 'SK',
+            'level': 3,
+            'importance': 3
+        }
+        import json
+        response = self.client.post(url, data=json.dumps(payload), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['title'], 'تسلط بر درایوهای فرکانس متغیر (VFD)')
+        self.assertTrue(data['code'].startswith('MANUAL-'))
+
+        # Verify in DB
+        from apps.jobs.models import JobOpportunityCompetency
+        comp = JobOpportunityCompetency.objects.filter(job=job, title='تسلط بر درایوهای فرکانس متغیر (VFD)').first()
+        self.assertIsNotNone(comp)
+        self.assertEqual(comp.level, 3)
+
     def test_job_skill_test_specification_print_view(self):
         """تست نمایش صفحه سند مشخصات آزمون مهارتی / کارگاهی به همراه شایستگی‌های دانشی و مهارتی"""
         job = JobOpportunity.objects.create(

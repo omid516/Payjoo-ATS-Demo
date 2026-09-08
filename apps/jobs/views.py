@@ -2530,6 +2530,68 @@ class JobSkillTestSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, 
         return context
 
 
+class JobAddCompetencyApiView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+    ]
+
+    def post(self, request, job_id):
+        import json
+        import uuid
+        from apps.jobs.models import JobOpportunity, JobOpportunityCompetency, AssessmentCompetency
+        
+        try:
+            job = JobOpportunity.objects.get(pk=job_id, is_deleted=False)
+        except JobOpportunity.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'شغل یافت نشد.'}, status=404)
+
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            data = request.POST
+
+        title = data.get('title', '').strip()
+        if not title:
+            return JsonResponse({'success': False, 'error': 'عنوان شایستگی نمی‌تواند خالی باشد.'}, status=400)
+
+        competency_type = data.get('competency_type', 'SK')
+        importance = int(data.get('importance', 2))
+        level = int(data.get('level', 2))
+        custom_code = f"MANUAL-{uuid.uuid4().hex[:8].upper()}"
+
+        jc = JobOpportunityCompetency.objects.create(
+            job=job,
+            central_competency=None,
+            code=custom_code,
+            title=title,
+            competency_type=competency_type,
+            importance=importance,
+            level=level,
+            is_custom=True
+        )
+
+        interview_stage = job.stages.filter(stage_type='INTERVIEW', is_deleted=False).first()
+        if interview_stage:
+            AssessmentCompetency.objects.create(
+                stage=interview_stage,
+                name=title,
+                weight=10
+            )
+
+        return JsonResponse({
+            'success': True,
+            'code': jc.code,
+            'title': jc.title,
+            'type_display': jc.get_competency_type_display(),
+            'level_display': jc.get_level_display(),
+            'importance_display': jc.get_importance_display(),
+            'message': 'شایستگی با موفقیت در شناسنامه فرصت شغلی ثبت گردید.'
+        })
+
+
 class SearchPostsApiView(LoginRequiredMixin, RoleRequiredMixin, View):
     allowed_roles = [
         UserProfile.ROLE_ADMIN,

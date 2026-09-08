@@ -353,7 +353,7 @@ class JobOpportunityAndWorkflowTests(TestCase):
             weight=100
         )
         
-        # Link to JobOpportunityCompetency snapshot
+        # Link to JobOpportunityCompetency snapshot (both KN and SK)
         JobOpportunityCompetency.objects.create(
             job=job,
             title='نقشه‌خوانی برق صنعتی',
@@ -361,6 +361,14 @@ class JobOpportunityAndWorkflowTests(TestCase):
             competency_type='KN',
             importance=1, # محوری
             level=3 # تسلط
+        )
+        JobOpportunityCompetency.objects.create(
+            job=job,
+            title='سیم‌بندی تابلوهای قدرت',
+            code='SKEL0055',
+            competency_type='SK',
+            importance=3, # حداقلی
+            level=2
         )
         
         self.client.login(username='recruiter_test', password='password123')
@@ -371,9 +379,12 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response, 'سند مشخصات و ساختار آزمون کتبی')
         self.assertContains(response, 'نقشه‌خوانی برق صنعتی')
         self.assertContains(response, 'KNEL0012')
+        # Also contains skill competency
+        self.assertContains(response, 'سیم‌بندی تابلوهای قدرت')
+        self.assertContains(response, 'SKEL0055')
 
     def test_job_interview_form_print_view(self):
-        """تست نمایش صفحه فرم ارزیابی مصاحبه تخصصی به همراه شایستگی‌های مهارتی"""
+        """تست نمایش صفحه فرم ارزیابی مصاحبه تخصصی به همراه شایستگی‌های دانشی و مهارتی"""
         job = JobOpportunity.objects.create(
             request_number='REQ-1402-993',
             title='کارشناس مکانیک',
@@ -402,6 +413,14 @@ class JobOpportunityAndWorkflowTests(TestCase):
             importance=3, # حداقلی
             level=3
         )
+        JobOpportunityCompetency.objects.create(
+            job=job,
+            title='مبانی ترمودینامیک و انتقال حرارت',
+            code='KNME0011',
+            competency_type='KN',
+            importance=2,
+            level=2
+        )
         self.client.login(username='recruiter_test', password='password123')
         url = reverse('job_interview_form_print', kwargs={'job_id': job.pk})
         response = self.client.get(url)
@@ -409,9 +428,12 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response, 'فرم ارزیابی مصاحبه تخصصی و شایستگی‌محور')
         self.assertContains(response, 'تحلیل ارتعاشات تجهیزات دوار')
         self.assertContains(response, 'SKME0044')
+        # Also contains knowledge competency
+        self.assertContains(response, 'مبانی ترمودینامیک و انتقال حرارت')
+        self.assertContains(response, 'KNME0011')
 
     def test_job_skill_test_specification_print_view(self):
-        """تست نمایش صفحه سند مشخصات آزمون مهارتی / کارگاهی"""
+        """تست نمایش صفحه سند مشخصات آزمون مهارتی / کارگاهی به همراه شایستگی‌های دانشی و مهارتی"""
         job = JobOpportunity.objects.create(
             request_number='REQ-1402-994',
             title='تکنسین جوشکاری و برشکاری',
@@ -440,6 +462,14 @@ class JobOpportunityAndWorkflowTests(TestCase):
             importance=3, # حداقلی
             level=3
         )
+        JobOpportunityCompetency.objects.create(
+            job=job,
+            title='متالورژی جوش و تست‌های غیرمخرب NDT',
+            code='KNWL0022',
+            competency_type='KN',
+            importance=2,
+            level=2
+        )
         self.client.login(username='recruiter_test', password='password123')
         url = reverse('job_skill_test_specification_print', kwargs={'job_id': job.pk})
         response = self.client.get(url)
@@ -447,6 +477,9 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response, 'سند مشخصات و سرفصل‌های آزمون مهارتی / کارگاهی')
         self.assertContains(response, 'جوشکاری لوله‌های فشار قوی با فرآیند TIG')
         self.assertContains(response, 'SKWL0088')
+        # Also contains knowledge competency
+        self.assertContains(response, 'متالورژی جوش و تست‌های غیرمخرب NDT')
+        self.assertContains(response, 'KNWL0022')
 
     def test_job_opportunity_empty_stages_assigned_workflow(self):
         """تست اختصاص مراحل پیش‌فرض به فرصت شغلی ویرایش شده که فاقد مرحله بوده است"""

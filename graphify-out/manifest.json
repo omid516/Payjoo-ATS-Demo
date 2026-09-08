@@ -595,8 +595,8 @@
     "semantic_hash": ""
   },
   "apps/jobs/tests.py": {
-    "mtime": 1788854912.8143725,
-    "ast_hash": "a6ae3bac521210e36f6bef4a0e5c93da",
+    "mtime": 1788856642.2019196,
+    "ast_hash": "1faf6cc5fd536f96d8f447d95a069f53",
     "semantic_hash": ""
   },
   "apps/jobs/urls.py": {
@@ -610,8 +610,8 @@
     "semantic_hash": ""
   },
   "apps/jobs/views.py": {
-    "mtime": 1788854767.771535,
-    "ast_hash": "eeb278190dda602b8f757afa1ebcf807",
+    "mtime": 1788856604.2125187,
+    "ast_hash": "4c08a6cbf4bedd892866e9a30e51e354",
     "semantic_hash": ""
   },
   "apps/recruitment_planning/__init__.py": {
@@ -1090,8 +1090,8 @@
     "semantic_hash": ""
   },
   "templates/jobs/exam_specification_print.html": {
-    "mtime": 1788854887.52298,
-    "ast_hash": "8bf9eed6ed46bc9bba372c224833a983",
+    "mtime": 1788856613.159276,
+    "ast_hash": "5f00f6fa6efc3d62fc6fb20a062232a2",
     "semantic_hash": ""
   },
   "templates/jobs/job_competency_config.html": {
@@ -1335,8 +1335,8 @@
     "semantic_hash": ""
   },
   "templates/jobs/skill_test_specification_print.html": {
-    "mtime": 1788854850.1138144,
-    "ast_hash": "a9dd8cbce393ccca4c3509cc15f29259",
+    "mtime": 1788856626.73429,
+    "ast_hash": "9e854e6c751dc81924df2a62cf93c9e0",
     "semantic_hash": ""
   }
 }

@@ -210,8 +210,8 @@
         <thead>
             <tr class="table-light">
                 <th style="width: 5%;">ردیف</th>
-                <th style="width: 11%;">کد مهارت</th>
-                <th class="text-start">عنوان مهارت / شایستگی عملی</th>
+                <th style="width: 11%;">کد</th>
+                <th class="text-start">عنوان شایستگی / سرفصل ارزیابی (دانش و مهارت)</th>
                 <th style="width: 10%;">سطح تسلط</th>
                 <th style="width: 9%;">اهمیت</th>
                 <th style="width: 10%;">وزن سرفصل (٪)</th>
@@ -234,7 +234,7 @@
                 <td class="font-bold text-primary skill-weight-cell">{{ comp.weight }}٪</td>
                 <td class="duration-cell font-semibold text-dark">0 دقیقه</td>
                 <td class="text-start text-xxs" style="line-height: 1.5;">
-                    <div>• <strong>معیار سنجش:</strong> اجرای عملی فرآیند طبق استاندارد کارگاهی و سرعت در اجرای وظایف.</div>
+                    <div>• <strong>معیار سنجش:</strong> اجرای عملی فرآیند طبق استاندارد کارگاهی و تسلط بر مبانی فنی.</div>
                     <div>• <strong>الزامات ایمنی:</strong> رعایت کامل آیین‌نامه‌ها و تجهیزات حفاظت فردی (HSE).</div>
                 </td>
                 <td class="no-print">
@@ -245,7 +245,7 @@
             </tr>
             {% empty %}
             <tr id="emptySkillRow">
-                <td colspan="9" class="text-center text-muted py-3">هیچ شایستگی مهارتی یا عملی برای این ردیف شغلی تعریف نشده است.</td>
+                <td colspan="9" class="text-center text-muted py-3">هیچ شایستگی دانشی یا مهارتی برای این ردیف شغلی تعریف نشده است.</td>
             </tr>
             {% endfor %}
             <tr class="table-light fw-bold" id="totalSkillRow">

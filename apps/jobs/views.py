@@ -2384,6 +2384,66 @@ class JobAssessmentPlanPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
         return context
 
 
+def get_kn_sk_ab_competencies_for_print(job, default_stage_name="ارزیابی"):
+    """
+    برمی‌گرداند تمامی شایستگی‌های دانشی (KN) و مهارتی/توانایی (SK, AB) فرصت شغلی را
+    با محاسبه وزن‌های متناسب که جمع آن‌ها دقیقاً ۱۰۰٪ است.
+    """
+    comps = list(job.selected_competencies.filter(
+        competency_type__in=['KN', 'SK', 'AB'],
+        is_deleted=False
+    ).order_by('competency_type', 'code'))
+    
+    if not comps:
+        return []
+        
+    raw_weights = []
+    total_raw = 0
+    for c in comps:
+        imp_factor = 3 if c.importance == 3 else (2 if c.importance == 2 else 1)
+        prof_factor = c.level or 1
+        rw = imp_factor * prof_factor
+        raw_weights.append(rw)
+        total_raw += rw
+        
+    result = []
+    distributed_sum = 0
+    for i, c in enumerate(comps):
+        pct = int(round((raw_weights[i] / total_raw) * 100)) if total_raw > 0 else int(round(100 / len(comps)))
+        calc_val = (raw_weights[i] / total_raw * 100) if total_raw > 0 else (100 / len(comps))
+        result.append({
+            'code': c.code or 'N/A',
+            'name': c.title,
+            'stage_name': default_stage_name,
+            'weight': pct,
+            'calc_weight': calc_val,
+            'level': c.get_level_display(),
+            'importance': c.get_importance_display(),
+            'type': c.get_competency_type_display(),
+            'type_code': c.competency_type,
+        })
+        distributed_sum += pct
+        
+    # Adjust round-off difference to exactly 100%
+    diff = 100 - distributed_sum
+    if diff != 0 and result:
+        result.sort(key=lambda x: x['calc_weight'] - int(x['calc_weight']), reverse=(diff > 0))
+        i = 0
+        while diff > 0 and i < len(result):
+            result[i]['weight'] += 1
+            diff -= 1
+            i += 1
+        i = len(result) - 1
+        while diff < 0 and i >= 0:
+            if result[i]['weight'] > 1:
+                result[i]['weight'] -= 1
+                diff += 1
+            i -= 1
+        result.sort(key=lambda x: (0 if x['type_code'] == 'KN' else 1, x['code']))
+        
+    return result
+
+
 class JobExamSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
     model = JobOpportunity
     template_name = 'jobs/exam_specification_print.html'
@@ -2399,31 +2459,13 @@ class JobExamSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, Detai
     ]
 
     def get_queryset(self):
-        return JobOpportunity.objects.filter(is_deleted=False).prefetch_related('stages', 'stages__competencies')
+        return JobOpportunity.objects.filter(is_deleted=False).prefetch_related('stages', 'stages__competencies', 'selected_competencies')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Fetch the written exam stage(s)
         exam_stages = self.object.stages.filter(stage_type='EXAM', is_deleted=False).order_by('sequence')
         context['exam_stages'] = exam_stages
-        
-        # If there are exam stages, collect competencies and map their levels/importance
-        exam_competencies = []
-        for stage in exam_stages:
-            for comp in stage.competencies.filter(is_deleted=False):
-                # Find matching JobOpportunityCompetency snapshot to get the required level and importance
-                jc = self.object.selected_competencies.filter(title=comp.name, is_deleted=False).first()
-                exam_competencies.append({
-                    'code': jc.code if jc else 'N/A',
-                    'name': comp.name,
-                    'stage_name': stage.name,
-                    'weight': comp.weight,
-                    'level': jc.get_level_display() if jc else 'نامشخص',
-                    'importance': jc.get_importance_display() if jc else 'نامشخص',
-                    'type': jc.get_competency_type_display() if jc else 'نامشخص'
-                })
-        
-        context['exam_competencies'] = exam_competencies
+        context['exam_competencies'] = get_kn_sk_ab_competencies_for_print(self.object, default_stage_name='آزمون کتبی')
         from apps.jobs.models import OrganizationSetting
         context['org_setting'] = OrganizationSetting.get_active_setting()
         return context
@@ -2452,37 +2494,7 @@ class JobInterviewFormPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
         context = super().get_context_data(**kwargs)
         interview_stages = self.object.stages.filter(stage_type='INTERVIEW', is_deleted=False).order_by('sequence')
         context['interview_stages'] = interview_stages
-        
-        interview_competencies = []
-        if interview_stages.exists():
-            for stage in interview_stages:
-                for comp in stage.competencies.filter(is_deleted=False):
-                    jc = self.object.selected_competencies.filter(title=comp.name, is_deleted=False).first()
-                    interview_competencies.append({
-                        'code': jc.code if jc else 'N/A',
-                        'name': comp.name,
-                        'stage_name': stage.name,
-                        'weight': comp.weight,
-                        'level': jc.get_level_display() if jc else 'توانایی',
-                        'importance': jc.get_importance_display() if jc else 'تکلیف محور',
-                        'type': jc.get_competency_type_display() if jc else 'مهارت'
-                    })
-        else:
-            sk_comps = self.object.selected_competencies.filter(competency_type__in=['SK', 'AB'], is_deleted=False)
-            total = sk_comps.count()
-            weight_per_comp = int(round(100 / total)) if total > 0 else 100
-            for jc in sk_comps:
-                interview_competencies.append({
-                    'code': jc.code or 'N/A',
-                    'name': jc.title,
-                    'stage_name': 'مصاحبه تخصصی',
-                    'weight': weight_per_comp,
-                    'level': jc.get_level_display(),
-                    'importance': jc.get_importance_display(),
-                    'type': jc.get_competency_type_display()
-                })
-        
-        context['interview_competencies'] = interview_competencies
+        context['interview_competencies'] = get_kn_sk_ab_competencies_for_print(self.object, default_stage_name='مصاحبه تخصصی')
         context['interviewers'] = self.object.stage_interviewers.filter(is_deleted=False).select_related('user')
         from apps.jobs.models import OrganizationSetting
         context['org_setting'] = OrganizationSetting.get_active_setting()
@@ -2512,37 +2524,7 @@ class JobSkillTestSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, 
         context = super().get_context_data(**kwargs)
         skill_stages = self.object.stages.filter(stage_type='SKILL_TEST', is_deleted=False).order_by('sequence')
         context['skill_stages'] = skill_stages
-        
-        skill_competencies = []
-        if skill_stages.exists():
-            for stage in skill_stages:
-                for comp in stage.competencies.filter(is_deleted=False):
-                    jc = self.object.selected_competencies.filter(title=comp.name, is_deleted=False).first()
-                    skill_competencies.append({
-                        'code': jc.code if jc else 'N/A',
-                        'name': comp.name,
-                        'stage_name': stage.name,
-                        'weight': comp.weight,
-                        'level': jc.get_level_display() if jc else 'توانایی',
-                        'importance': jc.get_importance_display() if jc else 'تکلیف محور',
-                        'type': jc.get_competency_type_display() if jc else 'مهارت'
-                    })
-        else:
-            sk_comps = self.object.selected_competencies.filter(competency_type__in=['SK', 'AB'], is_deleted=False)
-            total = sk_comps.count()
-            weight_per_comp = int(round(100 / total)) if total > 0 else 100
-            for jc in sk_comps:
-                skill_competencies.append({
-                    'code': jc.code or 'N/A',
-                    'name': jc.title,
-                    'stage_name': 'آزمون مهارتی / عملی',
-                    'weight': weight_per_comp,
-                    'level': jc.get_level_display(),
-                    'importance': jc.get_importance_display(),
-                    'type': jc.get_competency_type_display()
-                })
-        
-        context['skill_competencies'] = skill_competencies
+        context['skill_competencies'] = get_kn_sk_ab_competencies_for_print(self.object, default_stage_name='آزمون مهارتی / عملی')
         from apps.jobs.models import OrganizationSetting
         context['org_setting'] = OrganizationSetting.get_active_setting()
         return context

@@ -209,6 +209,14 @@ class JobOpportunity(SoftDeleteModel):
     def has_exam_stage(self):
         return self.stages.filter(stage_type='EXAM', is_deleted=False).exists()
 
+    @property
+    def has_interview_stage(self):
+        return self.stages.filter(stage_type='INTERVIEW', is_deleted=False).exists()
+
+    @property
+    def has_skill_test_stage(self):
+        return self.stages.filter(stage_type='SKILL_TEST', is_deleted=False).exists()
+
 
 
     def get_status_from_stage_name(self, stage_name):

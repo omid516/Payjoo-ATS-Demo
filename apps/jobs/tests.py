@@ -372,6 +372,82 @@ class JobOpportunityAndWorkflowTests(TestCase):
         self.assertContains(response, 'نقشه‌خوانی برق صنعتی')
         self.assertContains(response, 'KNEL0012')
 
+    def test_job_interview_form_print_view(self):
+        """تست نمایش صفحه فرم ارزیابی مصاحبه تخصصی به همراه شایستگی‌های مهارتی"""
+        job = JobOpportunity.objects.create(
+            request_number='REQ-1402-993',
+            title='کارشناس مکانیک',
+            code='ME-993',
+            department='فولادسازی',
+            description='تعمیرات و نگهداری'
+        )
+        stage_interview = JobOpportunityStage.objects.create(
+            job=job,
+            name='مصاحبه تخصصی',
+            weight=30,
+            sequence=1,
+            stage_type='INTERVIEW'
+        )
+        from apps.jobs.models import AssessmentCompetency, JobOpportunityCompetency
+        AssessmentCompetency.objects.create(
+            stage=stage_interview,
+            name='تحلیل ارتعاشات تجهیزات دوار',
+            weight=100
+        )
+        JobOpportunityCompetency.objects.create(
+            job=job,
+            title='تحلیل ارتعاشات تجهیزات دوار',
+            code='SKME0044',
+            competency_type='SK',
+            importance=3, # حداقلی
+            level=3
+        )
+        self.client.login(username='recruiter_test', password='password123')
+        url = reverse('job_interview_form_print', kwargs={'job_id': job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'فرم ارزیابی مصاحبه تخصصی و شایستگی‌محور')
+        self.assertContains(response, 'تحلیل ارتعاشات تجهیزات دوار')
+        self.assertContains(response, 'SKME0044')
+
+    def test_job_skill_test_specification_print_view(self):
+        """تست نمایش صفحه سند مشخصات آزمون مهارتی / کارگاهی"""
+        job = JobOpportunity.objects.create(
+            request_number='REQ-1402-994',
+            title='تکنسین جوشکاری و برشکاری',
+            code='WL-994',
+            department='تعمیرگاه مرکزی',
+            description='جوشکاری قطعات صنعتی'
+        )
+        stage_skill = JobOpportunityStage.objects.create(
+            job=job,
+            name='آزمون عملی کارگاهی',
+            weight=35,
+            sequence=1,
+            stage_type='SKILL_TEST'
+        )
+        from apps.jobs.models import AssessmentCompetency, JobOpportunityCompetency
+        AssessmentCompetency.objects.create(
+            stage=stage_skill,
+            name='جوشکاری لوله‌های فشار قوی با فرآیند TIG',
+            weight=100
+        )
+        JobOpportunityCompetency.objects.create(
+            job=job,
+            title='جوشکاری لوله‌های فشار قوی با فرآیند TIG',
+            code='SKWL0088',
+            competency_type='SK',
+            importance=3, # حداقلی
+            level=3
+        )
+        self.client.login(username='recruiter_test', password='password123')
+        url = reverse('job_skill_test_specification_print', kwargs={'job_id': job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'سند مشخصات و سرفصل‌های آزمون مهارتی / کارگاهی')
+        self.assertContains(response, 'جوشکاری لوله‌های فشار قوی با فرآیند TIG')
+        self.assertContains(response, 'SKWL0088')
+
     def test_job_opportunity_empty_stages_assigned_workflow(self):
         """تست اختصاص مراحل پیش‌فرض به فرصت شغلی ویرایش شده که فاقد مرحله بوده است"""
         # Create job opportunity with NO workflow template
@@ -1469,9 +1545,9 @@ class AssessmentPlanRoundingTests(TestCase):
                 self.level = level
 
         comps = [
-            MockComp('C1', 'Comp 1', 'KN', 1, 2),
+            MockComp('C1', 'Comp 1', 'KN', 3, 2),
             MockComp('C2', 'Comp 2', 'SK', 2, 3),
-            MockComp('C3', 'Comp 3', 'GE', 1, 1),
+            MockComp('C3', 'Comp 3', 'GE', 3, 1),
         ]
         
         # Test with round_to_five = True
@@ -1489,6 +1565,58 @@ class AssessmentPlanRoundingTests(TestCase):
         # The weights shouldn't all be multiples of 5 (e.g. EXAM might be 28 or 29)
         has_non_multiple_of_five = any(s['weight'] % 5 != 0 for s in stages_false.values())
         self.assertTrue(has_non_multiple_of_five)
+
+    def test_importance_weighting_order(self):
+        """تست اینکه حداقلی (importance=3) بیشترین ضریب و محوری (importance=1) کمترین ضریب را دارد"""
+        from apps.jobs.utils import calculate_assessment_plan
+        
+        class MockComp:
+            def __init__(self, code, title, competency_type, importance, level):
+                self.code = code
+                self.title = title
+                self.competency_type = competency_type
+                self.importance = importance
+                self.level = level
+
+        # دو شایستگی دانش با سطح یکسان (level=2)، یکی حداقلی (importance=3) و یکی محوری (importance=1)
+        comps = [
+            MockComp('KN-MIN', 'حداقلی', 'KN', 3, 2), # raw weight: 3 * 2 = 6
+            MockComp('KN-CORE', 'محوری', 'KN', 1, 2), # raw weight: 1 * 2 = 2
+        ]
+        res = calculate_assessment_plan(comps)
+        exam_comps = res['stages']['EXAM']['competencies']
+        comp_map = {c['code']: c['weight'] for c in exam_comps}
+        
+        # حداقلی باید ۷۵٪ و محوری ۲۵٪ باشد
+        self.assertEqual(comp_map['KN-MIN'], 75)
+        self.assertEqual(comp_map['KN-CORE'], 25)
+
+    def test_custom_competencies_multiple_do_not_overflow_100_percent(self):
+        """تست جلوگیری از به‌هم‌ریختن درصدها و اضافه شدن به بیش از ۱۰۰٪ هنگام افزودن چند شایستگی دستی با کد یکسان یا پیش‌فرض"""
+        from apps.jobs.utils import calculate_assessment_plan
+        
+        class MockComp:
+            def __init__(self, code, title, competency_type, importance, level):
+                self.code = code
+                self.title = title
+                self.competency_type = competency_type
+                self.importance = importance
+                self.level = level
+
+        # سه شایستگی دستی در آزمون کتبی که همگی دارای کد 'CUSTOM' هستند
+        comps = [
+            MockComp('CUSTOM', 'شایستگی دستی ۱', 'KN', 2, 2),
+            MockComp('CUSTOM', 'شایستگی دستی ۲', 'KN', 2, 2),
+            MockComp('CUSTOM', 'شایستگی دستی ۳', 'KN', 2, 2),
+        ]
+        # با فعال بودن round_to_five نباید مجموع از ۱۰۰٪ بیشتر شود
+        res = calculate_assessment_plan(comps, round_to_five=True)
+        exam_comps = res['stages']['EXAM']['competencies']
+        total_comp_weight = sum(c['weight'] for c in exam_comps)
+        self.assertEqual(total_comp_weight, 100)
+        # هر کدام باید حدود ۳۰-۳۵٪ باشند، نه ۱۰۰٪ یا ۶۰٪!
+        for c in exam_comps:
+            self.assertTrue(30 <= c['weight'] <= 40)
 
 
 class RecruitmentPatternSimulatorTests(TestCase):

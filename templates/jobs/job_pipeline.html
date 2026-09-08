@@ -101,7 +101,21 @@
                 {% if job.has_exam_stage %}
                 <li>
                     <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_exam_specification_print' job.id %}" target="_blank">
-                        <span>📝</span> {{ t.jp_doc_spec }}
+                        <span>📝</span> {{ t.jp_doc_spec|default:"سند مرکز آزمون کتبی" }}
+                    </a>
+                </li>
+                {% endif %}
+                {% if job.has_skill_test_stage or job.selected_competencies.exists %}
+                <li>
+                    <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_skill_test_specification_print' job.id %}" target="_blank">
+                        <span>⚙️</span> سند آزمون مهارتی / عملی
+                    </a>
+                </li>
+                {% endif %}
+                {% if job.has_interview_stage or job.selected_competencies.exists %}
+                <li>
+                    <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_interview_form_print' job.id %}" target="_blank">
+                        <span>🗣️</span> فرم ارزیابی مصاحبه تخصصی
                     </a>
                 </li>
                 {% endif %}

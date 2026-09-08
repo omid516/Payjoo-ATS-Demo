@@ -572,8 +572,8 @@ class JobOpportunityPrintAdView(LoginRequiredMixin, RoleRequiredMixin, DetailVie
         context = super().get_context_data(**kwargs)
         competencies = list(self.object.selected_competencies.filter(is_deleted=False))
         for comp in competencies:
-            # Formula: level + 3 - importance gives a combined rating of 1 to 5 stars
-            stars_count = max(1, min(5, (comp.level or 1) + 3 - (comp.importance or 3)))
+            # Formula: level + importance - 1 gives a combined rating of 1 to 5 stars (where level 1-3, importance 1-3)
+            stars_count = max(1, min(5, (comp.level or 1) + (comp.importance or 1) - 1))
             comp.stars_display = "★" * stars_count + "☆" * (5 - stars_count)
             
         context['selected_competencies'] = competencies
@@ -2096,9 +2096,10 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 TempComp(c.title, c.competency_type, c.importance, c.level, c.code)
                 for c in comps
             ]
-            for cc in custom_comps_parsed:
+            for i, cc in enumerate(custom_comps_parsed):
+                c_code = cc.get('code') or f"CUSTOM-{i+1}"
                 temp_comps.append(
-                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'])
+                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'], code=c_code)
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
@@ -2188,9 +2189,10 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 TempComp(c.title, c.competency_type, c.importance, c.level, c.code)
                 for c in central_comps
             ]
-            for cc in custom_comps_parsed:
+            for i, cc in enumerate(custom_comps_parsed):
+                c_code = cc.get('code') or f"CUSTOM-{i+1}"
                 temp_comps.append(
-                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'])
+                    TempComp(cc['title'], cc['competency_type'], cc['importance'], cc['level'], code=c_code)
                 )
 
             round_to_five = request.POST.get('round_to_five') == 'on'
@@ -2422,6 +2424,127 @@ class JobExamSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, Detai
                 })
         
         context['exam_competencies'] = exam_competencies
+        from apps.jobs.models import OrganizationSetting
+        context['org_setting'] = OrganizationSetting.get_active_setting()
+        return context
+
+
+class JobInterviewFormPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
+    model = JobOpportunity
+    template_name = 'jobs/interview_form_print.html'
+    context_object_name = 'job'
+    pk_url_kwarg = 'job_id'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_queryset(self):
+        return JobOpportunity.objects.filter(is_deleted=False).prefetch_related(
+            'stages', 'stages__competencies', 'selected_competencies', 'stage_interviewers__user'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        interview_stages = self.object.stages.filter(stage_type='INTERVIEW', is_deleted=False).order_by('sequence')
+        context['interview_stages'] = interview_stages
+        
+        interview_competencies = []
+        if interview_stages.exists():
+            for stage in interview_stages:
+                for comp in stage.competencies.filter(is_deleted=False):
+                    jc = self.object.selected_competencies.filter(title=comp.name, is_deleted=False).first()
+                    interview_competencies.append({
+                        'code': jc.code if jc else 'N/A',
+                        'name': comp.name,
+                        'stage_name': stage.name,
+                        'weight': comp.weight,
+                        'level': jc.get_level_display() if jc else 'توانایی',
+                        'importance': jc.get_importance_display() if jc else 'تکلیف محور',
+                        'type': jc.get_competency_type_display() if jc else 'مهارت'
+                    })
+        else:
+            sk_comps = self.object.selected_competencies.filter(competency_type__in=['SK', 'AB'], is_deleted=False)
+            total = sk_comps.count()
+            weight_per_comp = int(round(100 / total)) if total > 0 else 100
+            for jc in sk_comps:
+                interview_competencies.append({
+                    'code': jc.code or 'N/A',
+                    'name': jc.title,
+                    'stage_name': 'مصاحبه تخصصی',
+                    'weight': weight_per_comp,
+                    'level': jc.get_level_display(),
+                    'importance': jc.get_importance_display(),
+                    'type': jc.get_competency_type_display()
+                })
+        
+        context['interview_competencies'] = interview_competencies
+        context['interviewers'] = self.object.stage_interviewers.filter(is_deleted=False).select_related('user')
+        from apps.jobs.models import OrganizationSetting
+        context['org_setting'] = OrganizationSetting.get_active_setting()
+        return context
+
+
+class JobSkillTestSpecificationPrintView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
+    model = JobOpportunity
+    template_name = 'jobs/skill_test_specification_print.html'
+    context_object_name = 'job'
+    pk_url_kwarg = 'job_id'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get_queryset(self):
+        return JobOpportunity.objects.filter(is_deleted=False).prefetch_related(
+            'stages', 'stages__competencies', 'selected_competencies'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        skill_stages = self.object.stages.filter(stage_type='SKILL_TEST', is_deleted=False).order_by('sequence')
+        context['skill_stages'] = skill_stages
+        
+        skill_competencies = []
+        if skill_stages.exists():
+            for stage in skill_stages:
+                for comp in stage.competencies.filter(is_deleted=False):
+                    jc = self.object.selected_competencies.filter(title=comp.name, is_deleted=False).first()
+                    skill_competencies.append({
+                        'code': jc.code if jc else 'N/A',
+                        'name': comp.name,
+                        'stage_name': stage.name,
+                        'weight': comp.weight,
+                        'level': jc.get_level_display() if jc else 'توانایی',
+                        'importance': jc.get_importance_display() if jc else 'تکلیف محور',
+                        'type': jc.get_competency_type_display() if jc else 'مهارت'
+                    })
+        else:
+            sk_comps = self.object.selected_competencies.filter(competency_type__in=['SK', 'AB'], is_deleted=False)
+            total = sk_comps.count()
+            weight_per_comp = int(round(100 / total)) if total > 0 else 100
+            for jc in sk_comps:
+                skill_competencies.append({
+                    'code': jc.code or 'N/A',
+                    'name': jc.title,
+                    'stage_name': 'آزمون مهارتی / عملی',
+                    'weight': weight_per_comp,
+                    'level': jc.get_level_display(),
+                    'importance': jc.get_importance_display(),
+                    'type': jc.get_competency_type_display()
+                })
+        
+        context['skill_competencies'] = skill_competencies
+        from apps.jobs.models import OrganizationSetting
+        context['org_setting'] = OrganizationSetting.get_active_setting()
         return context
 
 

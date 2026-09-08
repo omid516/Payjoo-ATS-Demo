@@ -310,7 +310,7 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
         if ctype in ['PR', 'CQ', 'IN']:
             continue
             
-        imp_weight = 3 if comp.importance == 1 else (2 if comp.importance == 2 else 1)
+        imp_weight = 3 if comp.importance == 3 else (2 if comp.importance == 2 else 1)
         prof_weight = comp.level
         weight = imp_weight * prof_weight
         
@@ -493,10 +493,10 @@ def calculate_assessment_plan(competencies, custom_weights=None, custom_passing_
                 
             # Rounding check for competencies within the stage
             if round_to_five and computed_comps:
-                weights_c = {cc['code']: cc['weight'] for cc in computed_comps}
+                weights_c = {idx: cc['weight'] for idx, cc in enumerate(computed_comps)}
                 rounded_c = adjust_weights_to_step(weights_c, step=5, target_sum=100)
-                for cc in computed_comps:
-                    cc['weight'] = rounded_c[cc['code']]
+                for idx, cc in enumerate(computed_comps):
+                    cc['weight'] = rounded_c[idx]
             else:
                 comp_diff = 100 - sum(cc['weight'] for cc in computed_comps)
                 if comp_diff != 0 and computed_comps:

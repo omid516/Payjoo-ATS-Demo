@@ -23,6 +23,8 @@ from .views import (
     JobCompetencyConfigView,
     JobAssessmentPlanPrintView,
     JobExamSpecificationPrintView,
+    JobInterviewFormPrintView,
+    JobSkillTestSpecificationPrintView,
     SearchPostsApiView,
     SearchPostsDetailApiView,
     CustomCompetenciesReportView,
@@ -78,5 +80,7 @@ urlpatterns = [
     path('<int:job_id>/competencies/', JobCompetencyConfigView.as_view(), name='job_competency_config'),
     path('<int:job_id>/assessment-plan/print/', JobAssessmentPlanPrintView.as_view(), name='job_assessment_plan_print'),
     path('<int:job_id>/exam-specification/print/', JobExamSpecificationPrintView.as_view(), name='job_exam_specification_print'),
+    path('<int:job_id>/interview-form/print/', JobInterviewFormPrintView.as_view(), name='job_interview_form_print'),
+    path('<int:job_id>/skill-test-specification/print/', JobSkillTestSpecificationPrintView.as_view(), name='job_skill_test_specification_print'),
     path('competencies/patterns/print-ai-strategy/', JobAIStrategyPrintView.as_view(), name='job_ai_strategy_print'),
 ]

@@ -1,0 +1,465 @@
+{% load jalali_tags %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فرم ارزیابی مصاحبه تخصصی و شایستگی‌محور | {{ job.title }}</title>
+    <!-- Bootstrap RTL 5.3.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+    <!-- Google Fonts / Vazirmatn -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .print-container {
+            max-width: 950px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            padding: 2.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+        .doc-header {
+            border-bottom: 3px double #334155;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+        .control-panel {
+            max-width: 950px;
+            margin: 0 auto 1.5rem auto;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+        }
+        .table-details th {
+            width: 20%;
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .table-details td {
+            width: 30%;
+            font-size: 0.85rem;
+        }
+        .competency-table th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .competency-table td {
+            font-size: 0.82rem;
+        }
+        .signature-box {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 0.8rem 0.5rem;
+            min-height: 130px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #fafafa;
+        }
+        .signature-title {
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #1e293b;
+        }
+        .signature-note {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .instruction-box {
+            background-color: #f8fafc;
+            border-right: 4px solid #4f46e5;
+            border-radius: 6px;
+            padding: 0.9rem;
+            margin-bottom: 1.3rem;
+        }
+        .blank-line {
+            display: inline-block;
+            border-bottom: 1px dotted #94a3b8;
+            min-width: 140px;
+            height: 1.2rem;
+            vertical-align: middle;
+        }
+        .score-circle {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 11px;
+            color: #64748b;
+            margin: 0 1px;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-container {
+                border: none;
+                padding: 0;
+                max-width: 100%;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break-avoid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .signature-box {
+                border-color: #475569;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Interactive Control Panel (Hidden on Print) -->
+<div class="control-panel no-print shadow-sm">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                ← بازگشت به لیست
+            </a>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
+                🗣️ فرم مصاحبه تخصصی
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-xs text-muted">تعداد شایستگی‌ها: <strong id="compCountBadge" class="text-dark">{{ interview_competencies|length }}</strong></span>
+            <span class="text-xs text-muted">| مجموع اوزان: <strong id="totalWeightBadge" class="text-primary">۱۰۰٪</strong></span>
+            <button type="button" onclick="resetCompetencyRows()" class="btn btn-outline-warning btn-sm px-3 rounded-pill text-xs">
+                🔄 بازنشانی جدول
+            </button>
+            <button onclick="window.print()" class="btn btn-primary btn-sm px-4 py-1.5 rounded-pill shadow-sm text-xs font-bold">
+                🖨️ چاپ فرم A4
+            </button>
+        </div>
+    </div>
+    <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between">
+        <span>💡 <strong>راهنما:</strong> در صورت نیاز می‌توانید با کلیک بر روی دکمه «حذف» در هر ردیف، شایستگی مورد نظر را از جدول چاپ حذف کنید تا اوزان به صورت خودکار تراز شوند.</span>
+    </div>
+</div>
+
+<div class="print-container">
+    <!-- Header -->
+    <div class="doc-header d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold text-primary m-0">{{ org_setting.name|default:"شرکت فولاد مبارکه" }}</h4>
+            <span class="text-xs text-muted d-block mt-1">مدیریت توسعه و جذب منابع انسانی | شناسه شغل: {{ job.code }}</span>
+        </div>
+        <div class="text-end">
+            <h5 class="fw-bold text-dark m-0">فرم ارزیابی مصاحبه تخصصی و شایستگی‌محور</h5>
+            <span class="text-xs text-muted d-block mt-1">مخصوص اعضای کمیته مصاحبه (CBI Interview Evaluation Sheet)</span>
+        </div>
+    </div>
+
+    <!-- Section 1: Candidate & Job Details -->
+    <h6 class="fw-bold text-secondary mb-2 text-sm">۱. مشخصات داوطلب، شغل و ارزیابی</h6>
+    <table class="table table-bordered table-details align-middle text-sm mb-3">
+        <tbody>
+            <tr>
+                <th>عنوان شغل متقاضی</th>
+                <td class="font-bold text-dark">{{ job.title }}</td>
+                <th>کد شغل / رده سازمانی</th>
+                <td>{{ job.code }} / {{ job.job_category|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>نام و نام خانوادگی داوطلب</th>
+                <td><span class="blank-line w-100"></span></td>
+                <th>کد ملی / شماره پرونده</th>
+                <td><span class="blank-line w-100"></span></td>
+            </tr>
+            <tr>
+                <th>دپارتمان / محل خدمت</th>
+                <td>{{ job.department }} {% if job.unit %}- {{ job.unit }}{% endif %}</td>
+                <th>تاریخ و ساعت مصاحبه</th>
+                <td><span class="blank-line w-75"></span></td>
+            </tr>
+            <tr>
+                <th>سهم مصاحبه در جذب کل</th>
+                <td class="font-bold text-primary">
+                    {% for stage in interview_stages %}
+                        {{ stage.weight }}٪{% if not forloop.last %} + {% endif %}
+                    {% empty %}
+                        ۲۵٪
+                    {% endfor %}
+                </td>
+                <th>حد نصاب قبولی مصاحبه</th>
+                <td class="font-bold text-success">
+                    {% for stage in interview_stages %}
+                        {{ stage.passing_score|stringformat:".0f" }} از ۱۰۰
+                    {% empty %}
+                        ۶۰ از ۱۰۰
+                    {% endfor %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Section 2: Competency Assessment Matrix -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold text-secondary m-0 text-sm">۲. ماتریس سنجش شایستگی‌ها و مهارت‌های تخصصی داوطلب</h6>
+        <span class="text-xxs text-muted no-print">مقیاس نمره‌دهی: ۱ (ضعیف) تا ۵ (تسلط کامل)</span>
+    </div>
+
+    <table class="table table-bordered align-middle text-xs mb-3 competency-table text-center" id="competencyTable">
+        <thead>
+            <tr class="table-light">
+                <th style="width: 5%;">ردیف</th>
+                <th style="width: 11%;">کد</th>
+                <th class="text-start">عنوان شایستگی / مهارت تخصصی</th>
+                <th style="width: 10%;">سطح مورد انتظار</th>
+                <th style="width: 9%;">اهمیت</th>
+                <th style="width: 9%;">وزن (٪)</th>
+                <th style="width: 22%;">درجه انطباق و نمره داوطلب (۱ تا ۵)</th>
+                <th style="width: 22%;">شواهد رفتاری و ملاحظات ارزیاب</th>
+                <th style="width: 6%;" class="no-print">عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="competencyTableBody">
+            {% for comp in interview_competencies %}
+            <tr class="comp-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}" data-code="{{ comp.code }}">
+                <td class="row-num font-bold text-secondary">{{ forloop.counter }}</td>
+                <td class="font-monospace text-xxs text-muted">{{ comp.code }}</td>
+                <td class="text-start font-semibold">
+                    <div>{{ comp.name }}</div>
+                    <span class="text-muted text-xxs d-block mt-0.5">نوع: {{ comp.type }}</span>
+                </td>
+                <td class="font-bold text-secondary">{{ comp.level }}</td>
+                <td>{{ comp.importance }}</td>
+                <td class="font-bold text-primary comp-weight-cell">{{ comp.weight }}٪</td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center gap-1">
+                        <span class="score-circle">۱</span>
+                        <span class="score-circle">۲</span>
+                        <span class="score-circle">۳</span>
+                        <span class="score-circle">۴</span>
+                        <span class="score-circle">۵</span>
+                    </div>
+                </td>
+                <td class="text-start">
+                    <div style="min-height: 28px; border-bottom: 1px dotted #cbd5e1;"></div>
+                </td>
+                <td class="no-print">
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف از چاپ">
+                        ✕
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="emptyRow">
+                <td colspan="9" class="text-center text-muted py-3">هیچ شایستگی مهارتی یا مصاحبه‌ای برای این شغل تعریف نشده است.</td>
+            </tr>
+            {% endfor %}
+            <tr class="table-light fw-bold" id="totalRow">
+                <td colspan="5" class="text-end">جمع کل اوزان و میانگین ارزیابی:</td>
+                <td class="text-primary text-center" id="totalWeightCell">۱۰۰٪</td>
+                <td colspan="2" class="text-start pe-3">
+                    <span class="text-muted text-xxs">نمره نهایی مصاحبه (از ۱۰۰): </span>
+                    <span class="blank-line" style="min-width: 70px;"></span>
+                </td>
+                <td class="no-print"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Section 3: Scoring Guide -->
+    <div class="instruction-box text-xs mb-3">
+        <h6 class="fw-bold text-dark mb-1 text-xs">📌 راهنمای مقیاس ۵ درجه‌ای ارزیابی مبتنی بر شواهد (CBI):</h6>
+        <div class="row g-2 text-xxs text-secondary">
+            <div class="col-md-4"><strong>۱ (ضعیف / عدم انطباق):</strong> فاقد تجربه عملی و درک مفاهیم پایه.</div>
+            <div class="col-md-4"><strong>۳ (متوسط / حد استاندارد):</strong> دارای تجربه روتین و توانایی پاسخگویی به چالش‌های معمول.</div>
+            <div class="col-md-4"><strong>۵ (عالی / تسلط کامل):</strong> تسلط عمیق تحلیلی، ارائه مثال‌های دقیق بر اساس چارچوب STAR.</div>
+        </div>
+    </div>
+
+    <!-- Section 4: Final Summary & Decision -->
+    <div class="page-break-avoid mb-3">
+        <h6 class="fw-bold text-secondary mb-2 text-sm">۳. جمع‌بندی نقاط قوت، قابل بهبود و نظر نهایی کمیته مصاحبه</h6>
+        <div class="row g-2 text-xs mb-2">
+            <div class="col-6">
+                <div class="border rounded p-2 bg-light bg-opacity-25" style="min-height: 85px;">
+                    <strong class="text-success text-xxs d-block mb-1">✅ برجسته‌ترین نقاط قوت و مزیت‌های داوطلب:</strong>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded p-2 bg-light bg-opacity-25" style="min-height: 85px;">
+                    <strong class="text-warning text-xxs d-block mb-1">⚠️ حوزه‌های نیازمند آموزش و بهبود (Gap):</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-2 border rounded bg-white text-xs d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span class="font-bold text-dark text-xs">نتیجه‌گیری نهایی کمیته مصاحبه:</span>
+            <div class="d-flex gap-3">
+                <label class="d-flex align-items-center gap-1"><input type="checkbox"> [ ] پذیرش قطعی</label>
+                <label class="d-flex align-items-center gap-1"><input type="checkbox"> [ ] پذیرش مشروط (نیاز به دوره آموزشی)</label>
+                <label class="d-flex align-items-center gap-1"><input type="checkbox"> [ ] عدم پذیرش / رد</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Signature Workflows -->
+    <div class="page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-2 text-sm">۴. تاییدیه و امضای اعضای کمیته مصاحبه</h6>
+        <div class="row g-2 text-center">
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۱. کارشناس ارزیاب تخصصی ۱</span>
+                    <span class="text-xxs text-muted font-semibold">نماینده فنی دپارتمان</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۲. کارشناس ارزیاب تخصصی ۲</span>
+                    <span class="text-xxs text-muted font-semibold">ارزیاب مهارتی / همکار</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۳. کارشناس جذب و ارزیابی</span>
+                    <span class="text-xxs text-muted font-semibold">{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}مدیریت منابع انسانی{% endif %}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۴. مدیر / سرپرست واحد متقاضی</span>
+                    <span class="text-xxs text-muted font-semibold">{{ job.department }}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Store original rows on page load for reset
+    let originalRowsBackup = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const rows = document.querySelectorAll('.comp-row');
+        originalRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        recalculateWeights();
+    });
+
+    function removeCompetencyRow(button) {
+        const row = button.closest('.comp-row');
+        if (row) {
+            row.remove();
+            recalculateWeights();
+        }
+    }
+
+    function resetCompetencyRows() {
+        const tbody = document.getElementById('competencyTableBody');
+        const totalRow = document.getElementById('totalRow');
+        
+        // Remove current comp-rows
+        document.querySelectorAll('.comp-row').forEach(r => r.remove());
+        
+        // Insert backup rows before totalRow
+        originalRowsBackup.forEach(clonedRow => {
+            const freshRow = clonedRow.cloneNode(true);
+            tbody.insertBefore(freshRow, totalRow);
+        });
+
+        recalculateWeights();
+    }
+
+    function recalculateWeights() {
+        const rows = document.querySelectorAll('.comp-row');
+        const count = rows.length;
+        
+        document.getElementById('compCountBadge').innerText = count;
+
+        if (count === 0) {
+            document.getElementById('totalWeightCell').innerText = '۰٪';
+            document.getElementById('totalWeightBadge').innerText = '۰٪';
+            return;
+        }
+
+        // Calculate sum of remaining original weights
+        let sumOriginal = 0;
+        rows.forEach(r => {
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            sumOriginal += w;
+        });
+
+        let newWeights = [];
+        let distributedSum = 0;
+
+        rows.forEach((r, idx) => {
+            // Update row number
+            r.querySelector('.row-num').innerText = idx + 1;
+
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            const calculatedPercent = sumOriginal > 0 ? (w / sumOriginal) * 100 : (100 / count);
+            const roundedPercent = Math.round(calculatedPercent);
+            
+            newWeights.push({
+                row: r,
+                calc: calculatedPercent,
+                final: roundedPercent
+            });
+            distributedSum += roundedPercent;
+        });
+
+        // Adjust rounding diff to make sum exactly 100
+        let diff = 100 - distributedSum;
+        if (diff !== 0 && newWeights.length > 0) {
+            newWeights.sort((a, b) => (b.calc - Math.floor(b.calc)) - (a.calc - Math.floor(a.calc)));
+            let i = 0;
+            while (diff > 0 && i < newWeights.length) {
+                newWeights[i].final += 1;
+                diff--;
+                i++;
+            }
+            i = newWeights.length - 1;
+            while (diff < 0 && i >= 0) {
+                if (newWeights[i].final > 1) {
+                    newWeights[i].final -= 1;
+                    diff++;
+                }
+                i--;
+            }
+        }
+
+        // Apply updated weights to DOM
+        newWeights.forEach(item => {
+            item.row.setAttribute('data-weight', item.final);
+            item.row.querySelector('.comp-weight-cell').innerText = item.final + '٪';
+        });
+
+        document.getElementById('totalWeightCell').innerText = '۱۰۰٪';
+        document.getElementById('totalWeightBadge').innerText = '۱۰۰٪';
+    }
+</script>
+</body>
+</html>

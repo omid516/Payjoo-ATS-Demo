@@ -1,0 +1,419 @@
+{% load jalali_tags %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سند مشخصات و دستورالعمل آزمون مهارتی / عملی | {{ job.title }}</title>
+    <!-- Bootstrap RTL 5.3.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+    <!-- Google Fonts / Vazirmatn -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .print-container {
+            max-width: 950px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            padding: 2.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+        .doc-header {
+            border-bottom: 3px double #334155;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+        .control-panel {
+            max-width: 950px;
+            margin: 0 auto 1.5rem auto;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+        }
+        .table-details th {
+            width: 20%;
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .table-details td {
+            width: 30%;
+            font-size: 0.85rem;
+        }
+        .competency-table th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .competency-table td {
+            font-size: 0.82rem;
+        }
+        .signature-box {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 0.8rem 0.5rem;
+            min-height: 130px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #fafafa;
+        }
+        .signature-title {
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #1e293b;
+        }
+        .signature-note {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .instruction-box {
+            background-color: #f0fdf4;
+            border-right: 4px solid #16a34a;
+            border-radius: 6px;
+            padding: 0.9rem;
+            margin-bottom: 1.3rem;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-container {
+                border: none;
+                padding: 0;
+                max-width: 100%;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break-avoid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .signature-box {
+                border-color: #475569;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Interactive Control Panel (Hidden on Print) -->
+<div class="control-panel no-print shadow-sm">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                ← بازگشت به لیست
+            </a>
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
+                ⚙️ سند آزمون مهارتی / کارگاهی
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-1 me-2">
+                <label for="totalDurationInput" class="form-label m-0 text-xs fw-medium">مدت کل آزمون عملی (دقیقه):</label>
+                <input type="number" id="totalDurationInput" class="form-control form-control-sm text-center" style="width: 75px;" value="120" min="15" max="480" onchange="recalculateDuration()">
+            </div>
+            <button type="button" onclick="resetSkillRows()" class="btn btn-outline-warning btn-sm px-3 rounded-pill text-xs">
+                🔄 بازنشانی جدول
+            </button>
+            <button onclick="window.print()" class="btn btn-primary btn-sm px-4 py-1.5 rounded-pill shadow-sm text-xs font-bold">
+                🖨️ چاپ سند A4
+            </button>
+        </div>
+    </div>
+    <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between">
+        <span>💡 <strong>راهنما:</strong> این سند جهت ارسال به مرکز آزمون‌های مهارتی/فنی صادر می‌شود. می‌توانید در صورت لزوم شایستگی‌ها را حذف و تنظیم کنید.</span>
+        <span>تعداد شایستگی‌ها: <strong id="compCountBadge" class="text-dark">{{ skill_competencies|length }}</strong> | جمع اوزان: <strong id="totalWeightBadge" class="text-primary">۱۰۰٪</strong></span>
+    </div>
+</div>
+
+<div class="print-container">
+    <!-- Header -->
+    <div class="doc-header d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold text-primary m-0">{{ org_setting.name|default:"شرکت فولاد مبارکه" }}</h4>
+            <span class="text-xs text-muted d-block mt-1">مدیریت توسعه و جذب منابع انسانی | شناسه فرصت شغلی: {{ job.code }}</span>
+        </div>
+        <div class="text-end">
+            <h5 class="fw-bold text-dark m-0">سند مشخصات و سرفصل‌های آزمون مهارتی / کارگاهی</h5>
+            <span class="text-xs text-muted d-block mt-1">ابلاغیه رسمی به مرکز آزمون‌های مهارتی (Skill Test Specification)</span>
+        </div>
+    </div>
+
+    <!-- Section 1: Job & Stage Info -->
+    <h6 class="fw-bold text-secondary mb-2 text-sm">۱. مشخصات عمومی شغل و شرایط برگزاری آزمون مهارتی</h6>
+    <table class="table table-bordered table-details align-middle text-sm mb-3">
+        <tbody>
+            <tr>
+                <th>عنوان شغل متقاضی</th>
+                <td class="font-bold text-dark">{{ job.title }}</td>
+                <th>کد شغل / رده سازمانی</th>
+                <td>{{ job.code }} / {{ job.job_category|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>دپارتمان متقاضی</th>
+                <td>{{ job.department }} {% if job.unit %}/ {{ job.unit }}{% endif %}</td>
+                <th>کارشناس جذب مسئول</th>
+                <td>{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}-{% endif %}</td>
+            </tr>
+            <tr>
+                <th>سهم کل آزمون مهارتی در جذب</th>
+                <td class="font-bold text-primary">
+                    {% for stage in skill_stages %}
+                        {{ stage.weight }}٪{% if not forloop.last %} + {% endif %}
+                    {% empty %}
+                        ۳۰٪
+                    {% endfor %}
+                </td>
+                <th>حد نصاب قبولی در آزمون</th>
+                <td class="font-bold text-success">
+                    {% for stage in skill_stages %}
+                        {{ stage.passing_score|stringformat:".0f" }} از ۱۰۰
+                    {% empty %}
+                        ۶۰ از ۱۰۰
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <th>محل و محیط برگزاری</th>
+                <td>کارگاه‌ها و آزمایشگاه‌های تخصصی مرکز آزمون</td>
+                <th>مدت زمان کل ارزیابی عملی</th>
+                <td id="totalDurationCell" class="font-bold text-dark">۱۲۰ دقیقه</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Section 2: Skill Competencies Table -->
+    <h6 class="fw-bold text-secondary mb-2 text-sm">۲. جدول سرفصل‌ها، شایستگی‌های مهارتی و توزیع اوزان آزمون عملی</h6>
+    <table class="table table-bordered align-middle text-xs mb-3 competency-table text-center" id="skillTable">
+        <thead>
+            <tr class="table-light">
+                <th style="width: 5%;">ردیف</th>
+                <th style="width: 11%;">کد مهارت</th>
+                <th class="text-start">عنوان مهارت / شایستگی عملی</th>
+                <th style="width: 10%;">سطح تسلط</th>
+                <th style="width: 9%;">اهمیت</th>
+                <th style="width: 10%;">وزن سرفصل (٪)</th>
+                <th style="width: 12%;">مدت پیشنهادی</th>
+                <th style="width: 37%;" class="text-start">شاخص‌ها، سناریو و تجهیزات مورد سنجش در کارگاه</th>
+                <th style="width: 6%;" class="no-print">عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="skillTableBody">
+            {% for comp in skill_competencies %}
+            <tr class="skill-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}" data-code="{{ comp.code }}">
+                <td class="row-num font-bold text-secondary">{{ forloop.counter }}</td>
+                <td class="font-monospace text-xxs text-muted">{{ comp.code }}</td>
+                <td class="text-start font-semibold">
+                    <div>{{ comp.name }}</div>
+                    <span class="text-muted text-xxs d-block mt-0.5">نوع: {{ comp.type }}</span>
+                </td>
+                <td class="font-bold text-secondary">{{ comp.level }}</td>
+                <td>{{ comp.importance }}</td>
+                <td class="font-bold text-primary skill-weight-cell">{{ comp.weight }}٪</td>
+                <td class="duration-cell font-semibold text-dark">0 دقیقه</td>
+                <td class="text-start text-xxs" style="line-height: 1.5;">
+                    <div>• <strong>معیار سنجش:</strong> اجرای عملی فرآیند طبق استاندارد کارگاهی و سرعت در اجرای وظایف.</div>
+                    <div>• <strong>الزامات ایمنی:</strong> رعایت کامل آیین‌نامه‌ها و تجهیزات حفاظت فردی (HSE).</div>
+                </td>
+                <td class="no-print">
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeSkillRow(this)" title="حذف از چاپ">
+                        ✕
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="emptySkillRow">
+                <td colspan="9" class="text-center text-muted py-3">هیچ شایستگی مهارتی یا عملی برای این ردیف شغلی تعریف نشده است.</td>
+            </tr>
+            {% endfor %}
+            <tr class="table-light fw-bold" id="totalSkillRow">
+                <td colspan="5" class="text-end">جمع کل اوزان و زمان آزمون:</td>
+                <td class="text-primary text-center" id="totalWeightCell">۱۰۰٪</td>
+                <td class="text-dark text-center" id="totalDurationFooterCell">۱۲۰ دقیقه</td>
+                <td colspan="2" class="text-start text-xxs text-muted">تمامی سرفصل‌ها باید در چک‌لیست رسمی ممتحن ثبت شوند.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Section 3: Guidelines for Testing Center -->
+    <h6 class="fw-bold text-secondary mb-2 text-sm">۳. ضوابط فنی، ایمنی و دستورالعمل اجرایی مرکز آزمون مهارتی</h6>
+    <div class="instruction-box text-xs mb-3">
+        <h6 class="fw-bold text-dark mb-1 text-xs">📌 الزامات ایمنی و اجرای آزمون عملی:</h6>
+        <ul class="m-0 text-xxs text-secondary" style="padding-right: 1.2rem;">
+            <li class="mb-1"><strong>رعایت ایمنی و HSE:</strong> داوطلب پیش از ورود به محیط آزمون عملی موظف به استفاده از لوازم حفاظت فردی (کفش ایمنی، لباس کار، عینک و دستکش مناسب) می‌باشد. هرگونه خطای بحرانی ایمنی موجب توقف بلافاصله آزمون و نمره صفر در آن آیتم خواهد شد.</li>
+            <li class="mb-1"><strong>معیار نمره‌دهی فرآیندی:</strong> ۵۰٪ نمره به فرآیند اجرای کار (نحوه ابزارگیری، گام‌های اجرایی، تنظیمات) و ۵۰٪ به کیفیت محصول/خروجی نهایی اختصاص دارد.</li>
+            <li class="mb-1"><strong>مستندسازی و چک‌لیست:</strong> سرپرست کارگاه و ممتحن موظف به تکمیل فرم ریزنمرات و صورتجلسه آزمون عملی به همراه ثبت دقیق زمان صرف‌شده می‌باشند.</li>
+        </ul>
+    </div>
+
+    <!-- Section 4: Signatures -->
+    <div class="page-break-avoid">
+        <h6 class="fw-bold text-secondary mb-2 text-sm">۴. گردش تاییدات و تحویل سند مشخصات آزمون مهارتی</h6>
+        <div class="row g-2 text-center">
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۱. کارشناس تامین سرمایه انسانی</span>
+                    <span class="text-xxs text-muted font-semibold">{% if job.assigned_recruiter %}{{ job.assigned_recruiter.get_full_name|default:job.assigned_recruiter.username }}{% else %}کارشناس مسئول{% endif %}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۲. رئیس واحد تامین سرمایه</span>
+                    <span class="text-xxs text-muted font-semibold">ریاست واحد جذب</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۳. مدیر ناحیه متقاضی</span>
+                    <span class="text-xxs text-muted font-semibold">{{ job.department }}</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="signature-box">
+                    <span class="signature-title">۴. سرپرست مرکز آزمون مهارتی</span>
+                    <span class="text-xxs text-muted font-semibold">کارگاه / مرکز سنجش مهارت</span>
+                    <span class="signature-note">امضا و تاریخ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let originalSkillRowsBackup = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const rows = document.querySelectorAll('.skill-row');
+        originalSkillRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        recalculateSkillWeights();
+    });
+
+    function removeSkillRow(button) {
+        const row = button.closest('.skill-row');
+        if (row) {
+            row.remove();
+            recalculateSkillWeights();
+        }
+    }
+
+    function resetSkillRows() {
+        const tbody = document.getElementById('skillTableBody');
+        const totalRow = document.getElementById('totalSkillRow');
+        
+        document.querySelectorAll('.skill-row').forEach(r => r.remove());
+        
+        originalSkillRowsBackup.forEach(clonedRow => {
+            const freshRow = clonedRow.cloneNode(true);
+            tbody.insertBefore(freshRow, totalRow);
+        });
+
+        recalculateSkillWeights();
+    }
+
+    function recalculateDuration() {
+        recalculateSkillWeights();
+    }
+
+    function recalculateSkillWeights() {
+        const rows = document.querySelectorAll('.skill-row');
+        const count = rows.length;
+        
+        document.getElementById('compCountBadge').innerText = count;
+
+        const durationInput = document.getElementById('totalDurationInput');
+        let totalDuration = parseInt(durationInput.value) || 120;
+        if (totalDuration < 15) totalDuration = 15;
+
+        document.getElementById('totalDurationCell').innerText = totalDuration + ' دقیقه';
+        document.getElementById('totalDurationFooterCell').innerText = totalDuration + ' دقیقه';
+
+        if (count === 0) {
+            document.getElementById('totalWeightCell').innerText = '۰٪';
+            document.getElementById('totalWeightBadge').innerText = '۰٪';
+            return;
+        }
+
+        let sumOriginal = 0;
+        rows.forEach(r => {
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            sumOriginal += w;
+        });
+
+        let newWeights = [];
+        let distributedSum = 0;
+
+        rows.forEach((r, idx) => {
+            r.querySelector('.row-num').innerText = idx + 1;
+
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            const calculatedPercent = sumOriginal > 0 ? (w / sumOriginal) * 100 : (100 / count);
+            const roundedPercent = Math.round(calculatedPercent);
+            
+            newWeights.push({
+                row: r,
+                calc: calculatedPercent,
+                final: roundedPercent
+            });
+            distributedSum += roundedPercent;
+        });
+
+        // Rounding adjustment
+        let diff = 100 - distributedSum;
+        if (diff !== 0 && newWeights.length > 0) {
+            newWeights.sort((a, b) => (b.calc - Math.floor(b.calc)) - (a.calc - Math.floor(a.calc)));
+            let i = 0;
+            while (diff > 0 && i < newWeights.length) {
+                newWeights[i].final += 1;
+                diff--;
+                i++;
+            }
+            i = newWeights.length - 1;
+            while (diff < 0 && i >= 0) {
+                if (newWeights[i].final > 1) {
+                    newWeights[i].final -= 1;
+                    diff++;
+                }
+                i--;
+            }
+        }
+
+        // Apply updated weights and duration to DOM
+        newWeights.forEach(item => {
+            item.row.setAttribute('data-weight', item.final);
+            item.row.querySelector('.skill-weight-cell').innerText = item.final + '٪';
+            
+            const itemDuration = Math.max(5, Math.round((item.final / 100) * totalDuration));
+            item.row.querySelector('.duration-cell').innerText = itemDuration + ' دقیقه';
+        });
+
+        document.getElementById('totalWeightCell').innerText = '۱۰۰٪';
+        document.getElementById('totalWeightBadge').innerText = '۱۰۰٪';
+    }
+</script>
+</body>
+</html>

@@ -115,25 +115,34 @@
 <!-- Interactive Control Panel (Hidden on Print) -->
 <div class="control-panel no-print shadow-sm">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
             <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                 ← بازگشت به لیست
             </a>
-            <h6 class="m-0 fw-bold text-secondary">تنظیمات پویای سند آزمون:</h6>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
+                📝 سند مرکز آزمون کتبی
+            </span>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <label for="totalQuestionsInput" class="form-label m-0 text-sm fw-medium">تعداد کل سوالات:</label>
-            <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 80px;" value="50" min="10" max="200" onchange="recalculateQuestions()">
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <label for="timePerQuestionInput" class="form-label m-0 text-sm fw-medium">زمان هر سوال (دقیقه):</label>
-            <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 70px;" value="1.5" step="0.1" min="0.5" max="5.0" onchange="recalculateQuestions()">
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button onclick="window.print()" class="btn btn-primary btn-sm px-4 py-1.5 rounded-pill shadow-sm">
+            <div class="d-flex align-items-center gap-1">
+                <label for="totalQuestionsInput" class="form-label m-0 text-xs fw-medium">تعداد کل سوالات:</label>
+                <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 70px;" value="50" min="10" max="200" onchange="recalculateQuestions()">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <label for="timePerQuestionInput" class="form-label m-0 text-xs fw-medium">زمان/سوال (دقیقه):</label>
+                <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 65px;" value="1.5" step="0.1" min="0.5" max="5.0" onchange="recalculateQuestions()">
+            </div>
+            <button type="button" onclick="resetExamRows()" class="btn btn-outline-warning btn-sm px-2.5 rounded-pill text-xs">
+                🔄 بازنشانی جدول
+            </button>
+            <button onclick="window.print()" class="btn btn-primary btn-sm px-3.5 py-1.5 rounded-pill shadow-sm text-xs font-bold">
                 🖨️ چاپ سند A4
             </button>
         </div>
+    </div>
+    <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between">
+        <span>💡 <strong>راهنما:</strong> این سند جهت طراحی سوالات به مرکز آزمون ارسال می‌شود. می‌توانید در صورت نیاز شایستگی‌ها را از چاپ حذف نمایید.</span>
+        <span>تعداد شایستگی‌ها: <strong id="compCountBadge" class="text-dark">{{ exam_competencies|length }}</strong> | جمع اوزان: <strong id="totalWeightBadge" class="text-primary">۱۰۰٪</strong></span>
     </div>
 </div>
 
@@ -207,40 +216,47 @@
 
     <!-- Section 2: Competency Question Distribution Table -->
     <h6 class="fw-bold text-secondary mb-3">۲. جدول توزیع شایستگی‌ها و درصد سوالات آزمون کتبی</h6>
-    <table class="table table-bordered align-middle text-sm mb-4 competency-table text-center">
+    <table class="table table-bordered align-middle text-sm mb-4 competency-table text-center" id="examTable">
         <thead>
             <tr class="table-light">
                 <th style="width: 5%;">ردیف</th>
                 <th style="width: 12%;">کد شایستگی</th>
                 <th class="text-start">عنوان شایستگی ارزیابی آزمون کتبی</th>
-                <th style="width: 15%;">نوع شایستگی</th>
+                <th style="width: 14%;">نوع شایستگی</th>
                 <th style="width: 12%;">سطح تسلط مورد نیاز</th>
                 <th style="width: 10%;">اهمیت پست</th>
-                <th style="width: 13%;">وزن سوالات (٪)</th>
+                <th style="width: 12%;">وزن سوالات (٪)</th>
                 <th style="width: 13%;">تعداد سوالات پیشنهادی</th>
+                <th style="width: 6%;" class="no-print">عملیات</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="examTableBody">
             {% for comp in exam_competencies %}
-            <tr class="competency-row" data-weight="{{ comp.weight }}">
-                <td>{{ forloop.counter }}</td>
+            <tr class="competency-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}">
+                <td class="row-num font-bold text-secondary">{{ forloop.counter }}</td>
                 <td class="font-monospace text-xs text-muted">{{ comp.code }}</td>
                 <td class="text-start font-semibold">{{ comp.name }}</td>
                 <td>{{ comp.type }}</td>
                 <td class="comp-level font-bold text-secondary">{{ comp.level }}</td>
                 <td>{{ comp.importance }}</td>
-                <td class="font-bold text-primary">{{ comp.weight }}٪</td>
+                <td class="font-bold text-primary comp-weight-cell">{{ comp.weight }}٪</td>
                 <td class="question-count-cell font-bold text-dark">0</td>
+                <td class="no-print">
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeExamRow(this)" title="حذف از چاپ">
+                        ✕
+                    </button>
+                </td>
             </tr>
             {% empty %}
-            <tr>
-                <td colspan="8" class="text-center text-muted">هیچ شایستگی برای مرحله آزمون کتبی این ردیف شغلی تعریف نشده است.</td>
+            <tr id="emptyExamRow">
+                <td colspan="9" class="text-center text-muted">هیچ شایستگی برای مرحله آزمون کتبی این ردیف شغلی تعریف نشده است.</td>
             </tr>
             {% endfor %}
-            <tr class="table-light fw-bold">
+            <tr class="table-light fw-bold" id="totalExamRow">
                 <td colspan="6" class="text-end">جمع کل درصدها و تعداد سوالات:</td>
-                <td class="text-primary text-center">۱۰۰٪</td>
+                <td class="text-primary text-center" id="totalWeightCell">۱۰۰٪</td>
                 <td id="totalQuestionsCell" class="text-dark text-center">۵۰</td>
+                <td class="no-print"></td>
             </tr>
         </tbody>
     </table>
@@ -316,6 +332,36 @@
 </div>
 
 <script>
+    let originalExamRowsBackup = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const rows = document.querySelectorAll('.competency-row');
+        originalExamRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        recalculateQuestions();
+    });
+
+    function removeExamRow(button) {
+        const row = button.closest('.competency-row');
+        if (row) {
+            row.remove();
+            recalculateQuestions();
+        }
+    }
+
+    function resetExamRows() {
+        const tbody = document.getElementById('examTableBody');
+        const totalRow = document.getElementById('totalExamRow');
+        
+        document.querySelectorAll('.competency-row').forEach(r => r.remove());
+        
+        originalExamRowsBackup.forEach(clonedRow => {
+            const freshRow = clonedRow.cloneNode(true);
+            tbody.insertBefore(freshRow, totalRow);
+        });
+
+        recalculateQuestions();
+    }
+
     function recalculateQuestions() {
         const totalQuestionsInput = document.getElementById('totalQuestionsInput');
         const timePerQuestionInput = document.getElementById('timePerQuestionInput');
@@ -326,65 +372,117 @@
         if (totalQuestions < 5) totalQuestions = 5;
         if (timePerQuestion < 0.2) timePerQuestion = 0.2;
         
-        // Recalculate duration
+        const rows = document.querySelectorAll('.competency-row');
+        const count = rows.length;
+
+        document.getElementById('compCountBadge').innerText = count;
+
+        if (count === 0) {
+            document.getElementById('totalDurationCell').innerText = '۰ دقیقه';
+            document.getElementById('totalQuestionsCell').innerText = '۰';
+            document.getElementById('totalWeightCell').innerText = '۰٪';
+            document.getElementById('totalWeightBadge').innerText = '۰٪';
+            return;
+        }
+
+        // 1. Re-normalize weights among remaining rows
+        let sumOriginal = 0;
+        rows.forEach(r => {
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            sumOriginal += w;
+        });
+
+        let newWeights = [];
+        let distributedSumWeights = 0;
+
+        rows.forEach((r, idx) => {
+            r.querySelector('.row-num').innerText = idx + 1;
+            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            const calculatedPercent = sumOriginal > 0 ? (w / sumOriginal) * 100 : (100 / count);
+            const roundedPercent = Math.round(calculatedPercent);
+            
+            newWeights.push({
+                row: r,
+                calc: calculatedPercent,
+                finalWeight: roundedPercent
+            });
+            distributedSumWeights += roundedPercent;
+        });
+
+        let diffW = 100 - distributedSumWeights;
+        if (diffW !== 0 && newWeights.length > 0) {
+            newWeights.sort((a, b) => (b.calc - Math.floor(b.calc)) - (a.calc - Math.floor(a.calc)));
+            let i = 0;
+            while (diffW > 0 && i < newWeights.length) {
+                newWeights[i].finalWeight += 1;
+                diffW--;
+                i++;
+            }
+            i = newWeights.length - 1;
+            while (diffW < 0 && i >= 0) {
+                if (newWeights[i].finalWeight > 1) {
+                    newWeights[i].finalWeight -= 1;
+                    diffW++;
+                }
+                i--;
+            }
+        }
+
+        // Update weights in DOM
+        newWeights.forEach(item => {
+            item.row.setAttribute('data-weight', item.finalWeight);
+            item.row.querySelector('.comp-weight-cell').innerText = item.finalWeight + '٪';
+        });
+
+        // 2. Recalculate duration
         const duration = Math.round(totalQuestions * timePerQuestion);
         document.getElementById('totalDurationCell').innerText = duration + " دقیقه";
         document.getElementById('totalQuestionsCell').innerText = totalQuestions;
+        document.getElementById('totalWeightCell').innerText = '۱۰۰٪';
+        document.getElementById('totalWeightBadge').innerText = '۱۰۰٪';
         
-        // Recalculate question distribution
-        const rows = document.querySelectorAll('.competency-row');
-        let distributedSum = 0;
+        // 3. Recalculate question distribution
+        let distributedSumQ = 0;
         let rowData = [];
         
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
             const weight = parseFloat(row.getAttribute('data-weight')) || 0;
-            // Float calculated questions
             const calcCount = (weight / 100) * totalQuestions;
             rowData.push({
                 row: row,
                 calcCount: calcCount,
                 finalCount: Math.round(calcCount)
             });
-            distributedSum += Math.round(calcCount);
+            distributedSumQ += Math.round(calcCount);
         });
         
-        // Adjust round-off difference if necessary
-        let diff = totalQuestions - distributedSum;
-        if (diff !== 0 && rowData.length > 0) {
-            // Sort rowData by remainder decimal part descending if diff > 0, ascending if diff < 0
-            rowData.sort((a, b) => {
-                const remA = a.calcCount - Math.floor(a.calcCount);
-                const remB = b.calcCount - Math.floor(b.calcCount);
-                return remB - remA;
-            });
+        // Adjust round-off difference
+        let diffQ = totalQuestions - distributedSumQ;
+        if (diffQ !== 0 && rowData.length > 0) {
+            rowData.sort((a, b) => (b.calcCount - Math.floor(b.calcCount)) - (a.calcCount - Math.floor(a.calcCount)));
             
             let i = 0;
-            while (diff > 0 && i < rowData.length) {
+            while (diffQ > 0 && i < rowData.length) {
                 rowData[i].finalCount += 1;
-                diff -= 1;
+                diffQ -= 1;
                 i++;
             }
             
             i = rowData.length - 1;
-            while (diff < 0 && i >= 0) {
+            while (diffQ < 0 && i >= 0) {
                 if (rowData[i].finalCount > 0) {
                     rowData[i].finalCount -= 1;
-                    diff += 1;
+                    diffQ += 1;
                 }
                 i--;
             }
         }
         
-        // Update DOM cells
+        // Update question cells
         rowData.forEach(item => {
             item.row.querySelector('.question-count-cell').innerText = item.finalCount;
         });
     }
-
-    // Run once on load
-    window.addEventListener('DOMContentLoaded', () => {
-        recalculateQuestions();
-    });
 </script>
 </body>
 </html>

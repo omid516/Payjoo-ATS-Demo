@@ -529,12 +529,13 @@
         const impLabels = { 1: 'محوری', 2: 'تکلیف محور', 3: 'حداقلی' };
         const lvlLabels = { 1: 'آشنایی', 2: 'توانایی', 3: 'تسلط' };
         
+        const finalCode = code || ('MANUAL-' + Date.now() + '-' + Math.floor(Math.random() * 1000));
         const compData = {
             title: title,
             competency_type: typeVal,
             importance: importanceVal,
             level: levelVal,
-            code: code,
+            code: finalCode,
             model_name: modelName
         };
         

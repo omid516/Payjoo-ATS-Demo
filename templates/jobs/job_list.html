@@ -493,7 +493,23 @@
                                         {% if job.has_exam_stage %}
                                         <li>
                                             <a class="dropdown-item rounded d-flex align-items-center gap-2 py-1.5" href="{% url 'job_exam_specification_print' job.id %}" target="_blank">
-                                                <span>📝</span> سند مرکز آزمون (A4)
+                                                <span>📝</span> سند مرکز آزمون کتبی (A4)
+                                            </a>
+                                        </li>
+                                        {% endif %}
+
+                                        {% if job.has_skill_test_stage or job.selected_competencies.exists %}
+                                        <li>
+                                            <a class="dropdown-item rounded d-flex align-items-center gap-2 py-1.5" href="{% url 'job_skill_test_specification_print' job.id %}" target="_blank">
+                                                <span>⚙️</span> سند آزمون مهارتی / عملی (A4)
+                                            </a>
+                                        </li>
+                                        {% endif %}
+
+                                        {% if job.has_interview_stage or job.selected_competencies.exists %}
+                                        <li>
+                                            <a class="dropdown-item rounded d-flex align-items-center gap-2 py-1.5" href="{% url 'job_interview_form_print' job.id %}" target="_blank">
+                                                <span>🗣️</span> فرم ارزیابی مصاحبه تخصصی (A4)
                                             </a>
                                         </li>
                                         {% endif %}

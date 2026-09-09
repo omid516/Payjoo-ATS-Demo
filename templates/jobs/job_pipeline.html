@@ -62,16 +62,35 @@
 
 <div class="mb-4 d-flex justify-content-between align-items-end">
     <div>
+        {% if from_candidate %}
+        <a href="{% url 'candidate_detail' from_candidate.id %}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 mb-2 shadow-2xs font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+            ← بازگشت به پرونده متقاضی ({{ from_candidate.first_name }} {{ from_candidate.last_name }})
+        </a>
+        {% else %}
         <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
             {{ t.jp_back }}
         </a>
+        {% endif %}
         <h3 class="font-semibold text-secondary m-0">
             {{ t.jp_sub }} {{ job.title }}
         </h3>
-        <p class="text-muted text-sm m-0">{{ t.jp_code }} {{ job.code }} | {{ t.jp_dept }} {{ job.department }} | {{ t.jp_unit }} {{ job.unit|default:"-" }}{% if job.job_category %} | {{ t.jp_cat }} {{ job.job_category }}{% endif %}</p>
+        <p class="text-muted text-sm m-0 mt-1 d-flex flex-wrap align-items-center gap-1.5">
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-0.5 rounded text-xs font-monospace">
+                📋 شماره درخواست: {{ job.request_number }}
+            </span>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5 rounded text-xs font-monospace">
+                📌 کد پست: {{ job.code }}
+            </span>
+            <span class="text-muted text-xs">
+                | {{ t.jp_dept }} {{ job.department }} | {{ t.jp_unit }} {{ job.unit|default:"-" }}{% if job.job_category %} | {{ t.jp_cat }} {{ job.job_category }}{% endif %}
+            </span>
+        </p>
     </div>
     <div class="d-flex gap-2 align-items-center">
         <!-- Dropdown for print documents -->
@@ -235,6 +254,18 @@
     </div>
 </div>
 
+{% if from_candidate %}
+<div class="alert alert-primary bg-primary bg-opacity-10 border border-primary border-opacity-25 text-primary py-2.5 px-3.5 rounded-3 d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 text-xs shadow-xs">
+    <div class="d-flex align-items-center gap-2">
+        <span class="fs-5">👤</span>
+        <span>در حال مشاهده فرایند شغلی مرتبط با متقاضی <strong>{{ from_candidate.first_name }} {{ from_candidate.last_name }}</strong> (کد ملی: {{ from_candidate.national_id }})</span>
+    </div>
+    <a href="{% url 'candidate_detail' from_candidate.id %}" class="btn btn-xs btn-primary px-3 rounded-pill fw-semibold">
+        ← بازگشت به پرونده متقاضی
+    </a>
+</div>
+{% endif %}
+
 <!-- Applicants evaluation board -->
 <div class="card premium-card">
     <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center">
@@ -285,7 +316,7 @@
                     {% with screening_stage=stages|first %}
                     {% with scr_state=app|get_stage_state:screening_stage %}
                     {% with eff_status=app.effective_status %}
-                    <tr class="{% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %}">
+                    <tr id="candidate-app-row-{{ app.candidate.id }}" class="{% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %} {% if from_candidate and app.candidate.id == from_candidate.id %}table-primary border-start border-4 border-primary shadow-xs{% endif %}">
                         <td class="ps-4 text-center">
                             {% if eff_status == 'IN_PROGRESS' %}
                             <input type="checkbox" name="application_ids" value="{{ app.id }}" form="bulk-action-form" class="app-checkbox form-check-input">

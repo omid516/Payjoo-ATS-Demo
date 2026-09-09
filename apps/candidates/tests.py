@@ -274,6 +274,38 @@ class CandidateModuleTests(TestCase):
         self.assertFalse(CandidateExperience.objects.filter(pk=exp_pk).exists())
         self.assertFalse(JobApplication.objects.filter(pk=app_pk).exists())
 
+    def test_candidate_detail_job_links_and_pipeline_navigation(self):
+        """تست نمایش شماره درخواست، کد پست و لینک بازگشت از فرصت شغلی به پرونده متقاضی"""
+        candidate = Candidate.objects.create(
+            first_name='سعید',
+            last_name='کاظمی',
+            email='saeed@example.com',
+            phone_number='09131112233',
+            national_id='1112223344'
+        )
+        app = JobApplication.objects.create(
+            job=self.job,
+            candidate=candidate
+        )
+        self.client.login(username='recruiter_user', password='password123')
+        
+        # 1. Test candidate detail page displays request number, job code and pipeline link
+        detail_url = reverse('candidate_detail', kwargs={'pk': candidate.pk})
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.job.request_number)
+        self.assertContains(response, self.job.code)
+        expected_pipeline_link = f"{reverse('job_pipeline', kwargs={'pk': self.job.pk})}?from_candidate={candidate.pk}"
+        self.assertContains(response, expected_pipeline_link)
+
+        # 2. Test job pipeline page with from_candidate parameter displays return back button and candidate banner
+        pipeline_url = f"{reverse('job_pipeline', kwargs={'pk': self.job.pk})}?from_candidate={candidate.pk}"
+        pipeline_response = self.client.get(pipeline_url)
+        self.assertEqual(pipeline_response.status_code, 200)
+        self.assertEqual(pipeline_response.context['from_candidate'], candidate)
+        self.assertContains(pipeline_response, f"بازگشت به پرونده متقاضی ({candidate.first_name} {candidate.last_name})")
+        self.assertContains(pipeline_response, detail_url)
+
     def test_experience_form_jalali_date_conversion(self):
         """تست تبدیل خودکار تاریخ شمسی سوابق کاری در فرم به میلادی جهت ثبت در دیتابیس"""
         form_data = {

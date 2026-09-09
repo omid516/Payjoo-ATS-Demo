@@ -518,6 +518,14 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
                 stage_gaps[curr_stage.id] = gap
         data['stage_gaps'] = stage_gaps
 
+        from_candidate_id = self.request.GET.get('from_candidate')
+        if from_candidate_id:
+            try:
+                from apps.candidates.models import Candidate
+                data['from_candidate'] = Candidate.objects.filter(id=from_candidate_id, is_deleted=False).first()
+            except Exception:
+                pass
+
         return data
 
 

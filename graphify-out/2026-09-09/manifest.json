@@ -245,9 +245,9 @@
     "semantic_hash": ""
   },
   "apps/candidates/tests.py": {
-    "mtime": 1788968412.9797916,
-    "ast_hash": "1a398e181fa7b8e01ac66be568fcbed6",
-    "semantic_hash": ""
+    "mtime": 1786271352.0,
+    "ast_hash": "c2a9d67da2be4522b1bd6a46b2ad9b2e",
+    "semantic_hash": "c2a9d67da2be4522b1bd6a46b2ad9b2e"
   },
   "apps/candidates/urls.py": {
     "mtime": 1786271352.0,
@@ -255,9 +255,9 @@
     "semantic_hash": "2d3e866f47ee4f1e263da56258d83d5b"
   },
   "apps/candidates/views.py": {
-    "mtime": 1788967918.433588,
-    "ast_hash": "fd6306392cc26590365472cff9d0626d",
-    "semantic_hash": ""
+    "mtime": 1786271352.0,
+    "ast_hash": "fd4e7ff187481574a344228c17029abb",
+    "semantic_hash": "fd4e7ff187481574a344228c17029abb"
   },
   "apps/core/__init__.py": {
     "mtime": 1786271352.0,
@@ -870,9 +870,9 @@
     "semantic_hash": "97d6837d3df9fbd53e7c68d9f77a7c88"
   },
   "templates/candidates/candidate_detail.html": {
-    "mtime": 1788968272.5095284,
-    "ast_hash": "fc3b58301ccdbd4eaf9cf9d7c0b9baca",
-    "semantic_hash": ""
+    "mtime": 1786271352.0,
+    "ast_hash": "0efcfa7ea67d7af6396d2616c3118ddb",
+    "semantic_hash": "0efcfa7ea67d7af6396d2616c3118ddb"
   },
   "templates/candidates/candidate_form.html": {
     "mtime": 1786271352.0,
@@ -1120,8 +1120,8 @@
     "semantic_hash": ""
   },
   "templates/jobs/job_pipeline.html": {
-    "mtime": 1788968326.009646,
-    "ast_hash": "af379bc6254876f92fa8992049230374",
+    "mtime": 1788854904.2122846,
+    "ast_hash": "f2964d53bec3b94c62fea03634d83a47",
     "semantic_hash": ""
   },
   "templates/jobs/job_print_ad.html": {

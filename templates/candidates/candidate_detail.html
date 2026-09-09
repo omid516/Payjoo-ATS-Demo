@@ -245,14 +245,30 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex flex-column">
-                                        <a href="{% url 'job_pipeline' app.job.id %}?from_candidate={{ candidate.id }}" 
-                                           class="font-semibold text-primary text-decoration-none d-inline-flex align-items-center gap-1.5" 
-                                           title="مشاهده فرایند و جزئیات فرصت شغلی">
-                                            <span>{{ app.job.title }}</span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="text-primary opacity-75">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                            </svg>
-                                        </a>
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <a href="{% url 'job_pipeline' app.job.id %}?from_candidate={{ candidate.id }}" 
+                                               class="font-semibold text-primary text-decoration-none d-inline-flex align-items-center gap-1.5 stage-score-trigger" 
+                                               data-bs-toggle="popover"
+                                               data-bs-trigger="hover focus"
+                                               data-bs-placement="top"
+                                               data-bs-html="true"
+                                               data-bs-title="📊 جزئیات مراحل و نمرات: {{ app.job.title }}"
+                                               data-bs-content="<div class='text-start' style='font-family: Vazirmatn, sans-serif;'><div class='d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom'><span class='text-muted text-xxs'>کد: {{ app.job.code }}</span><span class='badge bg-primary text-white text-xxs'>نمره کل: {{ app.final_score|floatformat:1 }}</span></div><div class='d-flex flex-column gap-1'>{% for state in app.stage_states.all %}<div class='d-flex justify-content-between align-items-center p-1 rounded bg-light border text-xxs'><div><span class='fw-semibold text-dark'>{{ state.stage.name }}</span>{% if state.stage.weight %}<span class='text-muted text-xxs'> ({{ state.stage.weight }}٪)</span>{% endif %}</div><div class='d-flex align-items-center gap-1'><span class='fw-bold font-monospace text-primary'>{{ state.score|floatformat:1 }}</span>{% if state.status == 'COMPLETED' %}<span class='badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-1 py-0.5 rounded text-xxs'>قبول</span>{% elif state.status == 'FAILED' %}<span class='badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1 py-0.5 rounded text-xxs'>مردود</span>{% elif state.is_conditional_pass %}<span class='badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-1 py-0.5 rounded text-xxs'>مشروط</span>{% else %}<span class='badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-1 py-0.5 rounded text-xxs'>در انتظار</span>{% endif %}</div></div>{% empty %}<div class='text-muted text-center text-xxs py-1'>مرحله‌ای ثبت نشده است</div>{% endfor %}</div>{% if app.current_stage %}<div class='text-xxs text-muted mt-1.5 pt-1 border-top d-flex justify-content-between align-items-center'><span>مرحله جاری:</span><span class='fw-bold text-primary'>{{ app.current_stage.name }}</span></div>{% endif %}</div>">
+                                                <span>{{ app.job.title }}</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="text-primary opacity-75">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
+                                            </a>
+                                            <span class="badge bg-light text-primary border border-primary border-opacity-20 px-1.5 py-0.5 rounded text-xxs cursor-pointer stage-score-trigger" 
+                                                  data-bs-toggle="popover"
+                                                  data-bs-trigger="hover focus"
+                                                  data-bs-placement="top"
+                                                  data-bs-html="true"
+                                                  data-bs-title="📊 جزئیات مراحل: {{ app.job.title }}"
+                                                  data-bs-content="<div class='text-start' style='font-family: Vazirmatn, sans-serif;'><div class='d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom'><span class='text-muted text-xxs'>کد: {{ app.job.code }}</span><span class='badge bg-primary text-white text-xxs'>نمره کل: {{ app.final_score|floatformat:1 }}</span></div><div class='d-flex flex-column gap-1'>{% for state in app.stage_states.all %}<div class='d-flex justify-content-between align-items-center p-1 rounded bg-light border text-xxs'><div><span class='fw-semibold text-dark'>{{ state.stage.name }}</span>{% if state.stage.weight %}<span class='text-muted text-xxs'> ({{ state.stage.weight }}٪)</span>{% endif %}</div><div class='d-flex align-items-center gap-1'><span class='fw-bold font-monospace text-primary'>{{ state.score|floatformat:1 }}</span>{% if state.status == 'COMPLETED' %}<span class='badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-1 py-0.5 rounded text-xxs'>قبول</span>{% elif state.status == 'FAILED' %}<span class='badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1 py-0.5 rounded text-xxs'>مردود</span>{% elif state.is_conditional_pass %}<span class='badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-1 py-0.5 rounded text-xxs'>مشروط</span>{% else %}<span class='badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-1 py-0.5 rounded text-xxs'>در انتظار</span>{% endif %}</div></div>{% empty %}<div class='text-muted text-center text-xxs py-1'>مرحله‌ای ثبت نشده است</div>{% endfor %}</div></div>">
+                                                📊 نمرات
+                                            </span>
+                                        </div>
                                         <div class="d-flex flex-wrap align-items-center gap-1.5 mt-1">
                                             <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-1.5 py-0.5 rounded text-xxs font-monospace">
                                                 📋 درخواست: {{ app.job.request_number }}
@@ -276,7 +292,17 @@
                                     <span class="text-muted">{{ t.start_process }}</span>
                                     {% endif %}
                                 </td>
-                                <td class="font-bold text-secondary">{{ app.final_score|floatformat:1 }}</td>
+                                <td>
+                                    <span class="font-bold text-secondary cursor-pointer stage-score-trigger" 
+                                          data-bs-toggle="popover"
+                                          data-bs-trigger="hover focus"
+                                          data-bs-placement="top"
+                                          data-bs-html="true"
+                                          data-bs-title="📊 ریز نمرات مراحل"
+                                          data-bs-content="<div class='text-start' style='font-family: Vazirmatn, sans-serif;'><div class='d-flex flex-column gap-1'>{% for state in app.stage_states.all %}<div class='d-flex justify-content-between align-items-center p-1 rounded bg-light border text-xxs'><span class='fw-semibold text-dark'>{{ state.stage.name }} ({{ state.stage.weight }}٪):</span><span class='fw-bold font-monospace text-primary ms-2'>{{ state.score|floatformat:1 }}</span></div>{% endfor %}</div></div>">
+                                        {{ app.final_score|floatformat:1 }}
+                                    </span>
+                                </td>
                                 <td>
                                     {% if app.status == 'IN_PROGRESS' %}
                                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">{% if current_language_code == 'en' %}Under Assessment{% elif current_language_code == 'tr' %}Değerlendiriliyor{% elif current_language_code == 'ar' %}تحت التقييم{% else %}در حال ارزیابی{% endif %}</span>
@@ -319,4 +345,16 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const popoverTriggerList = document.querySelectorAll('.stage-score-trigger[data-bs-toggle="popover"]');
+        [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
+            sanitize: false,
+            container: 'body'
+        }));
+    });
+</script>
 {% endblock %}

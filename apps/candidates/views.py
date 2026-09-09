@@ -310,8 +310,16 @@ class CandidateDetailView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
         data['language_list'] = self.object.languages.filter(is_deleted=False)
         data['skill_list'] = self.object.skills.filter(is_deleted=False)
         data['certificate_list'] = self.object.certificates.filter(is_deleted=False)
-        # دریافت لیست درخواست‌ها به همراه مراحلشان
-        data['applications'] = self.object.applications.filter(is_deleted=False).select_related('job', 'current_stage')
+        # دریافت لیست درخواست‌ها به همراه مراحل و نمراتشان
+        from apps.candidates.models import ApplicationStageState
+        data['applications'] = self.object.applications.filter(is_deleted=False).select_related(
+            'job', 'current_stage'
+        ).prefetch_related(
+            models.Prefetch(
+                'stage_states',
+                queryset=ApplicationStageState.objects.filter(is_deleted=False).select_related('stage').order_by('stage__sequence')
+            )
+        )
         return data
 
 

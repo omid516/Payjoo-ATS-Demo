@@ -1,7 +1,7 @@
 # Graph Report - Payjoo-ATS-Demo-main  (2026-09-09)
 
 ## Corpus Check
-- 165 files · ~297,265 words
+- 165 files · ~297,685 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `83f93100`
+- Built from commit: `74c9b803`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -331,8 +331,8 @@ Cohesion: 0.06
 Nodes (18): JobOpportunityAndWorkflowTests, تست اعتبارسنجی فرم‌ست به نحوی که مجموع وزن مراحل باید دقیقاً ۱۰۰٪ باشد, تست حذف نرم فرصت‌های شغلی بدون حذف فیزیکی از دیتابیس, تست عملکرد صحیح فیلتر تبدیل تاریخ به شمسی, تست دریافت تاریخ شمسی از ورودی فرم و تبدیل صحیح آن به تاریخ میلادی برای ذخیره‌سا, تست ویوها و فرآیند ایجاد و مدیریت الگوهای فرآیند استخدام, تست خروجی اکسل فرصت‌های شغلی, تست ثبت و ویرایش فیلد رده شغلی در فرصت‌های شغلی (+10 more)
 
 ### Community 12 - "Static: Bootstrap Bundle Be"
-Cohesion: 0.12
-Nodes (20): be(), D(), ei(), getDataAttributes(), I(), Ie(), j(), k() (+12 more)
+Cohesion: 0.10
+Nodes (23): Ae(), be(), D(), ei(), getDataAttributes(), I(), Ie(), j() (+15 more)
 
 ### Community 14 - "Jobs: Jobs Utils Get"
 Cohesion: 0.22
@@ -384,7 +384,7 @@ Nodes (16): CentralCompetency, CompetencyModel, CompetencyModelItem, JobOpportun
 
 ### Community 31 - "Accounts: Accounts Usercreationform Clea"
 Cohesion: 0.13
-Nodes (8): CustomLoginView, ListView, UserListView, DjangoLoginView, Meta, UserCreationForm, UserUpdateForm, تست عدم نمایش متقاضیان در لیست کاربران و فرم‌های ثبت‌نام/ویرایش
+Nodes (8): CustomLoginView, CreateView, UserCreateView, DjangoLoginView, Meta, UserCreationForm, UserUpdateForm, تست عدم نمایش متقاضیان در لیست کاربران و فرم‌های ثبت‌نام/ویرایش
 
 ### Community 32 - "Static: Bootstrap Bundle Es"
 Cohesion: 0.12
@@ -395,8 +395,8 @@ Cohesion: 0.16
 Nodes (7): AuditLogListView, DashboardView, TemplateView, SMSPanelDashboardView, SystemBackupView, UserDeleteView, UserPreferencesView
 
 ### Community 34 - "Es"
-Cohesion: 0.23
-Nodes (25): Ae(), Ce(), De(), di(), $e(), Ee(), fe(), ge() (+17 more)
+Cohesion: 0.28
+Nodes (22): Ce(), De(), di(), $e(), Ee(), fe(), ge(), ii() (+14 more)
 
 ### Community 35 - "Accounts: Accounts Smstemplateandpanelte"
 Cohesion: 0.15

@@ -1,16 +1,16 @@
-# Graph Report - Payjoo-ATS-Demo-main  (2026-09-08)
+# Graph Report - Payjoo-ATS-Demo-main  (2026-09-09)
 
 ## Corpus Check
-- 165 files · ~296,676 words
+- 165 files · ~297,265 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2017 nodes · 5962 edges · 264 communities (75 shown, 189 thin omitted)
-- Extraction: 54% EXTRACTED · 46% INFERRED · 0% AMBIGUOUS · INFERRED: 2728 edges (avg confidence: 0.52)
+- 2019 nodes · 6144 edges · 275 communities (79 shown, 196 thin omitted)
+- Extraction: 56% EXTRACTED · 44% INFERRED · 0% AMBIGUOUS · INFERRED: 2700 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1eccb3a8`
+- Built from commit: `83f93100`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -117,6 +117,7 @@
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
+- .get_active_setting
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
@@ -127,6 +128,20 @@
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
+- .test_auto_creation_of_stage_states
+- Candidates: Candidates Candidatemodulete
+- .test_bulk_score_submission
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- .test_candidate_dashboard_access_control
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- Candidates: Candidates Candidatemodulete
+- .test_candidate_self_registration_restores_soft_deleted
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
@@ -142,21 +157,13 @@
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
+- .test_import_bulk_interview_scores_with_comments
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
-- Candidates: Candidates Candidatemodulete
+- .test_job_status_updates_on_stage_advance
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
 - Candidates: Candidates Candidatemodulete
@@ -166,6 +173,7 @@
 - Historical: Historical Import 0001
 - Historical: Historical Import 0002
 - Jobs: Jobs 0001 Initial
+- .test_score_entry_custom_evaluation_date
 - Jobs: Jobs 0003 Workflowtemplate
 - Jobs: Jobs 0004 Jobstageinterviewer
 - Jobs: Jobs 0005 Jobopportunitystage
@@ -213,6 +221,7 @@
 - Exams: Exams
 - Historical: Historical Import Init
 - Historical: Historical Import Init
+- .test_score_entry_failed_prior_filtering
 - Interviews: Interviews
 - Jobs: Jobs Init
 - Jobs: Jobs Management Init
@@ -224,6 +233,7 @@
 - گزارش جامع تغییرات و به‌روزرسانی‌های سامانه Payjoo ATS
 - UserProfile
 - .get_context_data
+- .test_score_entry_save_all_candidates_no_pagination
 - English Documentation
 - check_stage_access
 - TestCase
@@ -252,22 +262,22 @@
 - 0036_organizationsetting_general_requirements.py
 
 ## God Nodes (most connected - your core abstractions)
-1. `UserProfile` - 199 edges
-2. `RoleRequiredMixin` - 154 edges
-3. `SMSTemplate` - 131 edges
-4. `JobOpportunity` - 108 edges
-5. `Candidate` - 102 edges
-6. `JobApplication` - 100 edges
-7. `ApplicationStageState` - 100 edges
-8. `JobOpportunityStage` - 86 edges
-9. `CandidateEducation` - 85 edges
-10. `CandidateExperience` - 85 edges
+1. `UserProfile` - 201 edges
+2. `RoleRequiredMixin` - 155 edges
+3. `SMSTemplate` - 132 edges
+4. `JobOpportunity` - 110 edges
+5. `Candidate` - 104 edges
+6. `JobApplication` - 102 edges
+7. `ApplicationStageState` - 102 edges
+8. `JobOpportunityStage` - 88 edges
+9. `CandidateEducation` - 87 edges
+10. `CandidateExperience` - 87 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Meta` --uses--> `UserProfile`  [INFERRED]
-  apps/accounts/forms.py → apps/accounts/models.py
 - `test()` --calls--> `verify_license_key()`  [INFERRED]
   scratch/test_license_script.py → apps/core/license.py
+- `Meta` --uses--> `UserProfile`  [INFERRED]
+  apps/accounts/forms.py → apps/accounts/models.py
 - `test()` --calls--> `generate_license_key()`  [INFERRED]
   scratch/test_license_script.py → apps/core/license.py
 - `AuditLogListView` --uses--> `PersianLoginForm`  [INFERRED]
@@ -278,15 +288,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (264 total, 189 thin omitted)
+## Communities (275 total, 196 thin omitted)
 
 ### Community 0 - "Candidates: Candidates Get Str"
 Cohesion: 0.06
-Nodes (117): PasswordChangeView, UserPassesTestMixin, SMSTemplate, check_stage_access(), میکسین برای اعتبارسنجی نقش کاربر در نماهای کلاس‌محور., بررسی دسترسی نقش کاربر به یک مرحله ارزیابی خاص بر اساس نام مرحله.     - مدیران و, دکوراتور برای اعتبارسنجی نقش کاربر در نماهای تابع‌محور., role_required() (+109 more)
+Nodes (125): AssessmentCenterDetailReportView, AssessmentCenterReportView, AssessmentCenterSheetView, AssignCandidateToJobView, BulkAdvanceStageView, BulkInterviewScoresView, BulkSendNotificationModalView, BulkSendNotificationView (+117 more)
 
 ### Community 2 - "Recruitment: Planning Recruitment Ration"
-Cohesion: 0.06
-Nodes (40): Holiday, JobRecruitmentPlan, JobStagePlan, Meta, StageTypeConfiguration, تست عملکرد صفحات و ارسال فرم‌ها در ماژول برنامه‌ریزی, تست خروجی اکسل برنامه‌های جذب, تست جستجو، فیلتر دپارتمان و مرتب‌سازی در داشبورد برنامه‌ریزی (+32 more)
+Cohesion: 0.07
+Nodes (13): تست عملکرد صفحات و ارسال فرم‌ها در ماژول برنامه‌ریزی, تست خروجی اکسل برنامه‌های جذب, تست جستجو، فیلتر دپارتمان و مرتب‌سازی در داشبورد برنامه‌ریزی, تست دسترسی به نمای تقویم شمسی ماهانه, تست خروجی اکسل دستور کار هفتگی, تست نمای چاپی شکیل دستور کار هفتگی, تست هدایت خودکار ایجاد شغل به برنامه‌ریزی و سپس سند آزمون, تست نمای دستیار هوشمند پیشنهاد تاریخ شروع و ظرفیت (+5 more)
 
 ### Community 3 - "Historical: Import Historical Test"
 Cohesion: 0.05
@@ -297,36 +307,36 @@ Cohesion: 0.29
 Nodes (8): handle_job_application_notification(), handle_stage_state_notification(), log_notification(), render_notification_template(), send_dynamic_email(), send_gateway_sms(), send_kavenegar_sms(), NotificationLog
 
 ### Community 5 - "Jobs: Jobs Jobopportunityform Jobopportu"
-Cohesion: 0.18
-Nodes (39): JobDescriptionTemplateForm, JobOpportunityForm, WorkflowTemplateForm, CentralCompetency, JobDescriptionTemplate, WorkflowTemplate, AISettingView, CentralCompetencyUploadView (+31 more)
+Cohesion: 0.17
+Nodes (40): JobDescriptionTemplateForm, JobOpportunityForm, WorkflowTemplateForm, AssessmentCompetency, JobDescriptionTemplate, WorkflowStageTemplate, AISettingView, CentralCompetencyListView (+32 more)
 
 ### Community 6 - "Jobs: Jobs Candidates Get"
 Cohesion: 0.08
-Nodes (4): JobOpportunity, JobOpportunityStage, همگام‌سازی وضعیت‌های مراحل (ApplicationStageState) متقاضیان فعال فرصت شغلی, JobOpportunityDeleteView
+Nodes (3): JobOpportunity, JobOpportunityStage, همگام‌سازی وضعیت‌های مراحل (ApplicationStageState) متقاضیان فعال فرصت شغلی
 
 ### Community 7 - "Jobs: Jobs Get Context"
 Cohesion: 0.07
-Nodes (12): apply_job_filters(), CentralCompetencyListView, clean_str(), CompetencyModelListView, CustomCompetenciesReportView, get_ai_recommendation(), get_job_category_from_title(), is_functional_competency() (+4 more)
+Nodes (12): apply_job_filters(), clean_str(), CompetencyModelListView, CustomCompetenciesReportView, get_ai_recommendation(), get_job_category_from_title(), is_functional_competency(), JobOpportunityListView (+4 more)
 
 ### Community 8 - "Jobs: Jobs Accounts Userprofile"
-Cohesion: 0.13
-Nodes (13): AISettingForm, BaseJobOpportunityStageFormSet, BaseWorkflowStageTemplateFormSet, JobOpportunityStageForm, Meta, OrganizationSettingForm, WorkflowStageTemplateForm, AISetting (+5 more)
+Cohesion: 0.14
+Nodes (13): AISettingForm, BaseJobOpportunityStageFormSet, BaseWorkflowStageTemplateFormSet, JobOpportunityStageForm, Meta, OrganizationSettingForm, WorkflowStageTemplateForm, AIPostRecommendation (+5 more)
 
 ### Community 9 - "Jobs: Jobs Admin Str"
 Cohesion: 0.06
 Nodes (34): 1. اصلاح و بازطراحی A4 سند آزمون استخدامی (Issue #3), 1. امکان برگزاری چند آزمون با یک کد شغل (Issue #1), 1. رفع باگ عدم نمایش متون سایدبار و منوها (Issue #9), 1. ستون شماره ردیف (#) در لیست اصلی متقاضیان و بانک اطلاعاتی داوطلبان, 1. سیستم تولید هوشمند شرح شغل و شرایط احراز بر اساس بنچمارک‌های مرجع شغلی, 1. پویاسازی نام سازمان در کلیه صفحات و قالب‌ها (Branding Modernization), 1. گزینه انتخاب تعداد ردیف در صفحه فرصت‌های شغلی (Issue #11), 2. افزودن فیلد نام کارخانه / محل استقرار به فرصت شغلی (Issue #7) (+26 more)
 
 ### Community 10 - "Jobs: Jobs Jobopportunityandworkflowtest"
-Cohesion: 0.07
-Nodes (14): JobOpportunityAndWorkflowTests, تست اعتبارسنجی فرم‌ست به نحوی که مجموع وزن مراحل باید دقیقاً ۱۰۰٪ باشد, تست حذف نرم فرصت‌های شغلی بدون حذف فیزیکی از دیتابیس, تست دریافت تاریخ شمسی از ورودی فرم و تبدیل صحیح آن به تاریخ میلادی برای ذخیره‌سا, تست ویوها و فرآیند ایجاد و مدیریت الگوهای فرآیند استخدام, تست خروجی اکسل فرصت‌های شغلی, تست ثبت و ویرایش فیلد رده شغلی در فرصت‌های شغلی, تست نمایش صفحه چاپ سند آزمون به همراه جزئیات برنامه‌ریزی جذب (+6 more)
+Cohesion: 0.06
+Nodes (18): JobOpportunityAndWorkflowTests, تست اعتبارسنجی فرم‌ست به نحوی که مجموع وزن مراحل باید دقیقاً ۱۰۰٪ باشد, تست حذف نرم فرصت‌های شغلی بدون حذف فیزیکی از دیتابیس, تست عملکرد صحیح فیلتر تبدیل تاریخ به شمسی, تست دریافت تاریخ شمسی از ورودی فرم و تبدیل صحیح آن به تاریخ میلادی برای ذخیره‌سا, تست ویوها و فرآیند ایجاد و مدیریت الگوهای فرآیند استخدام, تست خروجی اکسل فرصت‌های شغلی, تست ثبت و ویرایش فیلد رده شغلی در فرصت‌های شغلی (+10 more)
 
 ### Community 12 - "Static: Bootstrap Bundle Be"
-Cohesion: 0.06
-Nodes (50): Ae(), be(), Ce(), D(), De(), di(), $e(), Ee() (+42 more)
+Cohesion: 0.12
+Nodes (20): be(), D(), ei(), getDataAttributes(), I(), Ie(), j(), k() (+12 more)
 
 ### Community 14 - "Jobs: Jobs Utils Get"
-Cohesion: 0.14
-Nodes (10): generate_license_key(), get_machine_id(), get_system_license_limits(), Generates a unique hardware identifier for the current machine based on MAC addr, Fetches the active organization setting, verifies its license_key,     and retur, Generates a cryptographically signed license key., Verifies a base64 encoded license key.     Returns a dict containing license sta, verify_license_key() (+2 more)
+Cohesion: 0.22
+Nodes (4): generate_license_key(), Generates a cryptographically signed license key., LicenseTestCase, test()
 
 ### Community 15 - "Jobs: Jobs Competencyenginetests Test"
 Cohesion: 0.07
@@ -337,12 +347,8 @@ Cohesion: 0.08
 Nodes (13): تست کنترل دسترسی نقش‌ها به صفحات پشتیبان‌گیری و بازگردانی, تست تهیه نسخه پشتیبان و تولید فایل ZIP حاوی دیتابیس, تست بازگردانی فایل نامعتبر (فایل زیپ بدون db.sqlite3), تست بازگردانی فایل دیتابیس نامعتبر, تست وجود متغیر نسخه جاری در کانتکست صفحه پشتیبان‌گیری, تست بررسی به‌روزرسانی در صورتی که سیستم به‌روز باشد, تست بررسی به‌روزرسانی در صورتی که نسخه جدید موجود باشد, تست رفتار سیستم در صورت ناموفق بودن ارتباط با گیت‌هاب (+5 more)
 
 ### Community 17 - "Candidates: Candidates Accounts Get"
-Cohesion: 0.07
-Nodes (13): ActiveJobWithoutCandidatesCheck, BaseIntegrityCheck, CompletedStageWithoutDateCheck, CutoffContradictionCheck, InterviewerScoreVarianceCheck, LogicalDateAnomalyCheck, MissingStageStatesCheck, Executes the query and returns a list of discrepancies.         Each item is a d (+5 more)
-
-### Community 20 - "Static: Bootstrap Bundle Jn"
-Cohesion: 0.08
-Nodes (3): H, Jn, W
+Cohesion: 0.16
+Nodes (6): ActiveJobWithoutCandidatesCheck, BaseIntegrityCheck, CutoffContradictionCheck, LogicalDateAnomalyCheck, Executes the query and returns a list of discrepancies.         Each item is a d, StatusSyncCompletedCheck
 
 ### Community 21 - "Accounts: Accounts Post Get"
 Cohesion: 0.13
@@ -353,24 +359,28 @@ Cohesion: 0.15
 Nodes (16): Command, detect_workflow_col(), find_col_idx(), get_or_create_workflow(), map_status(), normalize_digits(), parse_jalali_date(), Management Command: import_historical_jobs ===================================== (+8 more)
 
 ### Community 23 - "Jobs: Jobs Import Management"
-Cohesion: 0.10
-Nodes (10): get_kn_sk_ab_competencies_for_print(), JobOpportunityCreateView, JobOpportunityUpdateView, CreateView, UpdateView, برمی‌گرداند تمامی شایستگی‌های دانشی (KN) و مهارتی/توانایی (SK, AB) فرصت شغلی را, WorkflowTemplateCreateView, WorkflowTemplateUpdateView (+2 more)
+Cohesion: 0.16
+Nodes (6): JobOpportunityCreateView, JobOpportunityUpdateView, CreateView, UpdateView, WorkflowTemplateCreateView, WorkflowTemplateUpdateView
+
+### Community 24 - "Static: Bootstrap Bundle Bt"
+Cohesion: 0.14
+Nodes (4): Bt, getElementFromSelector(), getSelectorFromElement(), Y
 
 ### Community 27 - "Accounts: Accounts Userroleandpermission"
 Cohesion: 0.12
 Nodes (8): تست اینکه رکوردهای جدول AuditLog غیرقابل ویرایش و حذف هستند, تست محاسبات آماری، میانگین زمان مراحل و متقاضیان تاخیردار در داشبورد مدیریتی, تست کنترل دسترسی جامع نقش‌ها به مراحل ارزیابی و ثبت نمرات, تست دسترسی به لیست لاگ‌های ممیزی و فیلتر کردن آن‌ها, تست ایجاد خودکار پروفایل کاربر پس از ساخت اکانت کاربر جنگو, تست اینکه ارزیاب‌های خارجی به طور خودکار فلگ is_external=True می‌گیرند, تست کنترل دسترسی نقش‌ها (RBAC) به صفحات مدیریت کاربران, UserRoleAndPermissionTests
 
 ### Community 28 - "Core: Core Candidates Integrity"
-Cohesion: 0.17
-Nodes (6): MiddlewareMixin, AuditMiddleware, get_current_ip(), get_current_user(), log_action(), سرویس ثبت خودکار لاگ تغییرات با استفاده از کاربر و آی‌پی جاری سشن.
+Cohesion: 0.25
+Nodes (4): get_current_ip(), get_current_user(), log_action(), سرویس ثبت خودکار لاگ تغییرات با استفاده از کاربر و آی‌پی جاری سشن.
 
 ### Community 29 - "Candidates: Candidates Candidatemodulete"
-Cohesion: 0.10
-Nodes (10): CandidateModuleTests, تست انتساب مستقیم متقاضی به فرصت شغلی فعال, تست صفحه‌بندی (Pagination) در لیست متقاضیان بانک استعدادها, تست منطق ارجاع مشروط متقاضیان و دسترسی به مراحل بعدی, تست ثبت نمره در مرحله قفل شده با استفاده از قابلیت ثبت آزاد (بای‌پس), تست ورود اطلاعات متقاضیان از اکسل زمانی که متقاضی از قبل در سیستم وجود دارد, تست محاسبه خودکار امتیاز نهایی وزنی درخواست همکاری پس از ثبت نمره برای هر مرحله, تست ثبت‌نام خودکار متقاضی (+2 more)
+Cohesion: 0.24
+Nodes (18): Holiday, JobRecruitmentPlan, JobStagePlan, Meta, StageTypeConfiguration, AnalyticsDashboardView, EditJobStagePlanView, ExportPlanningExcelView (+10 more)
 
 ### Community 30 - "Static: Bootstrap Bundle Us"
-Cohesion: 0.20
-Nodes (18): AIPostRecommendation, AssessmentCompetency, CompetencyModel, CompetencyModelItem, JobOpportunityCompetency, JobStageInterviewer, Meta, SoftDeleteModel (+10 more)
+Cohesion: 0.28
+Nodes (16): CentralCompetency, CompetencyModel, CompetencyModelItem, JobOpportunityCompetency, JobStageInterviewer, SoftDeleteModel, AssessmentCompetencyAdmin, CentralCompetencyAdmin (+8 more)
 
 ### Community 31 - "Accounts: Accounts Usercreationform Clea"
 Cohesion: 0.13
@@ -383,6 +393,10 @@ Nodes (8): DefaultJobAdUrlAndJobOverrideTests, تست اینکه در صورت �
 ### Community 33 - "Accounts: Accounts Get Context"
 Cohesion: 0.16
 Nodes (7): AuditLogListView, DashboardView, TemplateView, SMSPanelDashboardView, SystemBackupView, UserDeleteView, UserPreferencesView
+
+### Community 34 - "Es"
+Cohesion: 0.23
+Nodes (25): Ae(), Ce(), De(), di(), $e(), Ee(), fe(), ge() (+17 more)
 
 ### Community 35 - "Accounts: Accounts Smstemplateandpanelte"
 Cohesion: 0.15
@@ -397,16 +411,20 @@ Cohesion: 0.23
 Nodes (9): Command, find_shamsi_col_idx(), map_status(), normalize_digits(), parse_shamsi_date_str(), Management Command: update_historical_dates ====================================, تبدیل ارقام فارسی/عربی به انگلیسی, یافتن ایندکس ستون بر اساس کلمات کلیدی، با اولویت ستون‌های غیرمیلادی (+1 more)
 
 ### Community 41 - "Jobs: Jobs Jobopportunitybulkstatustests"
-Cohesion: 0.15
-Nodes (4): JobOpportunitySortingTests, JobOpportunityStageSyncTests, TestCase, SearchCompetenciesApiTests
+Cohesion: 0.12
+Nodes (7): GenerateJobSpecsApiViewTests, JobOpportunityCascadeDeleteTests, JobOpportunityStageSyncTests, TestCase, تست اینکه بدون عنوان شغل خطای 400 بازگردانده می‌شود, تست اینکه با دادن عنوان شغل شرح شغل و شرایط احراز بنچمارک تولید می‌شود, SearchCompetenciesApiTests
 
 ### Community 42 - "Accounts: Accounts Init Persianloginform"
-Cohesion: 0.15
-Nodes (4): تست عملکرد صحیح فیلتر تبدیل تاریخ به شمسی, to_jalali(), export_to_excel_response(), تولید فایل اکسل راست‌چین شده با هدرهای زیبا و خروجی مستقیم به پاسخ HTTP
+Cohesion: 0.18
+Nodes (3): to_jalali(), export_to_excel_response(), تولید فایل اکسل راست‌چین شده با هدرهای زیبا و خروجی مستقیم به پاسخ HTTP
 
 ### Community 43 - "JobOpportunitySortingTests"
-Cohesion: 0.33
-Nodes (3): GenerateJobSpecsApiViewTests, تست اینکه بدون عنوان شغل خطای 400 بازگردانده می‌شود, تست اینکه با دادن عنوان شغل شرح شغل و شرایط احراز بنچمارک تولید می‌شود
+Cohesion: 0.17
+Nodes (9): add_working_days(), calculate_recruitment_schedule(), get_consumed_capacity(), get_jalali_month_range(), get_next_working_day(), parse_jalali_to_gregorian(), Calculates the consumed capacity of a stage type in a given month.     If the mo, Calculates stage-by-stage planned dates for a job opportunity based on SLAs and (+1 more)
+
+### Community 44 - "Candidates: Import Candidates Management"
+Cohesion: 0.12
+Nodes (8): CandidateModuleTests, تست انتساب مستقیم متقاضی به فرصت شغلی فعال, تست ورود اطلاعات متقاضیان از اکسل, تست عدم وجود صفحه‌بندی در صفحه ورود نمرات و نمایش همزمان تمام متقاضیان, تست عدم اجبار در ورود ارزیاب و توضیحات و معتبر بودن تاریخ ارزیابی شمسی, تست عملکرد نمای تغییر رمز عبور متقاضی, تست ثبت زبان‌ها، مهارت‌ها و دوره‌ها/مدرک‌ها از طریق فرم‌ست‌ها در پنل متقاضی, تست اختصاص مصاحبه‌گران و ارزیابی با محاسبه میانگین وزنی
 
 ### Community 45 - "Candidates: Import Candidates Management"
 Cohesion: 0.24
@@ -425,8 +443,8 @@ Cohesion: 0.18
 Nodes (6): JobOpportunityDeletionAndReuseTests, تست استفاده مجدد از کد و شماره درخواست پس از حذف نرم, تست عدم امکان ثبت دو فرصت شغلی فعال با کد یا شماره درخواست یکسان, تست حذف فرصت شغلی و حفظ متقاضیان اختصاصی در بانک استعدادها, تست حذف فرصت شغلی و حذف متقاضیان اختصاصی آن, تست اینکه حذف فرصت شغلی با انتخاب حذف متقاضیان، متقاضیانی که درخواست دیگری دارند
 
 ### Community 50 - "Static: Bootstrap Bundle Cn"
-Cohesion: 0.05
-Nodes (106): Q, ri(), st, xt, A(), ae(), ar(), at() (+98 more)
+Cohesion: 0.07
+Nodes (104): Q, ri(), A(), ae(), ar(), at(), B(), be() (+96 more)
 
 ### Community 51 - "Static: Bootstrap Bundle Qn"
 Cohesion: 0.27
@@ -444,6 +462,10 @@ Nodes (6): Command, find_col_idx(), normalize_digits(), Management Command: impo
 Cohesion: 0.25
 Nodes (4): JobOpportunityReportTests, تست اینکه کاربران وارد نشده به صفحه لاگین هدایت می‌شوند, تست مشاهده شناسنامه فرصت شغلی توسط کاربر مجاز, تست مشاهده شناسنامه فرصت شغلی زمانی که کارشناس جذب مسئول مشخص نشده است (None)
 
+### Community 57 - ".test_candidates_and_scores_export_excel"
+Cohesion: 0.24
+Nodes (8): get_license_usage_stats(), get_machine_id(), get_system_license_limits(), Generates a unique hardware identifier for the current machine based on MAC addr, Fetches the active organization setting, verifies its license_key,     and retur, Gathers current DB statistics and compares them against limits., Verifies a base64 encoded license key.     Returns a dict containing license sta, verify_license_key()
+
 ### Community 58 - "Core: Core Templatetags Jalali"
 Cohesion: 0.27
 Nodes (6): Command, find_col_idx(), normalize_digits(), Management Command: import_historical_interview_results ========================, تبدیل ارقام فارسی/عربی به انگلیسی, یافتن ایندکس ستون بر اساس کلمات کلیدی (اولویت اول: تطابق دقیق، اولویت دوم: تطابق
@@ -456,9 +478,9 @@ Nodes (6): Command, find_col_idx(), normalize_digits(), Management Command: impo
 Cohesion: 0.20
 Nodes (9): English Documentation, Installation & Setup, Key Features, Language Toggle / انتخاب زبان, Payjoo ATS - Applicant Tracking System / سامانه جذب و استخدام پیجو, Tech Stack, راهنمای فارسی (Persian), ویژگی‌های کلیدی (+1 more)
 
-### Community 64 - "Candidates: Candidates Management Comman"
+### Community 70 - ".test_soft_delete_candidate_and_cascades"
 Cohesion: 0.22
-Nodes (4): AutomatedNotificationTests, تست اینکه ایجاد درخواست جدید، ایمیل ثبت‌نام ارسال می‌کند, تست اینکه تغییر وضعیت مرحله آزمون به در انتظار، ایمیل دعوت ارسال می‌کند, تست اعلانات نهایی قبولی و رد رزومه
+Nodes (5): AutomatedNotificationTests, TestCase, تست اینکه ایجاد درخواست جدید، ایمیل ثبت‌نام ارسال می‌کند, تست اینکه تغییر وضعیت مرحله آزمون به در انتظار، ایمیل دعوت ارسال می‌کند, تست اعلانات نهایی قبولی و رد رزومه
 
 ### Community 76 - "Accounts: Accounts Context Processors"
 Cohesion: 0.32
@@ -467,22 +489,22 @@ Nodes (4): dict, دیکشنری سفارشی ترجمه با قابلیت فال
 ## Knowledge Gaps
 - **112 isolated node(s):** `Migration`, `Migration`, `Migration`, `Migration`, `Migration` (+107 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **189 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **196 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `UserProfile` connect `Jobs: Jobs Accounts Userprofile` to `Candidates: Candidates Get Str`, `Recruitment: Planning Recruitment Ration`, `Historical: Import Historical Test`, `Jobs: Jobs Jobopportunityform Jobopportu`, `Jobs: Jobs Candidates Get`, `Jobs: Jobs Get Context`, `Jobs: Jobs Jobopportunityandworkflowtest`, `Jobs: Jobs Competencyenginetests Test`, `Accounts: Accounts Systembackupandrestor`, `Accounts: Accounts Post Get`, `models.py`, `Jobs: Jobs Import Management`, `Accounts: Accounts Userroleandpermission`, `Candidates: Candidates Candidatemodulete`, `Accounts: Accounts Usercreationform Clea`, `Static: Bootstrap Bundle Es`, `Accounts: Accounts Get Context`, `Accounts: Accounts Smstemplateandpanelte`, `Jobs: Jobs Recruitmentpatternsimulatorte`, `Jobs: Jobs Get Context`, `Jobs: Jobs Jobopportunitybulkstatustests`, `JobOpportunitySortingTests`, `Candidates: Import Candidates Management`, `Jobs: Jobs Jobopportunitydeletionandreus`, `Static: Bootstrap Bundle Ui`, `Jobs: Jobs Competencymodelviewstests Tes`, `Jobs: Jobs Aisettingviewandapitests Test`, `Jobs: Jobs Jobopportunityreporttests Tes`, `Accounts: Accounts Restorebackupview Res`, `Candidates: Candidates Management Comman`, `JobOpportunityBulkStatusTests`, `JobOpportunityBulkStatusTests`?**
-  _High betweenness centrality (0.204) - this node is a cross-community bridge._
-- **Why does `CandidateModuleTests` connect `Candidates: Candidates Candidatemodulete` to `Candidates: Candidates Get Str`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Jobs: Jobs Accounts Userprofile`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Accounts Get`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Core: Core 0001 Initial`, `Historical: Historical Import 0001`, `Historical: Historical Import 0002`, `Jobs: Jobs 0001 Initial`, `.test_candidates_and_scores_export_excel`, `.test_conditional_stage_promotion_views`, `.test_export_job_final_ranking_excel`, `Candidates: Candidates Management Comman`, `.test_score_entry_no_pagination`, `.test_soft_delete_candidate_and_cascades`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidate Candida`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
-- **Why does `RecruitmentPlanningTests` connect `Recruitment: Planning Recruitment Ration` to `Jobs: Jobs Accounts Userprofile`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `UserProfile` connect `Jobs: Jobs Jobopportunityform Jobopportu` to `Candidates: Candidates Get Str`, `Recruitment: Planning Recruitment Ration`, `Historical: Import Historical Test`, `Jobs: Jobs Get Context`, `Jobs: Jobs Accounts Userprofile`, `Jobs: Jobs Jobopportunityandworkflowtest`, `Jobs: Jobs Competencyenginetests Test`, `Accounts: Accounts Systembackupandrestor`, `Accounts: Accounts Post Get`, `models.py`, `Jobs: Jobs Import Management`, `Accounts: Accounts Userroleandpermission`, `Candidates: Candidates Candidatemodulete`, `Accounts: Accounts Usercreationform Clea`, `Static: Bootstrap Bundle Es`, `Accounts: Accounts Get Context`, `Accounts: Accounts Smstemplateandpanelte`, `Jobs: Jobs Recruitmentpatternsimulatorte`, `Jobs: Jobs Get Context`, `Jobs: Jobs Jobopportunitybulkstatustests`, `Candidates: Import Candidates Management`, `Candidates: Import Candidates Management`, `Jobs: Jobs Jobopportunitydeletionandreus`, `Static: Bootstrap Bundle Ui`, `Jobs: Jobs Competencymodelviewstests Tes`, `Jobs: Jobs Aisettingviewandapitests Test`, `Jobs: Jobs Jobopportunityreporttests Tes`, `Accounts: Accounts Restorebackupview Res`, `JobOpportunityBulkStatusTests`, `JobOpportunityBulkStatusTests`, `.test_soft_delete_candidate_and_cascades`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`?**
+  _High betweenness centrality (0.201) - this node is a cross-community bridge._
+- **Why does `CandidateModuleTests` connect `Candidates: Import Candidates Management` to `Candidates: Candidates Get Str`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `.test_import_bulk_interview_scores_with_comments`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `.test_job_status_updates_on_stage_advance`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Core: Core 0001 Initial`, `Historical: Historical Import 0001`, `Historical: Historical Import 0002`, `Jobs: Jobs 0001 Initial`, `.test_score_entry_custom_evaluation_date`, `Jobs: Jobs Jobopportunityform Jobopportu`, `.test_soft_delete_candidate_and_cascades`, `.test_score_entry_failed_prior_filtering`, `.test_score_entry_save_all_candidates_no_pagination`, `TestCase`, `CreateView`, `DetailView`, `ListView`, `LoginRequiredMixin`, `TemplateView`, `UpdateView`, `AGENTS.md`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `.test_auto_creation_of_stage_states`, `Candidates: Candidates Candidatemodulete`, `.test_bulk_score_submission`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `.test_candidate_dashboard_access_control`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `Candidates: Candidates Candidatemodulete`, `.test_candidate_self_registration_restores_soft_deleted`?**
+  _High betweenness centrality (0.098) - this node is a cross-community bridge._
+- **Why does `RoleRequiredMixin` connect `Candidates: Candidates Get Str` to `Accounts: Accounts Get Context`, `Historical: Import Historical Test`, `Jobs: Jobs Jobopportunityform Jobopportu`, `Jobs: Jobs Get Context`, `Jobs: Jobs Get Context`, `Candidates: Candidates Candidatemodulete`, `Candidates: Import Candidates Management`, `Accounts: Accounts Post Get`, `Jobs: Jobs Import Management`, `Candidates: Candidates Candidatemodulete`, `Accounts: Accounts Restorebackupview Res`, `Accounts: Accounts Usercreationform Clea`?**
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Are the 187 inferred relationships involving `UserProfile` (e.g. with `AuditLogListView` and `CustomLoginView`) actually correct?**
   _`UserProfile` has 187 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 147 inferred relationships involving `RoleRequiredMixin` (e.g. with `AuditLogListView` and `CustomLoginView`) actually correct?**
   _`RoleRequiredMixin` has 147 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 127 inferred relationships involving `SMSTemplate` (e.g. with `AuditLogListView` and `CustomLoginView`) actually correct?**
   _`SMSTemplate` has 127 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 90 inferred relationships involving `JobOpportunity` (e.g. with `AISettingForm` and `BaseJobOpportunityStageFormSet`) actually correct?**
+- **Are the 90 inferred relationships involving `JobOpportunity` (e.g. with `.post()` and `.post()`) actually correct?**
   _`JobOpportunity` has 90 INFERRED edges - model-reasoned connections that need verification._

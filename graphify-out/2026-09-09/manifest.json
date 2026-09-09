@@ -255,8 +255,8 @@
     "semantic_hash": "2d3e866f47ee4f1e263da56258d83d5b"
   },
   "apps/candidates/views.py": {
-    "mtime": 1788967918.433588,
-    "ast_hash": "fd6306392cc26590365472cff9d0626d",
+    "mtime": 1788968620.3109677,
+    "ast_hash": "3722325ad5cfa1d032ca80ad884bfd42",
     "semantic_hash": ""
   },
   "apps/core/__init__.py": {
@@ -870,8 +870,8 @@
     "semantic_hash": "97d6837d3df9fbd53e7c68d9f77a7c88"
   },
   "templates/candidates/candidate_detail.html": {
-    "mtime": 1788968272.5095284,
-    "ast_hash": "fc3b58301ccdbd4eaf9cf9d7c0b9baca",
+    "mtime": 1788968662.043034,
+    "ast_hash": "eb808ee01ab43749384aa229e1ba9179",
     "semantic_hash": ""
   },
   "templates/candidates/candidate_form.html": {

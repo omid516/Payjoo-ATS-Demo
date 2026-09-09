@@ -560,8 +560,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_permissions_py",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "permissions.py"
     },
     {
@@ -571,8 +571,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_permissions_role_required",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "role_required()"
     },
     {
@@ -626,8 +626,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_permissions_check_stage_access",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "check_stage_access()"
     },
     {
@@ -637,8 +637,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_permissions_rationale_7",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "\u062f\u06a9\u0648\u0631\u0627\u062a\u0648\u0631 \u0628\u0631\u0627\u06cc \u0627\u0639\u062a\u0628\u0627\u0631\u0633\u0646\u062c\u06cc \u0646\u0642\u0634 \u06a9\u0627\u0631\u0628\u0631 \u062f\u0631 \u0646\u0645\u0627\u0647\u0627\u06cc \u062a\u0627\u0628\u0639\u200c\u0645\u062d\u0648\u0631."
     },
     {
@@ -659,8 +659,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_permissions_rationale_50",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "\u0628\u0631\u0631\u0633\u06cc \u062f\u0633\u062a\u0631\u0633\u06cc \u0646\u0642\u0634 \u06a9\u0627\u0631\u0628\u0631 \u0628\u0647 \u06cc\u06a9 \u0645\u0631\u062d\u0644\u0647 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc \u062e\u0627\u0635 \u0628\u0631 \u0627\u0633\u0627\u0633 \u0646\u0627\u0645 \u0645\u0631\u062d\u0644\u0647.     - \u0645\u062f\u06cc\u0631\u0627\u0646 \u0648"
     },
     {
@@ -802,8 +802,8 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_tests_userroleandpermissiontests_test_role_based_stage_access_control",
-      "community": 27,
-      "community_name": "Accounts: Accounts Userroleandpermission",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": ".test_role_based_stage_access_control()"
     },
     {
@@ -1121,8 +1121,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_accounts_tests_rationale_215",
-      "community": 27,
-      "community_name": "Accounts: Accounts Userroleandpermission",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": "\u062a\u0633\u062a \u06a9\u0646\u062a\u0631\u0644 \u062f\u0633\u062a\u0631\u0633\u06cc \u062c\u0627\u0645\u0639 \u0646\u0642\u0634\u200c\u0647\u0627 \u0628\u0647 \u0645\u0631\u0627\u062d\u0644 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a"
     },
     {
@@ -1473,8 +1473,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "apps_accounts_views_usercreateview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 107,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "usercreateview"
     },
     {
@@ -1484,8 +1484,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_createview",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 107,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "createview"
     },
     {
@@ -1495,8 +1495,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "apps_accounts_views_usercreateview_form_valid",
-      "community": 31,
-      "community_name": "Accounts: Accounts Usercreationform Clea",
+      "community": 107,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".form_valid()"
     },
     {
@@ -1506,8 +1506,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "apps_accounts_views_userupdateview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": "userupdateview"
     },
     {
@@ -1517,8 +1517,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "apps_accounts_views_py_updateview",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": "updateview"
     },
     {
@@ -1528,8 +1528,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "apps_accounts_views_userupdateview_get_initial",
-      "community": 21,
-      "community_name": "Accounts: Accounts Post Get",
+      "community": 31,
+      "community_name": "Accounts: Accounts Usercreationform Clea",
       "norm_label": ".get_initial()"
     },
     {
@@ -1539,8 +1539,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "apps_accounts_views_userdeleteview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": "userdeleteview"
     },
     {
@@ -1550,8 +1550,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "apps_accounts_views_userdeleteview_delete",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 21,
+      "community_name": "Accounts: Accounts Post Get",
       "norm_label": ".delete()"
     },
     {
@@ -1583,8 +1583,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "apps_accounts_views_dashboardview_dispatch",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".dispatch()"
     },
     {
@@ -1605,8 +1605,8 @@
       "source_location": "L671",
       "_origin": "ast",
       "id": "apps_accounts_views_auditloglistview",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": "auditloglistview"
     },
     {
@@ -1616,8 +1616,8 @@
       "source_location": "L677",
       "_origin": "ast",
       "id": "apps_accounts_views_auditloglistview_dispatch",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".dispatch()"
     },
     {
@@ -1627,8 +1627,8 @@
       "source_location": "L682",
       "_origin": "ast",
       "id": "apps_accounts_views_auditloglistview_get_queryset",
-      "community": 33,
-      "community_name": "Accounts: Accounts Get Context",
+      "community": 38,
+      "community_name": "Jobs: Jobs Get Context",
       "norm_label": ".get_queryset()"
     },
     {
@@ -2452,8 +2452,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_missingstagestatescheck",
-      "community": 109,
-      "community_name": "Candidates: Candidates Candidate Candida",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "missingstagestatescheck"
     },
     {
@@ -2463,8 +2463,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_missingstagestatescheck_scan",
-      "community": 109,
-      "community_name": "Candidates: Candidates Candidate Candida",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2474,8 +2474,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_missingstagestatescheck_resolve",
-      "community": 109,
-      "community_name": "Candidates: Candidates Candidate Candida",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2485,8 +2485,8 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussyncfailedcheck",
-      "community": 111,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "statussyncfailedcheck"
     },
     {
@@ -2496,8 +2496,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussyncfailedcheck_scan",
-      "community": 111,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2507,8 +2507,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_statussyncfailedcheck_resolve",
-      "community": 111,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2551,8 +2551,8 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_interviewerscorevariancecheck",
-      "community": 108,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "interviewerscorevariancecheck"
     },
     {
@@ -2562,8 +2562,8 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_interviewerscorevariancecheck_scan",
-      "community": 108,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2573,8 +2573,8 @@
       "source_location": "L314",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_interviewerscorevariancecheck_resolve",
-      "community": 108,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2650,8 +2650,8 @@
       "source_location": "L455",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_completedstagewithoutdatecheck",
-      "community": 107,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "completedstagewithoutdatecheck"
     },
     {
@@ -2661,8 +2661,8 @@
       "source_location": "L462",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_completedstagewithoutdatecheck_scan",
-      "community": 107,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2672,8 +2672,8 @@
       "source_location": "L495",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_completedstagewithoutdatecheck_resolve",
-      "community": 107,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2683,8 +2683,8 @@
       "source_location": "L500",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_stagecompletedwithoutplandatecheck",
-      "community": 110,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": "stagecompletedwithoutplandatecheck"
     },
     {
@@ -2694,8 +2694,8 @@
       "source_location": "L507",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_stagecompletedwithoutplandatecheck_scan",
-      "community": 110,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".scan()"
     },
     {
@@ -2705,8 +2705,8 @@
       "source_location": "L548",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_stagecompletedwithoutplandatecheck_resolve",
-      "community": 110,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 17,
+      "community_name": "Candidates: Candidates Accounts Get",
       "norm_label": ".resolve()"
     },
     {
@@ -2716,8 +2716,8 @@
       "source_location": "L553",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_activejobwithoutcandidatescheck",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": "activejobwithoutcandidatescheck"
     },
     {
@@ -2727,8 +2727,8 @@
       "source_location": "L560",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_activejobwithoutcandidatescheck_scan",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".scan()"
     },
     {
@@ -2738,8 +2738,8 @@
       "source_location": "L603",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_activejobwithoutcandidatescheck_resolve",
-      "community": 17,
-      "community_name": "Candidates: Candidates Accounts Get",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".resolve()"
     },
     {
@@ -2760,8 +2760,8 @@
       "source_location": "L622",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_integrityscanner_get_scanner_classes",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".get_scanner_classes()"
     },
     {
@@ -2771,8 +2771,8 @@
       "source_location": "L626",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_integrityscanner_run_scan",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".run_scan()"
     },
     {
@@ -2782,8 +2782,8 @@
       "source_location": "L660",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_integrityscanner_resolve_issue",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".resolve_issue()"
     },
     {
@@ -2793,8 +2793,8 @@
       "source_location": "L674",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_candidates_integrity_engine_undo_audit_log_action",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": "undo_audit_log_action()"
     },
     {
@@ -6368,8 +6368,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_extract_keywords",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".extract_keywords()"
     },
     {
@@ -6379,8 +6379,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_compute_job_match",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".compute_job_match()"
     },
     {
@@ -6390,8 +6390,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_get_queryset",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".get_queryset()"
     },
     {
@@ -6401,8 +6401,8 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatelistview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6434,8 +6434,8 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "apps_candidates_views_assigncandidatetojobview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -6467,8 +6467,8 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatedetailview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6500,8 +6500,8 @@
       "source_location": "L332",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatecreateview_get_success_url",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".get_success_url()"
     },
     {
@@ -6511,8 +6511,8 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatecreateview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6522,8 +6522,8 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatecreateview_form_valid",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".form_valid()"
     },
     {
@@ -6555,8 +6555,8 @@
       "source_location": "L374",
       "_origin": "ast",
       "id": "apps_candidates_views_candidateupdateview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6566,8 +6566,8 @@
       "source_location": "L390",
       "_origin": "ast",
       "id": "apps_candidates_views_candidateupdateview_form_valid",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".form_valid()"
     },
     {
@@ -6621,8 +6621,8 @@
       "source_location": "L439",
       "_origin": "ast",
       "id": "apps_candidates_views_jobapplicationcreateview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6643,8 +6643,8 @@
       "source_location": "L455",
       "_origin": "ast",
       "id": "apps_candidates_views_jobapplicationcreateview_get_success_url",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".get_success_url()"
     },
     {
@@ -6665,8 +6665,8 @@
       "source_location": "L468",
       "_origin": "ast",
       "id": "apps_candidates_views_jobopportunitypipelineview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -6687,8 +6687,8 @@
       "source_location": "L543",
       "_origin": "ast",
       "id": "apps_candidates_views_togglestagecompletionview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -6731,8 +6731,8 @@
       "source_location": "L572",
       "_origin": "ast",
       "id": "apps_candidates_views_updateapplicationstagestateview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -6841,8 +6841,8 @@
       "source_location": "L714",
       "_origin": "ast",
       "id": "apps_candidates_views_careersdetailandapplyview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -6874,8 +6874,8 @@
       "source_location": "L773",
       "_origin": "ast",
       "id": "apps_candidates_views_careerstrackview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -7215,8 +7215,8 @@
       "source_location": "L1148",
       "_origin": "ast",
       "id": "apps_candidates_views_parse_jalali_date",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "parse_jalali_date()"
     },
     {
@@ -7303,8 +7303,8 @@
       "source_location": "L1878",
       "_origin": "ast",
       "id": "apps_candidates_views_managestageinterviewersview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -7325,8 +7325,8 @@
       "source_location": "L1982",
       "_origin": "ast",
       "id": "apps_candidates_views_interviewspanelview_get",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": ".get()"
     },
     {
@@ -7347,8 +7347,8 @@
       "source_location": "L2036",
       "_origin": "ast",
       "id": "apps_candidates_views_submitinterviewerscoreview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": ".post()"
     },
     {
@@ -7391,8 +7391,8 @@
       "source_location": "L2100",
       "_origin": "ast",
       "id": "apps_candidates_views_assessmentcentersheetview_get",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": ".get()"
     },
     {
@@ -7402,8 +7402,8 @@
       "source_location": "L2146",
       "_origin": "ast",
       "id": "apps_candidates_views_assessmentcentersheetview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 64,
+      "community_name": "Candidates: Candidates Management Comman",
       "norm_label": ".post()"
     },
     {
@@ -7501,8 +7501,8 @@
       "source_location": "L2453",
       "_origin": "ast",
       "id": "apps_candidates_views_jobopportunityfinalrankingview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -7523,8 +7523,8 @@
       "source_location": "L2468",
       "_origin": "ast",
       "id": "apps_candidates_views_bulkupdateapplicationstatusview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -7732,8 +7732,8 @@
       "source_location": "L3157",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatepasswordchangeview_get_success_url",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_success_url()"
     },
     {
@@ -7853,8 +7853,8 @@
       "source_location": "L3348",
       "_origin": "ast",
       "id": "apps_candidates_views_managejobdefaultinterviewersview_delete",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".delete()"
     },
     {
@@ -7996,8 +7996,8 @@
       "source_location": "L4068",
       "_origin": "ast",
       "id": "apps_candidates_views_dataintegritydashboardview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8018,8 +8018,8 @@
       "source_location": "L4091",
       "_origin": "ast",
       "id": "apps_candidates_views_resolvediscrepancyview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".post()"
     },
     {
@@ -8040,8 +8040,8 @@
       "source_location": "L4151",
       "_origin": "ast",
       "id": "apps_candidates_views_undointegrityactionview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 66,
+      "community_name": ".test_score_entry_no_pagination",
       "norm_label": ".post()"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L4181",
       "_origin": "ast",
       "id": "apps_candidates_views_selectedcandidateslistview_get_queryset",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".get_queryset()"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L4252",
       "_origin": "ast",
       "id": "apps_candidates_views_selectedcandidateslistview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L4297",
       "_origin": "ast",
       "id": "apps_candidates_views_updateadmissiondateview_post",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".post()"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "L4395",
       "_origin": "ast",
       "id": "apps_candidates_views_candidatesbystagelistview_get_context_data",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 43,
+      "community_name": "JobOpportunitySortingTests",
       "norm_label": ".get_context_data()"
     },
     {
@@ -8205,8 +8205,8 @@
       "source_location": "L4432",
       "_origin": "ast",
       "id": "apps_candidates_views_bulksendnotificationmodalview_get",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".get()"
     },
     {
@@ -8282,8 +8282,8 @@
       "source_location": "L3349",
       "_origin": "ast",
       "id": "apps_candidates_views_rationale_3349",
-      "community": 0,
-      "community_name": "Candidates: Candidates Get Str",
+      "community": 29,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "\u062d\u0630\u0641 \u06cc\u06a9 \u0645\u0635\u0627\u062d\u0628\u0647\u200c\u06af\u0631 \u0645\u0646\u0641\u0631\u062f (\u0628\u0627 job_id \u0648 interviewer pk \u062f\u0631 query string)"
     },
     {
@@ -8513,8 +8513,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_py",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "middleware.py"
     },
     {
@@ -8524,8 +8524,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_auditmiddleware",
-      "community": 106,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "auditmiddleware"
     },
     {
@@ -8535,8 +8535,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "middlewaremixin",
-      "community": 106,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "middlewaremixin"
     },
     {
@@ -8546,8 +8546,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_auditmiddleware_process_request",
-      "community": 106,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": ".process_request()"
     },
     {
@@ -8557,8 +8557,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_auditmiddleware_process_response",
-      "community": 106,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": ".process_response()"
     },
     {
@@ -8568,8 +8568,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_get_current_user",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "get_current_user()"
     },
     {
@@ -8579,8 +8579,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_middleware_get_current_ip",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "get_current_ip()"
     },
     {
@@ -8711,8 +8711,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_models_softdeletemodel_delete",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": ".delete()"
     },
     {
@@ -8733,8 +8733,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_models_softdeletemodel_save",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": ".save()"
     },
     {
@@ -8755,8 +8755,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_models_auditlog_save",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": ".save()"
     },
     {
@@ -8920,8 +8920,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_utils_py",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "utils.py"
     },
     {
@@ -8931,8 +8931,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_utils_log_action",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "log_action()"
     },
     {
@@ -8953,8 +8953,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_core_utils_rationale_5",
-      "community": 28,
-      "community_name": "Core: Core Candidates Integrity",
+      "community": 36,
+      "community_name": "Candidates: Candidates Import Management",
       "norm_label": "\u0633\u0631\u0648\u06cc\u0633 \u062b\u0628\u062a \u062e\u0648\u062f\u06a9\u0627\u0631 \u0644\u0627\u06af \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0628\u0627 \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u0627\u0632 \u06a9\u0627\u0631\u0628\u0631 \u0648 \u0627\u06cc\u200c\u067e\u06cc \u062c\u0627\u0631\u06cc \u0633\u0634\u0646."
     },
     {
@@ -15586,8 +15586,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_py",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "models.py"
     },
     {
@@ -15597,8 +15597,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_stagetypeconfiguration",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "stagetypeconfiguration"
     },
     {
@@ -15608,8 +15608,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_meta",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "meta"
     },
     {
@@ -15619,8 +15619,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_stagetypeconfiguration_str",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".__str__()"
     },
     {
@@ -15630,8 +15630,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_holiday",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "holiday"
     },
     {
@@ -15641,8 +15641,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_holiday_str",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".__str__()"
     },
     {
@@ -15652,8 +15652,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_jobrecruitmentplan",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "jobrecruitmentplan"
     },
     {
@@ -15663,8 +15663,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_jobrecruitmentplan_str",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".__str__()"
     },
     {
@@ -15674,8 +15674,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_jobrecruitmentplan_delete",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".delete()"
     },
     {
@@ -15685,8 +15685,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_jobstageplan",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "jobstageplan"
     },
     {
@@ -15696,8 +15696,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_models_jobstageplan_str",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".__str__()"
     },
     {
@@ -16015,8 +16015,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_urls_py",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "urls.py"
     },
     {
@@ -16026,8 +16026,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_py",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "utils.py"
     },
     {
@@ -16037,8 +16037,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_to_jalali_string",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "to_jalali_string()"
     },
     {
@@ -16048,8 +16048,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_parse_jalali_to_gregorian",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "parse_jalali_to_gregorian()"
     },
     {
@@ -16059,8 +16059,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_add_working_days",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "add_working_days()"
     },
     {
@@ -16070,8 +16070,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_get_next_working_day",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "get_next_working_day()"
     },
     {
@@ -16081,8 +16081,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_get_jalali_month_range",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "get_jalali_month_range()"
     },
     {
@@ -16092,8 +16092,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_calculate_recruitment_schedule",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "calculate_recruitment_schedule()"
     },
     {
@@ -16103,8 +16103,8 @@
       "source_location": "L230",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_get_consumed_capacity",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "get_consumed_capacity()"
     },
     {
@@ -16114,8 +16114,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_rationale_60",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "calculates stage-by-stage planned dates for a job opportunity based on slas and"
     },
     {
@@ -16125,8 +16125,8 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_utils_rationale_231",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "calculates the consumed capacity of a stage type in a given month.     if the mo"
     },
     {
@@ -16136,8 +16136,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_py",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "views.py"
     },
     {
@@ -16147,8 +16147,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningdashboardview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "planningdashboardview"
     },
     {
@@ -16180,8 +16180,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningdashboardview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16191,8 +16191,8 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_jobplanningview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "jobplanningview"
     },
     {
@@ -16202,8 +16202,8 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_jobplanningview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16213,8 +16213,8 @@
       "source_location": "L296",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_jobplanningview_post",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".post()"
     },
     {
@@ -16224,8 +16224,8 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningconfigview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "planningconfigview"
     },
     {
@@ -16235,8 +16235,8 @@
       "source_location": "L385",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningconfigview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16246,8 +16246,8 @@
       "source_location": "L412",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningconfigview_post",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".post()"
     },
     {
@@ -16257,8 +16257,8 @@
       "source_location": "L452",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_exportplanningexcelview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "exportplanningexcelview"
     },
     {
@@ -16268,8 +16268,8 @@
       "source_location": "L455",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_exportplanningexcelview_get",
-      "community": 42,
-      "community_name": "Accounts: Accounts Init Persianloginform",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16279,8 +16279,8 @@
       "source_location": "L496",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningcalendarview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "planningcalendarview"
     },
     {
@@ -16290,8 +16290,8 @@
       "source_location": "L499",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_planningcalendarview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16301,8 +16301,8 @@
       "source_location": "L626",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_exportweeklyagendaexcelview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "exportweeklyagendaexcelview"
     },
     {
@@ -16323,8 +16323,8 @@
       "source_location": "L689",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_weeklyagendaprintview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "weeklyagendaprintview"
     },
     {
@@ -16334,8 +16334,8 @@
       "source_location": "L692",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_weeklyagendaprintview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16345,8 +16345,8 @@
       "source_location": "L765",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_jobplanningsuggestionsview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "jobplanningsuggestionsview"
     },
     {
@@ -16356,8 +16356,8 @@
       "source_location": "L768",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_jobplanningsuggestionsview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16367,8 +16367,8 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_sladelaysdashboardview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "sladelaysdashboardview"
     },
     {
@@ -16378,8 +16378,8 @@
       "source_location": "L865",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_sladelaysdashboardview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16389,8 +16389,8 @@
       "source_location": "L1077",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_overlapmonitorview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "overlapmonitorview"
     },
     {
@@ -16400,8 +16400,8 @@
       "source_location": "L1080",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_overlapmonitorview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16411,8 +16411,8 @@
       "source_location": "L1205",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_editjobstageplanview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "editjobstageplanview"
     },
     {
@@ -16433,8 +16433,8 @@
       "source_location": "L1222",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_editjobstageplanview_post",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".post()"
     },
     {
@@ -16444,8 +16444,8 @@
       "source_location": "L1312",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_viewjobstageplanview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "viewjobstageplanview"
     },
     {
@@ -16466,8 +16466,8 @@
       "source_location": "L1330",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_analyticsdashboardview",
-      "community": 29,
-      "community_name": "Candidates: Candidates Candidatemodulete",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": "analyticsdashboardview"
     },
     {
@@ -16477,8 +16477,8 @@
       "source_location": "L1333",
       "_origin": "ast",
       "id": "users_omidsalehi_desktop_ats_apps_recruitment_planning_views_analyticsdashboardview_get",
-      "community": 43,
-      "community_name": "JobOpportunitySortingTests",
+      "community": 2,
+      "community_name": "Recruitment: Planning Recruitment Ration",
       "norm_label": ".get()"
     },
     {
@@ -16815,8 +16815,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_remove",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 59,
+      "community_name": ".test_conditional_stage_promotion_views",
       "norm_label": "remove()"
     },
     {
@@ -17101,8 +17101,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": "w"
     },
     {
@@ -17123,8 +17123,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_dispose",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".dispose()"
     },
     {
@@ -17134,8 +17134,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_queuecallback",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._queuecallback()"
     },
     {
@@ -17178,8 +17178,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_version",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".version()"
     },
     {
@@ -17189,8 +17189,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_data_key",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".data_key()"
     },
     {
@@ -17200,8 +17200,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_event_key",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".event_key()"
     },
     {
@@ -17211,8 +17211,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_w_eventname",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 20,
+      "community_name": "Static: Bootstrap Bundle Jn",
       "norm_label": ".eventname()"
     },
     {
@@ -17255,8 +17255,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_focusablechildren",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "focusablechildren()"
     },
     {
@@ -17266,8 +17266,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_getselectorfromelement",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "getselectorfromelement()"
     },
     {
@@ -17277,8 +17277,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_getelementfromselector",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 25,
+      "community_name": "Static: Bootstrap Bundle Ks",
       "norm_label": "getelementfromselector()"
     },
     {
@@ -17299,8 +17299,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "q"
     },
     {
@@ -17310,8 +17310,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_name",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".name()"
     },
     {
@@ -17321,8 +17321,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_close",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".close()"
     },
     {
@@ -17332,8 +17332,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_destroyelement",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "._destroyelement()"
     },
     {
@@ -17343,8 +17343,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_q_jqueryinterface",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -17354,8 +17354,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "y"
     },
     {
@@ -17365,8 +17365,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_name",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -17376,8 +17376,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_toggle",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".toggle()"
     },
     {
@@ -17387,8 +17387,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_y_jqueryinterface",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -17552,8 +17552,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_constructor",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".constructor()"
     },
     {
@@ -17618,8 +17618,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_prev",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 1,
+      "community_name": "Static: Htmx Bootstrap Bundle",
       "norm_label": ".prev()"
     },
     {
@@ -17695,8 +17695,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_addeventlisteners",
-      "community": 39,
-      "community_name": "us",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -17706,8 +17706,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xt_addtoucheventlisteners",
-      "community": 39,
-      "community_name": "us",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "._addtoucheventlisteners()"
     },
     {
@@ -17860,8 +17860,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_bt_constructor",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".constructor()"
     },
     {
@@ -17904,8 +17904,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_bt_toggle",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".toggle()"
     },
     {
@@ -18014,8 +18014,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ue",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ue()"
     },
     {
@@ -18025,8 +18025,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_fe",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "fe()"
     },
     {
@@ -18036,8 +18036,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_pe",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "pe()"
     },
     {
@@ -18047,8 +18047,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_me",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "me()"
     },
     {
@@ -18058,8 +18058,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ge",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ge()"
     },
     {
@@ -18091,8 +18091,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ee",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ee()"
     },
     {
@@ -18102,8 +18102,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_te",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "te()"
     },
     {
@@ -18113,8 +18113,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ce",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ce()"
     },
     {
@@ -18124,8 +18124,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_oe",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "oe()"
     },
     {
@@ -18135,8 +18135,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_xe",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "xe()"
     },
     {
@@ -18146,8 +18146,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ke",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ke()"
     },
     {
@@ -18157,8 +18157,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_le",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "le()"
     },
     {
@@ -18168,8 +18168,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_se",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "se()"
     },
     {
@@ -18179,8 +18179,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_de",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "de()"
     },
     {
@@ -18190,8 +18190,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_e",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "$e()"
     },
     {
@@ -18223,8 +18223,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_je",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "je()"
     },
     {
@@ -18234,8 +18234,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_we",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "we()"
     },
     {
@@ -18267,8 +18267,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ye",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ye()"
     },
     {
@@ -18289,8 +18289,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ti",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ti()"
     },
     {
@@ -18311,8 +18311,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ii",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ii()"
     },
     {
@@ -18344,8 +18344,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ri",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ri()"
     },
     {
@@ -18355,8 +18355,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_di",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "di()"
     },
     {
@@ -18366,8 +18366,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "ui()"
     },
     {
@@ -18388,8 +18388,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_mi",
-      "community": 34,
-      "community_name": "Es",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "mi()"
     },
     {
@@ -18454,8 +18454,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qi_toggle",
-      "community": 13,
-      "community_name": "Static: Bootstrap Bundle Qi",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".toggle()"
     },
     {
@@ -18531,8 +18531,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qi_createpopper",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 13,
+      "community_name": "Static: Bootstrap Bundle Qi",
       "norm_label": "._createpopper()"
     },
     {
@@ -18652,8 +18652,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_default",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".default()"
     },
     {
@@ -18663,8 +18663,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_defaulttype",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18674,8 +18674,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_name",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -18685,8 +18685,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_show",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".show()"
     },
     {
@@ -18696,8 +18696,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_hide",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".hide()"
     },
     {
@@ -18707,8 +18707,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_dispose",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".dispose()"
     },
     {
@@ -18718,8 +18718,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_getelement",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._getelement()"
     },
     {
@@ -18729,8 +18729,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_configaftermerge",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._configaftermerge()"
     },
     {
@@ -18740,8 +18740,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_append",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._append()"
     },
     {
@@ -18751,8 +18751,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ui_emulateanimation",
-      "community": 64,
-      "community_name": "Candidates: Candidates Management Comman",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._emulateanimation()"
     },
     {
@@ -18762,8 +18762,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "sn"
     },
     {
@@ -18773,8 +18773,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_constructor",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".constructor()"
     },
     {
@@ -18784,8 +18784,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_default",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".default()"
     },
     {
@@ -18795,8 +18795,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_defaulttype",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".defaulttype()"
     },
     {
@@ -18806,8 +18806,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_name",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".name()"
     },
     {
@@ -18817,8 +18817,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_activate",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".activate()"
     },
     {
@@ -18828,8 +18828,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_deactivate",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": ".deactivate()"
     },
     {
@@ -18839,8 +18839,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_handlefocusin",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._handlefocusin()"
     },
     {
@@ -18850,8 +18850,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_sn_handlekeydown",
-      "community": 66,
-      "community_name": ".test_score_entry_no_pagination",
+      "community": 12,
+      "community_name": "Static: Bootstrap Bundle Be",
       "norm_label": "._handlekeydown()"
     },
     {
@@ -18861,8 +18861,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "cn"
     },
     {
@@ -18872,8 +18872,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_constructor",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".constructor()"
     },
     {
@@ -18883,8 +18883,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_getwidth",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".getwidth()"
     },
     {
@@ -18894,8 +18894,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_hide",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".hide()"
     },
     {
@@ -18905,8 +18905,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_reset",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".reset()"
     },
     {
@@ -18916,8 +18916,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_isoverflowing",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": ".isoverflowing()"
     },
     {
@@ -18927,8 +18927,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_disableoverflow",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._disableoverflow()"
     },
     {
@@ -18938,8 +18938,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_setelementattributes",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._setelementattributes()"
     },
     {
@@ -18949,8 +18949,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_saveinitialattribute",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._saveinitialattribute()"
     },
     {
@@ -18960,8 +18960,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_resetelementattributes",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._resetelementattributes()"
     },
     {
@@ -18971,8 +18971,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cn_applymanipulationcallback",
-      "community": 60,
-      "community_name": ".test_export_job_final_ranking_excel",
+      "community": 26,
+      "community_name": "Static: Bootstrap Bundle On",
       "norm_label": "._applymanipulationcallback()"
     },
     {
@@ -18982,8 +18982,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_on_constructor",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".constructor()"
     },
     {
@@ -19026,8 +19026,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_on_toggle",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".toggle()"
     },
     {
@@ -19081,8 +19081,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_on_initializebackdrop",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._initializebackdrop()"
     },
     {
@@ -19191,8 +19191,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "qn"
     },
     {
@@ -19202,8 +19202,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_constructor",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".constructor()"
     },
     {
@@ -19213,8 +19213,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_default",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".default()"
     },
     {
@@ -19224,8 +19224,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_defaulttype",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".defaulttype()"
     },
     {
@@ -19235,8 +19235,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_name",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".name()"
     },
     {
@@ -19246,8 +19246,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_toggle",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".toggle()"
     },
     {
@@ -19257,8 +19257,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_show",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".show()"
     },
     {
@@ -19268,8 +19268,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_hide",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".hide()"
     },
     {
@@ -19279,8 +19279,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_dispose",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".dispose()"
     },
     {
@@ -19290,8 +19290,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializebackdrop",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._initializebackdrop()"
     },
     {
@@ -19301,8 +19301,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_initializefocustrap",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._initializefocustrap()"
     },
     {
@@ -19312,8 +19312,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_qn_addeventlisteners",
-      "community": 18,
-      "community_name": "Static: Bootstrap Bundle Ae",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -19587,8 +19587,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_toggle",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".toggle()"
     },
     {
@@ -19620,8 +19620,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_hide",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": ".hide()"
     },
     {
@@ -19642,8 +19642,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_iswithcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._iswithcontent()"
     },
     {
@@ -19653,8 +19653,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettipelement",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._gettipelement()"
     },
     {
@@ -19664,8 +19664,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_createtipelement",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 59,
+      "community_name": ".test_conditional_stage_promotion_views",
       "norm_label": "._createtipelement()"
     },
     {
@@ -19686,8 +19686,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettemplatefactory",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 59,
+      "community_name": ".test_conditional_stage_promotion_views",
       "norm_label": "._gettemplatefactory()"
     },
     {
@@ -19697,8 +19697,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_getcontentfortemplate",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._getcontentfortemplate()"
     },
     {
@@ -19708,8 +19708,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_gettitle",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._gettitle()"
     },
     {
@@ -19730,8 +19730,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_isanimated",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._isanimated()"
     },
     {
@@ -19741,8 +19741,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_isshown",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._isshown()"
     },
     {
@@ -19763,8 +19763,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_getoffset",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 13,
+      "community_name": "Static: Bootstrap Bundle Qi",
       "norm_label": "._getoffset()"
     },
     {
@@ -19785,8 +19785,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_getpopperconfig",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 13,
+      "community_name": "Static: Bootstrap Bundle Qi",
       "norm_label": "._getpopperconfig()"
     },
     {
@@ -19796,8 +19796,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_setlisteners",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._setlisteners()"
     },
     {
@@ -19818,8 +19818,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_cs_enter",
-      "community": 24,
-      "community_name": "Static: Bootstrap Bundle Bt",
+      "community": 11,
+      "community_name": "Static: Bootstrap Bundle Cs",
       "norm_label": "._enter()"
     },
     {
@@ -19917,8 +19917,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "us"
     },
     {
@@ -19928,8 +19928,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_default",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": ".default()"
     },
     {
@@ -19939,8 +19939,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_defaulttype",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": ".defaulttype()"
     },
     {
@@ -19950,8 +19950,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_name",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": ".name()"
     },
     {
@@ -19961,8 +19961,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_iswithcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._iswithcontent()"
     },
     {
@@ -19972,8 +19972,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_getcontentfortemplate",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._getcontentfortemplate()"
     },
     {
@@ -19983,8 +19983,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_getcontent",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": "._getcontent()"
     },
     {
@@ -19994,8 +19994,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_us_jqueryinterface",
-      "community": 11,
-      "community_name": "Static: Bootstrap Bundle Cs",
+      "community": 60,
+      "community_name": ".test_export_job_final_ranking_excel",
       "norm_label": ".jqueryinterface()"
     },
     {
@@ -20445,8 +20445,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "static_js_bootstrap_bundle_min_ao_hide",
-      "community": 26,
-      "community_name": "Static: Bootstrap Bundle On",
+      "community": 19,
+      "community_name": "Static: Bootstrap Bundle Ao",
       "norm_label": ".hide()"
     },
     {
@@ -20544,8 +20544,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_e",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "e()"
     },
     {
@@ -20566,8 +20566,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ee",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "ee()"
     },
     {
@@ -20577,8 +20577,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_o",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "o()"
     },
     {
@@ -20588,8 +20588,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_te",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "te()"
     },
     {
@@ -20610,8 +20610,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_re",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "re()"
     },
     {
@@ -20621,8 +20621,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_c",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "c()"
     },
     {
@@ -20632,8 +20632,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_l",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "l()"
     },
     {
@@ -20643,8 +20643,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ne",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "ne()"
     },
     {
@@ -20665,8 +20665,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_a",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "a()"
     },
     {
@@ -20687,8 +20687,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_n",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "n()"
     },
     {
@@ -20698,8 +20698,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ie",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "ie()"
     },
     {
@@ -20709,8 +20709,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_i",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "i()"
     },
     {
@@ -20720,8 +20720,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_k",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "k()"
     },
     {
@@ -20731,8 +20731,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_p",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "p()"
     },
     {
@@ -20742,8 +20742,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ae",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ae()"
     },
     {
@@ -20753,8 +20753,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_m",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "m()"
     },
     {
@@ -20764,8 +20764,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_oe",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "oe()"
     },
     {
@@ -20775,8 +20775,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_x",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "x()"
     },
     {
@@ -20786,8 +20786,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_se",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "se()"
     },
     {
@@ -20819,8 +20819,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_t",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "t()"
     },
     {
@@ -20830,8 +20830,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_f",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "f()"
     },
     {
@@ -20841,8 +20841,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_v",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 106,
+      "community_name": "Candidates: Candidates Candidatemodulete",
       "norm_label": "v()"
     },
     {
@@ -20863,8 +20863,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_z",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "z()"
     },
     {
@@ -20874,8 +20874,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_w",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "w()"
     },
     {
@@ -20896,8 +20896,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ue",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "ue()"
     },
     {
@@ -20907,8 +20907,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ve",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "ve()"
     },
     {
@@ -20918,8 +20918,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_de",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "de()"
     },
     {
@@ -20929,8 +20929,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ge",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "ge()"
     },
     {
@@ -20940,8 +20940,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_me",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "me()"
     },
     {
@@ -20951,8 +20951,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xe",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "xe()"
     },
     {
@@ -20962,8 +20962,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ye",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "ye()"
     },
     {
@@ -20973,8 +20973,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_be",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "be()"
     },
     {
@@ -20984,8 +20984,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_we",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "we()"
     },
     {
@@ -20995,8 +20995,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ce",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "ce()"
     },
     {
@@ -21017,8 +21017,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_he",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "he()"
     },
     {
@@ -21061,8 +21061,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_je",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "je()"
     },
     {
@@ -21072,8 +21072,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_et",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "et()"
     },
     {
@@ -21127,8 +21127,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_at",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "at()"
     },
     {
@@ -21138,8 +21138,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ot",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ot()"
     },
     {
@@ -21149,8 +21149,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_st",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "st()"
     },
     {
@@ -21160,8 +21160,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_lt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "lt()"
     },
     {
@@ -21171,8 +21171,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ut",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 39,
+      "community_name": "us",
       "norm_label": "ut()"
     },
     {
@@ -21182,8 +21182,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ft",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ft()"
     },
     {
@@ -21193,8 +21193,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ct",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ct()"
     },
     {
@@ -21204,8 +21204,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ht",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "ht()"
     },
     {
@@ -21215,8 +21215,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_gt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "gt()"
     },
     {
@@ -21226,8 +21226,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "pt()"
     },
     {
@@ -21237,8 +21237,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_mt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "mt()"
     },
     {
@@ -21248,8 +21248,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "xt()"
     },
     {
@@ -21259,8 +21259,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_yt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "yt()"
     },
     {
@@ -21281,8 +21281,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_wt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 39,
+      "community_name": "us",
       "norm_label": "wt()"
     },
     {
@@ -21292,8 +21292,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_rt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "rt()"
     },
     {
@@ -21303,8 +21303,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_qt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "qt()"
     },
     {
@@ -21325,8 +21325,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_dt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "dt()"
     },
     {
@@ -21336,8 +21336,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_vt",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "vt()"
     },
     {
@@ -21369,8 +21369,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_r",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "r()"
     },
     {
@@ -21380,8 +21380,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_er",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "er()"
     },
     {
@@ -21391,8 +21391,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_tr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 28,
+      "community_name": "Core: Core Candidates Integrity",
       "norm_label": "tr()"
     },
     {
@@ -21413,8 +21413,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_nr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "nr()"
     },
     {
@@ -21424,8 +21424,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ir",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "ir()"
     },
     {
@@ -21435,8 +21435,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_ar",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "ar()"
     },
     {
@@ -21446,8 +21446,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_or",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "or()"
     },
     {
@@ -21457,8 +21457,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_sr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "sr()"
     },
     {
@@ -21468,8 +21468,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_lr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "lr()"
     },
     {
@@ -21556,8 +21556,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_pr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "pr()"
     },
     {
@@ -21567,8 +21567,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_mr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "mr()"
     },
     {
@@ -21578,8 +21578,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_xr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "xr()"
     },
     {
@@ -21589,8 +21589,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_yr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "yr()"
     },
     {
@@ -21644,8 +21644,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_jr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 34,
+      "community_name": "Es",
       "norm_label": "jr()"
     },
     {
@@ -21655,8 +21655,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "static_js_htmx_min_zr",
-      "community": 50,
-      "community_name": "Static: Bootstrap Bundle Cn",
+      "community": 18,
+      "community_name": "Static: Bootstrap Bundle Ae",
       "norm_label": "zr()"
     },
     {
@@ -21858,10 +21858,65 @@
       "norm_label": "\u06af\u0632\u0627\u0631\u0634 \u062c\u0627\u0645\u0639 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u0628\u0647\u200c\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc\u200c\u0647\u0627\u06cc \u0633\u0627\u0645\u0627\u0646\u0647 payjoo ats"
     },
     {
-      "label": "\ud83c\udf1f \u0646\u06af\u0627\u0631\u0634 \u06f3.\u06f2.\u06f0 (Version 3.2.0) - \u0633\u0641\u0627\u0631\u0634\u06cc\u200c\u0633\u0627\u0632\u06cc \u0622\u062f\u0631\u0633 \u0622\u06af\u0647\u06cc\u200c\u0647\u0627\u060c \u0634\u0631\u0627\u06cc\u0637 \u0639\u0645\u0648\u0645\u06cc \u0627\u062d\u0631\u0627\u0632 \u0648 \u0628\u0647\u0628\u0648\u062f \u0644\u06cc\u0633\u062a \u0641\u0631\u0635\u062a\u200c\u0647\u0627",
+      "label": "\ud83c\udf1f \u0646\u06af\u0627\u0631\u0634 \u06f4.\u06f0.\u06f0 (Version 4.0.0) - \u0627\u0631\u062a\u0642\u0627\u06cc \u0641\u0631\u0645 \u0645\u0635\u0627\u062d\u0628\u0647 \u062a\u062e\u0635\u0635\u06cc\u060c \u0631\u0647\u06af\u06cc\u0631\u06cc \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u062a\u0648\u0644\u200c\u062a\u06cc\u067e \u062a\u0639\u0627\u0645\u0644\u06cc \u06a9\u0627\u0631\u0646\u0627\u0645\u0647 \u0645\u0631\u0627\u062d\u0644",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
       "source_location": "L7",
+      "_origin": "ast",
+      "id": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
+      "norm_label": "\ud83c\udf1f \u0646\u06af\u0627\u0631\u0634 \u06f4.\u06f0.\u06f0 (version 4.0.0) - \u0627\u0631\u062a\u0642\u0627\u06cc \u0641\u0631\u0645 \u0645\u0635\u0627\u062d\u0628\u0647 \u062a\u062e\u0635\u0635\u06cc\u060c \u0631\u0647\u06af\u06cc\u0631\u06cc \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u062a\u0648\u0644\u200c\u062a\u06cc\u067e \u062a\u0639\u0627\u0645\u0644\u06cc \u06a9\u0627\u0631\u0646\u0627\u0645\u0647 \u0645\u0631\u0627\u062d\u0644"
+    },
+    {
+      "label": "\u06f1. \u0641\u0631\u0645 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc \u0645\u0635\u0627\u062d\u0628\u0647 \u062a\u062e\u0635\u0635\u06cc \u0628\u0627 \u062a\u0646\u0638\u06cc\u0645 \u062a\u0627\u0631\u06cc\u062e/\u0633\u0627\u0639\u062a \u0648 \u0633\u06cc\u0633\u062a\u0645 \u062a\u0637\u0628\u06cc\u0642 \u062e\u0648\u062f\u06a9\u0627\u0631 (Auto-Fit)",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "release_notes_\u06f1_\u0641\u0631\u0645_\u0627\u0631\u0632\u06cc\u0627\u0628\u06cc_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0628\u0627_\u062a\u0646\u0638\u06cc\u0645_\u062a\u0627\u0631\u06cc\u062e_\u0633\u0627\u0639\u062a_\u0648_\u0633\u06cc\u0633\u062a\u0645_\u062a\u0637\u0628\u06cc\u0642_\u062e\u0648\u062f\u06a9\u0627\u0631_auto_fit",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
+      "norm_label": "\u06f1. \u0641\u0631\u0645 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc \u0645\u0635\u0627\u062d\u0628\u0647 \u062a\u062e\u0635\u0635\u06cc \u0628\u0627 \u062a\u0646\u0638\u06cc\u0645 \u062a\u0627\u0631\u06cc\u062e/\u0633\u0627\u0639\u062a \u0648 \u0633\u06cc\u0633\u062a\u0645 \u062a\u0637\u0628\u06cc\u0642 \u062e\u0648\u062f\u06a9\u0627\u0631 (auto-fit)"
+    },
+    {
+      "label": "\u06f2. \u0646\u0645\u0627\u06cc\u0634 \u0634\u0645\u0627\u0631\u0647 \u062f\u0631\u062e\u0648\u0627\u0633\u062a \u0648 \u06a9\u062f \u067e\u0633\u062a \u062f\u0631 \u0641\u0631\u0635\u062a\u200c\u0647\u0627\u06cc \u0634\u063a\u0644\u06cc \u067e\u0631\u0648\u0646\u062f\u0647 \u0645\u062a\u0642\u0627\u0636\u06cc",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "release_notes_\u06f2_\u0646\u0645\u0627\u06cc\u0634_\u0634\u0645\u0627\u0631\u0647_\u062f\u0631\u062e\u0648\u0627\u0633\u062a_\u0648_\u06a9\u062f_\u067e\u0633\u062a_\u062f\u0631_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc_\u067e\u0631\u0648\u0646\u062f\u0647_\u0645\u062a\u0642\u0627\u0636\u06cc",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
+      "norm_label": "\u06f2. \u0646\u0645\u0627\u06cc\u0634 \u0634\u0645\u0627\u0631\u0647 \u062f\u0631\u062e\u0648\u0627\u0633\u062a \u0648 \u06a9\u062f \u067e\u0633\u062a \u062f\u0631 \u0641\u0631\u0635\u062a\u200c\u0647\u0627\u06cc \u0634\u063a\u0644\u06cc \u067e\u0631\u0648\u0646\u062f\u0647 \u0645\u062a\u0642\u0627\u0636\u06cc"
+    },
+    {
+      "label": "\u06f3. \u0646\u0627\u0648\u0628\u0631\u06cc \u062f\u0648\u0637\u0631\u0641\u0647 \u0647\u0648\u0634\u0645\u0646\u062f \u0628\u06cc\u0646 \u067e\u0631\u0648\u0646\u062f\u0647 \u0645\u062a\u0642\u0627\u0636\u06cc \u0648 \u067e\u0627\u06cc\u067e\u200c\u0644\u0627\u06cc\u0646 \u0641\u0631\u0635\u062a \u0634\u063a\u0644\u06cc",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "release_notes_\u06f3_\u0646\u0627\u0648\u0628\u0631\u06cc_\u062f\u0648\u0637\u0631\u0641\u0647_\u0647\u0648\u0634\u0645\u0646\u062f_\u0628\u06cc\u0646_\u067e\u0631\u0648\u0646\u062f\u0647_\u0645\u062a\u0642\u0627\u0636\u06cc_\u0648_\u067e\u0627\u06cc\u067e_\u0644\u0627\u06cc\u0646_\u0641\u0631\u0635\u062a_\u0634\u063a\u0644\u06cc",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
+      "norm_label": "\u06f3. \u0646\u0627\u0648\u0628\u0631\u06cc \u062f\u0648\u0637\u0631\u0641\u0647 \u0647\u0648\u0634\u0645\u0646\u062f \u0628\u06cc\u0646 \u067e\u0631\u0648\u0646\u062f\u0647 \u0645\u062a\u0642\u0627\u0636\u06cc \u0648 \u067e\u0627\u06cc\u067e\u200c\u0644\u0627\u06cc\u0646 \u0641\u0631\u0635\u062a \u0634\u063a\u0644\u06cc"
+    },
+    {
+      "label": "\u06f4. \u062a\u0648\u0644\u200c\u062a\u06cc\u067e \u0648 \u067e\u0627\u067e\u200c\u0627\u0648\u0631 \u062a\u0639\u0627\u0645\u0644\u06cc \u0646\u0645\u0631\u0627\u062a \u0648 \u0648\u0636\u0639\u06cc\u062a \u0645\u0631\u0627\u062d\u0644 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc (Hover Breakdown)",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "release_notes_\u06f4_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u0648_\u067e\u0627\u067e_\u0627\u0648\u0631_\u062a\u0639\u0627\u0645\u0644\u06cc_\u0646\u0645\u0631\u0627\u062a_\u0648_\u0648\u0636\u0639\u06cc\u062a_\u0645\u0631\u0627\u062d\u0644_\u0627\u0631\u0632\u06cc\u0627\u0628\u06cc_hover_breakdown",
+      "community": 9,
+      "community_name": "Jobs: Jobs Admin Str",
+      "norm_label": "\u06f4. \u062a\u0648\u0644\u200c\u062a\u06cc\u067e \u0648 \u067e\u0627\u067e\u200c\u0627\u0648\u0631 \u062a\u0639\u0627\u0645\u0644\u06cc \u0646\u0645\u0631\u0627\u062a \u0648 \u0648\u0636\u0639\u06cc\u062a \u0645\u0631\u0627\u062d\u0644 \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc (hover breakdown)"
+    },
+    {
+      "label": "\ud83c\udf1f \u0646\u06af\u0627\u0631\u0634 \u06f3.\u06f2.\u06f0 (Version 3.2.0) - \u0633\u0641\u0627\u0631\u0634\u06cc\u200c\u0633\u0627\u0632\u06cc \u0622\u062f\u0631\u0633 \u0622\u06af\u0647\u06cc\u200c\u0647\u0627\u060c \u0634\u0631\u0627\u06cc\u0637 \u0639\u0645\u0648\u0645\u06cc \u0627\u062d\u0631\u0627\u0632 \u0648 \u0628\u0647\u0628\u0648\u062f \u0644\u06cc\u0633\u062a \u0641\u0631\u0635\u062a\u200c\u0647\u0627",
+      "file_type": "document",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
       "community": 9,
@@ -21872,7 +21927,7 @@
       "label": "\u06f1. \u062a\u0646\u0638\u06cc\u0645 \u0622\u062f\u0631\u0633 \u067e\u06cc\u0634\u200c\u0641\u0631\u0636 \u067e\u0631\u062a\u0627\u0644 \u0622\u06af\u0647\u06cc\u200c\u0647\u0627 \u062f\u0631 \u062a\u0646\u0638\u06cc\u0645\u0627\u062a \u0633\u0627\u0632\u0645\u0627\u0646 \u0628\u0627 \u0627\u0645\u06a9\u0627\u0646 \u0628\u0627\u0632\u0646\u0648\u06cc\u0633\u06cc \u062f\u0631 \u0647\u0631 \u0622\u06af\u0647\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L9",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "release_notes_\u06f1_\u062a\u0646\u0638\u06cc\u0645_\u0622\u062f\u0631\u0633_\u067e\u06cc\u0634_\u0641\u0631\u0636_\u067e\u0631\u062a\u0627\u0644_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u062f\u0631_\u062a\u0646\u0638\u06cc\u0645\u0627\u062a_\u0633\u0627\u0632\u0645\u0627\u0646_\u0628\u0627_\u0627\u0645\u06a9\u0627\u0646_\u0628\u0627\u0632\u0646\u0648\u06cc\u0633\u06cc_\u062f\u0631_\u0647\u0631_\u0622\u06af\u0647\u06cc",
       "community": 9,
@@ -21883,7 +21938,7 @@
       "label": "\u06f2. \u0627\u0641\u0632\u0648\u062f\u0646 \u0634\u0631\u0627\u06cc\u0637 \u0639\u0645\u0648\u0645\u06cc \u0627\u062d\u0631\u0627\u0632 \u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646 \u0628\u0647 \u062a\u0646\u0638\u06cc\u0645\u0627\u062a \u0633\u0627\u0632\u0645\u0627\u0646 \u0648 \u0646\u0645\u0627\u06cc\u0634 \u062f\u0631 \u0622\u06af\u0647\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L13",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "release_notes_\u06f2_\u0627\u0641\u0632\u0648\u062f\u0646_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646_\u0628\u0647_\u062a\u0646\u0638\u06cc\u0645\u0627\u062a_\u0633\u0627\u0632\u0645\u0627\u0646_\u0648_\u0646\u0645\u0627\u06cc\u0634_\u062f\u0631_\u0622\u06af\u0647\u06cc",
       "community": 9,
@@ -21894,7 +21949,7 @@
       "label": "\u06f3. \u062d\u0630\u0641 \u0631\u062a\u0628\u0647\u200c\u0628\u0646\u062f\u06cc \u0633\u062a\u0627\u0631\u0647\u200c\u0647\u0627 \u0627\u0632 \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627\u06cc \u0622\u06af\u0647\u06cc \u0627\u0633\u062a\u062e\u062f\u0627\u0645",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L17",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "release_notes_\u06f3_\u062d\u0630\u0641_\u0631\u062a\u0628\u0647_\u0628\u0646\u062f\u06cc_\u0633\u062a\u0627\u0631\u0647_\u0647\u0627_\u0627\u0632_\u0634\u0627\u06cc\u0633\u062a\u06af\u06cc_\u0647\u0627\u06cc_\u0622\u06af\u0647\u06cc_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
       "community": 9,
@@ -21905,7 +21960,7 @@
       "label": "\u06f4. \u0627\u0646\u062a\u062e\u0627\u0628\u06cc \u0634\u062f\u0646 \u062a\u0627\u0631\u06cc\u062e \u0627\u0646\u062a\u0634\u0627\u0631 \u0622\u06af\u0647\u06cc \u0627\u0633\u062a\u062e\u062f\u0627\u0645\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L21",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "release_notes_\u06f4_\u0627\u0646\u062a\u062e\u0627\u0628\u06cc_\u0634\u062f\u0646_\u062a\u0627\u0631\u06cc\u062e_\u0627\u0646\u062a\u0634\u0627\u0631_\u0622\u06af\u0647\u06cc_\u0627\u0633\u062a\u062e\u062f\u0627\u0645\u06cc",
       "community": 9,
@@ -21916,7 +21971,7 @@
       "label": "\u06f5. \u0627\u0641\u0632\u0648\u062f\u0646 \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u0628\u0647 \u062c\u062f\u0648\u0644 \u0644\u06cc\u0633\u062a \u0641\u0631\u0635\u062a\u200c\u0647\u0627\u06cc \u0634\u063a\u0644\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L25",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "release_notes_\u06f5_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062c\u062f\u0648\u0644_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc",
       "community": 9,
@@ -21927,7 +21982,7 @@
       "label": "\ud83d\ude80 \u0641\u0627\u0632 \u06f1: \u0631\u0641\u0639 \u0628\u0627\u06af\u200c\u0647\u0627\u06cc \u062d\u06cc\u0627\u062a\u06cc \u0648 \u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc \u0641\u0648\u0631\u06cc \u0631\u0627\u0628\u0637 \u06a9\u0627\u0631\u0628\u0631\u06cc (UI/UX)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L31",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "release_notes_\u0641\u0627\u0632_\u06f1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0647\u0627\u06cc_\u062d\u06cc\u0627\u062a\u06cc_\u0648_\u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc_\u0641\u0648\u0631\u06cc_\u0631\u0627\u0628\u0637_\u06a9\u0627\u0631\u0628\u0631\u06cc_ui_ux",
       "community": 9,
@@ -21938,7 +21993,7 @@
       "label": "1. \u0631\u0641\u0639 \u0628\u0627\u06af \u0639\u062f\u0645 \u0646\u0645\u0627\u06cc\u0634 \u0645\u062a\u0648\u0646 \u0633\u0627\u06cc\u062f\u0628\u0627\u0631 \u0648 \u0645\u0646\u0648\u0647\u0627 (Issue #9)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L33",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "release_notes_1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0639\u062f\u0645_\u0646\u0645\u0627\u06cc\u0634_\u0645\u062a\u0648\u0646_\u0633\u0627\u06cc\u062f\u0628\u0627\u0631_\u0648_\u0645\u0646\u0648\u0647\u0627_issue_9",
       "community": 9,
@@ -21949,7 +22004,7 @@
       "label": "2. \u062d\u0630\u0641 \u0639\u0628\u0627\u0631\u062a \u0627\u0646\u06af\u0644\u06cc\u0633\u06cc Payjo \u0627\u0632 \u0627\u0633\u0646\u0627\u062f \u0686\u0627\u067e\u06cc (Issue #5)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L37",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "release_notes_2_\u062d\u0630\u0641_\u0639\u0628\u0627\u0631\u062a_\u0627\u0646\u06af\u0644\u06cc\u0633\u06cc_payjo_\u0627\u0632_\u0627\u0633\u0646\u0627\u062f_\u0686\u0627\u067e\u06cc_issue_5",
       "community": 9,
@@ -21960,7 +22015,7 @@
       "label": "3. \u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc \u0648 \u0646\u0645\u0627\u06cc\u0634 \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627\u06cc \u062f\u0633\u062a\u06cc \u0628\u0647 \u0635\u0648\u0631\u062a \u0644\u06cc\u0633\u062a \u0628\u0648\u0644\u062a\u200c\u062f\u0627\u0631 (Issue #10)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L41",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "release_notes_3_\u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc_\u0648_\u0646\u0645\u0627\u06cc\u0634_\u0634\u0627\u06cc\u0633\u062a\u06af\u06cc_\u0647\u0627\u06cc_\u062f\u0633\u062a\u06cc_\u0628\u0647_\u0635\u0648\u0631\u062a_\u0644\u06cc\u0633\u062a_\u0628\u0648\u0644\u062a_\u062f\u0627\u0631_issue_10",
       "community": 9,
@@ -21971,7 +22026,7 @@
       "label": "4. \u0627\u0641\u0632\u0648\u062f\u0646 \u06a9\u0627\u062f\u0631 \u062c\u0633\u062a\u062c\u0648\u06cc \u0645\u062a\u0646\u06cc \u0644\u062d\u0638\u0647\u200c\u0627\u06cc \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627 (Issue #8)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L45",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "release_notes_4_\u0627\u0641\u0632\u0648\u062f\u0646_\u06a9\u0627\u062f\u0631_\u062c\u0633\u062a\u062c\u0648\u06cc_\u0645\u062a\u0646\u06cc_\u0644\u062d\u0638\u0647_\u0627\u06cc_\u0634\u0627\u06cc\u0633\u062a\u06af\u06cc_\u0647\u0627_issue_8",
       "community": 9,
@@ -21982,7 +22037,7 @@
       "label": "\u2699\ufe0f \u0641\u0627\u0632 \u06f2: \u0627\u0635\u0644\u0627\u062d\u0627\u062a \u0645\u062f\u0644 \u062f\u0627\u062f\u0647\u060c \u0645\u062d\u062f\u0648\u062f\u06cc\u062a\u200c\u0647\u0627 \u0648 \u0645\u0646\u0637\u0642 \u0641\u0631\u0622\u06cc\u0646\u062f \u0627\u0633\u062a\u062e\u062f\u0627\u0645",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L51",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "release_notes_\u0641\u0627\u0632_\u06f2_\u0627\u0635\u0644\u0627\u062d\u0627\u062a_\u0645\u062f\u0644_\u062f\u0627\u062f\u0647_\u0645\u062d\u062f\u0648\u062f\u06cc\u062a_\u0647\u0627_\u0648_\u0645\u0646\u0637\u0642_\u0641\u0631\u0622\u06cc\u0646\u062f_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
       "community": 9,
@@ -21993,7 +22048,7 @@
       "label": "1. \u0627\u0645\u06a9\u0627\u0646 \u0628\u0631\u06af\u0632\u0627\u0631\u06cc \u0686\u0646\u062f \u0622\u0632\u0645\u0648\u0646 \u0628\u0627 \u06cc\u06a9 \u06a9\u062f \u0634\u063a\u0644 (Issue #1)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L53",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "release_notes_1_\u0627\u0645\u06a9\u0627\u0646_\u0628\u0631\u06af\u0632\u0627\u0631\u06cc_\u0686\u0646\u062f_\u0622\u0632\u0645\u0648\u0646_\u0628\u0627_\u06cc\u06a9_\u06a9\u062f_\u0634\u063a\u0644_issue_1",
       "community": 9,
@@ -22004,7 +22059,7 @@
       "label": "2. \u0627\u0641\u0632\u0648\u062f\u0646 \u0641\u06cc\u0644\u062f \u0646\u0627\u0645 \u06a9\u0627\u0631\u062e\u0627\u0646\u0647 / \u0645\u062d\u0644 \u0627\u0633\u062a\u0642\u0631\u0627\u0631 \u0628\u0647 \u0641\u0631\u0635\u062a \u0634\u063a\u0644\u06cc (Issue #7)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L57",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "release_notes_2_\u0627\u0641\u0632\u0648\u062f\u0646_\u0641\u06cc\u0644\u062f_\u0646\u0627\u0645_\u06a9\u0627\u0631\u062e\u0627\u0646\u0647_\u0645\u062d\u0644_\u0627\u0633\u062a\u0642\u0631\u0627\u0631_\u0628\u0647_\u0641\u0631\u0635\u062a_\u0634\u063a\u0644\u06cc_issue_7",
       "community": 9,
@@ -22015,7 +22070,7 @@
       "label": "3. \u062a\u0639\u06cc\u06cc\u0646 \u062a\u06a9\u0644\u06cc\u0641 \u0634\u0627\u06cc\u0633\u062a\u06af\u06cc\u200c\u0647\u0627 \u0648 \u0645\u0635\u0627\u062d\u0628\u0647\u200c\u06af\u0631\u0627\u0646 \u0647\u0646\u06af\u0627\u0645 \u062a\u063a\u06cc\u06cc\u0631 \u0627\u0644\u06af\u0648\u06cc \u0641\u0631\u0622\u06cc\u0646\u062f (Issue #2)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L61",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "release_notes_3_\u062a\u0639\u06cc\u06cc\u0646_\u062a\u06a9\u0644\u06cc\u0641_\u0634\u0627\u06cc\u0633\u062a\u06af\u06cc_\u0647\u0627_\u0648_\u0645\u0635\u0627\u062d\u0628\u0647_\u06af\u0631\u0627\u0646_\u0647\u0646\u06af\u0627\u0645_\u062a\u063a\u06cc\u06cc\u0631_\u0627\u0644\u06af\u0648\u06cc_\u0641\u0631\u0622\u06cc\u0646\u062f_issue_2",
       "community": 9,
@@ -22026,7 +22081,7 @@
       "label": "4. \u0627\u0641\u0632\u0648\u062f\u0646 \u0645\u0631\u062d\u0644\u0647 \"\u062a\u0633\u062a \u0647\u0648\u0634\" \u0628\u0647 \u06af\u0632\u06cc\u0646\u0647\u200c\u0647\u0627\u06cc \u0627\u0631\u0632\u06cc\u0627\u0628\u06cc (Issue #6)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L65",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "release_notes_4_\u0627\u0641\u0632\u0648\u062f\u0646_\u0645\u0631\u062d\u0644\u0647_\u062a\u0633\u062a_\u0647\u0648\u0634_\u0628\u0647_\u06af\u0632\u06cc\u0646\u0647_\u0647\u0627\u06cc_\u0627\u0631\u0632\u06cc\u0627\u0628\u06cc_issue_6",
       "community": 9,
@@ -22037,7 +22092,7 @@
       "label": "\ud83d\udcca \u0641\u0627\u0632 \u06f3: \u0627\u0631\u062a\u0642\u0627\u0621 \u0648 \u0647\u0648\u0634\u0645\u0646\u062f\u0633\u0627\u0632\u06cc \u0644\u06cc\u0633\u062a \u0641\u0631\u0635\u062a\u200c\u0647\u0627\u06cc \u0634\u063a\u0644\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L71",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "release_notes_\u0641\u0627\u0632_\u06f3_\u0627\u0631\u062a\u0642\u0627\u0621_\u0648_\u0647\u0648\u0634\u0645\u0646\u062f\u0633\u0627\u0632\u06cc_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc",
       "community": 9,
@@ -22048,7 +22103,7 @@
       "label": "1. \u06af\u0632\u06cc\u0646\u0647 \u0627\u0646\u062a\u062e\u0627\u0628 \u062a\u0639\u062f\u0627\u062f \u0631\u062f\u06cc\u0641 \u062f\u0631 \u0635\u0641\u062d\u0647 \u0641\u0631\u0635\u062a\u200c\u0647\u0627\u06cc \u0634\u063a\u0644\u06cc (Issue #11)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L73",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "release_notes_1_\u06af\u0632\u06cc\u0646\u0647_\u0627\u0646\u062a\u062e\u0627\u0628_\u062a\u0639\u062f\u0627\u062f_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0635\u0641\u062d\u0647_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc_issue_11",
       "community": 9,
@@ -22059,7 +22114,7 @@
       "label": "2. \u062a\u0641\u06a9\u06cc\u06a9 \u0633\u062a\u0648\u0646 \u06a9\u062f \u0634\u063a\u0644 \u0648 \u0634\u0645\u0627\u0631\u0647 \u062f\u0631\u062e\u0648\u0627\u0633\u062a \u0628\u0627 \u0642\u0627\u0628\u0644\u06cc\u062a \u0645\u0631\u062a\u0628\u200c\u0633\u0627\u0632\u06cc \u0645\u0633\u062a\u0642\u0644 (Issue #12)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L77",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "release_notes_2_\u062a\u0641\u06a9\u06cc\u06a9_\u0633\u062a\u0648\u0646_\u06a9\u062f_\u0634\u063a\u0644_\u0648_\u0634\u0645\u0627\u0631\u0647_\u062f\u0631\u062e\u0648\u0627\u0633\u062a_\u0628\u0627_\u0642\u0627\u0628\u0644\u06cc\u062a_\u0645\u0631\u062a\u0628_\u0633\u0627\u0632\u06cc_\u0645\u0633\u062a\u0642\u0644_issue_12",
       "community": 9,
@@ -22070,7 +22125,7 @@
       "label": "\u270d\ufe0f \u0641\u0627\u0632 \u06f4: \u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc \u0633\u0646\u062f \u0622\u0632\u0645\u0648\u0646 \u0648 \u067e\u06cc\u0627\u062f\u0647\u200c\u0633\u0627\u0632\u06cc \u0627\u0645\u0636\u0627\u06cc \u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L83",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "release_notes_\u0641\u0627\u0632_\u06f4_\u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc_\u0633\u0646\u062f_\u0622\u0632\u0645\u0648\u0646_\u0648_\u067e\u06cc\u0627\u062f\u0647_\u0633\u0627\u0632\u06cc_\u0627\u0645\u0636\u0627\u06cc_\u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc",
       "community": 9,
@@ -22081,7 +22136,7 @@
       "label": "1. \u0627\u0635\u0644\u0627\u062d \u0648 \u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc A4 \u0633\u0646\u062f \u0622\u0632\u0645\u0648\u0646 \u0627\u0633\u062a\u062e\u062f\u0627\u0645\u06cc (Issue #3)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L85",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "release_notes_1_\u0627\u0635\u0644\u0627\u062d_\u0648_\u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc_a4_\u0633\u0646\u062f_\u0622\u0632\u0645\u0648\u0646_\u0627\u0633\u062a\u062e\u062f\u0627\u0645\u06cc_issue_3",
       "community": 9,
@@ -22092,7 +22147,7 @@
       "label": "2. \u0633\u06cc\u0633\u062a\u0645 \u0645\u0647\u0631 \u0648 \u0627\u0645\u0636\u0627\u06cc \u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc \u0628\u0627 \u06a9\u062f \u0627\u0635\u0627\u0644\u062a \u0627\u0645\u0646\u06cc\u062a\u06cc (Issue #4)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L89",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "release_notes_2_\u0633\u06cc\u0633\u062a\u0645_\u0645\u0647\u0631_\u0648_\u0627\u0645\u0636\u0627\u06cc_\u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc_\u0628\u0627_\u06a9\u062f_\u0627\u0635\u0627\u0644\u062a_\u0627\u0645\u0646\u06cc\u062a\u06cc_issue_4",
       "community": 9,
@@ -22103,7 +22158,7 @@
       "label": "\ud83c\udf1f \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0648 \u06cc\u06a9\u067e\u0627\u0631\u0686\u0647\u200c\u0633\u0627\u0632\u06cc\u200c\u0647\u0627\u06cc \u062a\u06a9\u0645\u06cc\u0644\u06cc (\u0646\u0633\u062e\u0647 1.7.2)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L95",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u06cc\u06a9\u067e\u0627\u0631\u0686\u0647_\u0633\u0627\u0632\u06cc_\u0647\u0627\u06cc_\u062a\u06a9\u0645\u06cc\u0644\u06cc_\u0646\u0633\u062e\u0647_1_7_2",
       "community": 9,
@@ -22114,7 +22169,7 @@
       "label": "1. \u067e\u0648\u06cc\u0627\u0633\u0627\u0632\u06cc \u0646\u0627\u0645 \u0633\u0627\u0632\u0645\u0627\u0646 \u062f\u0631 \u06a9\u0644\u06cc\u0647 \u0635\u0641\u062d\u0627\u062a \u0648 \u0642\u0627\u0644\u0628\u200c\u0647\u0627 (Branding Modernization)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L97",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "release_notes_1_\u067e\u0648\u06cc\u0627\u0633\u0627\u0632\u06cc_\u0646\u0627\u0645_\u0633\u0627\u0632\u0645\u0627\u0646_\u062f\u0631_\u06a9\u0644\u06cc\u0647_\u0635\u0641\u062d\u0627\u062a_\u0648_\u0642\u0627\u0644\u0628_\u0647\u0627_branding_modernization",
       "community": 9,
@@ -22125,7 +22180,7 @@
       "label": "2. \u067e\u0634\u062a\u06cc\u0628\u0627\u0646\u06cc \u06a9\u0627\u0645\u0644 \u0645\u0631\u062d\u0644\u0647 \u00ab\u062a\u0633\u062a \u0647\u0648\u0634\u00bb (IQ_TEST) \u062f\u0631 \u0645\u0627\u0698\u0648\u0644 \u0628\u0631\u0646\u0627\u0645\u0647\u200c\u0631\u06cc\u0632\u06cc \u062c\u0630\u0628",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L101",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "release_notes_2_\u067e\u0634\u062a\u06cc\u0628\u0627\u0646\u06cc_\u06a9\u0627\u0645\u0644_\u0645\u0631\u062d\u0644\u0647_\u062a\u0633\u062a_\u0647\u0648\u0634_iq_test_\u062f\u0631_\u0645\u0627\u0698\u0648\u0644_\u0628\u0631\u0646\u0627\u0645\u0647_\u0631\u06cc\u0632\u06cc_\u062c\u0630\u0628",
       "community": 9,
@@ -22136,7 +22191,7 @@
       "label": "3. \u0645\u0627\u06cc\u06af\u0631\u06cc\u0634\u0646 \u062c\u062f\u06cc\u062f \u062f\u06cc\u062a\u0627\u0628\u06cc\u0633",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L105",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "release_notes_3_\u0645\u0627\u06cc\u06af\u0631\u06cc\u0634\u0646_\u062c\u062f\u06cc\u062f_\u062f\u06cc\u062a\u0627\u0628\u06cc\u0633",
       "community": 9,
@@ -22147,7 +22202,7 @@
       "label": "\ud83e\udd16 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.8.1 (\u062a\u0648\u0644\u06cc\u062f \u062e\u0648\u062f\u06a9\u0627\u0631 \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0627 AI)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L110",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
       "community": 9,
@@ -22158,7 +22213,7 @@
       "label": "1. \u0633\u06cc\u0633\u062a\u0645 \u062a\u0648\u0644\u06cc\u062f \u0647\u0648\u0634\u0645\u0646\u062f \u0634\u0631\u062d \u0634\u063a\u0644 \u0648 \u0634\u0631\u0627\u06cc\u0637 \u0627\u062d\u0631\u0627\u0632 \u0628\u0631 \u0627\u0633\u0627\u0633 \u0628\u0646\u0686\u0645\u0627\u0631\u06a9\u200c\u0647\u0627\u06cc \u0645\u0631\u062c\u0639 \u0634\u063a\u0644\u06cc",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L112",
+      "source_location": "L132",
       "_origin": "ast",
       "id": "release_notes_1_\u0633\u06cc\u0633\u062a\u0645_\u062a\u0648\u0644\u06cc\u062f_\u0647\u0648\u0634\u0645\u0646\u062f_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0631_\u0627\u0633\u0627\u0633_\u0628\u0646\u0686\u0645\u0627\u0631\u06a9_\u0647\u0627\u06cc_\u0645\u0631\u062c\u0639_\u0634\u063a\u0644\u06cc",
       "community": 9,
@@ -22169,7 +22224,7 @@
       "label": "\ud83d\udd22 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a \u0646\u0633\u062e\u0647 1.9.0 (\u0627\u0641\u0632\u0648\u062f\u0646 \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u0628\u0647 \u062a\u0645\u0627\u0645 \u062c\u062f\u0627\u0648\u0644 \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a)",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L119",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
       "community": 9,
@@ -22180,7 +22235,7 @@
       "label": "1. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0644\u06cc\u0633\u062a \u0627\u0635\u0644\u06cc \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0648 \u0628\u0627\u0646\u06a9 \u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc \u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L121",
+      "source_location": "L141",
       "_origin": "ast",
       "id": "release_notes_1_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0627\u0635\u0644\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u0628\u0627\u0646\u06a9_\u0627\u0637\u0644\u0627\u0639\u0627\u062a\u06cc_\u062f\u0627\u0648\u0637\u0644\u0628\u0627\u0646",
       "community": 9,
@@ -22191,7 +22246,7 @@
       "label": "2. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 (#) \u062f\u0631 \u0645\u0627\u062a\u0631\u06cc\u0633 \u0648\u0631\u0648\u062f \u0648 \u062b\u0628\u062a \u0646\u0645\u0631\u0627\u062a",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L124",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "release_notes_2_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0645\u0627\u062a\u0631\u06cc\u0633_\u0648\u0631\u0648\u062f_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
       "community": 9,
@@ -22202,7 +22257,7 @@
       "label": "3. \u0633\u062a\u0648\u0646 \u0634\u0645\u0627\u0631\u0647 \u0631\u062f\u06cc\u0641 \u062f\u0631 \u0644\u06cc\u0633\u062a \u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646 \u0628\u0647 \u062a\u0641\u06a9\u06cc\u06a9 \u0645\u0631\u062d\u0644\u0647 \u0648 \u0645\u0646\u062a\u062e\u0628\u06cc\u0646",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L127",
+      "source_location": "L147",
       "_origin": "ast",
       "id": "release_notes_3_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u062f\u0631_\u0644\u06cc\u0633\u062a_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0628\u0647_\u062a\u0641\u06a9\u06cc\u06a9_\u0645\u0631\u062d\u0644\u0647_\u0648_\u0645\u0646\u062a\u062e\u0628\u06cc\u0646",
       "community": 9,
@@ -22213,7 +22268,7 @@
       "label": "\ud83c\udfc6 \u062e\u0644\u0627\u0635\u0647 \u06a9\u0644\u06cc \u0648\u0636\u0639\u06cc\u062a \u067e\u0631\u0648\u0698\u0647",
       "file_type": "document",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L132",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "release_notes_\u062e\u0644\u0627\u0635\u0647_\u06a9\u0644\u06cc_\u0648\u0636\u0639\u06cc\u062a_\u067e\u0631\u0648\u0698\u0647",
       "community": 9,
@@ -91023,7 +91078,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L110",
+      "source_location": "L130",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91034,7 +91089,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L119",
+      "source_location": "L139",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91045,7 +91100,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L95",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91056,7 +91111,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L132",
+      "source_location": "L152",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91067,7 +91122,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L31",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91078,7 +91133,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L51",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91089,7 +91144,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L71",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91100,7 +91155,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L83",
+      "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91111,7 +91166,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L7",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
@@ -91122,7 +91177,62 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u06af\u0632\u0627\u0631\u0634_\u062c\u0627\u0645\u0639_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u0628\u0647_\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06cc_\u0647\u0627\u06cc_\u0633\u0627\u0645\u0627\u0646\u0647_payjoo_ats",
+      "target": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
       "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "target": "release_notes_\u06f1_\u0641\u0631\u0645_\u0627\u0631\u0632\u06cc\u0627\u0628\u06cc_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0628\u0627_\u062a\u0646\u0638\u06cc\u0645_\u062a\u0627\u0631\u06cc\u062e_\u0633\u0627\u0639\u062a_\u0648_\u0633\u06cc\u0633\u062a\u0645_\u062a\u0637\u0628\u06cc\u0642_\u062e\u0648\u062f\u06a9\u0627\u0631_auto_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "target": "release_notes_\u06f2_\u0646\u0645\u0627\u06cc\u0634_\u0634\u0645\u0627\u0631\u0647_\u062f\u0631\u062e\u0648\u0627\u0633\u062a_\u0648_\u06a9\u062f_\u067e\u0633\u062a_\u062f\u0631_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc_\u067e\u0631\u0648\u0646\u062f\u0647_\u0645\u062a\u0642\u0627\u0636\u06cc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "target": "release_notes_\u06f3_\u0646\u0627\u0648\u0628\u0631\u06cc_\u062f\u0648\u0637\u0631\u0641\u0647_\u0647\u0648\u0634\u0645\u0646\u062f_\u0628\u06cc\u0646_\u067e\u0631\u0648\u0646\u062f\u0647_\u0645\u062a\u0642\u0627\u0636\u06cc_\u0648_\u067e\u0627\u06cc\u067e_\u0644\u0627\u06cc\u0646_\u0641\u0631\u0635\u062a_\u0634\u063a\u0644\u06cc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f4_\u06f0_\u06f0_version_4_0_0_\u0627\u0631\u062a\u0642\u0627\u06cc_\u0641\u0631\u0645_\u0645\u0635\u0627\u062d\u0628\u0647_\u062a\u062e\u0635\u0635\u06cc_\u0631\u0647\u06af\u06cc\u0631\u06cc_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u062a\u0639\u0627\u0645\u0644\u06cc_\u06a9\u0627\u0631\u0646\u0627\u0645\u0647_\u0645\u0631\u0627\u062d\u0644",
+      "target": "release_notes_\u06f4_\u062a\u0648\u0644_\u062a\u06cc\u067e_\u0648_\u067e\u0627\u067e_\u0627\u0648\u0631_\u062a\u0639\u0627\u0645\u0644\u06cc_\u0646\u0645\u0631\u0627\u062a_\u0648_\u0648\u0636\u0639\u06cc\u062a_\u0645\u0631\u0627\u062d\u0644_\u0627\u0631\u0632\u06cc\u0627\u0628\u06cc_hover_breakdown",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE_NOTES.md",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
@@ -91133,7 +91243,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L13",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
@@ -91144,7 +91254,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L17",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
@@ -91155,7 +91265,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L21",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
@@ -91166,7 +91276,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L25",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0646\u06af\u0627\u0631\u0634_\u06f3_\u06f2_\u06f0_version_3_2_0_\u0633\u0641\u0627\u0631\u0634\u06cc_\u0633\u0627\u0632\u06cc_\u0622\u062f\u0631\u0633_\u0622\u06af\u0647\u06cc_\u0647\u0627_\u0634\u0631\u0627\u06cc\u0637_\u0639\u0645\u0648\u0645\u06cc_\u0627\u062d\u0631\u0627\u0632_\u0648_\u0628\u0647\u0628\u0648\u062f_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627",
@@ -91177,7 +91287,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L33",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0647\u0627\u06cc_\u062d\u06cc\u0627\u062a\u06cc_\u0648_\u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc_\u0641\u0648\u0631\u06cc_\u0631\u0627\u0628\u0637_\u06a9\u0627\u0631\u0628\u0631\u06cc_ui_ux",
@@ -91188,7 +91298,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L37",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0647\u0627\u06cc_\u062d\u06cc\u0627\u062a\u06cc_\u0648_\u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc_\u0641\u0648\u0631\u06cc_\u0631\u0627\u0628\u0637_\u06a9\u0627\u0631\u0628\u0631\u06cc_ui_ux",
@@ -91199,7 +91309,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L41",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0647\u0627\u06cc_\u062d\u06cc\u0627\u062a\u06cc_\u0648_\u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc_\u0641\u0648\u0631\u06cc_\u0631\u0627\u0628\u0637_\u06a9\u0627\u0631\u0628\u0631\u06cc_ui_ux",
@@ -91210,7 +91320,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L45",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f1_\u0631\u0641\u0639_\u0628\u0627\u06af_\u0647\u0627\u06cc_\u062d\u06cc\u0627\u062a\u06cc_\u0648_\u0628\u0647\u0628\u0648\u062f\u0647\u0627\u06cc_\u0641\u0648\u0631\u06cc_\u0631\u0627\u0628\u0637_\u06a9\u0627\u0631\u0628\u0631\u06cc_ui_ux",
@@ -91221,7 +91331,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L53",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f2_\u0627\u0635\u0644\u0627\u062d\u0627\u062a_\u0645\u062f\u0644_\u062f\u0627\u062f\u0647_\u0645\u062d\u062f\u0648\u062f\u06cc\u062a_\u0647\u0627_\u0648_\u0645\u0646\u0637\u0642_\u0641\u0631\u0622\u06cc\u0646\u062f_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
@@ -91232,7 +91342,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L57",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f2_\u0627\u0635\u0644\u0627\u062d\u0627\u062a_\u0645\u062f\u0644_\u062f\u0627\u062f\u0647_\u0645\u062d\u062f\u0648\u062f\u06cc\u062a_\u0647\u0627_\u0648_\u0645\u0646\u0637\u0642_\u0641\u0631\u0622\u06cc\u0646\u062f_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
@@ -91243,7 +91353,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L61",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f2_\u0627\u0635\u0644\u0627\u062d\u0627\u062a_\u0645\u062f\u0644_\u062f\u0627\u062f\u0647_\u0645\u062d\u062f\u0648\u062f\u06cc\u062a_\u0647\u0627_\u0648_\u0645\u0646\u0637\u0642_\u0641\u0631\u0622\u06cc\u0646\u062f_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
@@ -91254,7 +91364,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L65",
+      "source_location": "L85",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f2_\u0627\u0635\u0644\u0627\u062d\u0627\u062a_\u0645\u062f\u0644_\u062f\u0627\u062f\u0647_\u0645\u062d\u062f\u0648\u062f\u06cc\u062a_\u0647\u0627_\u0648_\u0645\u0646\u0637\u0642_\u0641\u0631\u0622\u06cc\u0646\u062f_\u0627\u0633\u062a\u062e\u062f\u0627\u0645",
@@ -91265,7 +91375,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L73",
+      "source_location": "L93",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f3_\u0627\u0631\u062a\u0642\u0627\u0621_\u0648_\u0647\u0648\u0634\u0645\u0646\u062f\u0633\u0627\u0632\u06cc_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc",
@@ -91276,7 +91386,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L77",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f3_\u0627\u0631\u062a\u0642\u0627\u0621_\u0648_\u0647\u0648\u0634\u0645\u0646\u062f\u0633\u0627\u0632\u06cc_\u0644\u06cc\u0633\u062a_\u0641\u0631\u0635\u062a_\u0647\u0627\u06cc_\u0634\u063a\u0644\u06cc",
@@ -91287,7 +91397,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L85",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f4_\u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc_\u0633\u0646\u062f_\u0622\u0632\u0645\u0648\u0646_\u0648_\u067e\u06cc\u0627\u062f\u0647_\u0633\u0627\u0632\u06cc_\u0627\u0645\u0636\u0627\u06cc_\u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc",
@@ -91298,7 +91408,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L89",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u0641\u0627\u0632_\u06f4_\u0628\u0627\u0632\u0637\u0631\u0627\u062d\u06cc_\u0633\u0646\u062f_\u0622\u0632\u0645\u0648\u0646_\u0648_\u067e\u06cc\u0627\u062f\u0647_\u0633\u0627\u0632\u06cc_\u0627\u0645\u0636\u0627\u06cc_\u0627\u0644\u06a9\u062a\u0631\u0648\u0646\u06cc\u06a9\u06cc",
@@ -91309,7 +91419,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L97",
+      "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u06cc\u06a9\u067e\u0627\u0631\u0686\u0647_\u0633\u0627\u0632\u06cc_\u0647\u0627\u06cc_\u062a\u06a9\u0645\u06cc\u0644\u06cc_\u0646\u0633\u062e\u0647_1_7_2",
@@ -91320,7 +91430,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L101",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u06cc\u06a9\u067e\u0627\u0631\u0686\u0647_\u0633\u0627\u0632\u06cc_\u0647\u0627\u06cc_\u062a\u06a9\u0645\u06cc\u0644\u06cc_\u0646\u0633\u062e\u0647_1_7_2",
@@ -91331,7 +91441,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L105",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0648_\u06cc\u06a9\u067e\u0627\u0631\u0686\u0647_\u0633\u0627\u0632\u06cc_\u0647\u0627\u06cc_\u062a\u06a9\u0645\u06cc\u0644\u06cc_\u0646\u0633\u062e\u0647_1_7_2",
@@ -91342,7 +91452,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L112",
+      "source_location": "L132",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_8_1_\u062a\u0648\u0644\u06cc\u062f_\u062e\u0648\u062f\u06a9\u0627\u0631_\u0634\u0631\u062d_\u0634\u063a\u0644_\u0648_\u0634\u0631\u0627\u06cc\u0637_\u0627\u062d\u0631\u0627\u0632_\u0628\u0627_ai",
@@ -91353,7 +91463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L121",
+      "source_location": "L141",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
@@ -91364,7 +91474,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L124",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
@@ -91375,7 +91485,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "RELEASE_NOTES.md",
-      "source_location": "L127",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "release_notes_\u062a\u063a\u06cc\u06cc\u0631\u0627\u062a_\u0646\u0633\u062e\u0647_1_9_0_\u0627\u0641\u0632\u0648\u062f\u0646_\u0633\u062a\u0648\u0646_\u0634\u0645\u0627\u0631\u0647_\u0631\u062f\u06cc\u0641_\u0628\u0647_\u062a\u0645\u0627\u0645_\u062c\u062f\u0627\u0648\u0644_\u0645\u062a\u0642\u0627\u0636\u06cc\u0627\u0646_\u0648_\u062b\u0628\u062a_\u0646\u0645\u0631\u0627\u062a",
@@ -91384,5 +91494,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "74c9b803c776bd2f8bd8eb5fe89a9c488b562758"
+  "built_at_commit": "330fa0b7c88281cdfc430fd4fc66a5d57489f26c"
 }

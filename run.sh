@@ -22,9 +22,10 @@ echo "Installing/checking dependencies..."
 pip install --upgrade pip --timeout 5 || echo "Warning: pip upgrade timed out/failed, continuing..."
 pip install -r requirements.txt --timeout 5 || echo "Warning: dependencies check timed out/failed, continuing..."
 
-# 4. Apply Database Migrations
-echo "Applying database migrations..."
+# 4. Apply Database Migrations & Optimization
+echo "Applying database migrations and optimizations..."
 python manage.py migrate
+python manage.py optimize_db
 
 # 5. Initialize/Reset Admin User and profile
 echo "Configuring default admin credentials..."

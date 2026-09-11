@@ -263,13 +263,13 @@
             flex-direction: row;
             justify-content: space-between;
             align-items: stretch;
-            gap: 0;
+            gap: 1.5%;
             max-width: 1400px;
             margin: 0 auto;
         }
         body.a5-mode .print-sheet {
-            width: 48.8%;
-            max-width: 48.8%;
+            width: 49.2%;
+            max-width: 49.2%;
             padding: 0.55rem 0.7rem;
             font-size: 0.63rem;
             border: 1px solid #cbd5e1;
@@ -283,37 +283,6 @@
         }
         body.a5-mode.autofit-enabled .print-sheet {
             min-height: 690px; /* fills standard A5 landscape height */
-        }
-        body.a5-mode .a5-divider {
-            width: 2.4%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        body.a5-mode .a5-divider .cut-line {
-            border-right: 1.5px dashed #94a3b8;
-            height: 100%;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        body.a5-mode .a5-divider .cut-line .cut-icon {
-            background: #f1f5f9;
-            padding: 2px;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        body.a5-mode .a5-divider .cut-line .cut-text {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            font-size: 8.5px;
-            color: #64748b;
-            letter-spacing: 2px;
-            background: #f1f5f9;
-            padding: 4px 0;
         }
 
         /* Compact & Auto-Fit scaling in A5 mode */
@@ -450,8 +419,8 @@
                 break-inside: avoid !important;
             }
             body.a5-mode .print-sheet {
-                width: 48.8% !important;
-                max-width: 48.8% !important;
+                width: 49.2% !important;
+                max-width: 49.2% !important;
                 height: 100% !important;
                 max-height: 100% !important;
                 padding: 1.5mm 2.5mm !important;
@@ -459,17 +428,6 @@
                 box-shadow: none !important;
                 page-break-after: avoid !important;
                 break-inside: avoid !important;
-            }
-            body.a5-mode .a5-divider {
-                width: 2.4% !important;
-                display: flex !important;
-            }
-            body.a5-mode .a5-divider .cut-line {
-                border-right: 1px dashed #475569 !important;
-            }
-            body.a5-mode .a5-divider .cut-line .cut-icon,
-            body.a5-mode .a5-divider .cut-line .cut-text {
-                background: #ffffff !important;
             }
         }
     </style>
@@ -784,14 +742,6 @@
         </div>
     </div>
 
-    <!-- Divider for A5 Mode (Scissors Cut Line) -->
-    <div id="a5Divider" class="a5-divider d-none">
-        <div class="cut-line">
-            <span class="cut-icon">✂️</span>
-            <span class="cut-text">محل برش برگه A5</span>
-        </div>
-    </div>
-
     <!-- Sheet 2 (Clone for A5 Mode) -->
     <div id="sheet2" class="print-container print-sheet d-none">
         <!-- Content will be cloned from Sheet 1 -->
@@ -1077,7 +1027,6 @@
         const btnPrint = document.getElementById('btnPrint');
         const indicator = document.getElementById('currentLayoutIndicator');
         const sheet2 = document.getElementById('sheet2');
-        const divider = document.getElementById('a5Divider');
 
         if (mode === 'A5') {
             document.body.classList.add('a5-mode');
@@ -1092,7 +1041,6 @@
             indicator.className = 'badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded';
 
             sheet2.classList.remove('d-none');
-            divider.classList.remove('d-none');
             syncA5Copies();
         } else {
             document.body.classList.remove('a5-mode');
@@ -1107,7 +1055,6 @@
             indicator.className = 'badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded';
 
             sheet2.classList.add('d-none');
-            divider.classList.add('d-none');
         }
     }
 

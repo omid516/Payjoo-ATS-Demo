@@ -27,3 +27,6 @@ resumes/
 
 # Excel files
 *.xlsx
+
+# Graphify
+graphify-out/

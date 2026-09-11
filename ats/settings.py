@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.interviews',
     'apps.recruitment_planning',
     'apps.historical_import',
+    'apps.sync_hub',
 ]
 
 MIDDLEWARE = [

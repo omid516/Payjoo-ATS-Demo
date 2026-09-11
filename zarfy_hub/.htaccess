@@ -1,0 +1,11 @@
+# Protect directory and allow api.php execution
+<Files "api.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Block access to hidden files and json packages directly
+<FilesMatch "(\.json|\.htaccess|\.atspack)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

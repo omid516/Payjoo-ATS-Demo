@@ -558,6 +558,7 @@ class AssessmentCompetency(SoftDeleteModel):
 
 
 class CentralCompetency(SoftDeleteModel):
+    audit_log_enabled = False
     post_code = models.CharField(max_length=50, db_index=True, verbose_name="کد پست")
     post_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="پست")
     code = models.CharField(max_length=50, db_index=True, verbose_name="کد شایستگی")
@@ -922,6 +923,7 @@ class OrganizationSetting(SoftDeleteModel):
 
 
 class JobDescriptionTemplate(SoftDeleteModel):
+    audit_log_enabled = False
     job_code = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="کد شغل")
     title = models.CharField(max_length=200, verbose_name="عنوان شغل")
     job_level_type_1 = models.CharField(max_length=100, blank=True, null=True, verbose_name="رده شغلی نوع ۱")

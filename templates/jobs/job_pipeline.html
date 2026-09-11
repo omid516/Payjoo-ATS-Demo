@@ -266,24 +266,171 @@
 </div>
 {% endif %}
 
+<!-- Summary Pipeline Statistics & Funnel Overview -->
+<div class="card premium-card mb-4">
+    <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-5">📊</span>
+            <h6 class="font-semibold text-secondary m-0">
+                {% if current_language_code == 'en' %}Recruitment Pipeline Statistics & Stage Pass Rates{% elif current_language_code == 'tr' %}İşe Alım Süreci İstatistikleri ve Aşama Başarı Durumu{% elif current_language_code == 'ar' %}إحصائيات مسار التوظيف ونسب القبول في المراحل{% else %}آمار فرآیند ارزیابی و وضعیت قبولی در مراحل{% endif %}
+            </h6>
+        </div>
+        <span class="text-xs text-muted">
+            {% if current_language_code == 'en' %}Real-time summary{% elif current_language_code == 'tr' %}Anlık özet{% elif current_language_code == 'ar' %}ملخص لحظي{% else %}خلاصه وضعیت لحظه‌ای{% endif %}
+        </span>
+    </div>
+    <div class="card-body p-3 bg-light bg-opacity-40">
+        <div class="row g-3 align-items-stretch">
+            <!-- 1. Total Registered -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="p-3 bg-white rounded-3 border border-primary border-opacity-30 shadow-2xs h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-xs font-bold text-primary">👥 {% if current_language_code == 'en' %}Registered{% elif current_language_code == 'tr' %}Kayıtlı{% elif current_language_code == 'ar' %}المسجلون{% else %}کل ثبت‌نام{% endif %}</span>
+                            <span class="badge bg-primary text-white px-2 py-0.5 rounded-pill text-xxs font-bold">100٪</span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1 my-2">
+                            <h3 class="font-bold text-primary m-0">{{ pipeline_stats.total_registered }}</h3>
+                            <span class="text-xs text-muted">{% if current_language_code == 'en' %}person(s){% elif current_language_code == 'tr' %}kişi{% elif current_language_code == 'ar' %}شخص{% else %}نفر{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="text-xxs text-muted pt-2 border-top border-slate-light">
+                        {% if current_language_code == 'en' %}Total registered candidates{% elif current_language_code == 'tr' %}Toplam başvuran adaylar{% elif current_language_code == 'ar' %}إجمالي المتقدمين للوظيفة{% else %}کل متقاضیان ثبت‌نام‌شده{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Screening Status -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="p-3 bg-white rounded-3 border border-info border-opacity-30 shadow-2xs h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-xs font-bold text-secondary">🔍 {% if current_language_code == 'en' %}Screening{% elif current_language_code == 'tr' %}Ön Eleme{% elif current_language_code == 'ar' %}الغربلة{% else %}وضعیت غربالگری{% endif %}</span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-1.5 py-0.5 rounded-pill text-xxs font-bold">
+                                {{ pipeline_stats.screening_determined_pct }}٪
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1 my-2">
+                            <h3 class="font-bold text-secondary m-0">{{ pipeline_stats.screening_determined }}</h3>
+                            <span class="text-xs text-muted">{% if current_language_code == 'en' %}of {{ pipeline_stats.total_registered }} set{% elif current_language_code == 'tr' %}/ {{ pipeline_stats.total_registered }} netleşti{% elif current_language_code == 'ar' %}تم تحديدهم{% else %}از {{ pipeline_stats.total_registered }} مشخص{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1.5 text-xxs pt-2 border-top border-slate-light font-semibold">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-1.5 py-0.5 rounded">
+                            ✓ {{ pipeline_stats.screening_passed }} {% if current_language_code == 'en' %}passed{% elif current_language_code == 'tr' %}geçti{% elif current_language_code == 'ar' %}قبول{% else %}قبول{% endif %}
+                        </span>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-1.5 py-0.5 rounded">
+                            ✗ {{ pipeline_stats.screening_failed }} {% if current_language_code == 'en' %}failed{% elif current_language_code == 'tr' %}elendi{% elif current_language_code == 'ar' %}مردود{% else %}مردود{% endif %}
+                        </span>
+                        {% if pipeline_stats.screening_pending > 0 %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-1.5 py-0.5 rounded">
+                            ⏳ {{ pipeline_stats.screening_pending }} {% if current_language_code == 'en' %}pending{% else %}انتظار{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Stage-by-Stage Cards -->
+            {% for s_stat in pipeline_stats.stage_summary_stats %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="p-3 bg-white rounded-3 border {% if s_stat.stage.is_completed %}border-success border-opacity-50{% else %}border-slate{% endif %} shadow-2xs h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-xs font-bold text-secondary text-truncate" title="{{ s_stat.stage.name }}">
+                                🎯 {{ s_stat.stage.name }}
+                            </span>
+                            <span class="badge {% if s_stat.stage.is_completed %}bg-success text-white{% else %}bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25{% endif %} px-1.5 py-0.5 rounded-pill text-xxs font-bold">
+                                {{ s_stat.pass_rate }}٪
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1 my-2">
+                            <h3 class="font-bold text-success m-0">{{ s_stat.passed_count }}</h3>
+                            <span class="text-xs text-muted">{% if current_language_code == 'en' %}passed{% elif current_language_code == 'tr' %}geçen{% elif current_language_code == 'ar' %}مقبول{% else %}نفر قبولی{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-xxs pt-2 border-top border-slate-light text-muted">
+                        <span>{% if current_language_code == 'en' %}Failed:{% else %}مردود:{% endif %} <strong class="text-danger">{{ s_stat.failed_count }}</strong></span>
+                        <span>{% if current_language_code == 'en' %}Pending:{% else %}در انتظار:{% endif %} <strong class="text-secondary">{{ s_stat.pending_count }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 4. Final Decision Status -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="p-3 bg-white rounded-3 border {% if pipeline_stats.selected_count > 0 %}border-success border-opacity-50 bg-success bg-opacity-10{% else %}border-slate{% endif %} shadow-2xs h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-xs font-bold {% if pipeline_stats.selected_count > 0 %}text-success{% else %}text-secondary{% endif %}">
+                                🏁 {% if current_language_code == 'en' %}Final Outcome{% elif current_language_code == 'tr' %}Nihai Durum{% elif current_language_code == 'ar' %}النتيجة النهائية{% else %}نتیجه نهایی{% endif %}
+                            </span>
+                            {% if pipeline_stats.selected_count > 0 %}
+                            <span class="badge bg-success text-white px-1.5 py-0.5 rounded-pill text-xxs font-bold">
+                                {{ pipeline_stats.selected_count }} {% if current_language_code == 'en' %}Selected{% else %}پذیرفته{% endif %}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1 my-2">
+                            <h3 class="font-bold {% if pipeline_stats.selected_count > 0 %}text-success{% else %}text-secondary{% endif %} m-0">
+                                {{ pipeline_stats.selected_count }}
+                            </h3>
+                            <span class="text-xs text-muted">{% if current_language_code == 'en' %}selected{% else %}نفر قبولی نهایی{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-xxs pt-2 border-top border-slate-light text-muted">
+                        <span>{% if current_language_code == 'en' %}Reserve:{% else %}ذخیره:{% endif %} <strong class="text-info">{{ pipeline_stats.reserve_count }}</strong></span>
+                        <span>{% if current_language_code == 'en' %}In-Progress:{% else %}در جریان:{% endif %} <strong class="text-warning text-dark">{{ pipeline_stats.in_progress_count }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Applicants evaluation board -->
 <div class="card premium-card">
-    <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center">
-        <h5 class="font-semibold text-secondary m-0">{% if current_language_code == 'en' %}Candidates List & Assessment Scores{% elif current_language_code == 'tr' %}Aday Listesi & Değerlendirme Puanları{% elif current_language_code == 'ar' %}قائمة المتقدمين ودرجات التقييم{% else %}لیست متقاضیان و نمرات ارزیابی{% endif %}</h5>
-        <div id="bulk-actions" class="d-none align-items-center gap-2">
-            <span class="text-xs text-muted font-medium"><span id="selected-count">0</span> {% if current_language_code == 'en' %} candidates selected{% elif current_language_code == 'tr' %} aday seçildi{% elif current_language_code == 'ar' %} متقدم تم اختيارهم{% else %} متقاضی انتخاب شده‌اند{% endif %}</span>
-            <button type="submit" form="bulk-action-form" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
-                {% if current_language_code == 'en' %}Advance to Next Stage{% elif current_language_code == 'tr' %}Sonraki Aşamaya Taşı{% elif current_language_code == 'ar' %}النقل للمرحلة التالية{% else %}انتقال به مرحله بعد{% endif %}
-            </button>
-            <button type="button" onclick="openBulkNotificationModal()" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                </svg>
-                {% if current_language_code == 'en' %}Send SMS & Email{% elif current_language_code == 'tr' %}SMS & E-posta Gönder{% elif current_language_code == 'ar' %}إرسال رسالة بريدية وهاتفية{% else %}ارسال پیامک و ایمیل{% endif %}
-            </button>
+    <div class="card-header bg-white border-bottom border-slate py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <h5 class="font-semibold text-secondary m-0">{% if current_language_code == 'en' %}Candidates List & Assessment Scores{% elif current_language_code == 'tr' %}Aday Listesi & Değerlendirme Puanları{% elif current_language_code == 'ar' %}قائمة المتقدمين ودرجات التقييم{% else %}لیست متقاضیان و نمرات ارزیابی{% endif %}</h5>
+            <span id="applicant-count-badge" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill text-xs font-semibold">
+                {{ applications|length }} {% if current_language_code == 'en' %}candidate(s){% elif current_language_code == 'tr' %}aday{% elif current_language_code == 'ar' %}متقدم{% else %}متقاضی{% endif %}
+            </span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+            <!-- Search Box -->
+            <div class="position-relative" style="min-width: 270px; max-width: 340px;">
+                <span class="position-absolute end-0 top-50 translate-middle-y me-2.5 text-muted opacity-75" style="pointer-events: none; font-size: 13px;">🔍</span>
+                <input type="text" 
+                       id="pipeline-candidate-search" 
+                       class="form-control form-control-sm bg-light border-slate" 
+                       placeholder="{% if current_language_code == 'en' %}Search candidate, national ID...{% elif current_language_code == 'tr' %}Aday, T.C. kimlik ara...{% elif current_language_code == 'ar' %}بحث عن متقدم، الرقم القومي...{% else %}جستجوی نام، کد ملی، شماره پرسنلی...{% endif %}"
+                       style="border-radius: 8px; font-size: 12px; height: 36px; padding-right: 32px; padding-left: 28px;"
+                       autocomplete="off">
+                <button type="button" 
+                        id="clear-pipeline-search" 
+                        class="btn btn-sm text-muted position-absolute start-0 top-50 translate-middle-y border-0 p-0 ms-2 d-none" 
+                        style="width: 20px; height: 20px; font-size: 13px; line-height: 1;" 
+                        title="{% if current_language_code == 'en' %}Clear search{% else %}پاک کردن جستجو{% endif %}">✕</button>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div id="bulk-actions" class="d-none align-items-center gap-2">
+                <span class="text-xs text-muted font-medium"><span id="selected-count">0</span> {% if current_language_code == 'en' %} candidates selected{% elif current_language_code == 'tr' %} aday seçildi{% elif current_language_code == 'ar' %} متقدم تم اختيارهم{% else %} متقاضی انتخاب شده‌اند{% endif %}</span>
+                <button type="submit" form="bulk-action-form" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                    {% if current_language_code == 'en' %}Advance to Next Stage{% elif current_language_code == 'tr' %}Sonraki Aşamaya Taşı{% elif current_language_code == 'ar' %}النقل للمرحلة التالية{% else %}انتقال به مرحله بعد{% endif %}
+                </button>
+                <button type="button" onclick="openBulkNotificationModal()" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold" style="border-radius: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
+                    {% if current_language_code == 'en' %}Send SMS & Email{% elif current_language_code == 'tr' %}SMS & E-posta Gönder{% elif current_language_code == 'ar' %}إرسال رسالة بريدية وهاتفية{% else %}ارسال پیامک و ایمیل{% endif %}
+                </button>
+            </div>
         </div>
     </div>
     <div class="card-body p-0">
@@ -291,7 +438,10 @@
             <table class="table table-hover align-middle mb-0" id="pipeline-table">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4" style="width: 45px;">
+                        <th class="ps-3 text-center" style="width: 48px;">
+                            {% if current_language_code == 'en' %}#{% elif current_language_code == 'tr' %}#{% elif current_language_code == 'ar' %}الرقم{% else %}ردیف{% endif %}
+                        </th>
+                        <th class="text-center" style="width: 45px;">
                             <input type="checkbox" id="select-all" class="form-check-input">
                         </th>
                         <th style="min-width: 220px; cursor: pointer; user-select: none;" class="sortable-header" data-column="name">
@@ -316,8 +466,15 @@
                     {% with screening_stage=stages|first %}
                     {% with scr_state=app|get_stage_state:screening_stage %}
                     {% with eff_status=app.effective_status %}
-                    <tr id="candidate-app-row-{{ app.candidate.id }}" class="{% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %} {% if from_candidate and app.candidate.id == from_candidate.id %}table-primary border-start border-4 border-primary shadow-xs{% endif %}">
-                        <td class="ps-4 text-center">
+                    <tr id="candidate-app-row-{{ app.candidate.id }}" 
+                        class="candidate-row {% if scr_state and scr_state.status == 'FAILED' %}screening-failed-row{% endif %} {% if from_candidate and app.candidate.id == from_candidate.id %}table-primary border-start border-4 border-primary shadow-xs{% endif %}"
+                        data-search-text="{{ app.candidate.first_name }} {{ app.candidate.last_name }} {{ app.candidate.national_id }} {{ app.candidate.personnel_number|default:'' }}">
+                        
+                        <td class="ps-3 text-center text-muted font-monospace text-xs row-number">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td class="text-center">
                             {% if eff_status == 'IN_PROGRESS' %}
                             <input type="checkbox" name="application_ids" value="{{ app.id }}" form="bulk-action-form" class="app-checkbox form-check-input">
                             {% else %}
@@ -326,7 +483,7 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-semibold text-secondary text-decoration-none">
+                                <a href="{% url 'candidate_detail' app.candidate.id %}" target="_blank" class="font-semibold text-secondary text-decoration-none candidate-name-link">
                                     {{ app.candidate.first_name }} {{ app.candidate.last_name }}
                                 </a>
                                 {% if scr_state and scr_state.status == 'FAILED' %}
@@ -387,11 +544,20 @@
                     {% endwith %}
                     {% empty %}
                     <tr class="empty-row">
-                        <td colspan="{{ table_stages.count|add:5 }}" class="text-center py-5 text-muted">
+                        <td colspan="{{ table_stages.count|add:6 }}" class="text-center py-5 text-muted">
                             {% if current_language_code == 'en' %}No candidates have registered for this job yet.{% elif current_language_code == 'tr' %}Bu iş fırsatına henüz başvuran aday yok.{% elif current_language_code == 'ar' %}لم يتم تسجيل أي متقدم لهذه الوظيفة حتى الآن.{% else %}هیچ متقاضی برای این فرصت شغلی ثبت‌نام نکرده است.{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
+                    <tr id="no-search-results-row" class="d-none">
+                        <td colspan="{{ table_stages.count|add:6 }}" class="text-center py-5 text-muted">
+                            <div class="d-flex flex-column align-items-center justify-content-center py-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-muted mb-2 opacity-50"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                <span class="font-semibold text-secondary mb-1">{% if current_language_code == 'en' %}No candidates found matching your search{% elif current_language_code == 'tr' %}Aramanızla eşleşen aday bulunamadı{% elif current_language_code == 'ar' %}لم يتم العثور على أي متقدم يطابق بحثك{% else %}متقاضی با مشخصات وارد شده یافت نشد{% endif %}</span>
+                                <small class="text-muted">{% if current_language_code == 'en' %}Try changing keywords or clearing the search box.{% elif current_language_code == 'tr' %}Anahtar kelimeleri değiştirmeyi veya aramayı temizlemeyi deneyin.{% elif current_language_code == 'ar' %}يرجى محاولة تغيير كلمات البحث أو مسح حقل البحث.{% else %}لطفاً عبارت دیگری را جستجو کنید یا کادر جستجو را خالی نمایید.{% endif %}</small>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -477,9 +643,46 @@
         const candidateCheckboxes = document.querySelectorAll('.app-checkbox');
         const bulkActionsPanel = document.getElementById('bulk-actions');
         const selectedCountSpan = document.getElementById('selected-count');
+        const table = document.getElementById('pipeline-table');
+        const tbody = table ? table.querySelector('tbody') : null;
+        const searchInput = document.getElementById('pipeline-candidate-search');
+        const clearSearchBtn = document.getElementById('clear-pipeline-search');
+        const noResultsRow = document.getElementById('no-search-results-row');
+        const countBadge = document.getElementById('applicant-count-badge');
+        const totalCandidates = {{ applications|length }};
+
+        function normalizeSearchText(str) {
+            if (!str) return '';
+            return str.toString()
+                .toLowerCase()
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .replace(/[ي]/g, 'ی')
+                .replace(/[ك]/g, 'ک')
+                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+                .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                .trim();
+        }
+
+        function updateRowNumbers() {
+            if (!tbody) return;
+            let visibleIndex = 1;
+            const rows = tbody.querySelectorAll('tr.candidate-row');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const numCell = row.querySelector('.row-number');
+                    if (numCell) {
+                        numCell.textContent = visibleIndex++;
+                    }
+                }
+            });
+        }
 
         function updateBulkActionsState() {
-            const checkedCount = Array.from(candidateCheckboxes).filter(cb => cb.checked).length;
+            const checkedCount = Array.from(candidateCheckboxes).filter(cb => {
+                const row = cb.closest('tr');
+                return cb.checked && (!row || row.style.display !== 'none');
+            }).length;
+
             if (checkedCount > 0) {
                 bulkActionsPanel.classList.remove('d-none');
                 bulkActionsPanel.classList.add('d-flex');
@@ -490,10 +693,66 @@
             }
         }
 
+        function filterCandidates() {
+            if (!tbody) return;
+            const query = normalizeSearchText(searchInput ? searchInput.value : '');
+            const rows = Array.from(tbody.querySelectorAll('tr.candidate-row'));
+            
+            if (clearSearchBtn) {
+                if (query.length > 0) {
+                    clearSearchBtn.classList.remove('d-none');
+                } else {
+                    clearSearchBtn.classList.add('d-none');
+                }
+            }
+
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const searchText = normalizeSearchText(row.getAttribute('data-search-text') || row.innerText);
+                const matches = query === '' || searchText.includes(query);
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (noResultsRow) {
+                if (visibleCount === 0 && rows.length > 0 && query !== '') {
+                    noResultsRow.classList.remove('d-none');
+                } else {
+                    noResultsRow.classList.add('d-none');
+                }
+            }
+
+            if (countBadge) {
+                if (query !== '') {
+                    countBadge.textContent = visibleCount + ' {% if current_language_code == 'en' %}of{% elif current_language_code == 'tr' %}/{% elif current_language_code == 'ar' %}من إجمالي{% else %}از{% endif %} ' + totalCandidates + ' {% if current_language_code == 'en' %}candidate(s){% elif current_language_code == 'tr' %}aday{% elif current_language_code == 'ar' %}متقدم{% else %}متقاضی{% endif %}';
+                } else {
+                    countBadge.textContent = totalCandidates + ' {% if current_language_code == 'en' %}candidate(s){% elif current_language_code == 'tr' %}aday{% elif current_language_code == 'ar' %}متقدم{% else %}متقاضی{% endif %}';
+                }
+            }
+
+            updateRowNumbers();
+            updateBulkActionsState();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterCandidates);
+        }
+
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                filterCandidates();
+                searchInput.focus();
+            });
+        }
+
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function() {
                 candidateCheckboxes.forEach(cb => {
-                    cb.checked = selectAllCheckbox.checked;
+                    const row = cb.closest('tr');
+                    if (!row || row.style.display !== 'none') {
+                        cb.checked = selectAllCheckbox.checked;
+                    }
                 });
                 updateBulkActionsState();
             });
@@ -501,8 +760,12 @@
 
         candidateCheckboxes.forEach(cb => {
             cb.addEventListener('change', function() {
-                const allChecked = Array.from(candidateCheckboxes).every(c => c.checked);
-                const someChecked = Array.from(candidateCheckboxes).some(c => c.checked);
+                const visibleCheckboxes = Array.from(candidateCheckboxes).filter(c => {
+                    const row = c.closest('tr');
+                    return !row || row.style.display !== 'none';
+                });
+                const allChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked);
+                const someChecked = visibleCheckboxes.some(c => c.checked);
                 if (selectAllCheckbox) {
                     selectAllCheckbox.checked = allChecked;
                     selectAllCheckbox.indeterminate = someChecked && !allChecked;
@@ -512,9 +775,7 @@
         });
 
         // Interactive Column Sorting
-        const table = document.getElementById('pipeline-table');
-        if (!table) return;
-        const tbody = table.querySelector('tbody');
+        if (!table || !tbody) return;
         const headers = table.querySelectorAll('.sortable-header');
         let currentSortColumn = null;
         let currentSortAsc = true;
@@ -546,8 +807,8 @@
                     }
                 });
 
-                // Get row data (excluding the empty warning row)
-                const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+                // Get candidate rows
+                const rows = Array.from(tbody.querySelectorAll('tr.candidate-row'));
                 if (rows.length === 0) return;
 
                 // Sort rows
@@ -555,14 +816,14 @@
                     let valA, valB;
 
                     if (columnType === 'name') {
-                        const linkA = rowA.cells[1].querySelector('a');
-                        const linkB = rowB.cells[1].querySelector('a');
+                        const linkA = rowA.querySelector('.candidate-name-link');
+                        const linkB = rowB.querySelector('.candidate-name-link');
                         valA = linkA ? linkA.textContent.trim() : '';
                         valB = linkB ? linkB.textContent.trim() : '';
                         return currentSortAsc ? valA.localeCompare(valB, 'fa') : valB.localeCompare(valA, 'fa');
                     } else if (columnType === 'status') {
-                        const selectA = rowA.cells[2].querySelector('select[name="status"]');
-                        const selectB = rowB.cells[2].querySelector('select[name="status"]');
+                        const selectA = rowA.querySelector('select[name="status"]');
+                        const selectB = rowB.querySelector('select[name="status"]');
                         const statusA = selectA ? selectA.value : '';
                         const statusB = selectB ? selectB.value : '';
                         
@@ -582,10 +843,10 @@
                         valB = getStatusPriority(statusB, isScreeningFailedB);
                         return currentSortAsc ? valA - valB : valB - valA;
                     } else if (columnType === 'final-score') {
-                        const cellA = rowA.cells[rowA.cells.length - 2];
-                        const cellB = rowB.cells[rowB.cells.length - 2];
-                        valA = parseFloat(cellA.textContent.trim()) || 0;
-                        valB = parseFloat(cellB.textContent.trim()) || 0;
+                        const scoreA = rowA.querySelector('[id^="final-score-"]');
+                        const scoreB = rowB.querySelector('[id^="final-score-"]');
+                        valA = parseFloat(scoreA ? scoreA.textContent.trim() : 0) || 0;
+                        valB = parseFloat(scoreB ? scoreB.textContent.trim() : 0) || 0;
                         return currentSortAsc ? valA - valB : valB - valA;
                     } else if (columnType.startsWith('stage-')) {
                         const colIndex = Array.from(header.parentNode.children).indexOf(header);
@@ -593,6 +854,7 @@
                         const cellB = rowB.cells[colIndex];
 
                         function getScoreFromCell(cell) {
+                            if (!cell) return -1;
                             if (cell.classList.contains('bg-light') && cell.classList.contains('text-muted')) {
                                   return -2; // Locked/inaccessible
                             }
@@ -614,6 +876,8 @@
 
                 // Re-append rows in sorted order
                 rows.forEach(row => tbody.appendChild(row));
+                if (noResultsRow) tbody.appendChild(noResultsRow);
+                updateRowNumbers();
             });
         });
     });

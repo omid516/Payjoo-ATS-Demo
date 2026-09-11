@@ -526,6 +526,88 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
                 stage_gaps[curr_stage.id] = gap
         data['stage_gaps'] = stage_gaps
 
+        # Calculate registration, screening, and stage acceptance statistics
+        total_registered = len(apps_list)
+        
+        screening_stage = next((s for s in stages_list if s.stage_type == 'SCREENING' or 'غربالگری' in s.name), None)
+        if not screening_stage and stages_list:
+            screening_stage = stages_list[0]
+            
+        screening_passed = 0
+        screening_failed = 0
+        screening_pending = 0
+        
+        if screening_stage:
+            for app in apps_list:
+                scr_st = next((st for st in app.stage_states.all() if st.stage_id == screening_stage.id and not st.is_deleted), None)
+                if scr_st:
+                    if scr_st.status == 'COMPLETED':
+                        screening_passed += 1
+                    elif scr_st.status == 'FAILED':
+                        if scr_st.is_conditional_pass:
+                            screening_passed += 1
+                        else:
+                            screening_failed += 1
+                    else:
+                        screening_pending += 1
+                else:
+                    screening_pending += 1
+        
+        screening_determined = screening_passed + screening_failed
+        screening_determined_pct = round((screening_determined / total_registered * 100), 1) if total_registered > 0 else 0
+        
+        stage_summary_stats = []
+        for stage in stages_list:
+            st_passed = 0
+            st_failed = 0
+            st_pending = 0
+            st_conditional = 0
+            for app in apps_list:
+                st = next((s for s in app.stage_states.all() if s.stage_id == stage.id and not s.is_deleted), None)
+                if st:
+                    if st.status == 'COMPLETED':
+                        st_passed += 1
+                    elif st.status == 'FAILED':
+                        if st.is_conditional_pass:
+                            st_conditional += 1
+                            st_passed += 1
+                        else:
+                            st_failed += 1
+                    else:
+                        st_pending += 1
+                else:
+                    st_pending += 1
+            
+            pass_rate = round((st_passed / total_registered * 100), 1) if total_registered > 0 else 0
+            stage_summary_stats.append({
+                'stage': stage,
+                'passed_count': st_passed,
+                'failed_count': st_failed,
+                'conditional_count': st_conditional,
+                'pending_count': st_pending,
+                'pass_rate': pass_rate,
+            })
+            
+        selected_count = sum(1 for a in apps_list if a.effective_status == 'SELECTED')
+        reserve_count = sum(1 for a in apps_list if a.effective_status == 'RESERVE')
+        rejected_count = sum(1 for a in apps_list if a.effective_status == 'REJECTED')
+        in_progress_count = sum(1 for a in apps_list if a.effective_status == 'IN_PROGRESS')
+
+        data['pipeline_stats'] = {
+            'total_registered': total_registered,
+            'screening_stage': screening_stage,
+            'screening_passed': screening_passed,
+            'screening_failed': screening_failed,
+            'screening_pending': screening_pending,
+            'screening_determined': screening_determined,
+            'screening_determined_pct': screening_determined_pct,
+            'stage_summary_stats': stage_summary_stats,
+            'selected_count': selected_count,
+            'reserve_count': reserve_count,
+            'rejected_count': rejected_count,
+            'in_progress_count': in_progress_count,
+        }
+
         from_candidate_id = self.request.GET.get('from_candidate')
         if from_candidate_id:
             try:

@@ -665,6 +665,7 @@ class JobDefaultInterviewer(SoftDeleteModel):
 
 
 class NotificationLog(SoftDeleteModel):
+    audit_log_enabled = False
     NOTIFICATION_TYPES = [
         ('SMS', 'پیامک'),
         ('EMAIL', 'ایمیل'),

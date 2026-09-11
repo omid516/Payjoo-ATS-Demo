@@ -1,0 +1,1348 @@
+{% extends 'base.html' %}
+{% load jalali_tags %}
+
+{% block title %}مرکز همگام‌سازی و انتقال تغییرات (Sync Hub) | سامانه جذب{% endblock %}
+
+{% block extra_head %}
+<style>
+    .sync-stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+    }
+    .sync-stat-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .nav-pills-custom .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.2s;
+    }
+    .nav-pills-custom .nav-link.active {
+        background-color: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+    .item-select-table th {
+        background-color: #f8fafc;
+        font-size: 0.8rem;
+        color: #475569;
+    }
+    .diff-badge-new { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .diff-badge-update { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+    .diff-badge-conflict { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .diff-badge-identical { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold text-slate-800 m-0 d-flex align-items-center gap-2">
+                <span>🔄</span> مرکز همگام‌سازی و انتقال تغییرات (Sync Hub)
+            </h4>
+            <p class="text-muted text-sm m-0 mt-1">ارسال، دریافت، پایش و ادغام هوشمند تغییرات (فرصت‌های شغلی، شایستگی‌ها، نمرات و شناسنامه‌ها) با سرور مرکزی</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-1" onclick="testServerPing()">
+                <span id="pingSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                <span id="pingIcon">📡</span>
+                <span>تست ارتباط با سرور</span>
+            </button>
+            <span id="pingStatusBadge" class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill text-xs">
+                وضعیت: بررسی نشده
+            </span>
+        </div>
+    </div>
+
+    <!-- Overview Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="sync-stat-card d-flex align-items-center gap-3">
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 fs-4">📁</div>
+                <div>
+                    <span class="text-muted text-xs d-block">فرصت‌های شغلی قابل ارسال</span>
+                    <span class="fs-5 fw-bold text-slate-800">{{ exportable.jobs|length }} مورد</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sync-stat-card d-flex align-items-center gap-3">
+                <div class="p-3 bg-success bg-opacity-10 text-success rounded-3 fs-4">🎯</div>
+                <div>
+                    <span class="text-muted text-xs d-block">نمرات و ارزیابی‌های اخیر</span>
+                    <span class="fs-5 fw-bold text-slate-800">{{ exportable.scores|length }} رکورد</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sync-stat-card d-flex align-items-center gap-3">
+                <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3 fs-4">📝</div>
+                <div>
+                    <span class="text-muted text-xs d-block">شناسنامه‌های شغل اخیر</span>
+                    <span class="fs-5 fw-bold text-slate-800">{{ exportable.job_descriptions|length }} مورد</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="sync-stat-card d-flex align-items-center gap-3">
+                <div class="p-3 bg-info bg-opacity-10 text-info rounded-3 fs-4">👤</div>
+                <div>
+                    <span class="text-muted text-xs d-block">کاربر جاری سیستم</span>
+                    <span class="fs-6 fw-bold text-slate-800 text-truncate d-block" style="max-width: 170px;">{{ user_display_name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom p-3">
+            <ul class="nav nav-pills nav-pills-custom gap-2" id="syncTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active d-flex align-items-center gap-1.5" id="export-tab" data-bs-toggle="pill" data-bs-target="#export-content" type="button" role="tab">
+                        <span>📤</span> ارسال تغییرات من به سرور
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-1.5" id="inbox-tab" data-bs-toggle="pill" data-bs-target="#inbox-content" type="button" role="tab" onclick="fetchServerPackages()">
+                        <span>📥</span> صندوق تغییرات دریافتی از سرور
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-1.5" id="offline-tab" data-bs-toggle="pill" data-bs-target="#offline-content" type="button" role="tab">
+                        <span>💾</span> بارگذاری دستی فایل (.atspack)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-1.5" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings-content" type="button" role="tab">
+                        <span>⚙️</span> تنظیمات اتصال
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="syncTabsContent">
+                
+                <!-- TAB 1: EXPORT & SEND -->
+                <div class="tab-pane fade show active" id="export-content" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-4 border-start">
+                            <h6 class="fw-bold text-slate-800 mb-3">📋 مشخصات بسته ارسالی</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-xs fw-bold">کارشناس ثبت‌کننده:</label>
+                                <input type="text" id="exportAuthor" class="form-control form-control-sm fw-bold" value="{{ user_display_name }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-xs fw-bold">عنوان بسته تغییرات:</label>
+                                <input type="text" id="exportTitle" class="form-control form-control-sm" placeholder="مثلاً: ارزیابی نهایی مصاحبه‌های مهندسی برق">
+                            </div>
+
+                            <div class="alert alert-info border-0 rounded-3 text-xs p-3 mb-3">
+                                💡 <strong>راهنما:</strong> به‌صورت پیش‌فرض هیچ آیتمی انتخاب نشده است. از لیست روبرو مواردی که مایلید به همکاران ارسال شود را تیک بزنید.
+                            </div>
+
+                            <div class="p-2.5 bg-light rounded-3 mb-4 text-center">
+                                <span class="text-xs text-muted">مجموع موارد انتخاب‌شده:</span>
+                                <span id="selectedCountBadge" class="badge bg-secondary fs-6 px-3 py-1 ms-2">0 مورد</span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" id="btnSendServer" class="btn btn-primary btn-sm py-2 fw-bold d-flex align-items-center justify-content-center gap-2" onclick="sendExportPackage('upload')">
+                                    <span>🚀</span> ارسال مستقیم به سرور
+                                </button>
+                                <button type="button" id="btnDownloadOffline" class="btn btn-outline-secondary btn-sm py-2 d-flex align-items-center justify-content-center gap-2" onclick="sendExportPackage('download')">
+                                    <span>💾</span> دانلود فایل بسته آفلاین (.atspack)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <!-- Timeframe Filter & Actions -->
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 p-2.5 bg-light rounded-3 border">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-xs fw-bold text-muted">بازه زمانی:</span>
+                                    <select class="form-select form-select-sm text-xs py-1" style="width: auto;" onchange="window.location.href='?days=' + this.value">
+                                        <option value="1" {% if current_days == 1 %}selected{% endif %}>تغییرات امروز (۲۴ ساعت اخیر)</option>
+                                        <option value="3" {% if current_days == 3 %}selected{% endif %}>تغییرات ۳ روز اخیر</option>
+                                        <option value="7" {% if current_days == 7 %}selected{% endif %}>تغییرات ۷ روز اخیر</option>
+                                        <option value="30" {% if current_days == 30 %}selected{% endif %}>تغییرات ۳۰ روز اخیر</option>
+                                        <option value="365" {% if current_days == 365 %}selected{% endif %}>همه رکوردهای موجود در سیستم</option>
+                                    </select>
+                                </div>
+
+                                <!-- Filter & Selection Buttons -->
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="فیلتر وضعیت ارسال">
+                                        <button type="button" class="btn btn-outline-primary active btn-sm" id="btnFilterAll" onclick="filterExportRows('ALL')">
+                                            همه ({{ exportable.counts.total|default:0 }})
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnFilterUnsent" onclick="filterExportRows('UNSENT')">
+                                            ✨ ارسال‌نشده‌ها ({{ exportable.counts.unsent_total|default:0 }})
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnFilterSent" onclick="filterExportRows('SENT')">
+                                            📤 ارسال‌شده‌ها ({{ exportable.counts.sent_total|default:0 }})
+                                        </button>
+                                    </div>
+
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="selectOnlyUnsent()" title="فقط تیک زدن آیتم‌های جدید و ویرایش‌شده">
+                                            ✨ انتخاب ارسال‌نشده‌ها
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleSelectAll(true)">همه</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleSelectAll(false)">لغو</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Accordion for Cherry-Picking -->
+                            <div class="accordion" id="exportAccordion">
+                                <!-- 1. Jobs -->
+                                <div class="accordion-item border rounded-3 mb-2">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button py-2.5 text-sm fw-bold d-flex align-items-center justify-content-between pe-4" type="button" data-bs-toggle="collapse" data-bs-target="#accJobs">
+                                            <span>📁 فرصت‌های شغلی ({{ exportable.jobs|length }} مورد در سیستم)</span>
+                                            {% if exportable.counts.unsent_jobs %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 me-2 text-2xs">{{ exportable.counts.unsent_jobs }} ارسال‌نشده</span>
+                                            {% endif %}
+                                        </button>
+                                    </h2>
+                                    <div id="accJobs" class="accordion-collapse collapse show" data-bs-parent="#exportAccordion">
+                                        <div class="accordion-body p-2">
+                                            {% if exportable.jobs %}
+                                            <div class="table-responsive" style="max-height: 220px;">
+                                                <table class="table table-sm table-hover text-xs m-0 align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="30"><input type="checkbox" class="form-check-input" onchange="toggleGroupCheck('job_ids', this.checked)"></th>
+                                                            <th>عنوان فرصت شغلی</th>
+                                                            <th>دپارتمان</th>
+                                                            <th>ظرفیت</th>
+                                                            <th>تاریخ ویرایش</th>
+                                                            <th>وضعیت ارسال</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for j in exportable.jobs %}
+                                                        <tr class="export-row export-row-{{ j.export_status|lower }}" data-status="{{ j.export_status }}">
+                                                            <td><input type="checkbox" name="job_ids" value="{{ j.id }}" class="form-check-input export-item-check" data-status="{{ j.export_status }}" onchange="updateSelectedCount()"></td>
+                                                            <td class="fw-bold">{{ j.title }}</td>
+                                                            <td>{{ j.department }}</td>
+                                                            <td>{{ j.capacity }} نفر</td>
+                                                            <td class="text-muted">{{ j.updated_at }}</td>
+                                                            <td>
+                                                                <span class="{{ j.status_class }} px-2 py-0.5 rounded-pill text-2xs">{{ j.status_label }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-muted text-xs m-2">فرصت شغلی در این بازه زمانی یافت نشد.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Job Descriptions -->
+                                <div class="accordion-item border rounded-3 mb-2">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed py-2.5 text-sm fw-bold d-flex align-items-center justify-content-between pe-4" type="button" data-bs-toggle="collapse" data-bs-target="#accDescs">
+                                            <span>📝 شناسنامه‌های استاندارد شغل ({{ exportable.job_descriptions|length }} مورد)</span>
+                                            {% if exportable.counts.unsent_descs %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 me-2 text-2xs">{{ exportable.counts.unsent_descs }} ارسال‌نشده</span>
+                                            {% endif %}
+                                        </button>
+                                    </h2>
+                                    <div id="accDescs" class="accordion-collapse collapse" data-bs-parent="#exportAccordion">
+                                        <div class="accordion-body p-2">
+                                            {% if exportable.job_descriptions %}
+                                            <div class="table-responsive" style="max-height: 220px;">
+                                                <table class="table table-sm table-hover text-xs m-0 align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="30"><input type="checkbox" class="form-check-input" onchange="toggleGroupCheck('desc_ids', this.checked)"></th>
+                                                            <th>کد شغل</th>
+                                                            <th>عنوان شناسنامه</th>
+                                                            <th>دپارتمان</th>
+                                                            <th>تاریخ</th>
+                                                            <th>وضعیت ارسال</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for d in exportable.job_descriptions %}
+                                                        <tr class="export-row export-row-{{ d.export_status|lower }}" data-status="{{ d.export_status }}">
+                                                            <td><input type="checkbox" name="desc_ids" value="{{ d.id }}" class="form-check-input export-item-check" data-status="{{ d.export_status }}" onchange="updateSelectedCount()"></td>
+                                                            <td class="fw-bold">{{ d.job_code }}</td>
+                                                            <td>{{ d.title }}</td>
+                                                            <td>{{ d.department }}</td>
+                                                            <td class="text-muted">{{ d.updated_at }}</td>
+                                                            <td>
+                                                                <span class="{{ d.status_class }} px-2 py-0.5 rounded-pill text-2xs">{{ d.status_label }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-muted text-xs m-2">شناسنامه‌ای در این بازه زمانی یافت نشد.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Scores -->
+                                <div class="accordion-item border rounded-3 mb-2">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed py-2.5 text-sm fw-bold d-flex align-items-center justify-content-between pe-4" type="button" data-bs-toggle="collapse" data-bs-target="#accScores">
+                                            <span>🎯 نمرات و ارزیابی‌های کارجویان ({{ exportable.scores|length }} رکورد در سیستم)</span>
+                                            {% if exportable.counts.unsent_scores %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 me-2 text-2xs">{{ exportable.counts.unsent_scores }} ارسال‌نشده</span>
+                                            {% endif %}
+                                        </button>
+                                    </h2>
+                                    <div id="accScores" class="accordion-collapse collapse" data-bs-parent="#exportAccordion">
+                                        <div class="accordion-body p-2">
+                                            {% if exportable.scores %}
+                                            <div class="table-responsive" style="max-height: 220px;">
+                                                <table class="table table-sm table-hover text-xs m-0 align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="30"><input type="checkbox" class="form-check-input" onchange="toggleGroupCheck('score_ids', this.checked)"></th>
+                                                            <th>کارجو</th>
+                                                            <th>کد ملی</th>
+                                                            <th>فرصت شغلی</th>
+                                                            <th>مرحله</th>
+                                                            <th>نمره</th>
+                                                            <th>وضعیت ارسال</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for sc in exportable.scores %}
+                                                        <tr class="export-row export-row-{{ sc.export_status|lower }}" data-status="{{ sc.export_status }}">
+                                                            <td><input type="checkbox" name="score_ids" value="{{ sc.id }}" class="form-check-input export-item-check" data-status="{{ sc.export_status }}" onchange="updateSelectedCount()"></td>
+                                                            <td class="fw-bold">{{ sc.candidate_name }}</td>
+                                                            <td>{{ sc.national_id }}</td>
+                                                            <td>{{ sc.job_title }}</td>
+                                                            <td>{{ sc.stage_name }}</td>
+                                                            <td class="fw-bold text-primary">{{ sc.score }}</td>
+                                                            <td>
+                                                                <span class="{{ sc.status_class }} px-2 py-0.5 rounded-pill text-2xs">{{ sc.status_label }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-muted text-xs m-2">نمره ارزیابی در این بازه زمانی یافت نشد.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: INBOX FROM SERVER -->
+                <div class="tab-pane fade" id="inbox-content" role="tabpanel">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div>
+                            <h6 class="fw-bold text-slate-800 m-0">📬 بسته‌های تغییرات ارسالی همکاران روی سرور</h6>
+                            <span class="text-xs text-muted">بسته‌های ارسالی را به صورت تکی یا دسته‌ای پایش و ادغام نمایید.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-1.5" onclick="runBatchScan()">
+                                <span>⚡️</span>
+                                <span>پایش کلی و اعمال دسته‌ای</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="fetchServerPackages()">
+                                🔄 به‌روزرسانی لیست
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="inboxLoading" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted text-xs mt-2">در حال فراخوانی بسته‌های تغییرات از سرور...</p>
+                    </div>
+
+                    <div id="inboxEmpty" class="text-center py-5 d-none">
+                        <span class="fs-1">📭</span>
+                        <h6 class="fw-bold text-slate-700 mt-2">بسته جدیدی روی سرور موجود نیست</h6>
+                        <p class="text-muted text-xs">تمامی تغییرات همگام شده‌اند یا هنوز بسته‌ای از سوی همکاران ارسال نشده است.</p>
+                    </div>
+
+                    <div id="inboxTableContainer" class="table-responsive">
+                        <table class="table table-hover align-middle text-xs" id="inboxTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>شناسه بسته</th>
+                                    <th>کارشناس فرستنده</th>
+                                    <th>عنوان بسته</th>
+                                    <th>محتویات</th>
+                                    <th>تاریخ ارسال</th>
+                                    <th>وضعیت</th>
+                                    <th class="text-center">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inboxTableBody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: OFFLINE FILE UPLOAD -->
+                <div class="tab-pane fade" id="offline-content" role="tabpanel">
+                    <div class="row justify-content-center py-4">
+                        <div class="col-lg-6 text-center">
+                            <div class="p-5 border-2 border-dashed rounded-4 bg-light">
+                                <span class="fs-1">📁</span>
+                                <h6 class="fw-bold text-slate-800 mt-3">بارگذاری فایل بسته تغییرات (.atspack)</h6>
+                                <p class="text-muted text-xs mb-4">فایل دریافتی از همکار خود (از طریق فلش مموری، ایمیل یا پیام‌رسان) را انتخاب کنید.</p>
+                                
+                                <input type="file" id="manualFileInput" accept=".atspack,.json" class="form-control form-control-sm mb-3">
+                                
+                                <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-bold" onclick="analyzeManualFile()">
+                                    🔍 پایش، بررسی و پیش‌نمایش تفاوت‌ها
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: SETTINGS -->
+                <div class="tab-pane fade" id="settings-content" role="tabpanel">
+                    <form action="{% url 'sync_hub:save_settings' %}" method="post" class="col-lg-6">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold">آدرس وب‌سرویس سرور همگام‌سازی:</label>
+                            <input type="url" name="server_url" class="form-control form-control-sm" value="{{ settings.server_url }}" required>
+                            <span class="text-muted text-xs">مسیر اسکریپت `api.php` آپلود شده روی هاست شما.</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold">کلید امنیتی اتصال (API Key):</label>
+                            <input type="text" name="api_key" class="form-control form-control-sm font-monospace" value="{{ settings.api_key }}" required>
+                            <span class="text-muted text-xs">باید دقیقاً برابر با `API_SECRET_KEY` در فایل `api.php` باشد.</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold">نام و عنوان کارشناس جاری:</label>
+                            <input type="text" name="specialist_name" class="form-control form-control-sm" value="{{ settings.specialist_name }}" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-sm px-4 py-2 fw-bold">
+                            💾 ذخیره تنظیمات
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 1: INDIVIDUAL DIFF & SMART SCAN -->
+<div class="modal fade" id="diffModal" tabindex="-1" aria-labelledby="diffModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-5">🔍</span>
+                    <div>
+                        <h6 class="modal-title fw-bold text-slate-800 m-0" id="diffModalLabel">پایش هوشمند، پیش‌نمایش و تایید بسته تغییرات</h6>
+                        <span id="diffModalAuthor" class="text-xs text-muted"></span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Smart Pre-Merge Redundancy Scan Banner -->
+                <div id="diffScanBanner" class="p-3 rounded-3 mb-3 border bg-light">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <span class="fs-3" id="diffScanIcon">🔍</span>
+                            <div>
+                                <h6 class="fw-bold text-slate-800 m-0" id="diffScanTitle">نتیجه پایش هوشمند دیتابیس</h6>
+                                <p class="text-xs text-muted m-0 mt-0.5" id="diffScanVerdict">در حال پایش تطبیق رکوردهای دیتابیس محلی...</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" id="diffScanBadges">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <ul class="nav nav-tabs text-xs fw-bold m-0" id="diffModalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="diff-jobs-tab" data-bs-toggle="tab" data-bs-target="#diff-jobs" type="button" role="tab">فرصت‌های شغلی (<span id="diffCountJobs">0</span>)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="diff-descs-tab" data-bs-toggle="tab" data-bs-target="#diff-descs" type="button" role="tab">شناسنامه‌های شغل (<span id="diffCountDescs">0</span>)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="diff-models-tab" data-bs-toggle="tab" data-bs-target="#diff-models" type="button" role="tab">شایستگی‌ها (<span id="diffCountModels">0</span>)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="diff-scores-tab" data-bs-toggle="tab" data-bs-target="#diff-scores" type="button" role="tab">نمرات و ارزیابی‌ها (<span id="diffCountScores">0</span>)</button>
+                        </li>
+                    </ul>
+
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary active btn-sm" id="btnFilterAll" onclick="filterDiffRows('ALL')">نمایش همه موارد</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnFilterNeeded" onclick="filterDiffRows('NEEDED')">⚡️ فقط موارد نیازمند ثبت</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnFilterIdentical" onclick="filterDiffRows('IDENTICAL')">⚪️ موارد بدون تغییر</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="diffModalTabsContent">
+                    <div class="tab-pane fade show active" id="diff-jobs" role="tabpanel">
+                        <table class="table table-sm text-xs table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="120">وضعیت پایش</th>
+                                    <th>عنوان فرصت شغلی</th>
+                                    <th>دپارتمان</th>
+                                    <th>ظرفیت</th>
+                                    <th>توضیحات و تحلیل تفاوت</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diffJobsTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="diff-descs" role="tabpanel">
+                        <table class="table table-sm text-xs table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="120">وضعیت پایش</th>
+                                    <th>کد شغل</th>
+                                    <th>عنوان شناسنامه</th>
+                                    <th>توضیحات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diffDescsTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="diff-models" role="tabpanel">
+                        <table class="table table-sm text-xs table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="120">وضعیت پایش</th>
+                                    <th>مدل شایستگی</th>
+                                    <th>تعداد شاخص‌ها</th>
+                                    <th>توضیحات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diffModelsTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="diff-scores" role="tabpanel">
+                        <table class="table table-sm text-xs table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="120">وضعیت پایش</th>
+                                    <th>نام داوطلب</th>
+                                    <th>فرصت شغلی</th>
+                                    <th>مرحله</th>
+                                    <th>نمره ارسالی</th>
+                                    <th>وضعیت ارسالی</th>
+                                    <th>توضیحات پایش</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diffScoresTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light py-2.5 d-flex align-items-center justify-content-between">
+                <span id="diffFooterHint" class="text-xs text-muted"></span>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" id="btnConfirmMerge" class="btn btn-success btn-sm px-4 fw-bold" onclick="executePackageMerge()">
+                        ✅ تایید و اعمال نهایی در دیتابیس من
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: BATCH SCAN & MERGE -->
+<div class="modal fade" id="batchModal" tabindex="-1" aria-labelledby="batchModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-5">⚡️</span>
+                    <div>
+                        <h6 class="modal-title fw-bold text-slate-800 m-0" id="batchModalLabel">پایش کلی و اعمال دسته‌ای بسته‌های در انتظار بررسی</h6>
+                        <span class="text-xs text-muted">بررسی خودکار تمام بسته‌های سرور و اعمال یکجای تغییرات مورد نیاز</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Batch Loading -->
+                <div id="batchLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted text-xs mt-2">در حال پایش هوشمند تمام بسته‌های سرور با دیتابیس محلی...</p>
+                </div>
+
+                <!-- Batch Content -->
+                <div id="batchContent" class="d-none">
+                    <!-- Batch Overview Cards -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 border text-center">
+                                <span class="text-muted text-xs d-block">تعداد بسته‌های در انتظار</span>
+                                <span class="fs-4 fw-bold text-slate-800" id="batchTotalPackages">0 بسته</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 text-center">
+                                <span class="text-success text-xs d-block fw-bold">کل تغییرات نیازمند ثبت</span>
+                                <span class="fs-4 fw-bold text-success" id="batchTotalNeeded">0 مورد</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-secondary bg-opacity-10 border rounded-3 text-center">
+                                <span class="text-muted text-xs d-block">موارد بدون تغییر (تکراری)</span>
+                                <span class="fs-4 fw-bold text-secondary" id="batchTotalIdentical">0 مورد</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-3 text-xs p-3 mb-3" id="batchAlertMessage">
+                        بسته‌های زیر پایش شدند. می‌توانید بسته‌های دلخواه را انتخاب کرده و با یک کلیک در سیستم اعمال نمایید.
+                    </div>
+
+                    <!-- Batch Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-xs">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="35"><input type="checkbox" id="batchSelectAll" class="form-check-input" checked onchange="toggleBatchSelectAll(this.checked)"></th>
+                                    <th>شناسه بسته</th>
+                                    <th>فرستنده</th>
+                                    <th>عنوان بسته</th>
+                                    <th>تعداد کل</th>
+                                    <th>نتیجه پایش دیتابیس</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchTableBody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light py-2.5 d-flex align-items-center justify-content-between">
+                <span id="batchFooterSelected" class="text-xs text-muted"></span>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">انصراف</button>
+                    <button type="button" id="btnConfirmBatchApply" class="btn btn-success btn-sm px-4 fw-bold" onclick="executeBatchApply()">
+                        🚀 تایید و اعمال دسته‌ای بسته‌های انتخاب‌شده
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentActivePackage = null;
+    let currentDiffData = null;
+    let scannedBatchPackages = [];
+
+    let diffModalInstance = null;
+    let batchModalInstance = null;
+
+    // بستن تمیز مدال و رفع هنگی و تاریک ماندن صفحه
+    function cleanupModalBackdrops() {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const diffEl = document.getElementById('diffModal');
+        if (diffEl) {
+            diffModalInstance = bootstrap.Modal.getOrCreateInstance(diffEl);
+            diffEl.addEventListener('hidden.bs.modal', cleanupModalBackdrops);
+        }
+
+        const batchEl = document.getElementById('batchModal');
+        if (batchEl) {
+            batchModalInstance = bootstrap.Modal.getOrCreateInstance(batchEl);
+            batchEl.addEventListener('hidden.bs.modal', cleanupModalBackdrops);
+        }
+
+        testServerPing();
+    });
+
+    // 1. تست پینگ و سلامت سرور
+    function testServerPing() {
+        const spinner = document.getElementById('pingSpinner');
+        const icon = document.getElementById('pingIcon');
+        const badge = document.getElementById('pingStatusBadge');
+
+        if (spinner) spinner.classList.remove('d-none');
+        if (icon) icon.classList.add('d-none');
+        if (badge) {
+            badge.className = 'badge bg-warning bg-opacity-10 text-warning border px-3 py-2 rounded-pill text-xs';
+            badge.innerText = 'در حال تست ارتباط با سرور...';
+        }
+
+        fetch("{% url 'sync_hub:ping_server' %}")
+            .then(async res => {
+                const text = await res.text();
+                try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+            })
+            .then(data => {
+                if (spinner) spinner.classList.add('d-none');
+                if (icon) icon.classList.remove('d-none');
+                if (badge) {
+                    if (data.success) {
+                        badge.className = 'badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill text-xs';
+                        badge.innerText = `🟢 متصل به سرور (${data.latency_ms}ms)`;
+                    } else {
+                        badge.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill text-xs';
+                        badge.innerText = '🔴 خطا در اتصال به سرور';
+                    }
+                }
+            })
+            .catch(err => {
+                if (spinner) spinner.classList.add('d-none');
+                if (icon) icon.classList.remove('d-none');
+                if (badge) {
+                    badge.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill text-xs';
+                    badge.innerText = '🔴 عدم دسترسی به سرور';
+                }
+            });
+    }
+
+    // 2. فیلتر و انتخاب هوشمند بسته ارسالی
+    let currentExportFilter = 'ALL';
+
+    function filterExportRows(filterType) {
+        currentExportFilter = filterType;
+
+        const btnAll = document.getElementById('btnFilterAll');
+        const btnUnsent = document.getElementById('btnFilterUnsent');
+        const btnSent = document.getElementById('btnFilterSent');
+
+        if (btnAll) btnAll.classList.toggle('active', filterType === 'ALL');
+        if (btnUnsent) btnUnsent.classList.toggle('active', filterType === 'UNSENT');
+        if (btnSent) btnSent.classList.toggle('active', filterType === 'SENT');
+
+        const rows = document.querySelectorAll('.export-row');
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            if (filterType === 'ALL') {
+                row.classList.remove('d-none');
+            } else if (filterType === 'UNSENT') {
+                if (status === 'UNSENT' || status === 'MODIFIED') {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.add('d-none');
+                }
+            } else if (filterType === 'SENT') {
+                if (status === 'SENT') {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.add('d-none');
+                }
+            }
+        });
+    }
+
+    function selectOnlyUnsent() {
+        const checkboxes = document.querySelectorAll('#exportAccordion input[type="checkbox"][name]');
+        checkboxes.forEach(cb => {
+            const status = cb.getAttribute('data-status');
+            if (status === 'UNSENT' || status === 'MODIFIED') {
+                cb.checked = true;
+            } else {
+                cb.checked = false;
+            }
+        });
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const total = document.querySelectorAll('#exportAccordion input[type="checkbox"][name]:checked').length;
+        const badge = document.getElementById('selectedCountBadge');
+        if (badge) {
+            badge.innerText = `${total} مورد`;
+            badge.className = total > 0 ? 'badge bg-success fs-6 px-3 py-1 ms-2' : 'badge bg-secondary fs-6 px-3 py-1 ms-2';
+        }
+    }
+
+    function toggleSelectAll(checked) {
+        const rows = document.querySelectorAll('#exportAccordion tr.export-row');
+        rows.forEach(row => {
+            if (!row.classList.contains('d-none')) {
+                const cb = row.querySelector('input[type="checkbox"][name]');
+                if (cb) cb.checked = checked;
+            }
+        });
+        updateSelectedCount();
+    }
+
+    function toggleGroupCheck(name, checked) {
+        document.querySelectorAll(`tr.export-row:not(.d-none) input[name="${name}"]`).forEach(cb => cb.checked = checked);
+        updateSelectedCount();
+    }
+
+    function sendExportPackage(target) {
+        const authorInput = document.getElementById('exportAuthor');
+        const titleInput = document.getElementById('exportTitle');
+        const author = authorInput ? authorInput.value.trim() : '';
+        const title = titleInput ? titleInput.value.trim() : '';
+
+        const selectedJobs = Array.from(document.querySelectorAll('input[name="job_ids"]:checked')).map(cb => parseInt(cb.value));
+        const selectedDescs = Array.from(document.querySelectorAll('input[name="desc_ids"]:checked')).map(cb => parseInt(cb.value));
+        const selectedScores = Array.from(document.querySelectorAll('input[name="score_ids"]:checked')).map(cb => parseInt(cb.value));
+
+        if (selectedJobs.length === 0 && selectedDescs.length === 0 && selectedScores.length === 0) {
+            alert('لطفاً حداقل یک آیتم را برای ارسال انتخاب کنید.');
+            return;
+        }
+
+        const payload = {
+            author: author,
+            title: title,
+            target: target,
+            selection: {
+                job_ids: selectedJobs,
+                desc_ids: selectedDescs,
+                score_ids: selectedScores,
+            }
+        };
+
+        const btn = document.getElementById(target === 'upload' ? 'btnSendServer' : 'btnDownloadOffline');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> در حال پردازش...';
+        }
+
+        fetch("{% url 'sync_hub:export_upload' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        })
+        .then(async res => {
+            const text = await res.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error(text.substring(0, 300) || 'پاسخ نامعتبر از سرور دریافت شد.');
+            }
+        })
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            if (data.success) {
+                if (target === 'upload') {
+                    alert('✅ بسته تغییرات با موفقیت به سرور ارسال شد!');
+                    window.location.reload();
+                } else {
+                    window.location.href = `/sync/download-file/${data.package_id}/`;
+                }
+            } else {
+                alert('❌ خطا: ' + (data.error || 'عملیات با خطا مواجه شد.'));
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            alert('❌ خطا در ارسال بسته: ' + err.message);
+        });
+    }
+
+    // 3. دریافت لیست از سرور
+    function fetchServerPackages() {
+        const loading = document.getElementById('inboxLoading');
+        const empty = document.getElementById('inboxEmpty');
+        const table = document.getElementById('inboxTable');
+        const tbody = document.getElementById('inboxTableBody');
+
+        if (loading) loading.classList.remove('d-none');
+        if (empty) empty.classList.add('d-none');
+        if (tbody) tbody.innerHTML = '';
+
+        fetch("{% url 'sync_hub:fetch_packages' %}")
+            .then(async res => {
+                const text = await res.text();
+                try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+            })
+            .then(data => {
+                if (loading) loading.classList.add('d-none');
+                if (data.success && data.packages && data.packages.length > 0) {
+                    if (table) table.classList.remove('d-none');
+                    data.packages.forEach(pkg => {
+                        const tr = document.createElement('tr');
+                        
+                        let statusBadge = '';
+                        let actionBtn = '';
+                        if (pkg.status === 'MERGED') {
+                            statusBadge = '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1">✅ ادغام و اعمال شده</span>';
+                            actionBtn = `<button class="btn btn-outline-secondary btn-sm px-2.5 py-1 text-xs" onclick="previewServerPackage('${pkg.package_id}')">👁️ مشاهده جزییات</button>`;
+                        } else if (pkg.status === 'REVIEWED') {
+                            statusBadge = '<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1">👁️ بررسی شده</span>';
+                            actionBtn = `<button class="btn btn-primary btn-sm px-2.5 py-1 text-xs" onclick="previewServerPackage('${pkg.package_id}')">🔍 پایش و اعمال نهایی</button>`;
+                        } else {
+                            statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1">⏳ در انتظار بررسی</span>';
+                            actionBtn = `<button class="btn btn-primary btn-sm px-2.5 py-1 text-xs" onclick="previewServerPackage('${pkg.package_id}')">🔍 پایش، پیش‌نمایش و تایید</button>`;
+                        }
+                        
+                        const itemsSummary = [];
+                        if (pkg.items_count) {
+                            if (pkg.items_count.jobs) itemsSummary.push(`${pkg.items_count.jobs} فرصت شغلی`);
+                            if (pkg.items_count.job_descriptions || pkg.items_count.templates) itemsSummary.push(`${pkg.items_count.job_descriptions || pkg.items_count.templates} شناسنامه`);
+                            if (pkg.items_count.scores) itemsSummary.push(`${pkg.items_count.scores} نمره`);
+                        }
+                        const summaryHtml = itemsSummary.length > 0 ? itemsSummary.map(s => `<span class="badge bg-light text-dark border me-1">${s}</span>`).join('') : '<span class="text-muted text-xs">-</span>';
+
+                        tr.innerHTML = `
+                            <td class="font-monospace text-xs">${pkg.package_id}</td>
+                            <td class="fw-bold">${pkg.author || 'نامشخص'}</td>
+                            <td>${pkg.title || '-'}</td>
+                            <td>${summaryHtml}</td>
+                            <td class="text-muted font-monospace">${pkg.created_at_jalali || pkg.server_received_at_jalali || pkg.server_received_at || pkg.created_at || '-'}</td>
+                            <td>${statusBadge}</td>
+                            <td class="text-center">${actionBtn}</td>
+                        `;
+                        if (tbody) tbody.appendChild(tr);
+                    });
+                } else {
+                    if (empty) empty.classList.remove('d-none');
+                }
+            })
+            .catch(err => {
+                if (loading) loading.classList.add('d-none');
+                alert('عدم دسترسی به سرور: ' + err.message);
+            });
+    }
+
+    // 4. پیش‌نمایش و پایش تفاوت‌های بسته تکی (Diff Modal)
+    function previewServerPackage(packageId) {
+        fetch(`{% url 'sync_hub:preview_diff' %}?package_id=${encodeURIComponent(packageId)}`)
+            .then(async res => {
+                const text = await res.text();
+                try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+            })
+            .then(data => {
+                if (data.success) {
+                    renderDiffModal(data);
+                } else {
+                    alert('خطا در دریافت بسته: ' + (data.error || 'ناشناخته'));
+                }
+            })
+            .catch(err => {
+                alert('خطا در دریافت بسته: ' + err.message);
+            });
+    }
+
+    function analyzeManualFile() {
+        const fileInput = document.getElementById('manualFileInput');
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert('لطفاً یک فایل انتخاب کنید.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('package_file', fileInput.files[0]);
+
+        fetch("{% url 'sync_hub:preview_diff' %}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(async res => {
+            const text = await res.text();
+            try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+        })
+        .then(data => {
+            if (data.success) {
+                renderDiffModal(data);
+            } else {
+                alert('خطا در تحلیل فایل: ' + (data.error || 'ناشناخته'));
+            }
+        })
+        .catch(err => {
+            alert('خطا در تحلیل فایل: ' + err.message);
+        });
+    }
+
+    function renderDiffModal(diffData) {
+        currentDiffData = diffData;
+        currentActivePackage = diffData.package_raw;
+        const info = diffData.package_info || {};
+        const diff = diffData.diff || { jobs: [], job_descriptions: [], competency_models: [], scores: [] };
+
+        const authorEl = document.getElementById('diffModalAuthor');
+        if (authorEl) {
+            const dateStr = info.created_at_jalali ? ` | تاریخ: ${info.created_at_jalali}` : '';
+            authorEl.innerText = `ارسال کننده: ${info.author || 'نامشخص'} | عنوان: ${info.title || ''}${dateStr}`;
+        }
+        
+        // Smart Scan Banner configuration
+        const scanBanner = document.getElementById('diffScanBanner');
+        const scanIcon = document.getElementById('diffScanIcon');
+        const scanTitle = document.getElementById('diffScanTitle');
+        const scanVerdict = document.getElementById('diffScanVerdict');
+        const scanBadges = document.getElementById('diffScanBadges');
+        const btnConfirm = document.getElementById('btnConfirmMerge');
+        const footerHint = document.getElementById('diffFooterHint');
+
+        scanVerdict.innerText = diff.scan_verdict || '';
+
+        if (diff.is_all_identical) {
+            scanBanner.className = 'p-3 rounded-3 mb-3 border bg-info bg-opacity-10 border-info border-opacity-25';
+            scanIcon.innerText = '💡';
+            scanTitle.innerText = 'پایش هوشمند: عدم نیاز به ثبت (داده‌ها از قبل یکسان و موجود هستند)';
+            scanTitle.className = 'fw-bold text-info m-0';
+            scanBadges.innerHTML = `
+                <span class="badge bg-secondary px-3 py-1.5 text-xs">⚪️ ${diff.total_items} مورد کاملاً منطبق با دیتابیس</span>
+            `;
+            if (footerHint) footerHint.innerText = '💡 اعمال این بسته هیچ تغییری در رکوردهای شما ایجاد نمی‌کند زیرا تمام موارد از قبل موجودند.';
+            if (btnConfirm) btnConfirm.innerHTML = '✅ تایید و اعمال مجدد در دیتابیس';
+        } else {
+            scanBanner.className = 'p-3 rounded-3 mb-3 border bg-success bg-opacity-10 border-success border-opacity-25';
+            scanIcon.innerText = '🔍';
+            scanTitle.innerText = 'پایش هوشمند: موارد نیازمند ثبت و اعمال شناسایی شدند';
+            scanTitle.className = 'fw-bold text-success m-0';
+            scanBadges.innerHTML = `
+                <span class="badge bg-success px-2.5 py-1 text-xs">🟢 ${diff.needed_items} مورد نیازمند اعمال</span>
+                <span class="badge bg-secondary px-2.5 py-1 text-xs">⚪️ ${diff.identical_items} مورد بدون تغییر</span>
+            `;
+            if (footerHint) footerHint.innerText = `تعداد ${diff.needed_items} تغییر در دیتابیس شما اعمال خواهد شد.`;
+            if (btnConfirm) btnConfirm.innerHTML = '✅ تایید و اعمال نهایی در دیتابیس من';
+        }
+
+        // Tab counts
+        const cntJobs = document.getElementById('diffCountJobs');
+        const cntDescs = document.getElementById('diffCountDescs');
+        const cntModels = document.getElementById('diffCountModels');
+        const cntScores = document.getElementById('diffCountScores');
+        if (cntJobs) cntJobs.innerText = (diff.jobs || []).length;
+        if (cntDescs) cntDescs.innerText = (diff.job_descriptions || []).length;
+        if (cntModels) cntModels.innerText = (diff.competency_models || []).length;
+        if (cntScores) cntScores.innerText = (diff.scores || []).length;
+
+        // Populate Jobs
+        const jobsTbody = document.getElementById('diffJobsTable');
+        if (jobsTbody) {
+            jobsTbody.innerHTML = '';
+            (diff.jobs || []).forEach(j => {
+                const badgeClass = j.action === 'NEW' ? 'diff-badge-new' : (j.action === 'UPDATE' ? 'diff-badge-update' : 'diff-badge-identical');
+                const rowClass = j.is_needed ? 'diff-row-needed' : 'diff-row-identical';
+                jobsTbody.innerHTML += `
+                    <tr class="diff-row ${rowClass}">
+                        <td><span class="badge ${badgeClass}">${j.badge || ''}</span></td>
+                        <td class="fw-bold">${j.title || ''}</td>
+                        <td>${j.department || ''}</td>
+                        <td>${j.capacity || ''}</td>
+                        <td>${j.details || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Populate Descs
+        const descsTbody = document.getElementById('diffDescsTable');
+        if (descsTbody) {
+            descsTbody.innerHTML = '';
+            (diff.job_descriptions || []).forEach(d => {
+                const badgeClass = d.action === 'NEW' ? 'diff-badge-new' : (d.action === 'UPDATE' ? 'diff-badge-update' : 'diff-badge-identical');
+                const rowClass = d.is_needed ? 'diff-row-needed' : 'diff-row-identical';
+                descsTbody.innerHTML += `
+                    <tr class="diff-row ${rowClass}">
+                        <td><span class="badge ${badgeClass}">${d.badge || ''}</span></td>
+                        <td class="fw-bold">${d.job_code || ''}</td>
+                        <td>${d.title || ''}</td>
+                        <td>${d.details || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Populate Models
+        const modelsTbody = document.getElementById('diffModelsTable');
+        if (modelsTbody) {
+            modelsTbody.innerHTML = '';
+            (diff.competency_models || []).forEach(m => {
+                const badgeClass = m.action === 'NEW' ? 'diff-badge-new' : (m.action === 'UPDATE' ? 'diff-badge-update' : 'diff-badge-identical');
+                const rowClass = m.is_needed ? 'diff-row-needed' : 'diff-row-identical';
+                modelsTbody.innerHTML += `
+                    <tr class="diff-row ${rowClass}">
+                        <td><span class="badge ${badgeClass}">${m.badge || ''}</span></td>
+                        <td class="fw-bold">${m.name || ''}</td>
+                        <td>${m.items_count || 0}</td>
+                        <td>${m.details || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Populate Scores
+        const scoresTbody = document.getElementById('diffScoresTable');
+        if (scoresTbody) {
+            scoresTbody.innerHTML = '';
+            (diff.scores || []).forEach(s => {
+                const badgeClass = s.action === 'IDENTICAL' ? 'diff-badge-identical' : (s.action === 'UPDATE' ? 'diff-badge-update' : 'diff-badge-new');
+                const rowClass = s.is_needed ? 'diff-row-needed' : 'diff-row-identical';
+                scoresTbody.innerHTML += `
+                    <tr class="diff-row ${rowClass}">
+                        <td><span class="badge ${badgeClass}">${s.badge || ''}</span></td>
+                        <td class="fw-bold">${s.candidate || ''}</td>
+                        <td>${s.job || ''}</td>
+                        <td>${s.stage || ''}</td>
+                        <td class="fw-bold text-primary">${s.new_score !== null && s.new_score !== undefined ? s.new_score : '-'}</td>
+                        <td>${s.new_status || '-'}</td>
+                        <td class="text-muted text-xs">${s.details || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        filterDiffRows('ALL');
+
+        if (diffModalInstance) {
+            diffModalInstance.show();
+        }
+    }
+
+    // فیلتر ردیف‌های جدول پیش‌نمایش تفاوت‌ها
+    function filterDiffRows(mode) {
+        document.getElementById('btnFilterAll').classList.toggle('active', mode === 'ALL');
+        document.getElementById('btnFilterNeeded').classList.toggle('active', mode === 'NEEDED');
+        document.getElementById('btnFilterIdentical').classList.toggle('active', mode === 'IDENTICAL');
+
+        document.querySelectorAll('.diff-row').forEach(row => {
+            if (mode === 'ALL') {
+                row.classList.remove('d-none');
+            } else if (mode === 'NEEDED') {
+                row.classList.toggle('d-none', !row.classList.contains('diff-row-needed'));
+            } else if (mode === 'IDENTICAL') {
+                row.classList.toggle('d-none', !row.classList.contains('diff-row-identical'));
+            }
+        });
+    }
+
+    // اعمال نهایی تغییرات بسته تکی
+    function executePackageMerge() {
+        if (!currentActivePackage) return;
+
+        const btn = document.getElementById('btnConfirmMerge');
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> در حال اعمال در دیتابیس...';
+        }
+
+        fetch("{% url 'sync_hub:apply_merge' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({package_data: currentActivePackage})
+        })
+        .then(async res => {
+            const text = await res.text();
+            try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+        })
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+            if (data.success) {
+                alert('🎉 ' + data.message);
+                if (diffModalInstance) diffModalInstance.hide();
+                fetchServerPackages();
+            } else {
+                alert('❌ خطا در اعمال تغییرات: ' + (data.error || 'ناشناخته'));
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+            alert('❌ خطا در اعمال: ' + err.message);
+        });
+    }
+
+    // 5. پایش کلی و اعمال دسته‌ای (Batch Scan & Apply)
+    function runBatchScan() {
+        const loading = document.getElementById('batchLoading');
+        const content = document.getElementById('batchContent');
+        const tbody = document.getElementById('batchTableBody');
+        
+        loading.classList.remove('d-none');
+        content.classList.add('d-none');
+        tbody.innerHTML = '';
+        
+        if (batchModalInstance) {
+            batchModalInstance.show();
+        }
+
+        fetch("{% url 'sync_hub:batch_scan' %}")
+            .then(async res => {
+                const text = await res.text();
+                try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+            })
+            .then(data => {
+                loading.classList.add('d-none');
+                content.classList.remove('d-none');
+
+                if (!data.success) {
+                    alert('خطا در پایش سرور: ' + (data.error || 'ناشناخته'));
+                    if (batchModalInstance) batchModalInstance.hide();
+                    return;
+                }
+
+                if (!data.has_pending || data.packages.length === 0) {
+                    document.getElementById('batchAlertMessage').innerHTML = '✅ <strong>تبریک:</strong> تمام بسته‌های موجود روی سرور از قبل در دیتابیس شما اعمال شده‌اند و هیچ بسته جدیدی در انتظار نیست.';
+                    document.getElementById('batchAlertMessage').className = 'alert alert-success border-0 rounded-3 text-xs p-3 mb-3';
+                    document.getElementById('btnConfirmBatchApply').disabled = true;
+                    document.getElementById('batchTotalPackages').innerText = '0 بسته';
+                    document.getElementById('batchTotalNeeded').innerText = '0 مورد';
+                    document.getElementById('batchTotalIdentical').innerText = '0 مورد';
+                    return;
+                }
+
+                scannedBatchPackages = data.packages;
+                document.getElementById('btnConfirmBatchApply').disabled = false;
+                document.getElementById('batchTotalPackages').innerText = `${data.stats.total_packages} بسته`;
+                document.getElementById('batchTotalNeeded').innerText = `${data.stats.needed_items} مورد`;
+                document.getElementById('batchTotalIdentical').innerText = `${data.stats.identical_items} مورد`;
+                
+                document.getElementById('batchAlertMessage').className = 'alert alert-info border-0 rounded-3 text-xs p-3 mb-3';
+                document.getElementById('batchAlertMessage').innerHTML = `🔍 <strong>نتیجه پایش کلی:</strong> از مجموع ${data.stats.total_packages} بسته بررسی‌نشده، تعداد ${data.stats.needed_items} رکورد نیازمند اعمال و ${data.stats.identical_items} رکورد از قبل بدون تغییر است.`;
+
+                tbody.innerHTML = '';
+                data.packages.forEach((pkg, idx) => {
+                    const verdictBadge = pkg.is_all_identical 
+                        ? '<span class="badge diff-badge-identical">⚪️ کاملاً منطبق (بدون تغییر)</span>' 
+                        : `<span class="badge diff-badge-new">🟢 ${pkg.needed_items} مورد نیازمند ثبت</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="checkbox" name="batch_pkg_select" value="${pkg.package_id}" class="form-check-input" checked onchange="updateBatchSelectedCount()"></td>
+                        <td class="font-monospace text-xs">${pkg.package_id}</td>
+                        <td class="fw-bold">${pkg.author || 'نامشخص'}</td>
+                        <td>${pkg.title || '-'}${pkg.created_at_jalali ? `<span class="text-muted font-monospace text-2xs d-block">${pkg.created_at_jalali}</span>` : ''}</td>
+                        <td><span class="badge bg-light text-dark border">${pkg.total_items} رکورد</span></td>
+                        <td>${verdictBadge}</td>
+                        <td><span class="badge bg-warning bg-opacity-10 text-warning border">در انتظار</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                updateBatchSelectedCount();
+            })
+            .catch(err => {
+                loading.classList.add('d-none');
+                alert('خطا در برقراری ارتباط با سرور: ' + err.message);
+                if (batchModalInstance) batchModalInstance.hide();
+            });
+    }
+
+    function toggleBatchSelectAll(checked) {
+        document.querySelectorAll('input[name="batch_pkg_select"]').forEach(cb => cb.checked = checked);
+        updateBatchSelectedCount();
+    }
+
+    function updateBatchSelectedCount() {
+        const checked = document.querySelectorAll('input[name="batch_pkg_select"]:checked').length;
+        const total = document.querySelectorAll('input[name="batch_pkg_select"]').length;
+        document.getElementById('batchFooterSelected').innerText = `انتخاب‌شده: ${checked} از ${total} بسته`;
+        const btn = document.getElementById('btnConfirmBatchApply');
+        if (btn) {
+            btn.disabled = (checked === 0);
+            btn.innerHTML = `🚀 تایید و اعمال دسته‌ای (${checked} بسته)`;
+        }
+    }
+
+    function executeBatchApply() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="batch_pkg_select"]:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) {
+            alert('لطفاً حداقل یک بسته را انتخاب کنید.');
+            return;
+        }
+
+        const packagesToApply = scannedBatchPackages
+            .filter(pkg => selectedIds.includes(pkg.package_id))
+            .map(pkg => pkg.package_raw);
+
+        const btn = document.getElementById('btnConfirmBatchApply');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> در حال اعمال دسته‌ای در دیتابیس...';
+        }
+
+        fetch("{% url 'sync_hub:batch_apply' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({packages: packagesToApply})
+        })
+        .then(async res => {
+            const text = await res.text();
+            try { return JSON.parse(text); } catch(e) { throw new Error(text.substring(0, 100)); }
+        })
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            if (data.success) {
+                alert('🎉 ' + data.message);
+                if (batchModalInstance) batchModalInstance.hide();
+                fetchServerPackages();
+            } else {
+                alert('❌ خطا در اعمال دسته‌ای: ' + (data.error || 'ناشناخته'));
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            alert('❌ خطا در اعمال دسته‌ای: ' + err.message);
+        });
+    }
+</script>
+{% endblock %}

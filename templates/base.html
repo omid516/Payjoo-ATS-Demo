@@ -406,6 +406,15 @@
                             </li>
                             {% endif %}
 
+                            <!-- همگام‌سازی و انتقال تغییرات (کارشناسان و ادمین) -->
+                            {% if user.profile.is_recruitment_staff or user.profile.role == 'ADMIN' %}
+                            <li>
+                                <a href="{% url 'sync_hub:dashboard' %}" class="nav-link {% if 'sync' in request.path %}active text-white{% endif %}">
+                                    🔄 مرکز همگام‌سازی (Sync)
+                                </a>
+                            </li>
+                            {% endif %}
+
                             <!-- پشتیبان‌گیری و بازگردانی (ادمین) -->
                             {% if user.profile.role == 'ADMIN' %}
                             <li>

@@ -15,6 +15,7 @@ urlpatterns = [
     path('candidates/', include('apps.candidates.urls')),
     path('planning/', include('apps.recruitment_planning.urls')),
     path('management/import/historical/', include('apps.historical_import.urls')),
+    path('sync/', include('apps.sync_hub.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 

@@ -35,16 +35,20 @@ class SoftDeleteModel(models.Model):
         super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
+        audit_enabled = getattr(self, 'audit_log_enabled', True)
         is_new = self.pk is None
         old_instance = None
 
-        if not is_new:
+        if audit_enabled and not is_new:
             try:
                 old_instance = self.__class__.all_objects.get(pk=self.pk)
             except self.__class__.DoesNotExist:
                 pass
 
         super().save(*args, **kwargs)
+
+        if not audit_enabled:
+            return
 
         # Import helper inside method to prevent circular imports
         from apps.core.utils import log_action

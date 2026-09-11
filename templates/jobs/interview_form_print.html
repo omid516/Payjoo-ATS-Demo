@@ -568,7 +568,7 @@
                 {% endif %}
                 <div>
                     <h4 class="fw-bold text-primary m-0" style="font-size: 0.95rem;">شرکت فولاد مبارکه</h4>
-                    <span class="text-xxs text-muted d-block mt-0.5">تامین سرمایه انسانی فولاد مبارکه | شناسه شغل: {{ job.code }}</span>
+                    <span class="text-xxs text-muted d-block mt-0.5">تامین سرمایه انسانی فولاد مبارکه | کد شغل: {{ job.code }} | شناسه فرصت شغلی: {{ job.id }}</span>
                 </div>
             </div>
             <div class="text-end">
@@ -583,7 +583,7 @@
             <tbody>
                 <tr>
                     <th style="width: 14%;">عنوان شغل</th>
-                    <td style="width: 36%;" class="fw-bold text-dark">{{ job.title }} ({{ job.code }})</td>
+                    <td style="width: 36%;" class="fw-bold text-dark">{{ job.title }} (کد شغل: {{ job.code }} | شناسه فرصت: {{ job.id }})</td>
                     <th style="width: 16%;">نام داوطلب</th>
                     <td style="width: 34%;" id="candidateNameCell">
                         <span id="candidateNameVal" class="fw-semibold text-dark d-none"></span>

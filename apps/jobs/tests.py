@@ -1114,18 +1114,111 @@ class CompetencyEngineTests(TestCase):
             stats = parse_competencies_excel(tmp_path)
             
             # Check import stats
-            # In setUp we created 3 competencies:
-            # - (8526, KNHS0003) -> updated (was created in setup, exists in excel)
-            # - (8526, SKHS0001) -> deleted (setup, doesn't exist in excel)
-            # - (8526, GEHS0001) -> deleted (setup, doesn't exist in excel)
-            # - (9000, SKTECH01) -> created (new in excel)
+            # In setUp we have for 8526:
+            # - (8526, KNHS0003) -> updated (exists in excel)
+            # - (8526, SKHS0001) -> deleted (not in excel)
+            # - (8526, GEHS0001) -> deleted (not in excel)
+            # And new:
+            # - (9000, SKTECH01) -> created
             self.assertEqual(stats['created'], 1)
             self.assertEqual(stats['updated'], 1)
             self.assertEqual(stats['deleted'], 2)
+            self.assertEqual(stats['posts_count'], 2)
             
-            # Verify database rows
+            # Verify database rows: 1 from 8526 + 1 from 9000 = 2 active
             self.assertEqual(CentralCompetency.objects.filter(is_deleted=False).count(), 2)
-            self.assertEqual(CentralCompetency.objects.filter(post_code='9000', code='SKTECH01').count(), 1)
+            self.assertEqual(CentralCompetency.objects.filter(post_code='9000', code='SKTECH01', is_deleted=False).count(), 1)
+            self.assertEqual(CentralCompetency.objects.filter(post_code='8526', is_deleted=False).count(), 1)
+        finally:
+            import os
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def test_single_post_competency_upload_does_not_affect_other_posts(self):
+        """تست آپلود اکسل شایستگی برای یک پست تکی بدون حذف یا بازنویسی شایستگی‌های سایر پست‌ها"""
+        import tempfile
+        import openpyxl
+        from apps.jobs.utils import parse_competencies_excel
+
+        # Create baseline competencies for Post 1001 (3 comps) and Post 2002 (2 comps)
+        CentralCompetency.objects.create(post_code='1001', code='KN_01', title='Knowledge 1', competency_type='KN', importance=1, level=2)
+        CentralCompetency.objects.create(post_code='1001', code='KN_02', title='Knowledge 2', competency_type='KN', importance=2, level=1)
+        CentralCompetency.objects.create(post_code='1001', code='SK_01', title='Skill 1 (to be removed)', competency_type='SK', importance=3, level=1)
+
+        CentralCompetency.objects.create(post_code='2002', code='KN_21', title='Post 2 Comp 1', competency_type='KN', importance=1, level=2)
+        CentralCompetency.objects.create(post_code='2002', code='SK_22', title='Post 2 Comp 2', competency_type='SK', importance=2, level=3)
+
+        # Create single-post Excel for Post 1001:
+        # Keep KN_01 (updated title), Keep KN_02, Remove SK_01, Add SK_02 (new)
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = 'شایستگی ها'
+            ws.append(['کد پست', 'پست', 'کد شایستگی', 'شایستگی', 'طبقه'])
+            ws.append(['1001', 'مهندس داده', 'KN_01', 'Knowledge 1 Updated', 'KN- دانش'])
+            ws.append(['1001', 'مهندس داده', 'KN_02', 'Knowledge 2', 'KN- دانش'])
+            ws.append(['1001', 'مهندس داده', 'SK_02', 'Skill 2 Brand New', 'SK- مهارت'])
+            wb.save(tmp.name)
+            tmp_path = tmp.name
+
+        try:
+            stats = parse_competencies_excel(tmp_path)
+            self.assertEqual(stats['posts_count'], 1)
+            self.assertEqual(stats['created'], 1)   # SK_02
+            self.assertEqual(stats['updated'], 2)   # KN_01, KN_02
+            self.assertEqual(stats['deleted'], 1)   # SK_01
+
+            # Assert Post 1001 active competencies
+            post1001_codes = set(CentralCompetency.objects.filter(post_code='1001', is_deleted=False).values_list('code', flat=True))
+            self.assertEqual(post1001_codes, {'KN_01', 'KN_02', 'SK_02'})
+            self.assertEqual(CentralCompetency.objects.get(post_code='1001', code='KN_01').title, 'Knowledge 1 Updated')
+
+            # Assert Post 2002 was NOT touched at all!
+            post2002_codes = set(CentralCompetency.objects.filter(post_code='2002', is_deleted=False).values_list('code', flat=True))
+            self.assertEqual(post2002_codes, {'KN_21', 'SK_22'})
+            self.assertEqual(CentralCompetency.objects.filter(post_code='2002', is_deleted=False).count(), 2)
+        finally:
+            import os
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def test_competency_export_excel(self):
+        """تست خروجی اکسل بانک شایستگی‌ها با فیلترها"""
+        url = reverse('competency_export')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertIn('central_competencies_', response['Content-Disposition'])
+
+        # Test export with filter
+        response_filtered = self.client.get(url + '?q=8526&competency_type=KN')
+        self.assertEqual(response_filtered.status_code, 200)
+
+    def test_large_file_bulk_import_performance(self):
+        """تست عملکرد بهینه ایمپورت دسته‌ای برای تعداد بالای رکوردها"""
+        import tempfile
+        import openpyxl
+        from apps.jobs.utils import parse_competencies_excel
+
+        # Create mock Excel with 100 competencies across 5 posts
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = 'Result'
+            ws.append(['کد پست', 'پست', 'کد شایستگی', 'شایستگی', 'طبقه', 'اهمیت شایستگی', 'سطح شایستگی'])
+            for p in range(1, 6):
+                for c in range(1, 21):
+                    ws.append([
+                        f'PST_{p}', f'عنوان پست {p}', f'SK_{p}_{c}', f'شایستگی {c}', 'SK- مهارت', '1- محوری', '2- توانایی'
+                    ])
+            wb.save(tmp.name)
+            tmp_path = tmp.name
+
+        try:
+            stats = parse_competencies_excel(tmp_path)
+            self.assertEqual(stats['posts_count'], 5)
+            self.assertEqual(stats['created'], 100)
+            self.assertEqual(CentralCompetency.objects.filter(post_code__startswith='PST_').count(), 100)
         finally:
             import os
             if os.path.exists(tmp_path):

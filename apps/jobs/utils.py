@@ -18,54 +18,74 @@ def clean_cell_value(val):
 
 def parse_competencies_excel(file_path):
     """
-    Parses شایستگی ها.xlsx and imports/updates the CentralCompetency table.
+    Parses competencies Excel file and imports/updates the CentralCompetency table per post.
+    High-performance bulk implementation using dictionary caching and bulk_create/bulk_update.
+    Only updates/removes competencies for the posts present in the uploaded file,
+    preserving all other posts in the database.
     Returns a dict with import statistics.
     """
-    wb = openpyxl.load_workbook(file_path, data_only=True)
-    if 'Result' not in wb.sheetnames:
-        raise ValueError("شیت با نام 'Result' در فایل اکسل یافت نشد.")
-    
-    ws = wb['Result']
-    rows = list(ws.iter_rows(values_only=True))
-    if not rows:
-        raise ValueError("فایل اکسل خالی است.")
+    wb = openpyxl.load_workbook(file_path, data_only=True, read_only=True)
+    if 'Result' in wb.sheetnames:
+        ws = wb['Result']
+    elif 'شایستگی' in wb.sheetnames:
+        ws = wb['شایستگی']
+    elif 'شایستگی ها' in wb.sheetnames:
+        ws = wb['شایستگی ها']
+    elif 'Competencies' in wb.sheetnames:
+        ws = wb['Competencies']
+    elif 'Sheet1' in wb.sheetnames:
+        ws = wb['Sheet1']
+    else:
+        ws = wb.active
         
-    headers = [clean_cell_value(h) for h in rows[0]]
+    if ws is None:
+        wb.close()
+        raise ValueError("شیت مناسبی در فایل اکسل یافت نشد.")
+    
+    rows_iter = ws.iter_rows(values_only=True)
+    try:
+        first_row = next(rows_iter)
+    except StopIteration:
+        wb.close()
+        raise ValueError("فایل اکسل خالی است یا فاقد داده می‌باشد.")
+        
+    headers = [clean_cell_value(h) for h in first_row]
     
     # Helper to find column index (case and space insensitive, handles common typos)
     def find_col(names):
         for name in names:
-            name_clean = name.replace(" ", "").replace("ی", "ي").replace("ک", "ك")
+            name_clean = name.replace(" ", "").replace("ی", "ي").replace("ک", "ك").lower()
             for idx, h in enumerate(headers):
-                h_clean = h.replace(" ", "").replace("ی", "ي").replace("ک", "ك")
+                h_clean = h.replace(" ", "").replace("ی", "ي").replace("ک", "ك").lower()
                 if h_clean == name_clean:
                     return idx
         return -1
 
     col_map = {
-        'post_code': find_col(['کد پست']),
-        'post_title': find_col(['پست']),
-        'code': find_col(['کد شایستگی', 'کد شايستگي']),
-        'old_code': find_col(['کد شایستگی قدیم', 'کد شايستگي قديم']),
-        'title': find_col(['شایستگی', 'شايستگي']),
-        'category_raw': find_col(['طبقه']),
-        'cluster_raw': find_col(['خوشه']),
-        'importance_raw': find_col(['اهمیت شایستگی', 'اهميت شايستگي']),
-        'level_raw': find_col(['سطح شایستگی', 'سطح شايستگي']),
-        'management_code': find_col(['کد مدیریت', 'کد  مديريت', 'کد مديريت']),
-        'management_name': find_col(['مدیریت', 'مديريت']),
-        'vice_president_code': find_col(['کد معاونت']),
-        'vice_president_name': find_col(['معاونت']),
-        'section_code': find_col(['کد قسمت']),
-        'section_name': find_col(['قسمت']),
-        'cost_center_code': find_col(['کد مرکز هزینه', 'کد مرکز هزينه']),
-        'cost_center_name': find_col(['مرکز هزینه', 'مرکز هزينه']),
+        'post_code': find_col(['کد پست', 'کدپست', 'post_code', 'post code', 'کد شغل']),
+        'post_title': find_col(['پست', 'عنوان پست', 'عنوان شغل', 'post_title', 'post title', 'نام پست']),
+        'code': find_col(['کد شایستگی', 'کد شايستگي', 'کدشایستگی', 'code', 'competency_code']),
+        'old_code': find_col(['کد شایستگی قدیم', 'کد شايستگي قديم', 'old_code']),
+        'title': find_col(['شایستگی', 'شايستگي', 'عنوان شایستگی', 'title', 'competency_title', 'نام شایستگی']),
+        'category_raw': find_col(['طبقه', 'نوع', 'نوع شایستگی', 'category', 'category_raw']),
+        'cluster_raw': find_col(['خوشه', 'cluster', 'cluster_raw']),
+        'importance_raw': find_col(['اهمیت شایستگی', 'اهميت شايستگي', 'اهمیت', 'importance']),
+        'level_raw': find_col(['سطح شایستگی', 'سطح شايستگي', 'سطح', 'level']),
+        'management_code': find_col(['کد مدیریت', 'کد  مديريت', 'کد مديريت', 'management_code']),
+        'management_name': find_col(['مدیریت', 'مديريت', 'management_name']),
+        'vice_president_code': find_col(['کد معاونت', 'vice_president_code']),
+        'vice_president_name': find_col(['معاونت', 'vice_president_name']),
+        'section_code': find_col(['کد قسمت', 'section_code']),
+        'section_name': find_col(['قسمت', 'section_name']),
+        'cost_center_code': find_col(['کد مرکز هزینه', 'کد مرکز هزينه', 'cost_center_code']),
+        'cost_center_name': find_col(['مرکز هزینه', 'مرکز هزينه', 'cost_center_name']),
     }
     
     # Required columns validation
-    required = ['post_code', 'code', 'title', 'category_raw']
+    required = ['post_code', 'code', 'title']
     for req in required:
         if col_map[req] == -1:
+            wb.close()
             raise ValueError(f"ستون حیاتی '{req}' (یا معادل فارسی آن) در اکسل پیدا نشد.")
 
     # License limits check for posts
@@ -74,124 +94,168 @@ def parse_competencies_excel(file_path):
     max_posts = limits['max_posts']
     active_post_codes = set(CentralCompetency.objects.filter(is_deleted=False).values_list('post_code', flat=True).distinct())
 
+    skipped_count = 0
+    excel_rows_map = {}
+    
+    # Fast in-memory parsing of all Excel rows
+    for row in rows_iter:
+        if not row or not any(row):
+            continue
+            
+        def get_val(key):
+            idx = col_map[key]
+            if idx == -1 or idx >= len(row):
+                return ''
+            return clean_cell_value(row[idx])
+            
+        post_code = normalize_persian_digits(get_val('post_code'))
+        code = normalize_persian_digits(get_val('code'))
+        title = get_val('title')
+        category_raw = get_val('category_raw')
+        
+        if not post_code or not code or not title:
+            skipped_count += 1
+            continue
+            
+        # Check limits on active post codes
+        if post_code not in active_post_codes:
+            if len(active_post_codes) >= max_posts:
+                wb.close()
+                raise ValueError(f"سقف مجاز تعداد پست‌های بانک شایستگی نسخه جاری تکمیل شده است (حداکثر {int(max_posts)} پست). جهت ارتقا لایسنس با مدیر سیستم تماس بگیرید.")
+            active_post_codes.add(post_code)
+            
+        # Parse competency type from category_raw or code
+        valid_types = ['KN', 'SK', 'AB', 'GE', 'ST', 'PR', 'CQ', 'IN']
+        comp_type = category_raw[:2].upper() if category_raw else ''
+        if comp_type not in valid_types:
+            code_prefix = code[:2].upper()
+            if code_prefix in valid_types:
+                comp_type = code_prefix
+                if not category_raw:
+                    category_raw = f"{comp_type}- {comp_type}"
+            else:
+                comp_type = 'GE'
+                if not category_raw:
+                    category_raw = 'GE- عمومی'
+                
+        # Parse importance
+        importance_raw = get_val('importance_raw')
+        importance = 3
+        if '1' in importance_raw or 'محوری' in importance_raw:
+            importance = 1
+        elif '2' in importance_raw or 'تکلیف' in importance_raw:
+            importance = 2
+        elif '3' in importance_raw or 'حداقلی' in importance_raw:
+            importance = 3
+            
+        # Parse level
+        level_raw = get_val('level_raw')
+        level = 1
+        if '3' in level_raw or 'تسلط' in level_raw:
+            level = 3
+        elif '2' in level_raw or 'توانایی' in level_raw or 'توانايي' in level_raw:
+            level = 2
+        elif '1' in level_raw or 'آشنایی' in level_raw or 'آشنايي' in level_raw:
+            level = 1
+
+        data = {
+            'post_title': get_val('post_title'),
+            'old_code': normalize_persian_digits(get_val('old_code')),
+            'title': title,
+            'competency_type': comp_type,
+            'category_raw': category_raw,
+            'cluster_raw': get_val('cluster_raw'),
+            'importance': importance,
+            'level': level,
+            'management_code': normalize_persian_digits(get_val('management_code')),
+            'management_name': get_val('management_name'),
+            'vice_president_code': normalize_persian_digits(get_val('vice_president_code')),
+            'vice_president_name': get_val('vice_president_name'),
+            'section_code': normalize_persian_digits(get_val('section_code')),
+            'section_name': get_val('section_name'),
+            'cost_center_code': normalize_persian_digits(get_val('cost_center_code')),
+            'cost_center_name': get_val('cost_center_name'),
+        }
+        excel_rows_map[(post_code, code)] = data
+
+    wb.close()
+    
+    processed_post_codes = set(k[0] for k in excel_rows_map.keys())
+    if not processed_post_codes:
+        return {
+            'posts_count': 0,
+            'created': 0,
+            'updated': 0,
+            'deleted': 0,
+            'skipped': skipped_count
+        }
+
+    # Fetch all existing active and soft-deleted competencies for the processed posts in 1 single query
+    existing_comps_qs = CentralCompetency.all_objects.filter(post_code__in=processed_post_codes)
+    existing_comps_map = {(c.post_code, c.code): c for c in existing_comps_qs}
+
+    to_create = []
+    to_update = []
     created_count = 0
     updated_count = 0
-    skipped_count = 0
-    seen_keys = set()
-    
-    with transaction.atomic():
-        for row_idx, row in enumerate(rows[1:], start=2):
-            if not row or not any(row):
-                continue
-                
-            def get_val(key):
-                idx = col_map[key]
-                if idx == -1 or idx >= len(row):
-                    return ''
-                return clean_cell_value(row[idx])
-                
-            post_code = normalize_persian_digits(get_val('post_code'))
-            code = normalize_persian_digits(get_val('code'))
-            title = get_val('title')
-            category_raw = get_val('category_raw')
-            
-            if not post_code or not code or not title or not category_raw:
-                skipped_count += 1
-                continue
-                
-            # Check limits on active post codes
-            if post_code not in active_post_codes:
-                if len(active_post_codes) >= max_posts:
-                    raise ValueError(f"سقف مجاز تعداد پست‌های بانک شایستگی نسخه جاری تکمیل شده است (حداکثر {int(max_posts)} پست). جهت ارتقا لایسنس با مدیر سیستم تماس بگیرید.")
-                active_post_codes.add(post_code)
-                
-            # Parse competency type from category_raw (first two letters, e.g. KN, SK, AB...)
-            comp_type = category_raw[:2].upper()
-            valid_types = ['KN', 'SK', 'AB', 'GE', 'ST', 'PR', 'CQ', 'IN']
-            if comp_type not in valid_types:
-                # Try fallback from code prefix
-                code_prefix = code[:2].upper()
-                if code_prefix in valid_types:
-                    comp_type = code_prefix
-                else:
-                    comp_type = 'GE' # fallback to general
-                    
-            # Parse importance
-            importance_raw = get_val('importance_raw')
-            importance = 3 # default: minimal
-            if '1' in importance_raw or 'محوری' in importance_raw:
-                importance = 1
-            elif '2' in importance_raw or 'تکلیف' in importance_raw:
-                importance = 2
-            elif '3' in importance_raw or 'حداقلی' in importance_raw:
-                importance = 3
-                
-            # Parse level
-            level_raw = get_val('level_raw')
-            level = 1 # default: familiarity
-            if '3' in level_raw or 'تسلط' in level_raw:
-                level = 3
-            elif '2' in level_raw or 'توانایی' in level_raw or 'توانايي' in level_raw:
-                level = 2
-            elif '1' in level_raw or 'آشنایی' in level_raw or 'آشنايي' in level_raw:
-                level = 1
 
-            key = (post_code, code)
-            seen_keys.add(key)
-            
-            # Find existing active or deleted competency with same post_code and code
-            comp = CentralCompetency.all_objects.filter(post_code=post_code, code=code).first()
-            
-            data = {
-                'post_title': get_val('post_title'),
-                'old_code': normalize_persian_digits(get_val('old_code')),
-                'title': title,
-                'competency_type': comp_type,
-                'category_raw': category_raw,
-                'cluster_raw': get_val('cluster_raw'),
-                'importance': importance,
-                'level': level,
-                'management_code': normalize_persian_digits(get_val('management_code')),
-                'management_name': get_val('management_name'),
-                'vice_president_code': normalize_persian_digits(get_val('vice_president_code')),
-                'vice_president_name': get_val('vice_president_name'),
-                'section_code': normalize_persian_digits(get_val('section_code')),
-                'section_name': get_val('section_name'),
-                'cost_center_code': normalize_persian_digits(get_val('cost_center_code')),
-                'cost_center_name': get_val('cost_center_name'),
-                'is_deleted': False,
-                'deleted_at': None
-            }
-            
-            if comp:
-                # Update
-                changed = False
-                for field, val in data.items():
-                    if getattr(comp, field) != val:
-                        setattr(comp, field, val)
-                        changed = True
-                if changed:
-                    comp.save()
-                    updated_count += 1
-            else:
-                # Create
-                CentralCompetency.objects.create(
-                    post_code=post_code,
-                    code=code,
-                    **data
-                )
-                created_count += 1
+    fields_to_check = [
+        'post_title', 'old_code', 'title', 'competency_type', 'category_raw',
+        'cluster_raw', 'importance', 'level', 'management_code', 'management_name',
+        'vice_president_code', 'vice_president_name', 'section_code', 'section_name',
+        'cost_center_code', 'cost_center_name'
+    ]
+
+    for (post_code, code), data in excel_rows_map.items():
+        comp = existing_comps_map.get((post_code, code))
+        if comp:
+            changed = False
+            for field in fields_to_check:
+                val = data[field]
+                if getattr(comp, field) != val:
+                    setattr(comp, field, val)
+                    changed = True
+            if comp.is_deleted:
+                comp.is_deleted = False
+                comp.deleted_at = None
+                changed = True
                 
-        # Soft delete competencies that are NOT in the uploaded file
-        # Retrieve all currently active competencies
-        active_comps = CentralCompetency.objects.filter(is_deleted=False)
-        deleted_count = 0
-        for comp in active_comps:
-            if (comp.post_code, comp.code) not in seen_keys:
-                comp.delete()
-                deleted_count += 1
-                
+            if changed:
+                to_update.append(comp)
+                updated_count += 1
+        else:
+            to_create.append(CentralCompetency(
+                post_code=post_code,
+                code=code,
+                is_deleted=False,
+                deleted_at=None,
+                **data
+            ))
+            created_count += 1
+
+    # Find competencies belonging to these processed posts that are not in the uploaded file
+    to_delete_ids = []
+    for (post_code, code), comp in existing_comps_map.items():
+        if not comp.is_deleted and (post_code, code) not in excel_rows_map:
+            to_delete_ids.append(comp.id)
+
+    deleted_count = len(to_delete_ids)
+
+    # Perform atomic bulk writes
+    all_update_fields = fields_to_check + ['is_deleted', 'deleted_at']
+    with transaction.atomic():
+        if to_create:
+            CentralCompetency.objects.bulk_create(to_create, batch_size=1000)
+        if to_update:
+            CentralCompetency.objects.bulk_update(to_update, all_update_fields, batch_size=1000)
+        if to_delete_ids:
+            CentralCompetency.objects.filter(id__in=to_delete_ids).update(
+                is_deleted=True,
+                deleted_at=timezone.now()
+            )
+
     return {
+        'posts_count': len(processed_post_codes),
         'created': created_count,
         'updated': updated_count,
         'deleted': deleted_count,

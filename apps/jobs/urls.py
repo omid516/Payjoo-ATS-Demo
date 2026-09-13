@@ -16,6 +16,7 @@ from .views import (
     JobOpportunityBulkStatusView,
     CentralCompetencyListView,
     CentralCompetencyUploadView,
+    ExportCompetenciesExcelView,
     ImportJobDescriptionsView,
     JobDescriptionListView,
     JobDescriptionUpdateView,
@@ -64,6 +65,7 @@ urlpatterns = [
 
     path('competencies/', CentralCompetencyListView.as_view(), name='competency_list'),
     path('competencies/upload/', CentralCompetencyUploadView.as_view(), name='competency_upload'),
+    path('competencies/export/', ExportCompetenciesExcelView.as_view(), name='competency_export'),
     path('competencies/patterns/', RecruitmentPatternDashboardView.as_view(), name='recruitment_patterns'),
     path('competencies/custom-report/', CustomCompetenciesReportView.as_view(), name='custom_competencies_report'),
     path('competencies/models/', CompetencyModelListView.as_view(), name='competency_model_list'),

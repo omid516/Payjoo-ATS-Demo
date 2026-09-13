@@ -637,7 +637,8 @@ class CentralCompetencyUploadView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         try:
             stats = parse_competencies_excel(file_path)
-            msg = (f"بانک شایستگی‌ها با موفقیت به‌روزرسانی شد. "
+            posts_count = stats.get('posts_count', 1)
+            msg = (f"بانک شایستگی‌ها برای {posts_count} پست با موفقیت به‌روزرسانی شد. "
                    f"جدید: {stats['created']} | ویرایش شده: {stats['updated']} | "
                    f"حذف شده: {stats['deleted']} | نادیده گرفته شده: {stats['skipped']}")
             messages.success(request, msg)
@@ -883,6 +884,103 @@ class CentralCompetencyListView(LoginRequiredMixin, RoleRequiredMixin, ListView)
             ('3', '۳ - تسلط'),
         ]
         return context
+
+
+class ExportCompetenciesExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+        UserProfile.ROLE_JOB_CLASSIFICATION_USER,
+        UserProfile.ROLE_DEPARTMENT_USER,
+        UserProfile.ROLE_READ_ONLY_AUDITOR,
+    ]
+
+    def get(self, request):
+        queryset = CentralCompetency.objects.filter(is_deleted=False)
+        
+        # Search filter
+        q = request.GET.get('q', '').strip()
+        if q:
+            q_norm = normalize_persian_digits(q)
+            queryset = queryset.filter(
+                Q(code__icontains=q) | 
+                Q(code__icontains=q_norm) |
+                Q(post_code__icontains=q) |
+                Q(post_code__icontains=q_norm) |
+                Q(title__icontains=q) |
+                Q(post_title__icontains=q)
+            )
+
+        # Type filter
+        comp_type = request.GET.get('competency_type', '').strip()
+        if comp_type:
+            queryset = queryset.filter(competency_type=comp_type)
+
+        # Importance filter
+        importance = request.GET.get('importance', '').strip()
+        if importance:
+            queryset = queryset.filter(importance=importance)
+
+        # Level filter
+        level = request.GET.get('level', '').strip()
+        if level:
+            queryset = queryset.filter(level=level)
+
+        queryset = queryset.order_by('post_code', 'code')
+
+        headers = [
+            'کد پست',
+            'پست',
+            'کد شایستگی',
+            'کد شایستگی قدیم',
+            'شایستگی',
+            'نوع شایستگی',
+            'طبقه',
+            'خوشه',
+            'اهمیت شایستگی',
+            'سطح شایستگی',
+            'کد مدیریت',
+            'مدیریت',
+            'کد معاونت',
+            'معاونت',
+            'کد قسمت',
+            'قسمت',
+            'کد مرکز هزینه',
+            'مرکز هزینه',
+        ]
+
+        importance_labels = {1: '۱ - محوری', 2: '۲ - تکلیف محور', 3: '۳ - حداقلی'}
+        level_labels = {1: '۱ - آشنایی', 2: '۲ - توانایی', 3: '۳ - تسلط'}
+
+        rows = []
+        for c in queryset:
+            rows.append([
+                c.post_code or '',
+                c.post_title or '',
+                c.code or '',
+                c.old_code or '',
+                c.title or '',
+                c.get_competency_type_display(),
+                c.category_raw or f"{c.competency_type}- {c.get_competency_type_display()}",
+                c.cluster_raw or '',
+                importance_labels.get(c.importance, str(c.importance)),
+                level_labels.get(c.level, str(c.level)),
+                c.management_code or '',
+                c.management_name or '',
+                c.vice_president_code or '',
+                c.vice_president_name or '',
+                c.section_code or '',
+                c.section_name or '',
+                c.cost_center_code or '',
+                c.cost_center_name or '',
+            ])
+
+        from apps.core.utils import export_to_excel_response
+        import datetime
+        now_str = datetime.date.today().strftime('%Y%m%d')
+        filename = f"central_competencies_{now_str}.xlsx"
+        return export_to_excel_response(filename, headers, rows)
 
 
 def clean_str(s):

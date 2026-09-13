@@ -274,8 +274,8 @@ class OrganizationSettingForm(forms.ModelForm):
             # Email Subjects
             'reg_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل ثبت‌نام'}),
             'exam_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل دعوت به آزمون'}),
-            'exam_default_total_questions': forms.NumberInput(attrs={'class': 'form-control text-center', 'min': '5', 'max': '500', 'placeholder': '50'}),
-            'exam_default_time_per_question': forms.NumberInput(attrs={'class': 'form-control text-center', 'min': '0.1', 'max': '10.0', 'step': '0.1', 'placeholder': '1.5'}),
+            'exam_default_total_questions': forms.NumberInput(attrs={'class': 'form-control text-center font-bold', 'min': '5', 'max': '500', 'placeholder': '50'}),
+            'exam_default_time_per_question': forms.NumberInput(attrs={'class': 'form-control text-center font-bold', 'min': '0.1', 'max': '10.0', 'step': '0.01', 'placeholder': '1.50'}),
             'interview_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل دعوت به مصاحبه'}),
             'offer_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل پیشنهاد همکاری'}),
             'reject_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل رد رزومه'}),
@@ -318,7 +318,7 @@ class OrganizationSettingForm(forms.ModelForm):
         val = self.cleaned_data.get('exam_default_time_per_question')
         if val is None or val == '':
             return 1.5
-        return val
+        return round(float(val), 2)
 
 
 class JobDescriptionTemplateForm(forms.ModelForm):

@@ -113,26 +113,42 @@
 <body>
 
 <!-- Interactive Control Panel (Hidden on Print) -->
-<div class="control-panel no-print shadow-sm">
+<div class="control-panel no-print shadow-sm p-3 rounded-4 mb-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div class="d-flex align-items-center gap-2">
-            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 font-medium text-xs">
                 ← بازگشت به لیست
             </a>
-            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill text-xs">
-                📝 سند مرکز آزمون کتبی
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1.5 rounded-pill text-xs font-semibold">
+                📝 سند مرکز آزمون کتبی (Test Specification)
             </span>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <div class="d-flex align-items-center gap-1">
-                <label for="totalQuestionsInput" class="form-label m-0 text-xs fw-medium">تعداد کل سوالات:</label>
-                <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 70px;" value="{{ org_setting.exam_default_total_questions|default:50 }}" min="5" max="300" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
+        
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- تعداد سوالات -->
+            <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text bg-light border-end-0 text-xxs font-semibold text-secondary">
+                    📋 تعداد سوالات:
+                </span>
+                <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center font-bold" style="width: 65px;" value="{{ org_setting.exam_default_total_questions|default:50 }}" min="5" max="300" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
+                <span class="input-group-text bg-light text-xxs">عدد</span>
             </div>
-            <div class="d-flex align-items-center gap-1">
-                <label for="timePerQuestionInput" class="form-label m-0 text-xs fw-medium">زمان/سوال (دقیقه):</label>
-                <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 65px;" value="{{ org_setting.exam_default_time_per_question|default:1.5 }}" step="0.1" min="0.2" max="10.0" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
+
+            <!-- زمان هر سوال -->
+            <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text bg-light border-end-0 text-xxs font-semibold text-secondary">
+                    ⏱️ زمان هر سوال:
+                </span>
+                <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center font-bold" style="width: 70px;" value="{{ org_setting.exam_default_time_per_question|floatformat:2|default:'1.50' }}" step="0.01" min="0.1" max="10.0" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
+                <span class="input-group-text bg-light text-xxs">دقیقه</span>
             </div>
-            <button type="button" onclick="resetExamRows()" class="btn btn-outline-warning btn-sm px-2.5 rounded-pill text-xs">
+
+            <!-- نشانگر زنده زمان کل -->
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-2 rounded-3 text-xs font-semibold" id="liveCalculatedDurationBadge">
+                ⏳ زمان کل: ۷۵ دقیقه
+            </span>
+
+            <button type="button" onclick="resetExamRows()" class="btn btn-outline-warning btn-sm px-3 rounded-pill text-xs font-medium">
                 🔄 بازنشانی جدول
             </button>
             <button onclick="window.print()" class="btn btn-primary btn-sm px-3.5 py-1.5 rounded-pill shadow-sm text-xs font-bold">
@@ -140,9 +156,13 @@
             </button>
         </div>
     </div>
-    <div class="mt-2 pt-2 border-top text-xxs text-muted d-flex justify-content-between">
-        <span>💡 <strong>راهنما:</strong> این سند جهت طراحی سوالات به مرکز آزمون ارسال می‌شود. می‌توانید در صورت نیاز شایستگی‌ها را از چاپ حذف نمایید.</span>
-        <span>تعداد شایستگی‌ها: <strong id="compCountBadge" class="text-dark">{{ exam_competencies|length }}</strong> | جمع اوزان: <strong id="totalWeightBadge" class="text-primary">۱۰۰٪</strong></span>
+    <div class="mt-2.5 pt-2 border-top text-xxs text-muted d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span>💡 <strong>راهنما:</strong> این سند جهت طراحی سوالات به مرکز آزمون ارسال می‌شود. می‌توانید در صورت نیاز شایستگی‌ها را از چاپ حذف یا پارامترهای تعداد/زمان را تغییر دهید.</span>
+        <span class="d-flex align-items-center gap-2">
+            <span>تعداد سرفصل‌ها: <strong id="compCountBadge" class="text-dark">{{ exam_competencies|length }}</strong></span>
+            <span>|</span>
+            <span>مجموع اوزان: <strong id="totalWeightBadge" class="text-primary font-bold">۱۰۰٪</strong></span>
+        </span>
     </div>
 </div>
 
@@ -436,10 +456,23 @@
 
         // 2. Recalculate duration
         const duration = Math.round(totalQuestions * timePerQuestion);
-        document.getElementById('totalDurationCell').innerText = duration + " دقیقه";
+        let durationText = duration + " دقیقه";
+        let durationFullText = `${duration} دقیقه`;
+        if (duration >= 60) {
+            const h = Math.floor(duration / 60);
+            const m = duration % 60;
+            durationFullText += ` (${h} ساعت${m > 0 ? ' و ' + m + ' دقیقه' : ''})`;
+        }
+        
+        document.getElementById('totalDurationCell').innerText = durationText;
         document.getElementById('totalQuestionsCell').innerText = totalQuestions;
         document.getElementById('totalWeightCell').innerText = '۱۰۰٪';
         document.getElementById('totalWeightBadge').innerText = '۱۰۰٪';
+        
+        const liveBadge = document.getElementById('liveCalculatedDurationBadge');
+        if (liveBadge) {
+            liveBadge.innerText = `⏳ زمان کل: ${durationFullText}`;
+        }
         
         // 3. Recalculate question distribution
         let distributedSumQ = 0;

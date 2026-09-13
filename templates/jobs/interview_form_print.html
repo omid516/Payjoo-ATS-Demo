@@ -867,6 +867,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    const STORAGE_KEY = 'payjoo_interview_spec_{{ job.id }}';
     // Store original rows on page load for reset
     let originalRowsBackup = [];
     let currentLayout = 'A4'; // 'A4' or 'A5'
@@ -877,9 +878,171 @@
     window.addEventListener('DOMContentLoaded', () => {
         const rows = document.querySelectorAll('#sheet1 .comp-row');
         originalRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        loadInterviewState();
         recalculateWeights();
         updateHeaderMetadata();
     });
+
+    function createCompetencyRowElement(data) {
+        const tr = document.createElement('tr');
+        tr.className = 'comp-row' + (data.isManual ? ' blank-manual-row' : '');
+        tr.setAttribute('data-original-weight', data.originalWeight || '15');
+        tr.setAttribute('data-weight', data.weight || data.originalWeight || '15');
+        tr.setAttribute('data-code', data.code || '');
+        tr.setAttribute('data-name', data.name || '');
+        tr.setAttribute('data-type', data.type || '');
+        tr.setAttribute('data-level', data.level || '');
+        tr.setAttribute('data-importance', data.importance || '');
+
+        if (data.isManual) {
+            tr.innerHTML = `
+                <td class="row-num fw-bold text-secondary"></td>
+                <td class="font-monospace text-xxs text-muted comp-code-cell">-</td>
+                <td class="text-start font-semibold">
+                    <span class="blank-line w-100" style="border-bottom: 1px dotted #475569; display: block; height: 16px;"></span>
+                    <span class="text-muted text-xxs d-block" style="font-size: 0.62rem;">(سرفصل دستی مصاحبه‌کننده)</span>
+                </td>
+                <td class="fw-bold text-secondary comp-level-cell">-</td>
+                <td class="comp-importance-cell">-</td>
+                <td class="fw-bold text-primary comp-weight-cell">0٪</td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center gap-1">
+                        <span class="score-circle">۱</span>
+                        <span class="score-circle">۲</span>
+                        <span class="score-circle">۳</span>
+                        <span class="score-circle">۴</span>
+                        <span class="score-circle">۵</span>
+                    </div>
+                </td>
+                <td class="text-start">
+                    <div class="evidence-line"></div>
+                </td>
+                <td class="no-print">
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
+                        ✕
+                    </button>
+                </td>
+            `;
+        } else {
+            tr.innerHTML = `
+                <td class="row-num fw-bold text-secondary"></td>
+                <td class="font-monospace text-xxs text-muted comp-code-cell">${data.code || ''}</td>
+                <td class="text-start font-semibold">
+                    <div class="comp-title-wrapper">
+                        <span class="comp-title-text" onclick="editCompetencyRow(this)" title="جهت ویرایش عنوان کلیک کنید">${data.name || ''}</span>
+                    </div>
+                    <span class="text-muted text-xxs d-block comp-type-label" style="font-size: 0.64rem;">نوع: ${data.type || ''}</span>
+                </td>
+                <td class="fw-bold text-secondary comp-level-cell">${data.level || ''}</td>
+                <td class="comp-importance-cell">${data.importance || ''}</td>
+                <td class="fw-bold text-primary comp-weight-cell">${data.weight || 0}٪</td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center gap-1">
+                        <span class="score-circle">۱</span>
+                        <span class="score-circle">۲</span>
+                        <span class="score-circle">۳</span>
+                        <span class="score-circle">۴</span>
+                        <span class="score-circle">۵</span>
+                    </div>
+                </td>
+                <td class="text-start">
+                    <div class="evidence-line"></div>
+                </td>
+                <td class="no-print">
+                    <div class="d-flex justify-content-center align-items-center gap-1">
+                        <button type="button" class="btn btn-outline-primary btn-sm p-0 px-1 text-xxs" onclick="editCompetencyRow(this)" title="ویرایش">
+                            ✏️
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
+                            ✕
+                        </button>
+                    </div>
+                </td>
+            `;
+        }
+        return tr;
+    }
+
+    function saveInterviewState() {
+        try {
+            const rowsData = [];
+            document.querySelectorAll('#sheet1 .comp-row').forEach(r => {
+                const isManual = r.classList.contains('blank-manual-row');
+                rowsData.push({
+                    code: r.getAttribute('data-code') || '',
+                    name: r.getAttribute('data-name') || r.querySelector('.comp-title-text')?.innerText.trim() || '',
+                    type: r.getAttribute('data-type') || (r.querySelector('.comp-type-label')?.innerText.replace('نوع:', '').trim() || ''),
+                    level: r.getAttribute('data-level') || r.querySelector('.comp-level-cell')?.innerText.trim() || '',
+                    importance: r.getAttribute('data-importance') || r.querySelector('.comp-importance-cell')?.innerText.trim() || '',
+                    originalWeight: r.getAttribute('data-original-weight') || '15',
+                    weight: r.getAttribute('data-weight') || '15',
+                    isManual: isManual
+                });
+            });
+
+            const state = {
+                layout: currentLayout,
+                density: currentDensity,
+                autoFit: isAutoFit,
+                interviewDate: document.getElementById('inputInterviewDate')?.value || '',
+                interviewTime: document.getElementById('inputInterviewTime')?.value || '',
+                assessorName: document.getElementById('inputAssessorName')?.value || '',
+                candidateName: document.getElementById('inputCandidateName')?.value || '',
+                rows: rowsData
+            };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.warn('Unable to save interview form state:', e);
+        }
+    }
+
+    function loadInterviewState() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return false;
+            const state = JSON.parse(saved);
+
+            if (state.layout) setLayoutMode(state.layout);
+            if (state.density) setDensity(state.density);
+            if (state.autoFit !== undefined) {
+                const sw = document.getElementById('switchAutoFit');
+                if (sw) sw.checked = state.autoFit;
+                toggleAutoFit(state.autoFit);
+            }
+
+            if (state.interviewDate !== undefined && document.getElementById('inputInterviewDate')) {
+                document.getElementById('inputInterviewDate').value = state.interviewDate;
+            }
+            if (state.interviewTime !== undefined && document.getElementById('inputInterviewTime')) {
+                document.getElementById('inputInterviewTime').value = state.interviewTime;
+            }
+            if (state.assessorName !== undefined && document.getElementById('inputAssessorName')) {
+                document.getElementById('inputAssessorName').value = state.assessorName;
+            }
+            if (state.candidateName !== undefined && document.getElementById('inputCandidateName')) {
+                document.getElementById('inputCandidateName').value = state.candidateName;
+            }
+
+            if (Array.isArray(state.rows)) {
+                const tbody = document.querySelector('#sheet1 #competencyTableBody');
+                const totalRow = document.querySelector('#sheet1 #totalRow');
+                const emptyRow = document.querySelector('#sheet1 #emptyRow');
+                if (emptyRow) emptyRow.remove();
+
+                document.querySelectorAll('#sheet1 .comp-row').forEach(r => r.remove());
+
+                state.rows.forEach(rowData => {
+                    const tr = createCompetencyRowElement(rowData);
+                    tbody.insertBefore(tr, totalRow);
+                });
+            }
+            return true;
+        } catch (e) {
+            console.warn('Unable to load interview form state:', e);
+            return false;
+        }
+    }
 
     // ----------------------------------------------------
     // Header Metadata Sync (Date, Time, Assessor, Candidate)
@@ -940,6 +1103,8 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+
+        saveInterviewState();
     }
 
     function setTodayDate() {
@@ -980,6 +1145,7 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+        saveInterviewState();
     }
 
     function setDensity(density) {
@@ -1014,6 +1180,7 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+        saveInterviewState();
     }
 
     // ----------------------------------------------------
@@ -1056,6 +1223,7 @@
 
             sheet2.classList.add('d-none');
         }
+        saveInterviewState();
     }
 
     function syncA5Copies() {
@@ -1099,10 +1267,15 @@
             if (currentLayout === 'A5') {
                 syncA5Copies();
             }
+            saveInterviewState();
         }
     }
 
     function resetCompetencyRows() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+
         const tbody = document.querySelector('#sheet1 #competencyTableBody');
         const totalRow = document.querySelector('#sheet1 #totalRow');
         
@@ -1151,51 +1324,16 @@
         const emptyRow = document.querySelector('#sheet1 #emptyRow');
         if (emptyRow) emptyRow.remove();
 
-        const tr = document.createElement('tr');
-        tr.className = 'comp-row';
-        tr.setAttribute('data-original-weight', '15');
-        tr.setAttribute('data-weight', '15');
-        tr.setAttribute('data-code', generatedCode);
-        tr.setAttribute('data-name', title);
-        tr.setAttribute('data-type', typeDisplay);
-        tr.setAttribute('data-level', levelDisplay);
-        tr.setAttribute('data-importance', importanceDisplay);
-
-        tr.innerHTML = `
-            <td class="row-num fw-bold text-secondary"></td>
-            <td class="font-monospace text-xxs text-muted comp-code-cell">${generatedCode}</td>
-            <td class="text-start font-semibold">
-                <div class="comp-title-wrapper">
-                    <span class="comp-title-text" onclick="editCompetencyRow(this)" title="جهت ویرایش عنوان کلیک کنید">${title}</span>
-                </div>
-                <span class="text-muted text-xxs d-block comp-type-label" style="font-size: 0.64rem;">نوع: ${typeDisplay}</span>
-            </td>
-            <td class="fw-bold text-secondary comp-level-cell">${levelDisplay}</td>
-            <td class="comp-importance-cell">${importanceDisplay}</td>
-            <td class="fw-bold text-primary comp-weight-cell">10٪</td>
-            <td>
-                <div class="d-flex justify-content-center align-items-center gap-1">
-                    <span class="score-circle">۱</span>
-                    <span class="score-circle">۲</span>
-                    <span class="score-circle">۳</span>
-                    <span class="score-circle">۴</span>
-                    <span class="score-circle">۵</span>
-                </div>
-            </td>
-            <td class="text-start">
-                <div class="evidence-line"></div>
-            </td>
-            <td class="no-print">
-                <div class="d-flex justify-content-center align-items-center gap-1">
-                    <button type="button" class="btn btn-outline-primary btn-sm p-0 px-1 text-xxs" onclick="editCompetencyRow(this)" title="ویرایش">
-                        ✏️
-                    </button>
-                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
-                        ✕
-                    </button>
-                </div>
-            </td>
-        `;
+        const tr = createCompetencyRowElement({
+            code: generatedCode,
+            name: title,
+            type: typeDisplay,
+            level: levelDisplay,
+            importance: importanceDisplay,
+            originalWeight: '15',
+            weight: '15',
+            isManual: false
+        });
 
         tbody.insertBefore(tr, totalRow);
         recalculateWeights();
@@ -1217,6 +1355,8 @@
             }).then(r => r.json()).then(data => {
                 if (data.success) {
                     tr.querySelector('.comp-code-cell').innerText = data.code;
+                    tr.setAttribute('data-code', data.code);
+                    saveInterviewState();
                 }
             }).catch(err => console.error(err));
         }
@@ -1228,6 +1368,7 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+        saveInterviewState();
     }
 
     function addBlankManualRow() {
@@ -1236,40 +1377,16 @@
         const emptyRow = document.querySelector('#sheet1 #emptyRow');
         if (emptyRow) emptyRow.remove();
 
-        const tr = document.createElement('tr');
-        tr.className = 'comp-row blank-manual-row';
-        tr.setAttribute('data-original-weight', '10');
-        tr.setAttribute('data-weight', '10');
-        tr.setAttribute('data-code', 'MANUAL');
-
-        tr.innerHTML = `
-            <td class="row-num fw-bold text-secondary"></td>
-            <td class="font-monospace text-xxs text-muted comp-code-cell">-</td>
-            <td class="text-start font-semibold">
-                <span class="blank-line w-100" style="border-bottom: 1px dotted #475569; display: block; height: 16px;"></span>
-                <span class="text-muted text-xxs d-block" style="font-size: 0.62rem;">(سرفصل دستی مصاحبه‌کننده)</span>
-            </td>
-            <td class="fw-bold text-secondary comp-level-cell">-</td>
-            <td class="comp-importance-cell">-</td>
-            <td class="fw-bold text-primary comp-weight-cell">0٪</td>
-            <td>
-                <div class="d-flex justify-content-center align-items-center gap-1">
-                    <span class="score-circle">۱</span>
-                    <span class="score-circle">۲</span>
-                    <span class="score-circle">۳</span>
-                    <span class="score-circle">۴</span>
-                    <span class="score-circle">۵</span>
-                </div>
-            </td>
-            <td class="text-start">
-                <div class="evidence-line"></div>
-            </td>
-            <td class="no-print">
-                <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 text-xxs" onclick="removeCompetencyRow(this)" title="حذف">
-                    ✕
-                </button>
-            </td>
-        `;
+        const tr = createCompetencyRowElement({
+            code: 'MANUAL',
+            name: '',
+            type: '',
+            level: '',
+            importance: '',
+            originalWeight: '10',
+            weight: '10',
+            isManual: true
+        });
 
         tbody.insertBefore(tr, totalRow);
         recalculateWeights();
@@ -1277,6 +1394,7 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+        saveInterviewState();
     }
 
     function editCompetencyRow(element) {
@@ -1329,6 +1447,7 @@
         if (impCell) impCell.innerText = newImportance;
 
         currentRowToEdit.setAttribute('data-name', newTitle);
+        currentRowToEdit.setAttribute('data-type', newType);
         currentRowToEdit.setAttribute('data-level', newLevel);
         currentRowToEdit.setAttribute('data-importance', newImportance);
 
@@ -1339,6 +1458,7 @@
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
+        saveInterviewState();
     }
 
     function recalculateWeights() {
@@ -1349,6 +1469,7 @@
         
         if (count === 0) {
             if (totalWeightCell) totalWeightCell.innerText = '۰٪';
+            saveInterviewState();
             return;
         }
 
@@ -1407,6 +1528,7 @@
         });
 
         if (totalWeightCell) totalWeightCell.innerText = '۱۰۰٪';
+        saveInterviewState();
     }
 </script>
 </body>

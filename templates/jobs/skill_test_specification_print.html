@@ -305,42 +305,94 @@
 </div>
 
 <script>
+    const STORAGE_KEY = 'payjoo_skill_spec_{{ job.id }}';
     let originalSkillRowsBackup = [];
 
     window.addEventListener('DOMContentLoaded', () => {
-        const rows = document.querySelectorAll('.skill-row');
+        const rows = document.querySelectorAll('#skillTableBody .skill-row');
         originalSkillRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        loadSkillState();
         recalculateSkillWeights();
     });
+
+    function saveSkillState() {
+        try {
+            const durationInput = document.getElementById('totalDurationInput');
+            const activeRows = document.querySelectorAll('#skillTableBody .skill-row');
+            const activeCodes = Array.from(activeRows).map(r => r.getAttribute('data-code')).filter(Boolean);
+            
+            const state = {
+                totalDuration: durationInput ? durationInput.value : 120,
+                activeCodes: activeCodes
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.warn('Unable to save skill spec state:', e);
+        }
+    }
+
+    function loadSkillState() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return false;
+            const state = JSON.parse(saved);
+            
+            if (state.totalDuration !== undefined && document.getElementById('totalDurationInput')) {
+                document.getElementById('totalDurationInput').value = state.totalDuration;
+            }
+            if (Array.isArray(state.activeCodes)) {
+                const rows = document.querySelectorAll('#skillTableBody .skill-row');
+                rows.forEach(r => {
+                    const code = r.getAttribute('data-code');
+                    if (code && !state.activeCodes.includes(code)) {
+                        r.remove();
+                    }
+                });
+            }
+            return true;
+        } catch (e) {
+            console.warn('Unable to load skill spec state:', e);
+            return false;
+        }
+    }
 
     function removeSkillRow(button) {
         const row = button.closest('.skill-row');
         if (row) {
             row.remove();
             recalculateSkillWeights();
+            saveSkillState();
         }
     }
 
     function resetSkillRows() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+
         const tbody = document.getElementById('skillTableBody');
         const totalRow = document.getElementById('totalSkillRow');
         
-        document.querySelectorAll('.skill-row').forEach(r => r.remove());
+        document.querySelectorAll('#skillTableBody .skill-row').forEach(r => r.remove());
         
         originalSkillRowsBackup.forEach(clonedRow => {
             const freshRow = clonedRow.cloneNode(true);
             tbody.insertBefore(freshRow, totalRow);
         });
 
+        const durationInput = document.getElementById('totalDurationInput');
+        if (durationInput) durationInput.value = 120;
+
         recalculateSkillWeights();
     }
 
     function recalculateDuration() {
         recalculateSkillWeights();
+        saveSkillState();
     }
 
     function recalculateSkillWeights() {
-        const rows = document.querySelectorAll('.skill-row');
+        const rows = document.querySelectorAll('#skillTableBody .skill-row');
         const count = rows.length;
         
         document.getElementById('compCountBadge').innerText = count;
@@ -355,6 +407,7 @@
         if (count === 0) {
             document.getElementById('totalWeightCell').innerText = '۰٪';
             document.getElementById('totalWeightBadge').innerText = '۰٪';
+            saveSkillState();
             return;
         }
 
@@ -413,6 +466,8 @@
 
         document.getElementById('totalWeightCell').innerText = '۱۰۰٪';
         document.getElementById('totalWeightBadge').innerText = '۱۰۰٪';
+
+        saveSkillState();
     }
 </script>
 </body>

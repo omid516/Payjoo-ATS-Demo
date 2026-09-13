@@ -252,7 +252,7 @@
         </thead>
         <tbody id="examTableBody">
             {% for comp in exam_competencies %}
-            <tr class="competency-row" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}">
+            <tr class="competency-row" data-code="{{ comp.code }}" data-original-weight="{{ comp.weight }}" data-weight="{{ comp.weight }}">
                 <td class="row-num font-bold text-secondary">{{ forloop.counter }}</td>
                 <td class="font-monospace text-xs text-muted">{{ comp.code }}</td>
                 <td class="text-start font-semibold">{{ comp.name }}</td>
@@ -352,32 +352,90 @@
 </div>
 
 <script>
+    const STORAGE_KEY = 'payjoo_exam_spec_{{ job.id }}';
     let originalExamRowsBackup = [];
 
     window.addEventListener('DOMContentLoaded', () => {
-        const rows = document.querySelectorAll('.competency-row');
+        const rows = document.querySelectorAll('#examTableBody .competency-row');
         originalExamRowsBackup = Array.from(rows).map(r => r.cloneNode(true));
+        loadExamState();
         recalculateQuestions();
     });
+
+    function saveExamState() {
+        try {
+            const totalQuestionsInput = document.getElementById('totalQuestionsInput');
+            const timePerQuestionInput = document.getElementById('timePerQuestionInput');
+            const activeRows = document.querySelectorAll('#examTableBody .competency-row');
+            const activeCodes = Array.from(activeRows).map(r => r.getAttribute('data-code')).filter(Boolean);
+            
+            const state = {
+                totalQuestions: totalQuestionsInput ? totalQuestionsInput.value : 50,
+                timePerQuestion: timePerQuestionInput ? timePerQuestionInput.value : 1.5,
+                activeCodes: activeCodes
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.warn('Unable to save exam spec state:', e);
+        }
+    }
+
+    function loadExamState() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return false;
+            const state = JSON.parse(saved);
+            
+            if (state.totalQuestions !== undefined && document.getElementById('totalQuestionsInput')) {
+                document.getElementById('totalQuestionsInput').value = state.totalQuestions;
+            }
+            if (state.timePerQuestion !== undefined && document.getElementById('timePerQuestionInput')) {
+                document.getElementById('timePerQuestionInput').value = state.timePerQuestion;
+            }
+            if (Array.isArray(state.activeCodes)) {
+                const rows = document.querySelectorAll('#examTableBody .competency-row');
+                rows.forEach(r => {
+                    const code = r.getAttribute('data-code');
+                    if (code && !state.activeCodes.includes(code)) {
+                        r.remove();
+                    }
+                });
+            }
+            return true;
+        } catch (e) {
+            console.warn('Unable to load exam spec state:', e);
+            return false;
+        }
+    }
 
     function removeExamRow(button) {
         const row = button.closest('.competency-row');
         if (row) {
             row.remove();
             recalculateQuestions();
+            saveExamState();
         }
     }
 
     function resetExamRows() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+
         const tbody = document.getElementById('examTableBody');
         const totalRow = document.getElementById('totalExamRow');
         
-        document.querySelectorAll('.competency-row').forEach(r => r.remove());
+        document.querySelectorAll('#examTableBody .competency-row').forEach(r => r.remove());
         
         originalExamRowsBackup.forEach(clonedRow => {
             const freshRow = clonedRow.cloneNode(true);
             tbody.insertBefore(freshRow, totalRow);
         });
+
+        const totalQuestionsInput = document.getElementById('totalQuestionsInput');
+        const timePerQuestionInput = document.getElementById('timePerQuestionInput');
+        if (totalQuestionsInput) totalQuestionsInput.value = "{{ org_setting.exam_default_total_questions|default:50 }}";
+        if (timePerQuestionInput) timePerQuestionInput.value = "{{ org_setting.exam_default_time_per_question|floatformat:2|default:'1.50' }}";
 
         recalculateQuestions();
     }
@@ -392,7 +450,7 @@
         if (totalQuestions < 5) totalQuestions = 5;
         if (timePerQuestion < 0.2) timePerQuestion = 0.2;
         
-        const rows = document.querySelectorAll('.competency-row');
+        const rows = document.querySelectorAll('#examTableBody .competency-row');
         const count = rows.length;
 
         document.getElementById('compCountBadge').innerText = count;
@@ -402,6 +460,7 @@
             document.getElementById('totalQuestionsCell').innerText = '۰';
             document.getElementById('totalWeightCell').innerText = '۰٪';
             document.getElementById('totalWeightBadge').innerText = '۰٪';
+            saveExamState();
             return;
         }
 
@@ -515,6 +574,8 @@
         rowData.forEach(item => {
             item.row.querySelector('.question-count-cell').innerText = item.finalCount;
         });
+
+        saveExamState();
     }
 </script>
 </body>

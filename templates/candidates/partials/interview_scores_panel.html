@@ -60,8 +60,8 @@
                         <td class="py-2.5 text-center">
                             <input type="number" 
                                    name="comp_score_{{ forloop.parentloop.counter0 }}_{{ cell.competency.id }}" 
-                                   value="{{ cell.score|floatformat:1 }}" 
-                                   min="0" max="100" step="0.1" 
+                                   value="{{ cell.score|floatformat:2 }}" 
+                                   min="0" max="100" step="0.01" 
                                    class="form-control form-control-sm text-center font-bold comp-score-input"
                                    data-comp-weight="{{ cell.competency.weight }}"
                                    required>
@@ -87,14 +87,14 @@
                                 <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold score-preview-badge">
                                     {{ score.score|floatformat:2 }}
                                 </span>
-                                <input type="hidden" name="score[]" class="score-input-hidden" value="{{ score.score }}">
+                                <input type="hidden" name="score[]" class="score-input-hidden" value="{{ score.score|floatformat:2 }}">
                             {% else %}
                                 <input type="number" 
                                        name="score[]" 
-                                       value="{{ score.score }}" 
+                                       value="{{ score.score|floatformat:2 }}" 
                                        min="0" 
                                        max="100" 
-                                       step="0.1" 
+                                       step="0.01" 
                                        class="form-control form-control-sm text-center font-bold score-input" 
                                        required>
                             {% endif %}
@@ -123,7 +123,7 @@
                         <td class="py-2.5 text-center">
                             <input type="number" 
                                    name="comp_score_{{ forloop.parentloop.counter0 }}_{{ cell.competency.id }}" 
-                                   min="0" max="100" step="0.1" 
+                                   min="0" max="100" step="0.01" 
                                    class="form-control form-control-sm text-center font-bold comp-score-input"
                                    data-comp-weight="{{ cell.competency.weight }}"
                                    required>
@@ -152,7 +152,7 @@
                                        name="score[]" 
                                        min="0" 
                                        max="100" 
-                                       step="0.1" 
+                                       step="0.01" 
                                        class="form-control form-control-sm text-center font-bold score-input" 
                                        required>
                             {% endif %}
@@ -179,7 +179,7 @@
                         <td class="py-2.5 text-center">
                             <input type="number" 
                                    name="comp_score_0_{{ comp.id }}" 
-                                   min="0" max="100" step="0.1" 
+                                   min="0" max="100" step="0.01" 
                                    class="form-control form-control-sm text-center font-bold comp-score-input"
                                    data-comp-weight="{{ comp.weight }}"
                                    required>
@@ -208,7 +208,7 @@
                                        name="score[]" 
                                        min="0" 
                                        max="100" 
-                                       step="0.1" 
+                                       step="0.01" 
                                        class="form-control form-control-sm text-center font-bold score-input" 
                                        required>
                             {% endif %}
@@ -384,7 +384,7 @@
             <td class="py-2.5 text-center">
                 <input type="number" 
                        name="comp_score_${nextRowIdx}_{{ comp.id }}" 
-                       min="0" max="100" step="0.1" 
+                       min="0" max="100" step="0.01" 
                        class="form-control form-control-sm text-center font-bold comp-score-input"
                        data-comp-weight="{{ comp.weight }}"
                        required>
@@ -407,7 +407,7 @@
                            name="score[]" 
                            min="0" 
                            max="100" 
-                           step="0.1" 
+                           step="0.01" 
                            class="form-control form-control-sm text-center font-bold score-input" 
                            required>
                 </td>`;

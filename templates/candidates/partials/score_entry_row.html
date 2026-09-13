@@ -65,12 +65,12 @@
                     <div class="d-flex align-items-center justify-content-center gap-1.5 mb-1.5">
                         <input type="number" 
                                name="score_{{ cell.id }}" 
-                               value="{{ cell.score|floatformat:1 }}" 
-                               step="0.1" 
+                               value="{{ cell.score|floatformat:2 }}" 
+                               step="0.01" 
                                min="0" 
                                max="100" 
                                class="form-control form-control-sm text-center font-bold text-xs" 
-                               style="width: 52px; border-radius: 6px; padding: 0.2rem;"
+                               style="width: 58px; border-radius: 6px; padding: 0.2rem;"
                                required>
                         
                         <select name="status_{{ cell.id }}" class="form-select form-select-sm text-xs font-semibold" style="border-radius: 6px; width: 80px; padding: 0.2rem;">
@@ -142,7 +142,7 @@
                     <!-- Read-Only View of Cell -->
                     <div class="text-center">
                         <span class="font-bold text-secondary text-sm {% if cell.status == 'FAILED' %}text-danger{% elif cell.status == 'COMPLETED' %}text-success{% endif %}">
-                            {{ cell.score|floatformat:1 }}
+                            {{ cell.score|floatformat:2 }}
                         </span>
                         <div class="text-xxs mt-0.5">
                             {% if cell.status == 'COMPLETED' %}
@@ -169,7 +169,7 @@
 
     <!-- Cumulative Score -->
     <td class="text-center font-bold text-sm bg-light bg-opacity-70" style="border-right: 1px solid #e2e8f0;">
-        <span class="text-primary">{{ app.final_score|floatformat:1 }}</span>
+        <span class="text-primary">{{ app.final_score|floatformat:2 }}</span>
     </td>
 
     <!-- Final Application Status -->

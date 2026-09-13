@@ -381,9 +381,9 @@
                 <td class="text-warning"><strong>{{ item.pending }}</strong></td>
                 <td>
                     {% if item.avg_score is not None %}
-                        حداقل: {{ item.min_score|floatformat:1 }} <br>
-                        حداکثر: {{ item.max_score|floatformat:1 }} <br>
-                        میانگین: <strong>{{ item.avg_score|floatformat:1 }}</strong>
+                        حداقل: {{ item.min_score|floatformat:2 }} <br>
+                        حداکثر: {{ item.max_score|floatformat:2 }} <br>
+                        میانگین: <strong>{{ item.avg_score|floatformat:2 }}</strong>
                     {% else %}
                         -
                     {% endif %}
@@ -419,7 +419,7 @@
                 <td>{{ forloop.counter }}</td>
                 <td style="text-align: right;">{{ app.candidate.national_id }}</td>
                 <td style="text-align: right;"><strong>{{ app.candidate.first_name }} {{ app.candidate.last_name }}</strong></td>
-                <td><strong class="text-success">{{ app.final_score }}</strong></td>
+                <td><strong class="text-success">{{ app.final_score|floatformat:2 }}</strong></td>
                 <td style="text-align: right; font-size: 11px;">
                     {% if app.highest_education %}
                         {{ app.highest_education.get_degree_display }} {{ app.highest_education.major }} <br>

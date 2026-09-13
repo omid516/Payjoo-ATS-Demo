@@ -244,6 +244,7 @@ class OrganizationSettingForm(forms.ModelForm):
             'name', 'logo', 'default_ad_url', 'general_requirements',
             'reg_email_enabled', 'reg_email_subject', 'reg_email_body', 'reg_sms_enabled', 'reg_sms_body',
             'exam_email_enabled', 'exam_email_subject', 'exam_email_body', 'exam_sms_enabled', 'exam_sms_body',
+            'exam_default_total_questions', 'exam_default_time_per_question',
             'interview_email_enabled', 'interview_email_subject', 'interview_email_body', 'interview_sms_enabled', 'interview_sms_body',
             'offer_email_enabled', 'offer_email_subject', 'offer_email_body', 'offer_sms_enabled', 'offer_sms_body',
             'reject_email_enabled', 'reject_email_subject', 'reject_email_body', 'reject_sms_enabled', 'reject_sms_body',
@@ -273,6 +274,8 @@ class OrganizationSettingForm(forms.ModelForm):
             # Email Subjects
             'reg_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل ثبت‌نام'}),
             'exam_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل دعوت به آزمون'}),
+            'exam_default_total_questions': forms.NumberInput(attrs={'class': 'form-control text-center', 'min': '5', 'max': '500', 'placeholder': '50'}),
+            'exam_default_time_per_question': forms.NumberInput(attrs={'class': 'form-control text-center', 'min': '0.1', 'max': '10.0', 'step': '0.1', 'placeholder': '1.5'}),
             'interview_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل دعوت به مصاحبه'}),
             'offer_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل پیشنهاد همکاری'}),
             'reject_email_subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'موضوع ایمیل رد رزومه'}),
@@ -304,6 +307,18 @@ class OrganizationSettingForm(forms.ModelForm):
             'sms_sender_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 100020003000'}),
             'sms_custom_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://api.yourdomain.com/send-sms'}),
         }
+
+    def clean_exam_default_total_questions(self):
+        val = self.cleaned_data.get('exam_default_total_questions')
+        if val is None or val == '':
+            return 50
+        return val
+
+    def clean_exam_default_time_per_question(self):
+        val = self.cleaned_data.get('exam_default_time_per_question')
+        if val is None or val == '':
+            return 1.5
+        return val
 
 
 class JobDescriptionTemplateForm(forms.ModelForm):

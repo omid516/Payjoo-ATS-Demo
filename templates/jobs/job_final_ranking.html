@@ -282,7 +282,7 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="score-badge font-bold">{{ app.final_score|floatformat:1 }}</span>
+                            <span class="score-badge font-bold">{{ app.final_score|floatformat:2 }}</span>
                         </td>
                         
                         {% for stage in stages %}
@@ -290,7 +290,7 @@
                                 <td class="text-center font-semibold">
                                     {% if state %}
                                         {% if state.status == 'COMPLETED' %}
-                                            <span class="text-secondary" style="font-size: 14px;">{{ state.score|floatformat:1 }}</span>
+                                            <span class="text-secondary" style="font-size: 14px;">{{ state.score|floatformat:2 }}</span>
                                         {% else %}
                                             <span class="text-muted text-xs">{% if current_language_code == 'en' %}Under Assessment{% elif current_language_code == 'tr' %}Değerlendiriliyor{% elif current_language_code == 'ar' %}تحت التقييم{% else %}در حال ارزیابی{% endif %}</span>
                                         {% endif %}

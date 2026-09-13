@@ -459,7 +459,7 @@
                             <td><strong>{{ app.job.title }}</strong></td>
                             <td>{{ app.created_at|to_jalali }}</td>
                             <td>{{ app.current_stage.name|default:"—" }}</td>
-                            <td><strong>{{ app.final_score }}</strong></td>
+                            <td><strong>{{ app.final_score|floatformat:2 }}</strong></td>
                             <td>
                                 {% if app.status == 'IN_PROGRESS' %}<span class="status-badge s-inprogress">در حال ارزیابی</span>
                                 {% elif app.status == 'SELECTED' %}<span class="status-badge s-selected">قبول نهایی</span>

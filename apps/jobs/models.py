@@ -830,6 +830,10 @@ class OrganizationSetting(SoftDeleteModel):
         verbose_name="متن پیامک دعوت به آزمون"
     )
 
+    # پارامترهای پیش‌فرض مرکز آزمون کتبی
+    exam_default_total_questions = models.IntegerField(default=50, blank=True, null=True, verbose_name="تعداد پیش‌فرض سوالات مرکز آزمون کتبی")
+    exam_default_time_per_question = models.FloatField(default=1.5, blank=True, null=True, verbose_name="زمان پیش‌فرض هر سوال مرکز آزمون (دقیقه)")
+
     # ۳. دعوت به مصاحبه (حضوری یا آنلاین)
     interview_email_enabled = models.BooleanField(default=True, verbose_name="ارسال ایمیل دعوت به مصاحبه فعال باشد")
     interview_email_subject = models.CharField(max_length=255, default="دعوت به جلسه مصاحبه تخصصی", verbose_name="موضوع ایمیل دعوت به مصاحبه")

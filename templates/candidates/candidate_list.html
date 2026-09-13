@@ -184,15 +184,15 @@
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label text-xxs text-muted font-bold">{{ t.min_exam_score_label }}</label>
-                                    <input type="number" name="min_exam_score" min="0" max="100" step="1" value="{{ selected_min_exam_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 75{% elif current_language_code == 'tr' %}Örn: 75{% elif current_language_code == 'ar' %}مثال: 75{% else %}مثلاً: ۷۵{% endif %}">
+                                    <input type="number" name="min_exam_score" min="0" max="100" step="0.01" value="{{ selected_min_exam_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 75{% elif current_language_code == 'tr' %}Örn: 75{% elif current_language_code == 'ar' %}مثال: 75{% else %}مثلاً: ۷۵{% endif %}">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label text-xxs text-muted font-bold">{{ t.min_interview_score_label }}</label>
-                                    <input type="number" name="min_interview_score" min="0" max="100" step="1" value="{{ selected_min_interview_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 80{% elif current_language_code == 'tr' %}Örn: 80{% elif current_language_code == 'ar' %}مثال: 80{% else %}مثلاً: ۸۰{% endif %}">
+                                    <input type="number" name="min_interview_score" min="0" max="100" step="0.01" value="{{ selected_min_interview_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 80{% elif current_language_code == 'tr' %}Örn: 80{% elif current_language_code == 'ar' %}مثال: 80{% else %}مثلاً: ۸۰{% endif %}">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label text-xxs text-muted font-bold">{{ t.min_assessment_score_label }}</label>
-                                    <input type="number" name="min_assessment_score" min="0" max="100" step="1" value="{{ selected_min_assessment_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 70{% elif current_language_code == 'tr' %}Örn: 70{% elif current_language_code == 'ar' %}مثال: 70{% else %}مثلاً: ۷۰{% endif %}">
+                                    <input type="number" name="min_assessment_score" min="0" max="100" step="0.01" value="{{ selected_min_assessment_score }}" class="form-control text-xs" placeholder="{% if current_language_code == 'en' %}e.g. 70{% elif current_language_code == 'tr' %}Örn: 70{% elif current_language_code == 'ar' %}مثال: 70{% else %}مثلاً: ۷۰{% endif %}">
                                 </div>
                             </div>
                             <!-- ردیف سوم: مشاغل درخواست‌شده و پیشنهاددهی هوشمند -->
@@ -270,17 +270,17 @@
                                     <div class="d-flex flex-wrap gap-1 mt-1">
                                         {% if scores.exam is not None %}
                                             <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 text-xxs px-1.5 py-0.5 rounded">
-                                                {{ t.cand_exam_lbl }} {{ scores.exam|floatformat:0 }}
+                                                {{ t.cand_exam_lbl }} {{ scores.exam|floatformat:2 }}
                                             </span>
                                         {% endif %}
                                         {% if scores.interview is not None %}
                                             <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 text-xxs px-1.5 py-0.5 rounded">
-                                                {{ t.cand_interview_lbl }} {{ scores.interview|floatformat:0 }}
+                                                {{ t.cand_interview_lbl }} {{ scores.interview|floatformat:2 }}
                                             </span>
                                         {% endif %}
                                         {% if scores.assessment is not None %}
                                             <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 text-xxs px-1.5 py-0.5 rounded">
-                                                {{ t.cand_assessment_lbl }} {{ scores.assessment|floatformat:0 }}
+                                                {{ t.cand_assessment_lbl }} {{ scores.assessment|floatformat:2 }}
                                             </span>
                                         {% endif %}
                                     </div>

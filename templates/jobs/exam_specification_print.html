@@ -126,11 +126,11 @@
         <div class="d-flex align-items-center gap-2">
             <div class="d-flex align-items-center gap-1">
                 <label for="totalQuestionsInput" class="form-label m-0 text-xs fw-medium">تعداد کل سوالات:</label>
-                <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 70px;" value="50" min="10" max="200" onchange="recalculateQuestions()">
+                <input type="number" id="totalQuestionsInput" class="form-control form-control-sm text-center" style="width: 70px;" value="{{ org_setting.exam_default_total_questions|default:50 }}" min="5" max="300" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
             </div>
             <div class="d-flex align-items-center gap-1">
                 <label for="timePerQuestionInput" class="form-label m-0 text-xs fw-medium">زمان/سوال (دقیقه):</label>
-                <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 65px;" value="1.5" step="0.1" min="0.5" max="5.0" onchange="recalculateQuestions()">
+                <input type="number" id="timePerQuestionInput" class="form-control form-control-sm text-center" style="width: 65px;" value="{{ org_setting.exam_default_time_per_question|default:1.5 }}" step="0.1" min="0.2" max="10.0" onchange="recalculateQuestions()" oninput="recalculateQuestions()">
             </div>
             <button type="button" onclick="resetExamRows()" class="btn btn-outline-warning btn-sm px-2.5 rounded-pill text-xs">
                 🔄 بازنشانی جدول

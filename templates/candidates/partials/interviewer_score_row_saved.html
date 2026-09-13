@@ -46,7 +46,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        <span>ارزیابی کانون با میانگین وزنی <strong>{{ iscore.score }}</strong> با موفقیت ثبت شد.</span>
+                        <span>ارزیابی کانون با میانگین وزنی <strong>{{ iscore.score|floatformat:2 }}</strong> با موفقیت ثبت شد.</span>
                     </div>
                     <div class="text-xxs opacity-75 font-medium">
                         ثبت شده توسط: {{ iscore.interviewer.get_full_name|default:iscore.interviewer.username }} در {{ iscore.updated_at|to_jalali }}
@@ -63,8 +63,8 @@
                     <div style="width: 150px;">
                         <input type="number" 
                                name="score" 
-                               value="{{ iscore.score }}" 
-                               step="0.1" 
+                               value="{{ iscore.score|floatformat:2 }}" 
+                               step="0.01" 
                                min="0" 
                                max="100" 
                                class="form-control form-control-sm text-center font-bold" 
@@ -90,7 +90,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        <span>ارزیابی شما با نمره <strong>{{ iscore.score }}</strong> با موفقیت ثبت شد.</span>
+                        <span>ارزیابی شما با نمره <strong>{{ iscore.score|floatformat:2 }}</strong> با موفقیت ثبت شد.</span>
                     </div>
                     <div class="text-xxs opacity-75 font-medium">
                         ثبت شده توسط: {{ iscore.interviewer.get_full_name|default:iscore.interviewer.username }} در {{ iscore.updated_at|to_jalali }}

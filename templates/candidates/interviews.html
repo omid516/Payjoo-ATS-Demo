@@ -86,7 +86,7 @@
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                     </svg>
-                                                    <span>ارزیابی کانون با میانگین وزنی <strong>{{ state.my_score_obj.score }}</strong> ثبت شده است.</span>
+                                                    <span>ارزیابی کانون با میانگین وزنی <strong>{{ state.my_score_obj.score|floatformat:2 }}</strong> ثبت شده است.</span>
                                                 </div>
                                                 <div class="opacity-75">
                                                     ثبت شده در {{ state.my_score_obj.updated_at|to_jalali }}
@@ -104,8 +104,8 @@
                                             <div style="width: 150px;">
                                                 <input type="number" 
                                                        name="score" 
-                                                       value="{{ state.my_score_obj.score|default:'' }}" 
-                                                       step="0.1" 
+                                                       value="{% if state.my_score_obj %}{{ state.my_score_obj.score|floatformat:2 }}{% endif %}" 
+                                                       step="0.01" 
                                                        min="0" 
                                                        max="100" 
                                                        placeholder="ثبت نشده"
@@ -129,7 +129,7 @@
                                         </div>
                                         {% if state.my_score_obj %}
                                             <div class="bg-success bg-opacity-10 border-top border-success border-opacity-20 text-success px-4 py-1 text-xxs d-flex align-items-center justify-content-between">
-                                                <span>آخرین ارزیابی ثبت شده با نمره <strong>{{ state.my_score_obj.score }}</strong></span>
+                                                <span>آخرین ارزیابی ثبت شده با نمره <strong>{{ state.my_score_obj.score|floatformat:2 }}</strong></span>
                                                 <span class="font-medium">ثبت شده توسط شما در {{ state.my_score_obj.updated_at|to_jalali }}</span>
                                             </div>
                                         {% endif %}

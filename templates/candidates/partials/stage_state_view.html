@@ -12,7 +12,7 @@
         {% if state.status == 'PENDING' %}
             <span class="text-muted">-</span>
         {% else %}
-            {{ state.score|floatformat:1 }}
+            {{ state.score|floatformat:2 }}
         {% endif %}
     </div>
     
@@ -71,7 +71,7 @@
     {% if oob_update %}
     <!-- Out of band update for final score -->
     <span id="final-score-{{ application.id }}" hx-swap-oob="true" class="font-bold text-secondary">
-        {{ application.final_score|floatformat:1 }}
+        {{ application.final_score|floatformat:2 }}
     </span>
     {% endif %}
 </td>

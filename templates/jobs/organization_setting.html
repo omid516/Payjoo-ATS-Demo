@@ -116,7 +116,7 @@
                     <span>✉️ اعلانات ثبت‌نام</span>
                 </button>
                 <button class="nav-link font-semibold text-xs py-2.5 px-3 text-end d-flex align-items-center justify-content-between" id="v-pills-exam-tab" data-bs-toggle="pill" data-bs-target="#v-pills-exam" type="button" role="tab" aria-controls="v-pills-exam" aria-selected="false">
-                    <span>📝 دعوت به آزمون کتبی</span>
+                    <span>📝 آزمون کتبی و مرکز آزمون</span>
                 </button>
                 <button class="nav-link font-semibold text-xs py-2.5 px-3 text-end d-flex align-items-center justify-content-between" id="v-pills-interview-tab" data-bs-toggle="pill" data-bs-target="#v-pills-interview" type="button" role="tab" aria-controls="v-pills-interview" aria-selected="false">
                     <span>👥 دعوت به مصاحبه</span>
@@ -246,16 +246,49 @@
                         </div>
                     </div>
 
-                    <!-- ۳. دعوت به آزمون کتبی -->
+                    <!-- ۳. دعوت به آزمون کتبی و مرکز آزمون -->
                     <div class="tab-pane fade" id="v-pills-exam" role="tabpanel" aria-labelledby="v-pills-exam-tab">
                         <h5 class="font-bold text-secondary mb-4 pb-2 border-bottom d-flex align-items-center justify-content-between">
-                            <span>📝 اعلانات دعوت به آزمون کتبی / تخصصی</span>
+                            <span>📝 تنظیمات مرکز آزمون و اعلانات آزمون کتبی</span>
                             <span class="badge bg-primary bg-opacity-10 text-primary text-xxs">مرحله آزمون</span>
                         </h5>
+
+                        <!-- پارامترهای پیش‌فرض مرکز آزمون کتبی -->
+                        <div class="card border border-primary border-opacity-20 rounded-3 p-3 mb-4 bg-primary bg-opacity-5">
+                            <h6 class="font-bold text-primary mb-2 text-xs d-flex align-items-center gap-1.5">
+                                <i class="bi bi-sliders"></i> ⚙️ پارامترهای پیش‌فرض سند مرکز آزمون (Test Specification)
+                            </h6>
+                            <p class="text-muted text-xxs mb-3">
+                                این مقادیر به صورت پیش‌فرض در زمان صدور سند مرکز آزمون کتبی (A4) بارگذاری می‌شوند، اما کارشناس در زمان مشاهده و چاپ سند نیز می‌تواند آن‌ها را تغییر دهد.
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_exam_default_total_questions" class="form-label font-semibold text-xxs text-secondary">
+                                        تعداد کل سوالات پیش‌فرض آزمون:
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        {{ form.exam_default_total_questions }}
+                                        <span class="input-group-text text-xxs">سوال</span>
+                                    </div>
+                                    <div class="form-text text-xxs text-muted mt-1">پیش‌فرض سیستم: ۵۰ سوال</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_exam_default_time_per_question" class="form-label font-semibold text-xxs text-secondary">
+                                        زمان پیشنهادی برای هر سوال:
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        {{ form.exam_default_time_per_question }}
+                                        <span class="input-group-text text-xxs">دقیقه</span>
+                                    </div>
+                                    <div class="form-text text-xxs text-muted mt-1">پیش‌فرض سیستم: ۱.۵ دقیقه به ازای هر سوال</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row g-3">
                             <div class="col-md-6 border-start">
                                 <h6 class="font-bold text-primary mb-3 text-xs d-flex align-items-center gap-1.5">
-                                    <i class="bi bi-envelope"></i> 📧 پیکربندی ایمیل
+                                    <i class="bi bi-envelope"></i> 📧 پیکربندی ایمیل دعوت به آزمون
                                 </h6>
                                 <div class="form-check form-switch mb-3">
                                     {{ form.exam_email_enabled }}

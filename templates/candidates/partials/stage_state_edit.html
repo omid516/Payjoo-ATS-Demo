@@ -3,7 +3,7 @@
     <form hx-post="{% url 'update_stage_state' state.id %}" hx-target="#stage-state-{{ state.id }}" hx-swap="outerHTML" class="m-0">
         <div class="mb-1">
             <label class="text-muted text-xxs d-block mb-0.5" style="font-size: 9px;">نمره (از ۱۰۰)</label>
-            <input type="number" name="score" value="{{ state.score }}" step="0.1" min="0" max="100" class="form-control form-control-sm text-center font-bold" style="font-size: 11px; padding: 2px 4px;" required>
+            <input type="number" name="score" value="{{ state.score|floatformat:2 }}" step="0.01" min="0" max="100" class="form-control form-control-sm text-center font-bold" style="font-size: 11px; padding: 2px 4px;" required>
         </div>
         <div class="mb-1">
             <label class="text-muted text-xxs d-block mb-0.5" style="font-size: 9px;">وضعیت</label>

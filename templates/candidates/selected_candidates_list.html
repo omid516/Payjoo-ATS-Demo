@@ -209,7 +209,7 @@
                         </td>
                         <td class="text-center">
                             {% if app.final_score %}
-                                <div class="font-bold text-success text-xs">{{ app.final_score }}٪</div>
+                                <div class="font-bold text-success text-xs">{{ app.final_score|floatformat:2 }}٪</div>
                                 <div class="progress progress-thin mt-1" style="width: 60px; margin: 0 auto;">
                                     <div class="progress-bar bg-success" style="width: {{ app.final_score }}%"></div>
                                 </div>

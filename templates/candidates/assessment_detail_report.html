@@ -125,7 +125,7 @@
                             </td>
                             {% for score_detail in row.scores %}
                                 <td class="text-center font-semibold text-secondary">
-                                    {{ score_detail.score|default:"-" }}
+                                    {% if score_detail.score is not None %}{{ score_detail.score|floatformat:2 }}{% else %}-{% endif %}
                                     {% if score_detail.notes %}
                                         <small class="text-muted d-block font-normal mt-0.5" style="font-size: 9px;">({{ score_detail.notes }})</small>
                                     {% endif %}
@@ -154,10 +154,10 @@
             <div class="rounded-3 p-3 h-100 text-white d-flex flex-column justify-content-between text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
                 <div>
                     <span class="opacity-75 text-xs d-block mb-1">امتیاز نهایی کانون ارزیابی (میانگین وزنی)</span>
-                    <span class="fs-1 font-bold">{{ state.score|floatformat:1 }}</span>
+                    <span class="fs-1 font-bold">{{ state.score|floatformat:2 }}</span>
                 </div>
                 <div class="mt-2 border-top border-secondary border-opacity-40 pt-2 text-xs">
-                    حد نصاب قبولی: <span class="font-bold">{{ state.stage.passing_score }}</span> | 
+                    حد نصاب قبولی: <span class="font-bold">{{ state.stage.passing_score|floatformat:2 }}</span> | 
                     وضعیت: 
                     <span class="font-bold">
                         {% if state.status == 'COMPLETED' %}

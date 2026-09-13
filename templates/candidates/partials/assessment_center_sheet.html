@@ -32,8 +32,8 @@
                     <div style="width: 80px;">
                         <input type="number" 
                                name="comp_score_{{ item.competency.id }}" 
-                               value="{{ item.score_obj.score|default:'0' }}" 
-                               min="0" max="100" step="0.5"
+                               value="{{ item.score_obj.score|floatformat:2|default:'0' }}" 
+                               min="0" max="100" step="0.01"
                                class="form-control form-control-sm text-center font-bold comp-score-input" 
                                oninput="calculateAssessmentAverage();"
                                required>

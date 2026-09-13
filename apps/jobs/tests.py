@@ -8,7 +8,7 @@ import json
 
 from apps.jobs.models import (
     WorkflowTemplate, WorkflowStageTemplate, JobOpportunity, JobOpportunityStage,
-    CentralCompetency, JobOpportunityCompetency
+    CentralCompetency, JobOpportunityCompetency, OrganizationSetting
 )
 from apps.jobs.forms import JobOpportunityFormSet, JobOpportunityForm
 from apps.core.templatetags.jalali_tags import to_jalali
@@ -2878,6 +2878,76 @@ class DefaultJobAdUrlAndJobOverrideTests(TestCase):
         self.assertContains(response, "id=\"input-publish-date\"")
         self.assertContains(response, "id=\"checkbox-show-publish-date\"")
         self.assertContains(response, "id=\"display-meta-publish\"")
+
+
+class ExamCenterSettingsAndDecimalScoreTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(username='superadmin', password='password123', email='admin@example.com')
+        self.client.login(username='superadmin', password='password123')
+        self.org_setting = OrganizationSetting.get_active_setting()
+        self.org_setting.exam_default_total_questions = 60
+        self.org_setting.exam_default_time_per_question = 1.25
+        self.org_setting.save()
+
+        self.job = JobOpportunity.objects.create(
+            request_number='REQ-1403-EXAM',
+            title='کارشناس متالورژی',
+            code='MET-99',
+            department='تولید'
+        )
+
+    def test_organization_setting_exam_defaults(self):
+        """تست ذخیره‌سازی مقادیر پیش‌فرض سوالات و زمان مرکز آزمون در تنظیمات سازمان"""
+        self.assertEqual(self.org_setting.exam_default_total_questions, 60)
+        self.assertEqual(self.org_setting.exam_default_time_per_question, 1.25)
+
+    def test_exam_specification_print_view_loads_org_setting_defaults(self):
+        """تست لود شدن مقادیر پیش‌فرض سازمان در سند مشخصات آزمون"""
+        url = reverse('job_exam_specification_print', kwargs={'job_id': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="60"')
+        self.assertContains(response, 'value="1.25"')
+        self.assertContains(response, 'id="totalQuestionsInput"')
+        self.assertContains(response, 'id="timePerQuestionInput"')
+
+    def test_score_decimal_precision_in_models_and_display(self):
+        """تست ثبت و نگهداری دقیق نمرات با ۲ رقم اعشار"""
+        from apps.candidates.models import Candidate, JobApplication, ApplicationStageState
+        from apps.jobs.models import JobOpportunityStage
+
+        candidate = Candidate.objects.create(
+            first_name='محمدرضا',
+            last_name='صادقی',
+            national_id='1234567890',
+            phone_number='09131234567'
+        )
+        app = JobApplication.objects.create(
+            candidate=candidate,
+            job=self.job
+        )
+        stage = JobOpportunityStage.objects.create(
+            job=self.job,
+            name='آزمون کتبی تخصصی',
+            sequence=1,
+            stage_type='EXAM',
+            weight=50,
+            passing_score=60.00
+        )
+        state = ApplicationStageState.objects.create(
+            application=app,
+            stage=stage,
+            score=84.75,
+            status=ApplicationStageState.STATUS_COMPLETED
+        )
+
+        self.assertEqual(state.score, 84.75)
+        # Test candidate detail page displays score with 2 decimals
+        url = reverse('candidate_detail', kwargs={'pk': candidate.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '84.75')
+
 
 
 

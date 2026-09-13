@@ -680,7 +680,7 @@ class UpdateApplicationStageStateView(LoginRequiredMixin, RoleRequiredMixin, Vie
         time_val = request.POST.get('time', '10:00').strip()
 
         try:
-            state.score = float(score_val)
+            state.score = round(float(score_val), 2)
         except ValueError:
             state.score = 0.0
 
@@ -1505,7 +1505,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                             if state.stage.stage_type != 'SCREENING':
                                 score_val = request.POST.get(f'score_{sid}', '0')
                                 try:
-                                    score_float = float(score_val)
+                                    score_float = round(float(score_val), 2)
                                 except ValueError:
                                     score_float = 0.0
                                 
@@ -2159,7 +2159,7 @@ class SubmitInterviewerScoreView(LoginRequiredMixin, RoleRequiredMixin, View):
         notes_val = request.POST.get('notes', '')
 
         try:
-            score_float = float(score_val)
+            score_float = round(float(score_val), 2)
         except ValueError:
             score_float = 0.0
 
@@ -2284,7 +2284,7 @@ class AssessmentCenterSheetView(LoginRequiredMixin, RoleRequiredMixin, View):
                 score_val = request.POST.get(f'comp_score_{c.id}', '0')
                 comp_notes = request.POST.get(f'comp_notes_{c.id}', '')
                 try:
-                    score_float = float(score_val)
+                    score_float = round(float(score_val), 2)
                 except ValueError:
                     score_float = 0.0
 
@@ -3593,7 +3593,7 @@ class BulkInterviewScoresView(LoginRequiredMixin, RoleRequiredMixin, View):
                             any_changes = True
                         continue
                     try:
-                        score_val = float(raw)
+                        score_val = round(float(raw), 2)
                     except ValueError:
                         continue
 
@@ -3964,8 +3964,8 @@ class ImportInterviewScoresExcelView(LoginRequiredMixin, RoleRequiredMixin, View
                     score_val = _normalize_number(raw_val)
                     if score_val is None:
                         continue
-                    # clamp
-                    score_val = max(0.0, min(100.0, score_val))
+                    # clamp and round to 2 decimals
+                    score_val = round(max(0.0, min(100.0, score_val)), 2)
                     has_score = True
 
                     es_obj = ExternalInterviewerScore.objects.filter(

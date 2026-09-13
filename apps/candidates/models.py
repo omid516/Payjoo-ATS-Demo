@@ -135,6 +135,26 @@ class JobApplication(SoftDeleteModel):
     def __str__(self):
         return f"درخواست {self.candidate} برای {self.job.title}"
 
+    def recalculate_final_score(self, save=True):
+        """
+        محاسبه مجدد امتیاز نهایی وزنی متقاضی بر اساس مراحل فعال و وزن هر مرحله.
+        """
+        if hasattr(self, '_prefetched_objects_cache') and 'stage_states' in self._prefetched_objects_cache:
+            states = [s for s in self.stage_states.all() if not s.is_deleted]
+        else:
+            states = list(self.stage_states.filter(is_deleted=False).select_related('stage'))
+            
+        has_evaluated_stages = any(s.status != 'PENDING' or s.score > 0 for s in states)
+        if has_evaluated_stages or self.final_score == 0.0:
+            total_weighted_score = 0.0
+            for state in states:
+                if state.stage and not state.stage.is_deleted:
+                    total_weighted_score += (state.score * state.stage.weight) / 100.0
+            self.final_score = round(total_weighted_score, 2)
+            if save and self.pk:
+                self.save(update_fields=['final_score'])
+        return self.final_score
+
     def recalculate_current_stage(self, save=True):
         stages = list(self.job.stages.filter(is_deleted=False).order_by('sequence'))
         if not stages:
@@ -472,13 +492,10 @@ class ApplicationStageState(SoftDeleteModel):
             if 'current_stage' not in update_fields:
                 update_fields.append('current_stage')
 
-            total_weighted_score = 0.0
-            # Get all active stage states
-            states = app.stage_states.filter(is_deleted=False)
-            for state in states:
-                # We multiply score by the weight of the stage (which is in stage.weight)
-                total_weighted_score += (state.score * state.stage.weight) / 100.0
-            app.final_score = round(total_weighted_score, 2)
+            # 3. Recalculate weighted final score
+            app.recalculate_final_score(save=False)
+            if 'final_score' not in update_fields:
+                update_fields.append('final_score')
             app.save(update_fields=update_fields)
 
 

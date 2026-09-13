@@ -497,9 +497,27 @@ class JobOpportunityPipelineView(LoginRequiredMixin, RoleRequiredMixin, DetailVi
             return 4
 
         apps_list = list(apps_qs)
+        stale_apps = []
         for app in apps_list:
             for state in app.stage_states.all():
                 state.application = app
+
+            # Recalculate final_score dynamically to ensure immediate accuracy if weights or stages changed
+            states = [s for s in app.stage_states.all() if not s.is_deleted]
+            has_evaluated_stages = any(s.status != 'PENDING' or s.score > 0 for s in states)
+            if has_evaluated_stages or app.final_score == 0.0:
+                total_weighted_score = 0.0
+                for state in states:
+                    if state.stage and not state.stage.is_deleted:
+                        total_weighted_score += (state.score * state.stage.weight) / 100.0
+                calc_score = round(total_weighted_score, 2)
+                if round(app.final_score, 2) != calc_score:
+                    app.final_score = calc_score
+                    stale_apps.append(app)
+
+        if stale_apps:
+            JobApplication.objects.bulk_update(stale_apps, ['final_score'])
+
         apps_list.sort(key=lambda app: (get_app_priority(app), -app.final_score, -app.id))
         
         data['applications'] = apps_list
@@ -2534,13 +2552,30 @@ class JobOpportunityFinalRankingView(LoginRequiredMixin, RoleRequiredMixin, Deta
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        apps = self.object.applications.filter(is_deleted=False).select_related('candidate')
-        data['applications'] = apps.order_by('-final_score')
+        apps = list(self.object.applications.filter(is_deleted=False).select_related('candidate').prefetch_related('stage_states__stage'))
+        stale_apps = []
+        for app in apps:
+            states = [s for s in app.stage_states.all() if not s.is_deleted]
+            has_evaluated_stages = any(s.status != 'PENDING' or s.score > 0 for s in states)
+            if has_evaluated_stages or app.final_score == 0.0:
+                total_weighted_score = 0.0
+                for state in states:
+                    if state.stage and not state.stage.is_deleted:
+                        total_weighted_score += (state.score * state.stage.weight) / 100.0
+                calc_score = round(total_weighted_score, 2)
+                if round(app.final_score, 2) != calc_score:
+                    app.final_score = calc_score
+                    stale_apps.append(app)
+        if stale_apps:
+            JobApplication.objects.bulk_update(stale_apps, ['final_score'])
+
+        apps.sort(key=lambda app: (-app.final_score, -app.id))
+        data['applications'] = apps
         data['stages'] = self.object.stages.filter(is_deleted=False).exclude(weight=0).order_by('sequence')
         data['all_stages'] = self.object.stages.filter(is_deleted=False).order_by('sequence')
-        data['selected_count'] = apps.filter(status=JobApplication.STATUS_SELECTED).count()
-        data['reserve_count'] = apps.filter(status=JobApplication.STATUS_RESERVE).count()
-        data['rejected_count'] = apps.filter(status=JobApplication.STATUS_REJECTED).count()
+        data['selected_count'] = sum(1 for a in apps if a.status == JobApplication.STATUS_SELECTED)
+        data['reserve_count'] = sum(1 for a in apps if a.status == JobApplication.STATUS_RESERVE)
+        data['rejected_count'] = sum(1 for a in apps if a.status == JobApplication.STATUS_REJECTED)
         return data
 
 

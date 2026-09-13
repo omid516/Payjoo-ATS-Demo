@@ -12,17 +12,22 @@
         border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     }
-    .hover-shadow-xs:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    .stage-drag-handle {
+        color: #94a3b8;
+        transition: all 0.2s ease;
     }
-    .ts-dropdown {
-        direction: rtl !important;
-        text-align: right !important;
+    .stage-drag-handle:hover {
+        color: #0052cc !important;
+        background-color: rgba(0, 82, 204, 0.08);
     }
-    .ts-control {
-        font-size: 0.8rem !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
+    .sortable-ghost {
+        opacity: 0.35;
+        background-color: #f1f5f9 !important;
+        border: 2px dashed #94a3b8 !important;
+    }
+    .sortable-chosen {
+        background-color: #f8fafc !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     }
 </style>
 {% endblock %}
@@ -210,7 +215,7 @@
 <div id="htmx-preview-trigger"
      hx-post="{% url 'job_competency_config' job.id %}"
      hx-target="#preview-table-container"
-     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name^='stage_active_'], [name='workflow_template_id'], [name='custom_competencies'], [name='round_to_five'], [name='bypass_limits'], [name='deactivated_stages']"
+     hx-include="[name='selected_competencies'], [name^='stage_weight_'], [name^='stage_passing_score_'], [name^='stage_active_'], [name='stage_order'], [name='custom_competencies'], [name='round_to_five'], [name='bypass_limits'], [name='deactivated_stages']"
      hx-vals="js:{action: 'preview', recalculate_weights: getRecalculateWeights()}"
      hx-trigger="updatePreview">
 </div>
@@ -277,8 +282,11 @@
 {% block extra_js %}
 <!-- Tom Select JS -->
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<!-- SortableJS for Drag & Drop Stage Reordering -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
     let customTitleSelect;
+    let stageSortableInstance = null;
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Tom Select with remote search support
@@ -676,6 +684,52 @@
         };
         return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
     }
+
+    function initStageSortable() {
+        const tbody = document.getElementById('stages-sortable-tbody');
+        if (!tbody) return;
+        if (stageSortableInstance) {
+            stageSortableInstance.destroy();
+        }
+        stageSortableInstance = new Sortable(tbody, {
+            handle: '.stage-drag-handle',
+            animation: 180,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function() {
+                updateStageOrderState();
+            }
+        });
+    }
+
+    function updateStageOrderState() {
+        const rows = document.querySelectorAll('#stages-sortable-tbody tr.stage-sortable-row');
+        const order = [];
+        rows.forEach((row, idx) => {
+            const stype = row.getAttribute('data-stage-type');
+            if (stype) order.push(stype);
+            const badge = row.querySelector('.stage-seq-num');
+            if (badge) {
+                badge.textContent = (idx + 1).toString();
+            }
+        });
+        const orderInput = document.getElementById('stage_order_input');
+        if (orderInput) {
+            orderInput.value = order.join(',');
+        }
+    }
+
+    // Listen for HTMX swaps on preview table container to re-initialize Sortable
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target && evt.detail.target.id === 'preview-table-container') {
+            initStageSortable();
+        }
+    });
+
+    // Initialize Sortable on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initStageSortable();
+    });
 
     window.applyAIWeights = function(weightsStr) {
         try {

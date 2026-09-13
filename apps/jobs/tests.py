@@ -560,41 +560,86 @@ class JobOpportunityAndWorkflowTests(TestCase):
 
         self.client.login(username='recruiter_test', password='password123')
         
-        # Post request to change workflow template to another_workflow
+        # Post request to edit job general information
         url = reverse('job_edit', kwargs={'pk': job.pk})
         form_data = {
             'request_number': 'REQ-TEST-002',
-            'title': 'کارشناس سیستم',
+            'title': 'کارشناس ارشد سیستم',
             'code': 'SYS-1402',
-            'department': 'فناوری',
-            'workflow': another_workflow.id,
-            'headcount': 1,
+            'department': 'فناوری اطلاعات و تحول دیجیتال',
+            'headcount': 2,
             'recruitment_type': 'EXTERNAL',
             'status': 'PLANNING',
-            'stages-TOTAL_FORMS': '2',
-            'stages-INITIAL_FORMS': '2',
-            'stages-MIN_NUM_FORMS': '0',
-            'stages-MAX_NUM_FORMS': '1000',
-            # Old stages in the formset (simulated from HTML rendering)
-            'stages-0-id': job.stages.all()[0].id,
-            'stages-0-name': 'آزمون کتبی',
-            'stages-0-weight': '40',
-            'stages-0-sequence': '1',
-            'stages-1-id': job.stages.all()[1].id,
-            'stages-1-name': 'مصاحبه حضوری',
-            'stages-1-weight': '60',
-            'stages-1-sequence': '2',
         }
         
         response = self.client.post(url, form_data)
         self.assertEqual(response.status_code, 302)
+        expected_redirect_url = reverse('job_competency_config', kwargs={'job_id': job.pk})
+        self.assertRedirects(response, expected_redirect_url)
 
-        # Verify stages are reset and updated to the new template's stage (مصاحبه مدیر عامل)
+        job.refresh_from_db()
+        self.assertEqual(job.title, 'کارشناس ارشد سیستم')
+        self.assertEqual(job.department, 'فناوری اطلاعات و تحول دیجیتال')
+        self.assertEqual(job.headcount, 2)
+
+        # Programmatically changing workflow on JobOpportunity model still updates default stages
+        job.workflow = another_workflow
+        job.save()
         job.refresh_from_db()
         self.assertEqual(job.workflow, another_workflow)
         active_stages = job.stages.filter(is_deleted=False)
         self.assertEqual(active_stages.count(), 1)
         self.assertEqual(active_stages[0].name, 'مصاحبه مدیر عامل')
+
+    def test_job_competency_config_stage_order_persistence(self):
+        """تست ذخیره‌سازی ترتیب سفارشی مراحل ارزیابی با قابلیت درگ اند دراپ (stage_order)"""
+        CentralCompetency.objects.create(
+            post_code='SYS-1402', post_title='کارشناس سیستم', code='KN-SYS-01', title='دانش شبکه',
+            competency_type='KN', category_raw='KN- دانش', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+        CentralCompetency.objects.create(
+            post_code='SYS-1402', post_title='کارشناس سیستم', code='SK-SYS-01', title='مهارت سیسکو',
+            competency_type='SK', category_raw='SK- مهارت', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+        CentralCompetency.objects.create(
+            post_code='SYS-1402', post_title='کارشناس سیستم', code='GE-SYS-01', title='کار تیمی',
+            competency_type='GE', category_raw='GE- رفتاری', cluster_raw='3-عمومی',
+            importance=1, level=3
+        )
+
+        job = JobOpportunity.objects.create(
+            request_number='REQ-ORDER-001',
+            title='مهندس شبکه',
+            code='SYS-1402',
+            department='فناوری'
+        )
+
+        self.client.login(username='recruiter_test', password='password123')
+        comps = list(CentralCompetency.objects.filter(post_code='SYS-1402'))
+
+        # Custom stage order: SCREENING, then INTERVIEW before EXAM, then SKILL_TEST, then ASSESSMENT
+        custom_order = 'SCREENING,INTERVIEW,EXAM,SKILL_TEST,ASSESSMENT'
+        url = reverse('job_competency_config', kwargs={'job_id': job.pk})
+        data = {
+            'action': 'save',
+            'selected_competencies': [c.id for c in comps],
+            'stage_order': custom_order,
+            'stage_weight_INTERVIEW': 20,
+            'stage_weight_EXAM': 30,
+            'stage_weight_SKILL_TEST': 25,
+            'stage_weight_ASSESSMENT': 25,
+            'bypass_limits': 'on'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+
+        # Verify stages were created with the exact custom sequence
+        stages = list(job.stages.filter(is_deleted=False).order_by('sequence'))
+        self.assertEqual([s.stage_type for s in stages], ['SCREENING', 'INTERVIEW', 'EXAM', 'SKILL_TEST', 'ASSESSMENT'])
+        self.assertEqual([s.sequence for s in stages], [1, 2, 3, 4, 5])
+
 
 
 class JobOpportunityReportTests(TestCase):

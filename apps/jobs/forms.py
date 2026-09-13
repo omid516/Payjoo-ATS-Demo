@@ -17,7 +17,7 @@ class JobOpportunityForm(forms.ModelForm):
         fields = [
             'request_number', 'title', 'code', 'department', 'unit', 'factory_name', 'job_category',
             'headcount', 'recruitment_type', 'assigned_recruiter',
-            'workflow', 'status', 'start_date', 'end_date', 'custom_apply_url', 'description', 'job_type_details', 'expected_results', 'requirements', 'notes'
+            'status', 'start_date', 'end_date', 'custom_apply_url', 'description', 'job_type_details', 'expected_results', 'requirements', 'notes'
         ]
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: REQ-1402-001'}),
@@ -29,7 +29,6 @@ class JobOpportunityForm(forms.ModelForm):
             'headcount': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'recruitment_type': forms.Select(attrs={'class': 'form-select'}),
             'assigned_recruiter': forms.Select(attrs={'class': 'form-select'}),
-            'workflow': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'custom_apply_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: https://careers.msc.ir/jobs/101 (اختیاری - در صورت خالی بودن از آدرس پیش‌فرض سازمان استفاده می‌شود)'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'شرح وظایف و مسئولیت‌های شغلی'}),

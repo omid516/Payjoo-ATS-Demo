@@ -228,31 +228,10 @@ class JobOpportunityCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView
             return reverse('job_planning', kwargs={'job_id': self.object.pk}) + '?next=print_doc'
         return reverse('job_competency_config', kwargs={'job_id': self.object.pk})
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['stages'] = JobOpportunityFormSet(self.request.POST)
-        else:
-            data['stages'] = JobOpportunityFormSet()
-        return data
-
     def form_valid(self, form):
-        context = self.get_context_data()
-        stages = context['stages']
-        
-        # If a workflow template is selected, we automatically copy its default stages and skip formset
-        if form.cleaned_data.get('workflow'):
-            self.object = form.save()
-            from django.http import HttpResponseRedirect
-            return HttpResponseRedirect(self.get_success_url())
-
-        if stages.is_valid():
-            self.object = form.save()
-            stages.instance = self.object
-            stages.save()
-            return super().form_valid(form)
-        else:
-            return self.form_invalid(form)
+        from django.http import HttpResponseRedirect
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class JobOpportunityUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
@@ -270,52 +249,10 @@ class JobOpportunityUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView
         from django.urls import reverse
         return reverse('job_competency_config', kwargs={'job_id': self.object.pk})
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['stages'] = JobOpportunityFormSet(self.request.POST, instance=self.object)
-        else:
-            data['stages'] = JobOpportunityFormSet(
-                instance=self.object,
-                queryset=JobOpportunityStage.objects.filter(is_deleted=False).order_by('sequence')
-            )
-        return data
-
     def form_valid(self, form):
-        # Check if workflow has changed
-        workflow_changed = False
-        if self.object and self.object.pk:
-            old_instance = JobOpportunity.objects.filter(pk=self.object.pk).first()
-            if old_instance and form.cleaned_data.get('workflow') != old_instance.workflow:
-                workflow_changed = True
-
-        context = self.get_context_data()
-        stages = context['stages']
-        
-        # If workflow has changed, bypass formset validation, save parent (JobOpportunity.save will recreate stages)
-        if workflow_changed:
-            self.object = form.save()
-            from django.http import HttpResponseRedirect
-            return HttpResponseRedirect(self.get_success_url())
-
-        # If workflow has not changed, but the job has no stages and a workflow is selected,
-        # copy template stages automatically.
-        workflow = form.cleaned_data.get('workflow')
-        has_no_stages = not self.object.stages.filter(is_deleted=False).exists()
-        if workflow and has_no_stages:
-            self.object = form.save()
-            from django.http import HttpResponseRedirect
-            return HttpResponseRedirect(self.get_success_url())
-
-        # Otherwise validate and save formset normally
-        if stages.is_valid():
-            self.object = form.save()
-            stages.instance = self.object
-            stages.save()
-            self.object.sync_application_stages()
-            return super().form_valid(form)
-        else:
-            return self.form_invalid(form)
+        from django.http import HttpResponseRedirect
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class JobOpportunityDeleteConfirmView(LoginRequiredMixin, RoleRequiredMixin, View):
@@ -1998,7 +1935,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
         deactivated_stages_str = ','.join(deactivated_stages)
         round_to_five = request.GET.get('round_to_five', 'on') == 'on'
 
-        # Get suggested workflows based on current selection
+        # Get calculated assessment plan
         plan_res = calculate_assessment_plan(
             selected_comps,
             custom_weights=custom_weights,
@@ -2007,11 +1944,21 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             deactivated_stages=deactivated_stages,
             bypass_limits=job.bypass_limits
         )
-        active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
-        from .utils import suggest_workflow_templates
-        suggested_workflows = suggest_workflow_templates(active_stage_keys)
-        selected_workflow_id = job.workflow.id if job.workflow else None
+        stages_data = plan_res['stages']
 
+        # If existing stages exist in DB, preserve their sequence order
+        if db_stages.exists():
+            db_order = [s.stage_type for s in db_stages.order_by('sequence')]
+            ordered_stages = {}
+            for k in db_order:
+                if k in stages_data:
+                    ordered_stages[k] = stages_data[k]
+            for k, v in stages_data.items():
+                if k not in ordered_stages:
+                    ordered_stages[k] = v
+            stages_data = ordered_stages
+
+        stage_order_str = ','.join(stages_data.keys())
         competency_models = CompetencyModel.objects.filter(is_deleted=False)
 
         context = {
@@ -2022,9 +1969,8 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
             'suggested_post': suggested_post,
             'suggested_post_title': suggested_post_title,
             'suggested_post_count': suggested_post_count,
-            'calculated_plan': plan_res['stages'],
-            'suggested_workflows': suggested_workflows,
-            'selected_workflow_id': selected_workflow_id,
+            'calculated_plan': stages_data,
+            'stage_order_str': stage_order_str,
             'round_to_five': round_to_five,
             'bypass_limits': job.bypass_limits,
             'competency_models': competency_models,
@@ -2070,8 +2016,6 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 if val is not None and val.strip() != '':
                     custom_passing_scores[key] = val
             
-            selected_workflow_id = request.POST.get('workflow_template_id')
-            
             # Parse manual/custom competencies
             custom_comps_raw = request.POST.getlist('custom_competencies')
             custom_comps_parsed = []
@@ -2116,16 +2060,27 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 bypass_limits=bypass_limits
             )
             
-            active_stage_keys = [k for k, s in plan_res['stages'].items() if s.get('is_active', False)]
-            from .utils import suggest_workflow_templates
-            suggested_workflows = suggest_workflow_templates(active_stage_keys)
+            stages_data = plan_res['stages']
+            stage_order_raw = request.POST.get('stage_order', '').strip()
+            if stage_order_raw:
+                order_keys = [k.strip() for k in stage_order_raw.split(',') if k.strip()]
+                ordered_stages = {}
+                for k in order_keys:
+                    if k in stages_data:
+                        ordered_stages[k] = stages_data[k]
+                for k, v in stages_data.items():
+                    if k not in ordered_stages:
+                        ordered_stages[k] = v
+                stages_data = ordered_stages
+
+            stage_order_str = ','.join(stages_data.keys())
             
             context = {
                 'job': job,
-                'calculated_plan': plan_res['stages'],
+                'calculated_plan': stages_data,
+                'stage_order_str': stage_order_str,
                 'errors': plan_res.get('errors', []),
-                'suggested_workflows': suggested_workflows,
-                'selected_workflow_id': selected_workflow_id,
+                'warnings': plan_res.get('warnings', []),
                 'deactivated_stages_str': deactivated_stages_raw,
                 'bypass_limits': bypass_limits
             }
@@ -2209,17 +2164,25 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                 bypass_limits=bypass_limits
             )
             stages_data = plan_res['stages']
+            stage_order_raw = request.POST.get('stage_order', '').strip()
+            if stage_order_raw:
+                order_keys = [k.strip() for k in stage_order_raw.split(',') if k.strip()]
+                ordered_stages = {}
+                for k in order_keys:
+                    if k in stages_data:
+                        ordered_stages[k] = stages_data[k]
+                for k, v in stages_data.items():
+                    if k not in ordered_stages:
+                        ordered_stages[k] = v
+                stages_data = ordered_stages
+
+            stage_order_str = ','.join(stages_data.keys())
             
             # Check for validation errors
             if plan_res.get('errors') or not stages_data:
                 errors = plan_res.get('errors', [])
                 if not stages_data and not errors:
                     errors.append("هیچ شایستگی مناسبی برای سنجش انتخاب نشده است. لطفاً حداقل یک شایستگی با نوع KN، SK، AB، GE یا ST انتخاب کنید.")
-                
-                # Retrieve matching suggested workflows for the error screen
-                from .utils import suggest_workflow_templates
-                active_stage_keys = [k for k, s in stages_data.items() if s.get('is_active', False)]
-                suggested_workflows = suggest_workflow_templates(active_stage_keys)
                 
                 # Prepare suggested post context
                 suggested_post = request.POST.get('post_code', '').strip()
@@ -2240,18 +2203,18 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     'suggested_post_title': suggested_post_title,
                     'suggested_post_count': suggested_post_count,
                     'calculated_plan': stages_data,
+                    'stage_order_str': stage_order_str,
                     'errors': errors,
-                    'suggested_workflows': suggested_workflows,
-                    'selected_workflow_id': request.POST.get('workflow_template_id'),
                     'round_to_five': round_to_five,
                     'bypass_limits': bypass_limits,
+                    'competency_models': CompetencyModel.objects.filter(is_deleted=False),
                     'deactivated_stages_str': deactivated_stages_raw
                 }
                 return render(request, self.template_name, context)
 
             # 2. Validation passed! Now save to DB inside transaction
             with transaction.atomic():
-                # Link selected workflow template to the job first (will trigger default stage copying if changed)
+                # Link selected workflow template to the job if provided (optional)
                 workflow_id = request.POST.get('workflow_template_id')
                 if workflow_id:
                     from apps.jobs.models import WorkflowTemplate
@@ -2328,7 +2291,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     deleted_at=timezone.now()
                 )
 
-                # Create new customized stages and assessment competencies
+                # Create new customized stages and assessment competencies in specified order
                 seq = 1
                 for key, s_info in stages_data.items():
                     if not s_info.get('is_active', False):
@@ -2344,7 +2307,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     )
                     
                     # Create AssessmentCompetency records under this stage
-                    for c_info in s_info['competencies']:
+                    for c_info in s_info.get('competencies', []):
                         AssessmentCompetency.objects.create(
                             stage=stage,
                             name=c_info['title'],
@@ -2353,7 +2316,7 @@ class JobCompetencyConfigView(LoginRequiredMixin, RoleRequiredMixin, View):
                     seq += 1
                 job.sync_application_stages()
 
-            messages.success(request, "شایستگی‌های فرصت شغلی و سند Assessment Plan با موفقیت ثبت و الگوی فرآیند مربوطه اعمال گردید.")
+            messages.success(request, "شایستگی‌های فرصت شغلی و سند Assessment Plan با موفقیت ثبت گردید.")
             return redirect('job_list')
 
         messages.error(request, "عملیات نامعتبر است.")

@@ -442,11 +442,38 @@ class JobOpportunity(SoftDeleteModel):
         if new_states_to_create:
             ApplicationStageState.objects.bulk_create(new_states_to_create)
             
-        # بروزرسانی مرحله جاری متقاضیان
+        # بروزرسانی مرحله جاری و نمرات متقاضیان
         for app in applications:
             if 'stage_states' in app.__dict__:
                 del app.__dict__['stage_states']
             app.recalculate_current_stage(save=True)
+            
+        self.recalculate_all_application_scores()
+
+    def recalculate_all_application_scores(self):
+        """
+        محاسبه مجدد امتیاز نهایی وزنی (final_score) تمامی متقاضیان این فرصت شغلی
+        بر اساس وزن‌ها و مراحل فعال فعلی.
+        """
+        from apps.candidates.models import JobApplication
+        apps = list(self.applications.filter(is_deleted=False).prefetch_related('stage_states__stage'))
+        if not apps:
+            return
+        apps_to_update = []
+        for app in apps:
+            states = [s for s in app.stage_states.all() if not s.is_deleted]
+            has_evaluated_stages = any(s.status != 'PENDING' or s.score > 0 for s in states)
+            if has_evaluated_stages or app.final_score == 0.0:
+                total_weighted_score = 0.0
+                for state in states:
+                    if state.stage and not state.stage.is_deleted:
+                        total_weighted_score += (state.score * state.stage.weight) / 100.0
+                calc_score = round(total_weighted_score, 2)
+                if round(app.final_score, 2) != calc_score:
+                    app.final_score = calc_score
+                    apps_to_update.append(app)
+        if apps_to_update:
+            JobApplication.objects.bulk_update(apps_to_update, ['final_score'])
 
 
 
@@ -466,6 +493,12 @@ class JobOpportunityStage(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.name} - {self.job.title} (وزن: {self.weight}٪)"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not getattr(self, '_bypass_score_recalculation', False):
+            if hasattr(self, 'job') and self.job_id:
+                self.job.recalculate_all_application_scores()
 
     @property
     def actual_start_date(self):
@@ -524,6 +557,8 @@ class JobOpportunityStage(SoftDeleteModel):
             is_deleted=True,
             deleted_at=timezone.now()
         )
+        if hasattr(self, 'job') and self.job_id:
+            self.job.recalculate_all_application_scores()
 
 
 

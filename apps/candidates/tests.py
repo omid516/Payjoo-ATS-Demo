@@ -423,6 +423,52 @@ class CandidateModuleTests(TestCase):
         app.refresh_from_db()
         self.assertEqual(app.final_score, 86.0)
 
+    def test_recalculate_scores_when_stage_weights_change(self):
+        """تست به‌روزرسانی خودکار امتیاز نهایی وزنی متقاضیان پس از تغییر وزن مراحل ارزیابی"""
+        candidate = Candidate.objects.create(
+            first_name='سعید',
+            last_name='کریمی',
+            email='saeed@example.com',
+            phone_number='09131112233',
+            national_id='1234567890'
+        )
+        app = JobApplication.objects.create(
+            job=self.job,
+            candidate=candidate
+        )
+        stages = list(self.job.stages.all().order_by('sequence'))
+        stage1 = stages[0]  # weight = 40
+        stage2 = stages[1]  # weight = 60
+
+        state1 = app.stage_states.get(stage=stage1)
+        state1.score = 80.0
+        state1.status = ApplicationStageState.STATUS_COMPLETED
+        state1.save()
+
+        state2 = app.stage_states.get(stage=stage2)
+        state2.score = 90.0
+        state2.status = ApplicationStageState.STATUS_COMPLETED
+        state2.save()
+
+        app.refresh_from_db()
+        self.assertEqual(app.final_score, 86.0)
+
+        # تغییر اوزان مراحل: مرحله اول 70٪ و مرحله دوم 30٪
+        stage1.weight = 70
+        stage1.save()
+        stage2.weight = 30
+        stage2.save()
+
+        app.refresh_from_db()
+        # 80 * 0.70 + 90 * 0.30 = 56.0 + 27.0 = 83.0
+        self.assertEqual(app.final_score, 83.0)
+
+        # تست همگام‌سازی از طریق پایپ‌لاین
+        self.client.force_login(self.recruiter)
+        response = self.client.get(reverse('job_pipeline', kwargs={'pk': self.job.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '83.0')
+
     def test_careers_list_public_access(self):
         """تست دسترسی عمومی به لیست مشاغل منتشر شده و دسته‌بندی دپارتمانی"""
         # Create a non-published job to verify it's excluded

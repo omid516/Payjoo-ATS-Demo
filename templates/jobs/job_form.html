@@ -39,14 +39,6 @@
 </div>
 {% endif %}
 
-{% if stages.non_form_errors %}
-<div class="alert alert-danger mb-3 py-2 px-3 text-sm" style="max-width: 780px;">
-    {% for error in stages.non_form_errors %}
-        <div>{{ error }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
 <div class="card premium-card mb-5" style="max-width: 780px;">
     <div class="card-body p-4">
         <form method="post">
@@ -131,31 +123,20 @@
                     {% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label font-medium text-secondary">{{ t.jf_workflow }}</label>
-                    {{ form.workflow }}
-                    <small class="text-muted text-xs d-block mt-1">{{ t.jf_workflow_help }}</small>
-                    {% if form.workflow.errors %}
-                    <div class="text-danger text-xs mt-1">{{ form.workflow.errors.0 }}</div>
-                    {% endif %}
-                    <div id="workflow-stages-preview" class="mt-2 border rounded p-2.5 bg-light d-none" style="border-color: #cbd5e1 !important; background-color: #f8fafc !important;">
-                        <!-- Workflow stages will be loaded here dynamically -->
-                    </div>
-                </div>
-                <div class="col-md-4">
                     <label class="form-label font-medium text-secondary">{{ t.jf_status }}</label>
                     {{ form.status }}
                     {% if form.status.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.status.errors.0 }}</div>
                     {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label font-medium text-secondary">{{ t.jf_start_date }}</label>
                     {{ form.start_date }}
                     {% if form.start_date.errors %}
                     <div class="text-danger text-xs mt-1">{{ form.start_date.errors.0 }}</div>
                     {% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label font-medium text-secondary">{{ t.jf_end_date }}</label>
                     {{ form.end_date }}
                     {% if form.end_date.errors %}
@@ -282,112 +263,16 @@
                 </div>
             </div>
 
-            <!-- Section 4: Dynamic Stages -->
-            <h5 class="font-semibold text-secondary mb-3 pb-2 border-bottom border-slate">{{ t.jf_section_stages }}</h5>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="text-muted text-xs m-0">{{ t.jf_stages_help }}</p>
-                <button type="button" id="add-stage-btn" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    {% if current_language_code == 'en' %}Add Stage{% elif current_language_code == 'tr' %}Aşama Ekle{% elif current_language_code == 'ar' %}إضافة مرحلة{% else %}افزودن مرحله{% endif %}
-                </button>
-            </div>
-
-            {{ stages.management_form }}
-            
-            <div id="stages-formset-container" class="mb-3">
-                {% for stage_form in stages %}
-                <div class="row g-2 align-items-end stage-form-row mb-3" id="stage-form-{{ forloop.counter0 }}">
-                    {{ stage_form.id }}
-                    <div class="col-md-4">
-                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_name }}</label>
-                        {{ stage_form.name }}
-                        {% if stage_form.name.errors %}
-                        <div class="text-danger text-xs mt-1">{{ stage_form.name.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_type }}</label>
-                        {{ stage_form.stage_type }}
-                        {% if stage_form.stage_type.errors %}
-                        <div class="text-danger text-xs mt-1">{{ stage_form.stage_type.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_weight }}</label>
-                        {{ stage_form.weight }}
-                        {% if stage_form.weight.errors %}
-                        <div class="text-danger text-xs mt-1">{{ stage_form.weight.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-1">
-                        <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_seq }}</label>
-                        {{ stage_form.sequence }}
-                        {% if stage_form.sequence.errors %}
-                        <div class="text-danger text-xs mt-1">{{ stage_form.sequence.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        {% if stage_form.instance.pk %}
-                            <div class="form-check d-none">
-                                {{ stage_form.DELETE }}
-                            </div>
-                            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="deleteStageRow('{{ forloop.counter0 }}')">
-                                {{ t.delete }}
-                            </button>
-                        {% else %}
-                            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeNewStageRow('{{ forloop.counter0 }}')">
-                                {{ t.delete }}
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="col-12 mt-1 mb-4">
-                <div class="alert alert-info py-2.5 px-3 text-sm d-flex align-items-center justify-content-between mb-0" id="weight_sum_alert">
-                    <span>{% if current_language_code == 'en' %}Total stage weight: {% elif current_language_code == 'tr' %}Toplam aşama ağırlığı: {% elif current_language_code == 'ar' %}مجموع أوزان المراحل: {% else %}مجموع درصد وزن مراحل: {% endif %}<strong id="weight_sum_val">۰</strong>٪</span>
-                    <span class="font-semibold text-xs" id="weight_sum_status">{% if current_language_code == 'en' %}Total value is valid.{% elif current_language_code == 'tr' %}Toplam değer geçerlidir.{% elif current_language_code == 'ar' %}المجموع الكلي صحيح.{% else %}مجموع مقادیر معتبر است.{% endif %}</span>
-                </div>
-            </div>
-
-            <div class="mt-4 d-flex justify-content-end gap-2">
+            <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <a href="{% url 'job_list' %}" class="btn btn-outline-secondary px-4 py-2">{{ t.cancel }}</a>
-                <button type="submit" class="btn btn-primary-custom px-4 py-2">
-                    {% if object %}{{ t.cf_save }}{% else %}{% if current_language_code == 'en' %}Create Job Post{% elif current_language_code == 'tr' %}İş Fırsatı Oluştur{% elif current_language_code == 'ar' %}إنشاء فرصة العمل{% else %}ایجاد فرصت شغلی{% endif %}{% endif %}
+                <button type="submit" class="btn btn-primary-custom px-4 py-2 d-inline-flex align-items-center gap-2">
+                    <span>{% if object %}ذخیره و ادامه به پیکربندی شایستگی‌ها{% else %}ایجاد فرصت شغلی و رفتن به پیکربندی شایستگی‌ها{% endif %}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
                 </button>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- Template HTML for dynamic row cloning -->
-<div id="stage-form-template" class="d-none">
-    <div class="row g-2 align-items-end stage-form-row mb-3" id="stage-form-__prefix__">
-        {{ stages.empty_form.id }}
-        <div class="col-md-4">
-            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_name }}</label>
-            {{ stages.empty_form.name }}
-        </div>
-        <div class="col-md-3">
-            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_type }}</label>
-            {{ stages.empty_form.stage_type }}
-        </div>
-        <div class="col-md-2">
-            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_weight }}</label>
-            {{ stages.empty_form.weight }}
-        </div>
-        <div class="col-md-1">
-            <label class="form-label text-xs text-muted mb-1">{{ t.jf_stage_seq }}</label>
-            {{ stages.empty_form.sequence }}
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeNewStageRow('__prefix__')">
-                {{ t.delete }}
-            </button>
-        </div>
     </div>
 </div>
 {% endblock %}
@@ -476,122 +361,6 @@
                 previousButtonIcon: '<'
             });
         }
-
-        const container = document.getElementById('stages-formset-container');
-        const template = document.getElementById('stage-form-template').innerHTML;
-        const totalFormsInput = document.getElementById('id_stages-TOTAL_FORMS');
-        const addBtn = document.getElementById('add-stage-btn');
-        
-        const sumVal = document.getElementById('weight_sum_val');
-        const sumStatus = document.getElementById('weight_sum_status');
-        const sumAlert = document.getElementById('weight_sum_alert');
-        
-        function updateSum() {
-            const weightInputs = document.querySelectorAll('.stage-form-row:not(.deleted-stage-row) .stage-weight');
-            let total = 0;
-            weightInputs.forEach(input => {
-                const val = parseInt(input.value) || 0;
-                total += val;
-            });
-            
-            sumVal.textContent = total;
-            if (total === 100) {
-                sumAlert.classList.remove('alert-info', 'alert-danger');
-                sumAlert.classList.add('alert-success');
-                sumStatus.textContent = "{% if current_language_code == 'en' %}Total is valid (100%).{% elif current_language_code == 'tr' %}Toplam değer geçerlidir (%100).{% elif current_language_code == 'ar' %}المجموع الكلي صحيح (١٠٠٪).{% else %}مجموع مقادیر معتبر است (۱۰۰٪).{% endif %}";
-            } else {
-                sumAlert.classList.remove('alert-info', 'alert-success');
-                sumAlert.classList.add('alert-danger');
-                sumStatus.textContent = "{% if current_language_code == 'en' %}Total must be exactly 100%.{% elif current_language_code == 'tr' %}Toplam tam olarak %100 olmalıdır.{% elif current_language_code == 'ar' %}المجموع الكلي يجب أن يكون ١٠٠٪ تماماً.{% else %}مجموع مقادیر باید دقیقاً ۱۰۰٪ باشد.{% endif %}";
-            }
-        }
-        
-        function attachWeightListeners() {
-            const weightInputs = document.querySelectorAll('.stage-weight');
-            weightInputs.forEach(input => {
-                input.removeEventListener('input', updateSum);
-                input.addEventListener('input', updateSum);
-            });
-        }
-        
-        addBtn.addEventListener('click', function() {
-            const currentCount = parseInt(totalFormsInput.value);
-            let rowHtml = template.replace(/__prefix__/g, currentCount);
-            
-            container.insertAdjacentHTML('beforeend', rowHtml);
-            
-            const newSeqInput = document.getElementById('id_stages-' + currentCount + '-sequence');
-            if (newSeqInput) {
-                newSeqInput.value = currentCount + 1;
-            }
-            
-            totalFormsInput.value = currentCount + 1;
-            
-            attachWeightListeners();
-            updateSum();
-        });
-        
-        window.deleteStageRow = function(index) {
-            const row = document.getElementById('stage-form-' + index);
-            const deleteCheckbox = document.getElementById('id_stages-' + index + '-DELETE');
-            if (deleteCheckbox) {
-                deleteCheckbox.checked = true;
-            }
-            row.style.display = 'none';
-            row.classList.add('deleted-stage-row');
-            updateSum();
-        };
-        
-        window.removeNewStageRow = function(index) {
-            const row = document.getElementById('stage-form-' + index);
-            const nameInput = document.getElementById('id_stages-' + index + '-name');
-            const weightInput = document.getElementById('id_stages-' + index + '-weight');
-            if (nameInput) nameInput.value = '';
-            if (weightInput) weightInput.value = '';
-            row.style.display = 'none';
-            row.classList.add('deleted-stage-row');
-            updateSum();
-        };
-        
-        // Fetch and show workflow stages preview
-        const workflowSelect = document.getElementById('id_workflow');
-        const previewContainer = document.getElementById('workflow-stages-preview');
- 
-        function updateWorkflowPreview() {
-            const workflowId = workflowSelect.value;
-            if (!workflowId) {
-                previewContainer.innerHTML = '';
-                previewContainer.classList.add('d-none');
-                return;
-            }
- 
-            // Fetch stages
-            fetch(`/jobs/workflows/${workflowId}/stages/`)
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    }
-                    throw new Error('Failed to fetch stages');
-                })
-                .then(html => {
-                    previewContainer.innerHTML = html;
-                    previewContainer.classList.remove('d-none');
-                })
-                .catch(error => {
-                    console.error('Error fetching workflow stages:', error);
-                    previewContainer.innerHTML = '<span class="text-danger text-xs">{% if current_language_code == 'en' %}Error loading workflow stages{% elif current_language_code == 'tr' %}Şablon aşamaları yüklenirken hata oluştu{% elif current_language_code == 'ar' %}خطأ في تحميل مراحل النموذج{% else %}خطا در بارگذاری مراحل الگو{% endif %}</span>';
-                    previewContainer.classList.remove('d-none');
-                });
-        }
- 
-        if (workflowSelect) {
-            workflowSelect.addEventListener('change', updateWorkflowPreview);
-            updateWorkflowPreview(); // Check initial state (e.g., when editing an existing job)
-        }
-        
-        // Initial setup
-        attachWeightListeners();
-        updateSum();
     });
 
     function generateAISpecs(targetField) {

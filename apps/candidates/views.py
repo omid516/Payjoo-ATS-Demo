@@ -2605,18 +2605,24 @@ class BulkAdvanceStageView(LoginRequiredMixin, RoleRequiredMixin, View):
         with transaction.atomic():
             for app_id in application_ids:
                 app = JobApplication.objects.filter(pk=app_id, job=job, status=JobApplication.STATUS_IN_PROGRESS, is_deleted=False).first()
-                if app and app.current_stage:
-                    current_state = app.stage_states.filter(stage=app.current_stage, is_deleted=False).first()
-                    if current_state and (current_state.status == ApplicationStageState.STATUS_COMPLETED or current_state.is_conditional_pass):
-                        next_stage = job.stages.filter(
-                            is_deleted=False, 
-                            sequence__gt=app.current_stage.sequence
-                        ).order_by('sequence').first()
-                        
-                        if next_stage:
-                            app.current_stage = next_stage
-                            app.save(update_fields=['current_stage'])
-            job.update_status()
+                if app:
+                    app.recalculate_current_stage(save=True)
+                    if app.current_stage:
+                        current_state = app.stage_states.filter(stage=app.current_stage, is_deleted=False).first()
+                        if current_state and (current_state.status == ApplicationStageState.STATUS_COMPLETED or current_state.is_conditional_pass):
+                            next_stage = job.stages.filter(
+                                is_deleted=False, 
+                                sequence__gt=app.current_stage.sequence
+                            ).order_by('sequence').first()
+                            
+                            if next_stage:
+                                app.current_stage = next_stage
+                                app.save(update_fields=['current_stage'])
+            
+            # Reset manual status lock and force recalculation of job status based on furthest active stage
+            job.is_status_manual = False
+            job.save(update_fields=['is_status_manual'])
+            job.update_status(force=True)
 
         return redirect('job_pipeline', pk=job_id)
 
@@ -3370,7 +3376,8 @@ class StageRollbackView(LoginRequiredMixin, RoleRequiredMixin, View):
             stage_state.status = ApplicationStageState.STATUS_PENDING
             stage_state.score = 0.0
             stage_state.is_conditional_pass = False
-            stage_state.save(update_fields=['status', 'score', 'is_conditional_pass'])
+            stage_state.is_manually_edited = True
+            stage_state.save(update_fields=['status', 'score', 'is_conditional_pass', 'is_manually_edited'])
 
             # 4. حذف نمرات خارجی قبلی این مرحله (soft-delete)
             ExternalInterviewerScore.objects.filter(

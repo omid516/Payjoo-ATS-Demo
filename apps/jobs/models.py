@@ -109,6 +109,7 @@ class JobOpportunity(SoftDeleteModel):
     assigned_recruiter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_jobs', verbose_name="کارشناس جذب مسئول")
     workflow = models.ForeignKey(WorkflowTemplate, on_delete=models.SET_NULL, null=True, blank=True, related_name='jobs', verbose_name="الگوی فرآیند استخدامی")
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_RECEIVED, verbose_name="وضعیت فرصت شغلی")
+    is_status_manual = models.BooleanField(default=False, verbose_name="وضعیت دستی تنظیم شده توسط کاربر")
     bypass_limits = models.BooleanField(default=False, verbose_name="بایپس کردن رنج")
 
     SOURCE_ATS = 'ATS'
@@ -219,9 +220,31 @@ class JobOpportunity(SoftDeleteModel):
 
 
 
+    def get_status_from_stage(self, stage):
+        if not stage:
+            return None
+        # 1. Match by stage_type first
+        if stage.stage_type == 'SCREENING':
+            return self.STATUS_SCREENING
+        elif stage.stage_type == 'EXAM':
+            return self.STATUS_EXAM
+        elif stage.stage_type == 'SKILL_TEST':
+            return self.STATUS_SKILL_TEST
+        elif stage.stage_type == 'IQ_TEST':
+            return self.STATUS_IQ_TEST
+        elif stage.stage_type == 'INTERVIEW':
+            return self.STATUS_INTERVIEW
+        elif stage.stage_type == 'ASSESSMENT':
+            return self.STATUS_ASSESSMENT
+        elif stage.stage_type == 'FINAL_SELECTION':
+            return self.STATUS_FINAL_SELECTION
+
+        # 2. Match by stage name
+        return self.get_status_from_stage_name(stage.name)
+
     def get_status_from_stage_name(self, stage_name):
         name_lower = stage_name.lower()
-        if any(kw in name_lower for kw in ["غربال", "screening"]):
+        if any(kw in name_lower for kw in ["غربال", "screening", "مدارک", "رزومه"]):
             return self.STATUS_SCREENING
         elif any(kw in name_lower for kw in ["مهارتی", "skill_test", "عملی"]):
             return self.STATUS_SKILL_TEST
@@ -237,8 +260,10 @@ class JobOpportunity(SoftDeleteModel):
             return self.STATUS_FINAL_SELECTION
         return None
 
-    def update_status(self):
+    def update_status(self, force=False):
         if self.status in [self.STATUS_CANCELLED, self.STATUS_SUSPENDED]:
+            return
+        if self.is_status_manual and not force:
             return
         # 1. Check if any candidate is SELECTED (قبول نهایی)
         if self.applications.filter(status='SELECTED', is_deleted=False).exists():
@@ -255,30 +280,23 @@ class JobOpportunity(SoftDeleteModel):
             if max_seq is not None:
                 furthest_stage = self.stages.filter(sequence=max_seq, is_deleted=False).first()
                 if furthest_stage:
-                    new_status = self.get_status_from_stage_name(furthest_stage.name)
+                    new_status = self.get_status_from_stage(furthest_stage)
                     if not new_status:
                         # Fallback mapping based on relative position
                         stages_list = list(self.stages.filter(is_deleted=False).order_by('sequence'))
                         if furthest_stage in stages_list:
                             idx = stages_list.index(furthest_stage)
                             total = len(stages_list)
-                            if total == 1:
+                            if idx == 0:
+                                new_status = self.STATUS_SCREENING
+                            elif idx == total - 1 and total > 1:
+                                new_status = self.STATUS_FINAL_SELECTION
+                            elif idx == 1:
                                 new_status = self.STATUS_EXAM
-                            elif total == 2:
-                                new_status = [self.STATUS_EXAM, self.STATUS_INTERVIEW][idx]
-                            elif total == 3:
-                                new_status = [self.STATUS_EXAM, self.STATUS_INTERVIEW, self.STATUS_ASSESSMENT][idx]
+                            elif idx == 2:
+                                new_status = self.STATUS_INTERVIEW
                             else:
-                                if idx == 0:
-                                    new_status = self.STATUS_SCREENING
-                                elif idx == total - 1:
-                                    new_status = self.STATUS_FINAL_SELECTION
-                                elif idx == 1:
-                                    new_status = self.STATUS_EXAM
-                                elif idx == 2:
-                                    new_status = self.STATUS_INTERVIEW
-                                else:
-                                    new_status = self.STATUS_ASSESSMENT
+                                new_status = self.STATUS_ASSESSMENT
                     if new_status and self.status != new_status:
                         self.status = new_status
                         self.save(update_fields=['status'])

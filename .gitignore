@@ -28,5 +28,6 @@ resumes/
 # Excel files
 *.xlsx
 
-# Graphify
-graphify-out/
+# Scratch files
+scratch/
+scratch_backup/

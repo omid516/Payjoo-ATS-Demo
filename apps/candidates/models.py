@@ -261,7 +261,7 @@ class JobApplication(SoftDeleteModel):
                             
                             if subsequent_states.exists() and all_pending_zero:
                                 scr_state = self.stage_states.filter(stage=first_stage, is_deleted=False).first()
-                                if scr_state and scr_state.status != 'FAILED' and scr_state.status != 'COMPLETED':
+                                if scr_state and not scr_state.is_manually_edited and scr_state.status != 'FAILED' and scr_state.status != 'COMPLETED':
                                     scr_state.status = 'FAILED'
                                     super(ApplicationStageState, scr_state).save(update_fields=['status'])
                                     
@@ -476,7 +476,7 @@ class ApplicationStageState(SoftDeleteModel):
                 if app.status != JobApplication.STATUS_REJECTED:
                     app.status = JobApplication.STATUS_REJECTED
                     update_fields.append('status')
-            elif (self.status == self.STATUS_COMPLETED or self.is_conditional_pass) and app.status == JobApplication.STATUS_REJECTED:
+            elif (self.status in [self.STATUS_COMPLETED, self.STATUS_PENDING] or self.is_conditional_pass) and app.status == JobApplication.STATUS_REJECTED:
                 # Revert to IN_PROGRESS if no other stages are failed
                 other_failed = app.stage_states.filter(
                     status=self.STATUS_FAILED,
@@ -497,6 +497,9 @@ class ApplicationStageState(SoftDeleteModel):
             if 'final_score' not in update_fields:
                 update_fields.append('final_score')
             app.save(update_fields=update_fields)
+            
+            if app.job:
+                app.job.update_status()
 
 
 class CandidateLanguage(SoftDeleteModel):

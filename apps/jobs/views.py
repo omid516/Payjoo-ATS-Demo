@@ -251,7 +251,11 @@ class JobOpportunityUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView
 
     def form_valid(self, form):
         from django.http import HttpResponseRedirect
-        self.object = form.save()
+        job = form.save(commit=False)
+        job.is_status_manual = True
+        job.save()
+        form.save_m2m()
+        self.object = job
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -577,8 +581,8 @@ class JobOpportunityBulkStatusView(LoginRequiredMixin, RoleRequiredMixin, View):
         for job in jobs:
             if job.status != new_status:
                 job.status = new_status
-                job.save(update_fields=['status'])
-                # Also ensure update_status does not conflict, but it checks CANCELLED/SUSPENDED which is fine.
+                job.is_status_manual = True
+                job.save(update_fields=['status', 'is_status_manual'])
                 updated_count += 1
                 
         if updated_count > 0:

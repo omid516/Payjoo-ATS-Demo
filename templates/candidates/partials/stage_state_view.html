@@ -68,10 +68,36 @@
     </div>
     {% endif %}
     
-    {% if oob_update %}
+    {% if oob_update and application %}
     <!-- Out of band update for final score -->
     <span id="final-score-{{ application.id }}" hx-swap-oob="true" class="font-bold text-secondary">
         {{ application.final_score|floatformat:2 }}
     </span>
+    <!-- Out of band update for application status badge -->
+    <div id="app-status-badge-{{ application.id }}" hx-swap-oob="true">
+        {% if application.effective_status == 'IN_PROGRESS' %}
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1.5 rounded text-xs">در حال ارزیابی</span>
+        {% elif application.effective_status == 'SELECTED' %}
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1.5 rounded text-xs">قبول نهایی</span>
+        {% elif application.effective_status == 'RESERVE' %}
+            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1.5 rounded text-xs">ذخیره</span>
+        {% elif application.effective_status == 'REJECTED' %}
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1.5 rounded text-xs">مردود شده</span>
+        {% endif %}
+    </div>
+    <script>
+        (function() {
+            var row = document.getElementById('candidate-app-row-{{ application.candidate.id }}');
+            if (row) {
+                {% if state.stage.stage_type == 'SCREENING' or 'غربالگری' in state.stage.name %}
+                    {% if state.status == 'FAILED' and not state.is_conditional_pass %}
+                        row.classList.add('screening-failed-row');
+                    {% else %}
+                        row.classList.remove('screening-failed-row');
+                    {% endif %}
+                {% endif %}
+            }
+        })();
+    </script>
     {% endif %}
 </td>

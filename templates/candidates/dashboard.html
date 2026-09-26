@@ -164,7 +164,7 @@
                                                 <span class="text-xs font-semibold text-secondary me-2">روند مراحل ارزیابی:</span>
                                                 {% for state in app.stage_states.all %}
                                                     <div class="d-flex align-items-center">
-                                                        <div class="d-flex align-items-center gap-1.5 px-2.5 py-1 rounded text-xs border {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10 text-success border-success{% elif state.status == 'FAILED' %}bg-danger bg-opacity-10 text-danger border-danger{% elif app.status == 'IN_PROGRESS' and app.current_stage == state.stage %}bg-primary bg-opacity-10 text-primary border-primary{% else %}bg-secondary bg-opacity-5 text-muted border-secondary border-opacity-10{% endif %}"
+                                                        <div class="d-flex align-items-center gap-1.5 px-2.5 py-1 rounded text-xs border {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10 text-success border-success{% elif state.status == 'FAILED' %}bg-danger bg-opacity-10 text-danger border-danger{% elif state.status == 'ABSENT' %}bg-secondary bg-opacity-10 text-secondary border-secondary{% elif app.status == 'IN_PROGRESS' and app.current_stage == state.stage %}bg-primary bg-opacity-10 text-primary border-primary{% else %}bg-secondary bg-opacity-5 text-muted border-secondary border-opacity-10{% endif %}"
                                                              {% if state.status != 'PENDING' %}title="تاریخ ثبت: {{ state.updated_at|to_jalali }}"{% endif %}>
                                                             {% if state.status == 'COMPLETED' %}
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="text-success">
@@ -176,6 +176,9 @@
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                                                 </svg>
                                                                 <span>{{ state.stage.name }} (مردود)</span>
+                                                            {% elif state.status == 'ABSENT' %}
+                                                                <span class="text-secondary" style="font-size: 10px;">🚫</span>
+                                                                <span>{{ state.stage.name }} (غایب)</span>
                                                             {% elif app.status == 'IN_PROGRESS' and app.current_stage == state.stage %}
                                                                 <div class="spinner-grow spinner-grow-sm text-primary" role="status" style="width: 8px; height: 8px;"></div>
                                                                 <span class="font-semibold">{{ state.stage.name }} (جاری)</span>

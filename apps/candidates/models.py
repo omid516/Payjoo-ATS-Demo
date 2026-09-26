@@ -113,9 +113,9 @@ class JobApplication(SoftDeleteModel):
 
     @property
     def effective_status(self):
-        # 1. If any active stage state is FAILED, then status is REJECTED
+        # 1. If any active stage state is FAILED or ABSENT, then status is REJECTED
         for state in self.stage_states.all():
-            if state.status == 'FAILED' and not state.is_conditional_pass and not state.is_deleted:
+            if state.status in ['FAILED', 'ABSENT'] and not state.is_conditional_pass and not state.is_deleted:
                 return self.STATUS_REJECTED
         
         # 2. If the job status is CLOSED or FINAL_SELECTION (meaning selection is finalized), 
@@ -318,11 +318,13 @@ class ApplicationStageState(SoftDeleteModel):
     STATUS_PENDING = 'PENDING'
     STATUS_COMPLETED = 'COMPLETED'
     STATUS_FAILED = 'FAILED'
+    STATUS_ABSENT = 'ABSENT'
 
     STATUS_CHOICES = [
         (STATUS_PENDING, 'در انتظار ارزیابی'),
         (STATUS_COMPLETED, 'قبول شده در این مرحله'),
         (STATUS_FAILED, 'مردود شده در این مرحله'),
+        (STATUS_ABSENT, 'غایب در این مرحله'),
     ]
 
     application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, related_name='stage_states', verbose_name="درخواست همکاری")
@@ -359,7 +361,7 @@ class ApplicationStageState(SoftDeleteModel):
             return self.has_failed_prior
         states = list(self.application.stage_states.all())
         prior_states = [state for state in states if state.stage.sequence < self.stage.sequence and not state.is_deleted]
-        return any(state.status == self.STATUS_FAILED and not state.is_conditional_pass for state in prior_states)
+        return any(state.status in [self.STATUS_FAILED, self.STATUS_ABSENT] and not state.is_conditional_pass for state in prior_states)
 
     @property
     def prev_stage_state(self):
@@ -472,14 +474,14 @@ class ApplicationStageState(SoftDeleteModel):
             update_fields = ['final_score']
             
             # 1. Update application status based on stage status
-            if self.status == self.STATUS_FAILED and not self.is_conditional_pass:
+            if self.status in [self.STATUS_FAILED, self.STATUS_ABSENT] and not self.is_conditional_pass:
                 if app.status != JobApplication.STATUS_REJECTED:
                     app.status = JobApplication.STATUS_REJECTED
                     update_fields.append('status')
             elif (self.status in [self.STATUS_COMPLETED, self.STATUS_PENDING] or self.is_conditional_pass) and app.status == JobApplication.STATUS_REJECTED:
-                # Revert to IN_PROGRESS if no other stages are failed
+                # Revert to IN_PROGRESS if no other stages are failed or absent
                 other_failed = app.stage_states.filter(
-                    status=self.STATUS_FAILED,
+                    status__in=[self.STATUS_FAILED, self.STATUS_ABSENT],
                     is_conditional_pass=False,
                     is_deleted=False
                 ).exclude(pk=self.pk).exists()

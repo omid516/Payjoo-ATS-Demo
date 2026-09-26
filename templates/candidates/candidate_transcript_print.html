@@ -376,6 +376,8 @@
                         <span class="status-b s-completed">قبول ✓</span>
                     {% elif state.status == 'FAILED' %}
                         <span class="status-b s-failed">مردود ✗</span>
+                    {% elif state.status == 'ABSENT' %}
+                        <span class="status-b" style="background:#e2e8f0;color:#475569;">غایب ⊘</span>
                     {% else %}
                         <span class="status-b s-pending">در انتظار</span>
                     {% endif %}

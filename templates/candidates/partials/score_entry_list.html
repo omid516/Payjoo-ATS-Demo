@@ -71,6 +71,7 @@
                     hx-indicator="#loading-indicator">
                 <option value="PENDING" {% if selected_eval_status == 'PENDING' %}selected{% endif %}>{{ t.se_filter_pending }}</option>
                 <option value="COMPLETED_FAILED" {% if selected_eval_status == 'COMPLETED_FAILED' %}selected{% endif %}>{{ t.se_filter_completed }}</option>
+                <option value="ABSENT" {% if selected_eval_status == 'ABSENT' %}selected{% endif %}>فقط غایبین</option>
                 <option value="ALL" {% if selected_eval_status == 'ALL' %}selected{% endif %}>{{ t.se_filter_all }}</option>
             </select>
         </div>

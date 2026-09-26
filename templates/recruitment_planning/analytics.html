@@ -155,6 +155,9 @@
                                             <span class="font-bold text-secondary">{{ s.passed }} نفر</span>
                                             {% if not forloop.first %}
                                                 <span class="text-muted ms-1 font-semibold">({{ s.pass_rate }}٪ گذر)</span>
+                                                {% if s.absent %}
+                                                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 ms-1" style="font-size: 10px;" title="{{ s.absent_rate }}٪ نرخ غیبت">{{ s.absent }} غایب</span>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                     </div>

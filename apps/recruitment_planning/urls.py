@@ -3,7 +3,7 @@ from .views import (
     PlanningDashboardView, JobPlanningView, PlanningConfigView, ExportPlanningExcelView,
     PlanningCalendarView, ExportWeeklyAgendaExcelView, WeeklyAgendaPrintView, JobPlanningSuggestionsView,
     SlaDelaysDashboardView, OverlapMonitorView, EditJobStagePlanView, ViewJobStagePlanView,
-    AnalyticsDashboardView
+    AnalyticsDashboardView, BaleScheduleSaveView, BaleScheduleDeleteView, BaleScheduleCandidateListView
 )
 
 urlpatterns = [
@@ -15,6 +15,9 @@ urlpatterns = [
     path('config/', PlanningConfigView.as_view(), name='planning_config'),
     path('export/excel/', ExportPlanningExcelView.as_view(), name='planning_export_excel'),
     path('calendar/', PlanningCalendarView.as_view(), name='planning_calendar'),
+    path('calendar/save-schedule/', BaleScheduleSaveView.as_view(), name='bale_schedule_save'),
+    path('calendar/delete-schedule/', BaleScheduleDeleteView.as_view(), name='bale_schedule_delete'),
+    path('calendar/candidates/', BaleScheduleCandidateListView.as_view(), name='bale_schedule_candidates'),
     path('export/weekly/', ExportWeeklyAgendaExcelView.as_view(), name='planning_agenda_export_excel'),
     path('agenda/print/', WeeklyAgendaPrintView.as_view(), name='planning_agenda_print'),
     path('conflicts/', OverlapMonitorView.as_view(), name='planning_conflicts'),

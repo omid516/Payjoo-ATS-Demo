@@ -1,15 +1,50 @@
 {% extends "base.html" %}
 {% load jalali_tags %}
-{% block title %}تقویم برنامه‌ریزی جذب | {{ organization_name }}{% endblock %}
+{% block title %}تقویم هوشمند ارزیابی و جذب | {{ organization_name }}{% endblock %}
 
 {% block extra_head %}
 <style>
-    .calendar-container {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
+    /* Styling for Smart Persian Calendar */
+    .cal-kpi-card {
+        border-radius: 14px;
         border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        background: #ffffff;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cal-kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+    .cal-pill-btn {
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        transition: all 0.2s ease;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .cal-pill-btn:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .cal-pill-btn.active {
+        background: #1e293b;
+        color: #ffffff;
+        border-color: #1e293b;
+    }
+    .calendar-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.03);
+        overflow: hidden;
     }
     .calendar-table {
         width: 100%;
@@ -21,21 +56,45 @@
         border-bottom: 2px solid #e2e8f0;
         text-align: center;
         padding: 12px 6px;
-        color: #475569;
-        font-weight: 700;
+        color: #334155;
+        font-weight: 800;
         font-size: 13px;
         width: 14.28%;
     }
     .calendar-table td {
-        border: 1px solid #e2e8f0;
-        height: 125px;
+        border: 1px solid #edf2f7;
+        height: 135px;
         vertical-align: top;
-        padding: 8px;
+        padding: 6px;
         background-color: #ffffff;
-        transition: background-color 0.2s;
+        position: relative;
+        transition: background-color 0.15s ease;
     }
     .calendar-table td:hover {
         background-color: #f8fafc;
+    }
+    .calendar-table td:hover .quick-add-btn {
+        opacity: 1;
+        visibility: visible;
+    }
+    .quick-add-btn {
+        position: absolute;
+        bottom: 6px;
+        left: 6px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
     }
     .calendar-day-cell {
         display: flex;
@@ -46,11 +105,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 6px;
+        margin-bottom: 5px;
     }
     .day-number {
-        font-weight: 700;
-        font-size: 14px;
+        font-weight: 800;
+        font-size: 13px;
         color: #334155;
         width: 26px;
         height: 26px;
@@ -60,34 +119,32 @@
         border-radius: 50%;
     }
     .is-today .day-number {
-        background-color: #3b82f6;
+        background-color: #2563eb;
         color: #ffffff !important;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
     }
     .is-today {
+        background-color: #eff6ff !important;
         outline: 2px solid #3b82f6;
         outline-offset: -2px;
-        background-color: #eff6ff !important;
     }
     .holiday-label {
         font-size: 9px;
-        font-weight: bold;
-        color: #e11d48;
-        background-color: #ffe4e6;
-        padding: 2px 4px;
+        font-weight: 700;
+        color: #dc2626;
+        background-color: #fee2e2;
+        padding: 2px 5px;
         border-radius: 4px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 75px;
+        max-width: 80px;
     }
     .is-holiday .day-number {
-        color: #e11d48;
+        color: #dc2626;
     }
     .is-holiday {
-        background-color: #fff1f2 !important;
-    }
-    .is-holiday:hover {
-        background-color: #ffe4e6 !important;
+        background-color: #fffaf0 !important;
     }
     .events-list {
         display: flex;
@@ -95,22 +152,40 @@
         gap: 4px;
         overflow-y: auto;
         flex-grow: 1;
+        max-height: 98px;
     }
-    .event-badge {
-        font-size: 9.5px;
+    .event-card-item {
+        font-size: 10px;
         font-weight: 600;
-        padding: 3px 6px;
+        padding: 4px 6px;
         border-radius: 6px;
-        line-height: 1.3;
+        line-height: 1.35;
         display: block;
-        text-decoration: none;
-        transition: transform 0.1s;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
         border-right: 3px solid transparent;
-        white-space: normal;
-        word-break: break-word;
+        text-align: right;
     }
-    .event-badge:hover {
+    .event-card-item:hover {
         transform: scale(1.02);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Event Category Themes */
+    .event-interview {
+        background-color: #e0e7ff;
+        color: #3730a3;
+        border-right-color: #4f46e5;
+    }
+    .event-exam {
+        background-color: #f3e8ff;
+        color: #6b21a8;
+        border-right-color: #9333ea;
+    }
+    .event-skill {
+        background-color: #ffedd5;
+        color: #9a3412;
+        border-right-color: #ea580c;
     }
     .event-start {
         background-color: #dcfce7;
@@ -123,89 +198,725 @@
         border-right-color: #ef4444;
     }
     .calendar-empty {
-        background-color: #f1f5f9 !important;
-        opacity: 0.5;
+        background-color: #f8fafc !important;
+        opacity: 0.6;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-end mb-4">
-    <div>
-        <h3 class="font-bold text-secondary mb-1">تقویم برنامه‌ریزی جذب</h3>
-        <p class="text-muted text-sm m-0">مشاهده روزانه تعهدات، زمانبندی شروع و پایان مراحل ارزیابی در قالب تقویم شمسی</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="{% url 'planning_dashboard' %}" class="btn btn-outline-secondary font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3" style="border-radius: 8px;">
-            🔙 بازگشت به داشبورد برنامه‌ریزی
-        </a>
-    </div>
-</div>
-
-<div class="card calendar-container border-0 p-4 shadow-xs">
-    <!-- هدر ناوبری ماه -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <h4 class="font-bold text-secondary m-0">{{ current_month_name }}</h4>
+<div class="container-fluid px-0">
+    <!-- Header & Quick Actions -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="font-bold text-dark m-0">تقویم برنامه‌ریزی جذب و ارزیابی هوشمند</h3>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11px; border-radius: 6px;">
+                    🟢 همگام با بات بله (Bale Bot)
+                </span>
+            </div>
+            <p class="text-muted text-sm m-0">
+                برنامه‌ریزی، زمان‌بندی و پایش برخط مصاحبه‌ها، آزمون‌های کتبی و عملی شرکت فولاد مبارکه
+            </p>
+        </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="{% url 'planning_calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-sm btn-outline-secondary font-bold px-3 py-1.5" style="border-radius: 8px;">
-                ◀ ماه قبل
-            </a>
-            <span class="badge bg-light text-secondary border px-3 py-2 font-bold" style="font-size: 12px; border-radius: 8px;">
-                امروز: {{ today_jalali }}
-            </span>
-            <a href="{% url 'planning_calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn btn-sm btn-outline-secondary font-bold px-3 py-1.5" style="border-radius: 8px;">
-                ماه بعد ▶
+            <!-- Sync with Bale Button -->
+            <button id="syncBaleBtn" class="btn btn-outline-primary font-bold text-xs d-flex align-items-center gap-2 py-2 px-3 shadow-2xs" style="border-radius: 10px;">
+                <span id="syncSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                <span id="syncIcon">🔄</span>
+                <span>همگام‌سازی با ربات بله</span>
+            </button>
+
+            <!-- Add Schedule Button -->
+            <button class="btn btn-primary font-bold text-xs d-flex align-items-center gap-1.5 py-2 px-3 shadow-xs" style="border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                <span>➕</span>
+                <span>زمان‌بندی جدید ارزیابی</span>
+            </button>
+
+            <!-- Back to Dashboard -->
+            <a href="{% url 'planning_dashboard' %}" class="btn btn-light border font-bold text-xs d-flex align-items-center gap-1 py-2 px-3" style="border-radius: 10px;">
+                داشبورد جذب
             </a>
         </div>
     </div>
 
-    <!-- جدول تقویم -->
-    <div class="table-responsive">
-        <table class="calendar-table">
-            <thead>
-                <tr>
-                    <th>شنبه</th>
-                    <th>یکشنبه</th>
-                    <th>دوشنبه</th>
-                    <th>سه‌شنبه</th>
-                    <th>چهارشنبه</th>
-                    <th>پنجشنبه</th>
-                    <th>جمعه</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for week in weeks %}
-                <tr>
-                    {% for day in week %}
-                        {% if day is None %}
-                            <td class="calendar-empty"></td>
-                        {% else %}
-                            <td class="{% if day.is_today %}is-today{% endif %} {% if day.is_holiday %}is-holiday{% endif %}">
-                                <div class="calendar-day-cell">
-                                    <div class="day-header">
-                                        <span class="day-number">{{ day.day }}</span>
-                                        {% if day.holiday_title %}
-                                            <span class="holiday-label" title="{{ day.holiday_title }}">{{ day.holiday_title }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="events-list">
-                                        {% for event in day.events %}
-                                            <a href="{% url 'job_planning' event.job_id %}" 
-                                               class="event-badge {% if event.type == 'START' %}event-start{% else %}event-end{% endif %}"
-                                               title="{{ event.label }} (فرصت: {{ event.job_title }})">
-                                                <strong>{% if event.type == 'START' %}🟢 شروع{% else %}🔴 پایان{% endif %}:</strong>
-                                                {{ event.label|slice:"5:" }} ({{ event.job_title }})
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </td>
-                        {% endif %}
+    <!-- Category KPI Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">کل رویدادهای این ماه</span>
+                <h4 class="font-bold text-dark m-0">{{ kpi_counts.total }}</h4>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center" style="border-right: 4px solid #4f46e5;">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">🎤 مصاحبه‌ها</span>
+                <h4 class="font-bold text-primary m-0">{{ kpi_counts.interview }}</h4>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center" style="border-right: 4px solid #9333ea;">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">📝 آزمون‌های کتبی</span>
+                <h4 class="font-bold text-purple m-0" style="color: #9333ea;">{{ kpi_counts.written_exam }}</h4>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center" style="border-right: 4px solid #ea580c;">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">⚙️ آزمون‌های مهارتی</span>
+                <h4 class="font-bold text-warning m-0" style="color: #ea580c;">{{ kpi_counts.skill_test }}</h4>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center" style="border-right: 4px solid #10b981;">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">📌 تعهدات مراحل (SLA)</span>
+                <h4 class="font-bold text-success m-0">{{ kpi_counts.stage_plan }}</h4>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="p-3 cal-kpi-card text-center">
+                <span class="text-muted text-xs d-block mb-1 font-semibold">امروز در تقویم</span>
+                <span class="badge bg-light text-primary border font-bold mt-1 px-2 py-1.5" style="font-size: 11px;">
+                    {{ today_jalali }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar & Month Navigation -->
+    <div class="card border-0 p-3 mb-3 shadow-xs" style="border-radius: 14px; background: #ffffff;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <!-- Event Type Pills -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                <a href="?year={{ selected_year }}&month={{ selected_month }}&event_type=ALL{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="cal-pill-btn {% if selected_type == 'ALL' %}active{% endif %}">
+                    <span>همه رویدادها</span>
+                    <span class="badge rounded-pill {% if selected_type == 'ALL' %}bg-white text-dark{% else %}bg-secondary text-white{% endif %}">{{ kpi_counts.total }}</span>
+                </a>
+                <a href="?year={{ selected_year }}&month={{ selected_month }}&event_type=INTERVIEW{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="cal-pill-btn {% if selected_type == 'INTERVIEW' %}active{% endif %}">
+                    <span>🎤 مصاحبه‌ها</span>
+                    <span class="badge rounded-pill {% if selected_type == 'INTERVIEW' %}bg-white text-dark{% else %}bg-secondary text-white{% endif %}">{{ kpi_counts.interview }}</span>
+                </a>
+                <a href="?year={{ selected_year }}&month={{ selected_month }}&event_type=WRITTEN_EXAM{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="cal-pill-btn {% if selected_type == 'WRITTEN_EXAM' %}active{% endif %}">
+                    <span>📝 آزمون کتبی</span>
+                    <span class="badge rounded-pill {% if selected_type == 'WRITTEN_EXAM' %}bg-white text-dark{% else %}bg-secondary text-white{% endif %}">{{ kpi_counts.written_exam }}</span>
+                </a>
+                <a href="?year={{ selected_year }}&month={{ selected_month }}&event_type=SKILL_TEST{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="cal-pill-btn {% if selected_type == 'SKILL_TEST' %}active{% endif %}">
+                    <span>⚙️ آزمون مهارتی</span>
+                    <span class="badge rounded-pill {% if selected_type == 'SKILL_TEST' %}bg-white text-dark{% else %}bg-secondary text-white{% endif %}">{{ kpi_counts.skill_test }}</span>
+                </a>
+                <a href="?year={{ selected_year }}&month={{ selected_month }}&event_type=STAGE_PLAN{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="cal-pill-btn {% if selected_type == 'STAGE_PLAN' %}active{% endif %}">
+                    <span>📌 تعهدات SLA</span>
+                </a>
+            </div>
+
+            <!-- Month Navigator -->
+            <div class="d-flex align-items-center gap-2">
+                <a href="?year={{ prev_year }}&month={{ prev_month }}&event_type={{ selected_type }}{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="btn btn-sm btn-outline-secondary font-bold px-3 py-1.5" style="border-radius: 8px;">
+                    ◀ ماه قبل
+                </a>
+                <span class="font-bold text-dark px-2" style="font-size: 15px;">
+                    {{ current_month_name }}
+                </span>
+                <a href="?year={{ next_year }}&month={{ next_month }}&event_type={{ selected_type }}{% if selected_job_id %}&job_id={{ selected_job_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                   class="btn btn-sm btn-outline-secondary font-bold px-3 py-1.5" style="border-radius: 8px;">
+                    ماه بعد ▶
+                </a>
+            </div>
+        </div>
+
+        <!-- Secondary Filters (Job selection & Search) -->
+        <form method="GET" class="row g-2 align-items-center mt-2 pt-2 border-top">
+            <input type="hidden" name="year" value="{{ selected_year }}">
+            <input type="hidden" name="month" value="{{ selected_month }}">
+            <input type="hidden" name="event_type" value="{{ selected_type }}">
+
+            <div class="col-md-5 col-12">
+                <select name="job_id" class="form-select form-select-sm text-xs font-semibold" style="border-radius: 8px;" onchange="this.form.submit()">
+                    <option value="">-- نمایش همه فرصت‌های شغلی ({{ all_jobs|length }} عنوان) --</option>
+                    {% for j in all_jobs %}
+                    <option value="{{ j.id }}" {% if selected_job_id == j.id|stringformat:"s" %}selected{% endif %}>
+                        کد {{ j.code }}: {{ j.title }} ({{ j.department|default:"فولاد مبارکه" }})
+                    </option>
                     {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </select>
+            </div>
+
+            <div class="col-md-5 col-12">
+                <input type="text" name="q" value="{{ search_query }}" 
+                       placeholder="جستجو در شغل، مکان، مصاحبه‌گر یا توضیحات..." 
+                       class="form-control form-control-sm text-xs" style="border-radius: 8px;">
+            </div>
+
+            <div class="col-md-2 col-12 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-secondary w-100 font-bold text-xs py-1.5" style="border-radius: 8px;">
+                    فیلتر
+                </button>
+                {% if selected_job_id or search_query or selected_type != 'ALL' %}
+                <a href="?year={{ selected_year }}&month={{ selected_month }}" class="btn btn-sm btn-outline-danger font-bold text-xs py-1.5 px-2" style="border-radius: 8px;" title="حذف فیلترها">
+                    ✕
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Main Calendar Grid -->
+    <div class="calendar-container">
+        <div class="table-responsive">
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th>شنبه</th>
+                        <th>یکشنبه</th>
+                        <th>دوشنبه</th>
+                        <th>سه‌شنبه</th>
+                        <th>چهارشنبه</th>
+                        <th>پنجشنبه</th>
+                        <th style="color: #dc2626;">جمعه</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in weeks %}
+                    <tr>
+                        {% for day in week %}
+                            {% if day is None %}
+                                <td class="calendar-empty"></td>
+                            {% else %}
+                                <td class="{% if day.is_today %}is-today{% endif %} {% if day.is_holiday %}is-holiday{% endif %}">
+                                    <div class="calendar-day-cell">
+                                        <div class="day-header">
+                                            <span class="day-number">{{ day.day }}</span>
+                                            {% if day.holiday_title %}
+                                                <span class="holiday-label" title="{{ day.holiday_title }}">{{ day.holiday_title }}</span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Event list inside the day -->
+                                        <div class="events-list">
+                                            {% for event in day.events %}
+                                                {% if event.is_bale_event %}
+                                                    <!-- Live Assessment Event from Bale Bot -->
+                                                    <div class="event-card-item {{ event.badge_class }}"
+                                                         data-id="{{ event.id }}"
+                                                         data-icon="{{ event.icon }}"
+                                                         data-type-title="{{ event.type_title }}"
+                                                         data-event-type="{{ event.event_type }}"
+                                                         data-title="{{ event.title }}"
+                                                         data-job-code="{{ event.job_code }}"
+                                                         data-job-id="{{ event.job_id|default:'' }}"
+                                                         data-unit="{{ event.unit }}"
+                                                         data-date="{{ event.jalali_date }}"
+                                                         data-time="{{ event.time }}"
+                                                         data-location="{{ event.location }}"
+                                                         data-notes="{{ event.notes }}"
+                                                         data-source="{{ event.source }}"
+                                                         onclick="openEventDetailsFromEl(this)"
+                                                         title="{{ event.type_title }} - {{ event.title }} (ساعت {{ event.time }})">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span><strong>{{ event.icon }} {{ event.time }}</strong></span>
+                                                            {% if event.candidates_count > 0 %}
+                                                            <span class="badge bg-white text-dark" style="font-size: 8.5px; padding: 1px 4px; border-radius: 4px;">
+                                                                {{ event.candidates_count }} داوطلب
+                                                            </span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="text-truncate mt-0.5" style="font-size: 9.5px;">
+                                                            {{ event.title }}
+                                                        </div>
+                                                        {% if event.location %}
+                                                        <div class="text-truncate opacity-75 text-2xs" style="font-size: 8.5px;">
+                                                            📍 {{ event.location }}
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <!-- SLA Stage Plan Milestone -->
+                                                    <a href="{% url 'job_planning' event.job_id %}" 
+                                                       class="event-card-item {{ event.badge_class }}"
+                                                       title="{{ event.title }} (فرصت: {{ event.job_title }})">
+                                                        <strong>{{ event.icon }} {{ event.title }}</strong>
+                                                        <div class="text-truncate text-2xs">{{ event.job_title }}</div>
+                                                    </a>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+
+                                        <!-- Quick Add Button on Hover -->
+                                        <button class="quick-add-btn" 
+                                                title="افزودن زمان‌بندی برای {{ day.jalali_date_str }}"
+                                                onclick="quickAddForDate('{{ day.jalali_date_str }}')">
+                                            +
+                                        </button>
+                                    </div>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: جزئیات و مدیریت رویداد بله / اپلیکیشن -->
+<!-- ========================================== -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-bottom bg-light py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <span id="modalEventIcon" style="font-size: 20px;">🎤</span>
+                    <div>
+                        <h5 class="modal-title font-bold text-dark m-0" id="modalEventTitle">جزئیات زمان‌بندی ارزیابی</h5>
+                        <span class="text-xs text-muted" id="modalEventSubtitle">شناسه: -</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Info Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6 col-12">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <span class="text-xs text-muted d-block mb-1">فرصت شغلی / ردیف جذب:</span>
+                            <h6 class="font-bold text-dark m-0" id="modalJobTitle">-</h6>
+                            <span class="badge bg-secondary-subtle text-secondary border mt-1" id="modalJobCode">کد: -</span>
+                            <span class="badge bg-light text-muted border mt-1" id="modalJobUnit">واحد: -</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <span class="text-xs text-muted d-block mb-1">زمان و مکان برگزاری:</span>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary text-white font-bold px-2 py-1" id="modalEventDate">-</span>
+                                <span class="badge bg-dark text-white font-bold px-2 py-1" id="modalEventTime">ساعت -</span>
+                            </div>
+                            <div class="text-xs text-dark mt-1 font-semibold" id="modalEventLocation">
+                                📍 مکان: ثبت نشده
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12" id="modalNotesContainer">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <span class="text-xs text-muted d-block mb-1">مصاحبه‌گر / یادداشت‌ها و هماهنگی‌ها:</span>
+                            <p class="m-0 text-sm text-dark font-medium" id="modalEventNotes">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candidates Section -->
+                <div class="border rounded-3 p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-bold text-dark m-0 d-flex align-items-center gap-1.5">
+                            <span>👥 داوطلبان این مرحله</span>
+                            <span class="badge bg-primary rounded-pill text-xs" id="modalCandidateCount">۰ نفر</span>
+                        </h6>
+                        <a href="#" id="modalScoreEntryLink" class="btn btn-sm btn-outline-success font-bold text-xs" target="_blank">
+                            📝 ورود سریع نمرات و ثبت غیبت در این مرحله
+                        </a>
+                    </div>
+                    
+                    <div id="modalCandidatesLoading" class="text-center py-3 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-1" role="status"></div>
+                        در حال بارگذاری لیست کارجویان...
+                    </div>
+
+                    <div id="modalCandidatesTableContainer" class="table-responsive d-none" style="max-height: 220px; overflow-y: auto;">
+                        <table class="table table-sm table-hover text-xs m-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>نام و نام خانوادگی</th>
+                                    <th>کد ملی</th>
+                                    <th>تلفن تماس</th>
+                                    <th>وضعیت فعلی</th>
+                                    <th>نمره</th>
+                                    <th>اقدام</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalCandidatesList">
+                                <!-- Ajax populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="modal-footer border-top bg-light py-2.5 px-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-danger font-bold text-xs d-flex align-items-center gap-1" id="modalDeleteBtn">
+                    <span>🗑</span>
+                    <span>لغو و حذف جلسه</span>
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary font-bold text-xs" id="modalEditBtn">
+                        ✏️ ویرایش زمان‌بندی
+                    </button>
+                    <button type="button" class="btn btn-secondary font-bold text-xs" data-bs-dismiss="modal">
+                        بستن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: ثبت و ویرایش زمان‌بندی ارزیابی -->
+<!-- ========================================== -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <form id="scheduleForm">
+                {% csrf_token %}
+                <input type="hidden" name="id" id="formScheduleId" value="">
+                
+                <div class="modal-header border-bottom bg-light py-3 px-4">
+                    <h5 class="modal-title font-bold text-dark m-0" id="formModalTitle">
+                        ➕ ثبت زمان‌بندی جدید ارزیابی
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <!-- Job Opportunity Selector -->
+                    <div class="mb-3">
+                        <label class="form-label font-bold text-xs text-dark">فرصت شغلی مرتبط <span class="text-danger">*</span></label>
+                        <select name="job_id" id="formJobId" class="form-select form-select-sm text-xs" required>
+                            <option value="">-- انتخاب شغل مورد تقاضا --</option>
+                            {% for j in all_jobs %}
+                            <option value="{{ j.id }}" data-code="{{ j.code }}" data-title="{{ j.title }}" data-unit="{{ j.department|default:'' }}">
+                                کد {{ j.code }}: {{ j.title }} ({{ j.department|default:"فولاد مبارکه" }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Event Type -->
+                    <div class="mb-3">
+                        <label class="form-label font-bold text-xs text-dark">نوع رویداد ارزیابی <span class="text-danger">*</span></label>
+                        <select name="event_type" id="formEventType" class="form-select form-select-sm text-xs font-semibold" required>
+                            <option value="INTERVIEW">🎤 مصاحبه تخصصی / شایستگی‌محور</option>
+                            <option value="WRITTEN_EXAM">📝 آزمون کتبی (تخصصی / عمومی)</option>
+                            <option value="SKILL_TEST">⚙️ آزمون مهارتی / کانون ارزیابی عملی</option>
+                        </select>
+                    </div>
+
+                    <!-- Date & Time Row -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-7">
+                            <label class="form-label font-bold text-xs text-dark">تاریخ برگزاری (شمسی) <span class="text-danger">*</span></label>
+                            <input type="text" name="jalali_date" id="formJalaliDate" 
+                                   class="form-control form-control-sm text-xs text-center font-bold" 
+                                   placeholder="مثال: ۱۴۰۵/۰۷/۱۵" value="{{ today_jalali }}" required>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label font-bold text-xs text-dark">ساعت شروع <span class="text-danger">*</span></label>
+                            <input type="text" name="time" id="formTime" 
+                                   class="form-control form-control-sm text-xs text-center font-bold" 
+                                   placeholder="10:00" value="10:00" required>
+                        </div>
+                    </div>
+
+                    <!-- Location / Link -->
+                    <div class="mb-3">
+                        <label class="form-label font-bold text-xs text-dark">مکان برگزاری یا لینک جلسه</label>
+                        <input type="text" name="location" id="formLocation" 
+                               class="form-control form-control-sm text-xs" 
+                               placeholder="مثال: سالن نگین، ساختمان آموزش، اتاق مصاحبه ۱">
+                    </div>
+
+                    <!-- Notes / Interviewer -->
+                    <div class="mb-2">
+                        <label class="form-label font-bold text-xs text-dark">مصاحبه‌کننده / توضیحات و نکات هماهنگی</label>
+                        <textarea name="notes" id="formNotes" rows="2" 
+                                  class="form-control form-control-sm text-xs" 
+                                  placeholder="مثال: مصاحبه‌گر دکتر دایی ۰۹۱۳۳۳۴۴۴۳۳ - نیاز به سیستم ویدئو پروژکتور"></textarea>
+                    </div>
+
+                    <div class="alert alert-light border py-2 px-3 m-0 d-flex align-items-center gap-2" style="font-size: 11px;">
+                        <span>ℹ️</span>
+                        <span>این رویداد به طور خودکار با <strong>ربات بله</strong> و <strong>اپلیکیشن موبایل پیجو</strong> سینک خواهد شد.</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top bg-light py-2.5 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary font-bold text-xs" data-bs-dismiss="modal">
+                        انصراف
+                    </button>
+                    <button type="submit" id="formSubmitBtn" class="btn btn-primary font-bold text-xs d-flex align-items-center gap-1.5">
+                        <span id="formSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        <span>💾 ثبت و ارسال به ربات بله</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentEvent = null;
+
+    function openEventDetailsFromEl(el) {
+        const event = {
+            id: el.dataset.id || '',
+            icon: el.dataset.icon || '🎤',
+            type_title: el.dataset.typeTitle || 'ارزیابی',
+            event_type: el.dataset.eventType || 'INTERVIEW',
+            title: el.dataset.title || '',
+            job_code: el.dataset.jobCode || '',
+            job_id: el.dataset.jobId || '',
+            unit: el.dataset.unit || '',
+            jalali_date: el.dataset.date || '',
+            time: el.dataset.time || '10:00',
+            location: el.dataset.location || '',
+            notes: el.dataset.notes || '',
+            source: el.dataset.source || 'BALE'
+        };
+        openEventDetails(event);
+    }
+
+    // Open Event Details Modal
+    function openEventDetails(event) {
+        currentEvent = event;
+        document.getElementById('modalEventIcon').innerText = event.icon || '🎤';
+        document.getElementById('modalEventTitle').innerText = (event.type_title || 'ارزیابی') + ' — ' + (event.title || '');
+        document.getElementById('modalEventSubtitle').innerText = 'شناسه یکتا: ' + (event.id || '-') + ' | منبع: ' + (event.source || 'BALE');
+        
+        document.getElementById('modalJobTitle').innerText = event.title || '-';
+        document.getElementById('modalJobCode').innerText = 'کد شغل: ' + (event.job_code || '-');
+        document.getElementById('modalJobUnit').innerText = 'واحد: ' + (event.unit || 'نامشخص');
+        
+        document.getElementById('modalEventDate').innerText = event.jalali_date || '-';
+        document.getElementById('modalEventTime').innerText = 'ساعت ' + (event.time || '-');
+        document.getElementById('modalEventLocation').innerText = event.location ? ('📍 مکان: ' + event.location) : '📍 مکان: حضوری / تعیین نشده';
+        document.getElementById('modalEventNotes').innerText = event.notes || 'توضیحات و هماهنگی اولیه‌ای ثبت نشده است.';
+
+        // Load Candidates for this Job & Stage
+        loadStageCandidates(event.job_code, event.job_id, event.event_type);
+
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+        modal.show();
+    }
+
+    // Load Stage Candidates via AJAX
+    function loadStageCandidates(jobCode, jobId, eventType) {
+        const loadingEl = document.getElementById('modalCandidatesLoading');
+        const containerEl = document.getElementById('modalCandidatesTableContainer');
+        const tbodyEl = document.getElementById('modalCandidatesList');
+        const countBadge = document.getElementById('modalCandidateCount');
+        const scoreEntryLink = document.getElementById('modalScoreEntryLink');
+
+        loadingEl.classList.remove('d-none');
+        containerEl.classList.add('d-none');
+        tbodyEl.innerHTML = '';
+        countBadge.innerText = 'در حال شمارش...';
+
+        const url = `{% url 'bale_schedule_candidates' %}?job_code=${encodeURIComponent(jobCode || '')}&job_id=${encodeURIComponent(jobId || '')}&event_type=${encodeURIComponent(eventType || '')}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                loadingEl.classList.add('d-none');
+                if (data.ok) {
+                    countBadge.innerText = (data.candidates.length) + ' نفر';
+                    if (data.score_entry_url) {
+                        scoreEntryLink.href = data.score_entry_url;
+                        scoreEntryLink.classList.remove('d-none');
+                    } else {
+                        scoreEntryLink.classList.add('d-none');
+                    }
+
+                    if (data.candidates.length === 0) {
+                        tbodyEl.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">هیچ داوطلبی در مرحله ارزیابی این شغل یافت نشد.</td></tr>';
+                    } else {
+                        let html = '';
+                        data.candidates.forEach(c => {
+                            let badgeBg = 'bg-secondary';
+                            if (c.status === 'COMPLETED') badgeBg = 'bg-success';
+                            else if (c.status === 'FAILED') badgeBg = 'bg-danger';
+                            else if (c.status === 'ABSENT') badgeBg = 'bg-secondary text-white';
+                            else if (c.status === 'PENDING') badgeBg = 'bg-warning text-dark';
+
+                            html += `
+                                <tr>
+                                    <td class="font-bold"><a href="${c.url}" target="_blank" class="text-dark text-decoration-none">${c.name}</a></td>
+                                    <td>${c.national_id || '-'}</td>
+                                    <td>${c.phone || '-'}</td>
+                                    <td><span class="badge ${badgeBg}">${c.status_display}</span></td>
+                                    <td><strong>${c.score ? c.score : '-'}</strong></td>
+                                    <td><a href="${c.url}" target="_blank" class="btn btn-2xs btn-outline-primary py-0 px-1.5" style="font-size: 10px;">پرونده</a></td>
+                                </tr>
+                            `;
+                        });
+                        tbodyEl.innerHTML = html;
+                    }
+                    containerEl.classList.remove('d-none');
+                } else {
+                    countBadge.innerText = '۰ نفر';
+                    tbodyEl.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">${data.error || 'خطا در واکشی اطلاعات'}</td></tr>`;
+                    containerEl.classList.remove('d-none');
+                }
+            })
+            .catch(err => {
+                loadingEl.classList.add('d-none');
+                tbodyEl.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-3">خطا در ارتباط با سرور سامانه</td></tr>';
+                containerEl.classList.remove('d-none');
+            });
+    }
+
+    // Quick Add for clicked day
+    function quickAddForDate(dateStr) {
+        document.getElementById('formScheduleId').value = '';
+        document.getElementById('formModalTitle').innerText = '➕ ثبت زمان‌بندی جدید ارزیابی';
+        document.getElementById('formJalaliDate').value = dateStr;
+        document.getElementById('formJobId').value = '';
+        document.getElementById('formLocation').value = '';
+        document.getElementById('formNotes').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('addScheduleModal'));
+        modal.show();
+    }
+
+    // Edit Event Action from Details Modal
+    document.getElementById('modalEditBtn').addEventListener('click', function() {
+        if (!currentEvent) return;
+        
+        // Hide details modal
+        bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal')).hide();
+
+        // Populate Add/Edit Modal
+        document.getElementById('formScheduleId').value = currentEvent.id || '';
+        document.getElementById('formModalTitle').innerText = '✏️ ویرایش زمان‌بندی ارزیابی';
+        document.getElementById('formJalaliDate').value = currentEvent.jalali_date || '';
+        document.getElementById('formTime').value = currentEvent.time || '10:00';
+        document.getElementById('formEventType').value = currentEvent.event_type || 'INTERVIEW';
+        document.getElementById('formLocation').value = currentEvent.location || '';
+        document.getElementById('formNotes').value = currentEvent.notes || '';
+
+        // Select Job
+        const jobSelect = document.getElementById('formJobId');
+        if (currentEvent.job_id) {
+            jobSelect.value = currentEvent.job_id;
+        } else {
+            // Find by code
+            for (let i = 0; i < jobSelect.options.length; i++) {
+                if (jobSelect.options[i].dataset.code === currentEvent.job_code) {
+                    jobSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        const editModal = new bootstrap.Modal(document.getElementById('addScheduleModal'));
+        editModal.show();
+    });
+
+    // Delete Event Action
+    document.getElementById('modalDeleteBtn').addEventListener('click', function() {
+        if (!currentEvent) return;
+        if (!confirm(`آیا از لغو و حذف زمان‌بندی «${currentEvent.title}» در تاریخ ${currentEvent.jalali_date} اطمینان دارید؟ این عمل رویداد را از ربات بله نیز حذف خواهد کرد.`)) {
+            return;
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerText = 'در حال حذف...';
+
+        fetch('{% url "bale_schedule_delete" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                id: currentEvent.id,
+                request_number: currentEvent.job_code,
+                job_code: currentEvent.job_code,
+                jalali_date: currentEvent.jalali_date,
+                time: currentEvent.time
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerText = 'لغو و حذف جلسه';
+            if (data.ok) {
+                alert('زمان‌بندی با موفقیت حذف گردید.');
+                window.location.reload();
+            } else {
+                alert('خطا در حذف زمان‌بندی: ' + (data.error || 'خطای سرور'));
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerText = 'لغو و حذف جلسه';
+            alert('خطای شبکه در حذف زمان‌بندی');
+        });
+    });
+
+    // Submit Add/Edit Form
+    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('formSubmitBtn');
+        const spinner = document.getElementById('formSubmitSpinner');
+
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        const formData = new FormData(this);
+        const payload = {};
+        formData.forEach((value, key) => payload[key] = value);
+
+        fetch('{% url "bale_schedule_save" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+            if (data.ok) {
+                alert('زمان‌بندی با موفقیت ذخیره و در ربات بله اعمال گردید.');
+                window.location.reload();
+            } else {
+                alert('خطا در ذخیره رویداد: ' + (data.error || 'خطای سرور'));
+            }
+        })
+        .catch(err => {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+            alert('خطای شبکه در ارسال اطلاعات');
+        });
+    });
+
+    // Live Sync Button Action
+    document.getElementById('syncBaleBtn').addEventListener('click', function() {
+        const spinner = document.getElementById('syncSpinner');
+        const icon = document.getElementById('syncIcon');
+        const btn = this;
+
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        icon.classList.add('d-none');
+
+        // Reload page to fetch freshest data
+        setTimeout(() => {
+            window.location.reload();
+        }, 600);
+    });
+</script>
 {% endblock %}

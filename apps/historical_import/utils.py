@@ -828,7 +828,7 @@ def import_fixed_template_excel(excel_file, user):
         res_str = res_str.replace('ي', 'ی').replace('ك', 'ک').replace('\u200c', '').strip()
         
         if "غایب" in res_str:
-            return ApplicationStageState.STATUS_FAILED
+            return ApplicationStageState.STATUS_ABSENT
         if any(kw in res_str for kw in ["غیرمجاز", "غیر مجاز", "مردود", "رد"]):
             return ApplicationStageState.STATUS_FAILED
         if any(kw in res_str for kw in ["مجاز", "قبول", "تایید"]):
@@ -1221,7 +1221,7 @@ def import_fixed_template_excel(excel_file, user):
                         is_absent = True
                     
                     if is_absent:
-                        stage_state.status = ApplicationStageState.STATUS_FAILED
+                        stage_state.status = ApplicationStageState.STATUS_ABSENT
                         stage_state.score = 0.0
                         stage_state.notes = f"غایب در {stage.name}"
                         stats['absent_count'] += 1
@@ -1399,7 +1399,7 @@ def import_fixed_template_excel(excel_file, user):
                     scr_state.save()
 
         # ۳. محاسبه نمره کل و وضعیت نهایی درخواست
-        has_failed_stage = app.stage_states.filter(status=ApplicationStageState.STATUS_FAILED, is_deleted=False).exists()
+        has_failed_stage = app.stage_states.filter(status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT], is_deleted=False).exists()
         total_weighted_score = 0.0
         states = app.stage_states.filter(is_deleted=False)
         for state in states:

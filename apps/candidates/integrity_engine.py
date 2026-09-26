@@ -120,9 +120,9 @@ class StatusSyncFailedCheck(BaseIntegrityCheck):
 
     def scan(self):
         discrepancies = []
-        # Find applications marked IN_PROGRESS but having any non-conditional FAILED stage state
+        # Find applications marked IN_PROGRESS but having any non-conditional FAILED or ABSENT stage state
         failed_states = ApplicationStageState.objects.filter(
-            status=ApplicationStageState.STATUS_FAILED,
+            status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
             is_conditional_pass=False,
             is_deleted=False,
             application__status=JobApplication.STATUS_IN_PROGRESS,

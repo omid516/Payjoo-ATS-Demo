@@ -105,7 +105,7 @@
             <tbody>
                 {% for state in stage_states %}
                 <tr id="bulk-row-{{ state.pk }}" data-state-id="{{ state.pk }}"
-                    {% if state.status == 'COMPLETED' %}class="table-success bg-opacity-25"{% elif state.status == 'FAILED' %}class="table-danger bg-opacity-10"{% endif %}>
+                    {% if state.status == 'COMPLETED' %}class="table-success bg-opacity-25"{% elif state.status == 'FAILED' %}class="table-danger bg-opacity-10"{% elif state.status == 'ABSENT' %}class="table-secondary bg-opacity-20"{% endif %}>
                     <td class="ps-2 py-1">
                         <div class="font-semibold text-xs">
                             {{ state.application.candidate.first_name }} {{ state.application.candidate.last_name }}
@@ -115,6 +115,8 @@
                         <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 text-xxs px-1 py-0">✓ ثبت شده</span>
                         {% elif state.status == 'FAILED' %}
                         <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-25 text-xxs px-1 py-0">✗ مردود</span>
+                        {% elif state.status == 'ABSENT' %}
+                        <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 text-xxs px-1 py-0">⊘ غایب</span>
                         {% endif %}
                     </td>
                     {% for cell in state.interviewer_cells %}

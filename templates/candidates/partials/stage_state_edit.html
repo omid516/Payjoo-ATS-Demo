@@ -11,6 +11,7 @@
                 <option value="PENDING" {% if state.status == 'PENDING' %}selected{% endif %}>در انتظار</option>
                 <option value="COMPLETED" {% if state.status == 'COMPLETED' %}selected{% endif %}>قبول شده</option>
                 <option value="FAILED" {% if state.status == 'FAILED' %}selected{% endif %}>مردود شده</option>
+                <option value="ABSENT" {% if state.status == 'ABSENT' %}selected{% endif %}>غایب</option>
             </select>
         </div>
         <div class="mb-1">

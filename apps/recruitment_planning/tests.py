@@ -476,4 +476,51 @@ class RecruitmentPlanningTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertContains(response, 'تاریخ شروع باید قبل از پایان باشد', status_code=400)
 
+    def test_bale_schedule_endpoints(self):
+        """تست اندپوینت‌های ثبت، حذف و مشاهده کارجویان زمان‌بندی بله"""
+        from unittest.mock import patch
+        self.client.login(username='admin_planning', password='testpassword123')
+
+        # 1. Test Save Schedule
+        with patch('apps.recruitment_planning.bale_service.save_bale_schedule') as mock_save:
+            mock_save.return_value = {'ok': True, 'status': 'saved'}
+            
+            save_url = reverse('bale_schedule_save')
+            payload = {
+                'job_id': self.job1.id,
+                'event_type': 'INTERVIEW',
+                'jalali_date': '1405/07/20',
+                'time': '11:00',
+                'location': 'سالن نگین',
+                'notes': 'مصاحبه فنی'
+            }
+            res = self.client.post(save_url, payload, content_type='application/json')
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            self.assertTrue(data['ok'])
+            self.assertEqual(data['item']['job_code'], self.job1.code)
+            self.assertEqual(data['item']['location'], 'سالن نگین')
+
+        # 2. Test Candidates List for Stage
+        candidates_url = reverse('bale_schedule_candidates') + f"?job_id={self.job1.id}&event_type=INTERVIEW"
+        res_cand = self.client.get(candidates_url)
+        self.assertEqual(res_cand.status_code, 200)
+        cand_data = res_cand.json()
+        self.assertTrue(cand_data['ok'])
+        self.assertEqual(cand_data['job_code'], self.job1.code)
+
+        # 3. Test Delete Schedule
+        with patch('apps.recruitment_planning.bale_service.delete_bale_schedule') as mock_delete:
+            mock_delete.return_value = {'ok': True, 'status': 'deleted'}
+            
+            del_url = reverse('bale_schedule_delete')
+            del_payload = {
+                'id': 'test-uuid-123',
+                'job_code': self.job1.code
+            }
+            res_del = self.client.post(del_url, del_payload, content_type='application/json')
+            self.assertEqual(res_del.status_code, 200)
+            self.assertTrue(res_del.json()['ok'])
+
+
 

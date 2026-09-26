@@ -4,13 +4,15 @@
     hx-trigger="click" 
     hx-target="this"
     hx-swap="outerHTML"
-    class="text-center p-3 cursor-pointer hover-bg-light {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10{% elif state.status == 'FAILED' and not state.is_conditional_pass %}bg-danger bg-opacity-10{% elif state.is_conditional_pass %}bg-warning bg-opacity-10{% elif not state.is_accessible %}bg-light bg-opacity-50{% endif %}" 
+    class="text-center p-3 cursor-pointer hover-bg-light {% if state.status == 'COMPLETED' %}bg-success bg-opacity-10{% elif state.status == 'FAILED' and not state.is_conditional_pass %}bg-danger bg-opacity-10{% elif state.status == 'ABSENT' %}bg-secondary bg-opacity-20 text-muted{% elif state.is_conditional_pass %}bg-warning bg-opacity-10{% elif not state.is_accessible %}bg-light bg-opacity-50{% endif %}" 
     style="min-width: 130px; transition: background 0.15s;"
     title="{% if state.evaluator %}ثبت‌کننده: {{ state.evaluator.get_full_name|default:state.evaluator.username }} در {{ state.updated_at|to_jalali }}&#10;{% endif %}{% if state.interviewer_scores.all %}نمرات مصاحبه‌گران:&#10;{% for iscore in state.interviewer_scores.all %}- {{ iscore.interviewer.get_full_name|default:iscore.interviewer.username }}: {{ iscore.score }} ({{ iscore.get_status_display }}){% if iscore.competency_scores.all %} (شایستگی‌ها: {% for cs in iscore.competency_scores.all %}{{ cs.competency.name }}={{ cs.score }}{% if not forloop.last %}، {% endif %}{% endfor %}){% endif %} در {{ iscore.updated_at|to_jalali }}{% if iscore.notes %} [{{ iscore.notes }}]{% endif %}&#10;{% endfor %}{% endif %}{% if state.notes %}یادداشت عمومی: {{ state.notes }}{% endif %}{% if not state.is_accessible %}&#10;(این مرحله در روال عادی قفل است اما می‌توانید آن را ویرایش کنید){% endif %}">
     
     <div class="font-bold text-secondary mb-1">
         {% if state.status == 'PENDING' %}
             <span class="text-muted">-</span>
+        {% elif state.status == 'ABSENT' %}
+            <span class="text-muted">۰.۰۰</span>
         {% else %}
             {{ state.score|floatformat:2 }}
         {% endif %}
@@ -35,6 +37,8 @@
             {% else %}
                 <span class="text-danger font-semibold">مردود</span>
             {% endif %}
+        {% elif state.status == 'ABSENT' %}
+            <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 px-1.5 py-0.5 rounded text-xs font-semibold">غایب</span>
         {% endif %}
     </div>
     

@@ -1314,7 +1314,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 from django.db.models import Exists, OuterRef
                 selected_stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
                 app_statuses = [JobApplication.STATUS_IN_PROGRESS]
-                if show_failed_prior or bypass_locks:
+                if show_failed_prior or bypass_locks or eval_status in ['COMPLETED_FAILED', 'ABSENT', 'ALL']:
                     app_statuses.append(JobApplication.STATUS_REJECTED)
                 pending_states_qs = ApplicationStageState.objects.filter(
                     application__job=selected_job,
@@ -1327,7 +1327,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 prior_failed_subquery = ApplicationStageState.objects.filter(
                     application=OuterRef('application'),
                     stage__sequence__lt=OuterRef('stage__sequence'),
-                    status=ApplicationStageState.STATUS_FAILED,
+                    status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
                     is_conditional_pass=False,
                     is_deleted=False
                 )
@@ -1341,7 +1341,9 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 if eval_status == 'PENDING':
                     pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_PENDING)
                 elif eval_status == 'COMPLETED_FAILED':
-                    pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED])
+                    pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT])
+                elif eval_status == 'ABSENT':
+                    pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_ABSENT)
                 
                 if q:
                     pending_states_qs = pending_states_qs.filter(
@@ -1502,7 +1504,9 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                             date_val = request.POST.get(f'date_{sid}', '').strip()
                             is_conditional_pass_val = request.POST.get(f'is_conditional_pass_{sid}') in ['true', 'on']
                             
-                            if state.stage.stage_type != 'SCREENING':
+                            if status_val == ApplicationStageState.STATUS_ABSENT:
+                                state.score = 0.0
+                            elif state.stage.stage_type != 'SCREENING':
                                 score_val = request.POST.get(f'score_{sid}', '0')
                                 try:
                                     score_float = round(float(score_val), 2)
@@ -1551,7 +1555,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 from django.db.models import Exists, OuterRef
                 selected_stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
                 app_statuses = [JobApplication.STATUS_IN_PROGRESS]
-                if show_failed_prior or bypass_locks:
+                if show_failed_prior or bypass_locks or eval_status in ['COMPLETED_FAILED', 'ABSENT', 'ALL']:
                     app_statuses.append(JobApplication.STATUS_REJECTED)
                 pending_states_qs = ApplicationStageState.objects.filter(
                     application__job=selected_job,
@@ -1564,7 +1568,7 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 prior_failed_subquery = ApplicationStageState.objects.filter(
                     application=OuterRef('application'),
                     stage__sequence__lt=OuterRef('stage__sequence'),
-                    status=ApplicationStageState.STATUS_FAILED,
+                    status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
                     is_conditional_pass=False,
                     is_deleted=False
                 )
@@ -1578,7 +1582,9 @@ class ScoreEntryListView(LoginRequiredMixin, RoleRequiredMixin, View):
                 if eval_status == 'PENDING':
                     pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_PENDING)
                 elif eval_status == 'COMPLETED_FAILED':
-                    pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED])
+                    pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT])
+                elif eval_status == 'ABSENT':
+                    pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_ABSENT)
                 
                 if q:
                     pending_states_qs = pending_states_qs.filter(
@@ -1788,6 +1794,12 @@ class ImportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
             "مردود شده در این مرحله": 'FAILED',
             "مردود": 'FAILED',
             "failed": 'FAILED',
+            "غایب در این مرحله": 'ABSENT',
+            "غایب": 'ABSENT',
+            "غائب": 'ABSENT',
+            "absent": 'ABSENT',
+            "no_show": 'ABSENT',
+            "no show": 'ABSENT',
         }
 
         try:
@@ -2701,7 +2713,7 @@ class ExportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         stage = get_object_or_404(JobOpportunityStage, pk=stage_id, is_deleted=False)
         
         app_statuses = [JobApplication.STATUS_IN_PROGRESS]
-        if show_failed_prior or bypass_locks:
+        if show_failed_prior or bypass_locks or eval_status in ['COMPLETED_FAILED', 'ABSENT', 'ALL']:
             app_statuses.append(JobApplication.STATUS_REJECTED)
             
         # Ensure all active applications have a stage state record for this stage before exporting
@@ -2741,7 +2753,7 @@ class ExportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         prior_failed_subquery = ApplicationStageState.objects.filter(
             application=OuterRef('application'),
             stage__sequence__lt=OuterRef('stage__sequence'),
-            status=ApplicationStageState.STATUS_FAILED,
+            status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
             is_conditional_pass=False,
             is_deleted=False
         )
@@ -2756,7 +2768,9 @@ class ExportScoreEntryExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
         if eval_status == 'PENDING':
             pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_PENDING)
         elif eval_status == 'COMPLETED_FAILED':
-            pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED])
+            pending_states_qs = pending_states_qs.filter(status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT])
+        elif eval_status == 'ABSENT':
+            pending_states_qs = pending_states_qs.filter(status=ApplicationStageState.STATUS_ABSENT)
             
         if q:
             pending_states_qs = pending_states_qs.filter(
@@ -3784,6 +3798,7 @@ class DownloadInterviewScoresTemplateView(LoginRequiredMixin, RoleRequiredMixin,
             ApplicationStageState.STATUS_PENDING: 'در انتظار',
             ApplicationStageState.STATUS_COMPLETED: 'قبول',
             ApplicationStageState.STATUS_FAILED: 'مردود',
+            ApplicationStageState.STATUS_ABSENT: 'غایب',
         }
         row_fill_even = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
         row_fill_odd = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
@@ -4009,7 +4024,7 @@ class ImportInterviewScoresExcelView(LoginRequiredMixin, RoleRequiredMixin, View
         prior_failed_subquery = ApplicationStageState.objects.filter(
             application=OuterRef('application'),
             stage__sequence__lt=OuterRef('stage__sequence'),
-            status=ApplicationStageState.STATUS_FAILED,
+            status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
             is_conditional_pass=False,
             is_deleted=False
         )
@@ -4108,7 +4123,7 @@ class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
             prior_failed_subquery = ApplicationStageState.objects.filter(
                 application=OuterRef('application'),
                 stage__sequence__lt=stage.sequence,
-                status=ApplicationStageState.STATUS_FAILED,
+                status__in=[ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT],
                 is_conditional_pass=False,
                 is_deleted=False
             )
@@ -4124,11 +4139,12 @@ class JobOpportunityReportView(LoginRequiredMixin, RoleRequiredMixin, View):
             total_entered = stage_states.count()
             passed = stage_states.filter(status=ApplicationStageState.STATUS_COMPLETED).count()
             failed = stage_states.filter(status=ApplicationStageState.STATUS_FAILED).count()
+            absent = stage_states.filter(status=ApplicationStageState.STATUS_ABSENT).count()
             pending = stage_states.filter(status=ApplicationStageState.STATUS_PENDING).count()
             
             # تاریخ واقعی اولین و آخرین ارزیابی
             evaluated_states = stage_states.filter(
-                status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED]
+                status__in=[ApplicationStageState.STATUS_COMPLETED, ApplicationStageState.STATUS_FAILED, ApplicationStageState.STATUS_ABSENT]
             )
             eval_dates = evaluated_states.aggregate(min_date=Min('evaluation_date'), max_date=Max('evaluation_date'))
             actual_start = eval_dates['min_date']

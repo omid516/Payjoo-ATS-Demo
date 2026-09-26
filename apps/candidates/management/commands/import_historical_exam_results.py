@@ -247,7 +247,7 @@ class Command(BaseCommand):
             # ۴. خالی/سایر -> مقایسه نمره با کف قبولی مرحله
             notes_str = ''
             if 'غایب' in result_str:
-                status_val = ApplicationStageState.STATUS_FAILED
+                status_val = ApplicationStageState.STATUS_ABSENT
                 notes_str = 'غایب در آزمون کتبی'
             elif 'غير' in result_str or 'غیر' in result_str or 'ineligible' in result_str.lower():
                 status_val = ApplicationStageState.STATUS_FAILED

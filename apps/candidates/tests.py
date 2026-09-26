@@ -2937,6 +2937,118 @@ class AutomatedNotificationTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("تقدیر و تشکر", mail.outbox[0].subject)
 
+    def test_absent_status_handling_single_and_bulk(self):
+        """تست ثبت وضعیت غایب در مراحل ارزیابی، تأثیر بر وضعیت متقاضی و فیلترها"""
+        candidate = Candidate.objects.create(
+            first_name='محسن',
+            last_name='غایبی',
+            email='mohsen@example.com',
+            phone_number='09130000000',
+            national_id='1234500000'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        stages = list(app.stage_states.all().order_by('stage__sequence'))
+        state1, state2 = stages[0], stages[1]
+        
+        # 1. ثبت وضعیت غایب در مرحله اول
+        state1.status = ApplicationStageState.STATUS_ABSENT
+        state1.score = 0.0
+        state1.notes = "عدم حضور در جلسه آزمون"
+        state1.save()
+        
+        # متقاضی باید به صورت خودکار رد شده تلقی شود
+        app.refresh_from_db()
+        self.assertEqual(app.status, JobApplication.STATUS_REJECTED)
+        self.assertEqual(app.effective_status, JobApplication.STATUS_REJECTED)
+        
+        # مرحله دوم نباید قابل دسترسی باشد و has_failed_prior_stages باید True باشد
+        state2.refresh_from_db()
+        self.assertFalse(state2.is_accessible)
+        self.assertTrue(state2.has_failed_prior_stages)
+        
+        # 2. تست ثبت غیبت از طریق نمای ورود تکی (UpdateApplicationStageStateView)
+        self.client.force_login(self.recruiter)
+        url = reverse('update_stage_state', args=[state1.id])
+        resp = self.client.post(url, {
+            'status': 'ABSENT',
+            'score': '0',
+            'notes': 'غیبت تایید شد',
+            'time': '10:00'
+        })
+        self.assertEqual(resp.status_code, 200)
+        state1.refresh_from_db()
+        self.assertEqual(state1.status, ApplicationStageState.STATUS_ABSENT)
+        self.assertIn("غایب", resp.content.decode('utf-8'))
+        
+        # 3. تست فیلترهای ورود نمرات ماتریسی بر اساس ABSENT
+        matrix_url = reverse('candidate_score_entry')
+        resp_filter = self.client.get(matrix_url, {
+            'job_id': self.job.id,
+            'eval_status': 'ABSENT'
+        })
+        self.assertEqual(resp_filter.status_code, 200)
+        self.assertIn("غایبی", resp_filter.content.decode('utf-8'))
+
+    def test_absent_excel_import_and_export(self):
+        """تست ورود و خروج اکسل با وضعیت غایب"""
+        import io, openpyxl
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        
+        candidate = Candidate.objects.create(
+            first_name='سعید',
+            last_name='غایب‌پور',
+            email='saeed_gh@example.com',
+            phone_number='09131111111',
+            national_id='1234511111'
+        )
+        app = JobApplication.objects.create(job=self.job, candidate=candidate)
+        stage1_obj = self.job.stages.get(sequence=1)
+        state1 = app.stage_states.filter(stage=stage1_obj).first()
+        
+        # ساخت فایل اکسل تست
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append([
+            "شناسه وضعیت", "نام متقاضی", "نام خانوادگی", "کد ملی", "عنوان شغل", "مرحله", 
+            "نمره نهایی مرحله", "وضعیت ارزیابی", "توضیحات و یادداشت ارزیاب", "تاریخ ارزیابی", "ارزیاب", "آخرین تغییر"
+        ])
+        ws.append([
+            state1.id, "سعید", "غایب‌پور", "1234511111", self.job.title, stage1_obj.name,
+            0.0, "غایب", "عدم حضور در جلسه", "1405/03/10", self.recruiter.username, ""
+        ])
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        excel_file = SimpleUploadedFile("test_absent.xlsx", output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        
+        self.client.force_login(self.recruiter)
+        url = reverse('score_entry_import_excel')
+        resp = self.client.post(url, {
+            'job_id': self.job.id,
+            'stage_id': stage1_obj.id,
+            'excel_file': excel_file
+        })
+        self.assertEqual(resp.status_code, 302)
+        state1.refresh_from_db()
+        self.assertEqual(state1.status, ApplicationStageState.STATUS_ABSENT)
+        self.assertEqual(state1.score, 0.0)
+        self.assertEqual(state1.notes, "عدم حضور در جلسه")
+        
+        # تست خروجی اکسل
+        export_url = reverse('score_entry_export_excel')
+        export_resp = self.client.get(f"{export_url}?job_id={self.job.id}&stage_id={stage1_obj.id}&eval_status=ABSENT")
+        self.assertEqual(export_resp.status_code, 200)
+        self.assertEqual(export_resp['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        
+        # بررسی محتوای فایل اکسل دانلود شده
+        wb_exp = openpyxl.load_workbook(io.BytesIO(export_resp.content))
+        ws_exp = wb_exp.active
+        rows_exp = list(ws_exp.iter_rows(values_only=True))
+        self.assertEqual(len(rows_exp), 2)  # header + 1 absent row
+        self.assertIn("غایب", rows_exp[1][7])
+
+
+
 
 
 

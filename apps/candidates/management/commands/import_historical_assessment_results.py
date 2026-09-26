@@ -276,7 +276,7 @@ class Command(BaseCommand):
             notes_list = []
             notes_str = ''
             if 'غایب' in result_str:
-                status_val = ApplicationStageState.STATUS_FAILED
+                status_val = ApplicationStageState.STATUS_ABSENT
                 notes_str = 'غایب در کانون ارزیابی'
                 score_val = 0.0
             elif 'غير' in result_str or 'غیر' in result_str or 'ineligible' in result_str.lower():

@@ -497,6 +497,10 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
     allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
 
     def get(self, request):
+        from .bale_service import fetch_bale_schedules, normalize_digits, normalize_jalali_date, normalize_time
+        from django.db.models import Q
+        from apps.candidates.models import ApplicationStageState
+
         today = datetime.date.today()
         j_today = jdatetime.date.fromgregorian(date=today)
         
@@ -506,6 +510,11 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
         except (ValueError, TypeError):
             year = j_today.year
             month = j_today.month
+
+        # Filters
+        selected_type = request.GET.get('event_type', 'ALL').strip().upper()
+        selected_job_id = request.GET.get('job_id', '').strip()
+        search_query = request.GET.get('q', '').strip()
 
         JALALI_MONTH_NAMES = [
             "", "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -529,8 +538,8 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
             
         g_start, g_end = get_jalali_month_range(year, month)
         
-        # Fetch active stage plans in this range
-        stage_plans = JobStagePlan.objects.filter(
+        # Fetch active stage plans in this range (SLA milestones)
+        stage_plans_qs = JobStagePlan.objects.filter(
             plan__status=JobRecruitmentPlan.STATUS_ACTIVE,
             plan__is_deleted=False,
             plan__job__is_deleted=False,
@@ -540,6 +549,13 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
         ).exclude(
             plan__job__status__in=[JobOpportunity.STATUS_CLOSED, JobOpportunity.STATUS_CANCELLED, JobOpportunity.STATUS_SUSPENDED]
         ).select_related('plan__job', 'stage')
+
+        if selected_job_id:
+            stage_plans_qs = stage_plans_qs.filter(plan__job_id=selected_job_id)
+
+        # Pre-fetch jobs for fast lookup and select dropdown
+        all_jobs_qs = JobOpportunity.objects.filter(is_deleted=False).order_by('code')
+        jobs_map_by_code = {j.code: j for j in all_jobs_qs}
         
         # Fetch holidays in this range
         holidays = Holiday.objects.filter(
@@ -547,7 +563,109 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
             date__range=(g_start, g_end)
         )
         holiday_dict = {h.date: h.title for h in holidays}
+
+        # Fetch Live Schedules from Bale Bot & App central server (zarfy.ir)
+        raw_bale_schedules = fetch_bale_schedules()
         
+        # Parse and enrich bale schedules
+        month_schedules_by_day = {} # day_number (1..31) -> list of events
+        
+        # Category counters for this month
+        kpi_counts = {
+            'total': 0,
+            'interview': 0,
+            'written_exam': 0,
+            'skill_test': 0,
+            'stage_plan': 0
+        }
+
+        for item in raw_bale_schedules:
+            j_date = item.get('jalali_date', '')
+            if not j_date:
+                continue
+            parts = j_date.replace('-', '/').split('/')
+            if len(parts) != 3:
+                continue
+            try:
+                ev_y, ev_m, ev_d = int(parts[0]), int(parts[1]), int(parts[2])
+            except ValueError:
+                continue
+
+            ev_type = (item.get('event_type') or 'INTERVIEW').upper()
+            if 'WRITTEN' in ev_type or 'EXAM' in ev_type:
+                canonical_type = 'WRITTEN_EXAM'
+                type_title = 'آزمون کتبی'
+                badge_class = 'event-exam'
+                icon = '📝'
+            elif 'SKILL' in ev_type:
+                canonical_type = 'SKILL_TEST'
+                type_title = 'آزمون مهارتی / عملی'
+                badge_class = 'event-skill'
+                icon = '⚙️'
+            else:
+                canonical_type = 'INTERVIEW'
+                type_title = 'مصاحبه حضوری/آنلاین'
+                badge_class = 'event-interview'
+                icon = '🎤'
+
+            # Match with DB JobOpportunity
+            req_code = item.get('job_code') or item.get('request_number') or ''
+            matched_job = jobs_map_by_code.get(req_code)
+            job_title = matched_job.title if matched_job else item.get('job_title') or f"فرصت شغلی (کد: {req_code})"
+            unit = matched_job.department if matched_job else item.get('unit', '')
+            matched_job_id = matched_job.id if matched_job else None
+
+            # Filter checking
+            if ev_y == year and ev_m == month:
+                kpi_counts['total'] += 1
+                if canonical_type == 'INTERVIEW':
+                    kpi_counts['interview'] += 1
+                elif canonical_type == 'WRITTEN_EXAM':
+                    kpi_counts['written_exam'] += 1
+                elif canonical_type == 'SKILL_TEST':
+                    kpi_counts['skill_test'] += 1
+
+                # Apply active filters
+                if selected_type != 'ALL' and selected_type != canonical_type:
+                    continue
+                if selected_job_id:
+                    if not matched_job or str(matched_job.id) != str(selected_job_id):
+                        continue
+                if search_query:
+                    searchable = f"{job_title} {req_code} {unit} {item.get('location', '')} {item.get('notes', '')}"
+                    if search_query.lower() not in searchable.lower():
+                        continue
+
+                # Candidate count for this stage
+                candidates_count = 0
+                if matched_job:
+                    st_type_target = 'INTERVIEW' if canonical_type == 'INTERVIEW' else ('EXAM' if canonical_type == 'WRITTEN_EXAM' else 'SKILL_TEST')
+                    st = matched_job.stages.filter(stage_type=st_type_target, is_deleted=False).first()
+                    if st:
+                        candidates_count = ApplicationStageState.objects.filter(stage=st, is_deleted=False, application__is_deleted=False).count()
+
+                event_dict = {
+                    'is_bale_event': True,
+                    'id': item.get('id', ''),
+                    'event_type': canonical_type,
+                    'type_title': type_title,
+                    'badge_class': badge_class,
+                    'icon': icon,
+                    'title': job_title,
+                    'job_code': req_code,
+                    'job_id': matched_job_id,
+                    'unit': unit,
+                    'time': item.get('time', '10:00'),
+                    'jalali_date': j_date,
+                    'location': item.get('location', ''),
+                    'notes': item.get('notes', ''),
+                    'registered_by': item.get('registered_by', 'بات بله'),
+                    'source': item.get('source', 'BALE'),
+                    'candidates_count': candidates_count
+                }
+
+                month_schedules_by_day.setdefault(ev_d, []).append(event_dict)
+
         # Build month grid
         if month <= 6:
             num_days = 31
@@ -575,31 +693,52 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
             holiday_title = "جمعه" if g_date.weekday() == 4 else holiday_dict.get(g_date, "")
             
             day_events = []
-            for sp in stage_plans:
-                if sp.planned_start_date == g_date:
-                    day_events.append({
-                        'type': 'START',
-                        'label': f"شروع {sp.stage.name}",
-                        'job_title': sp.plan.job.title,
-                        'color': 'success',
-                        'job_id': sp.plan.job.id,
-                    })
-                if sp.planned_end_date == g_date:
-                    day_events.append({
-                        'type': 'END',
-                        'label': f"پایان {sp.stage.name}",
-                        'job_title': sp.plan.job.title,
-                        'color': 'danger',
-                        'job_id': sp.plan.job.id,
-                    })
+
+            # 1. Add Bale bot events
+            bale_events_today = month_schedules_by_day.get(day, [])
+            day_events.extend(bale_events_today)
+
+            # 2. Add SLA Stage Plans
+            if selected_type in ['ALL', 'STAGE_PLAN']:
+                for sp in stage_plans_qs:
+                    if sp.planned_start_date == g_date:
+                        kpi_counts['stage_plan'] += 1
+                        day_events.append({
+                            'is_bale_event': False,
+                            'event_type': 'STAGE_PLAN',
+                            'type_title': 'شروع مرحله برنامه',
+                            'badge_class': 'event-start',
+                            'icon': '🟢',
+                            'title': f"شروع {sp.stage.name}",
+                            'job_title': sp.plan.job.title,
+                            'job_code': sp.plan.job.code,
+                            'job_id': sp.plan.job.id,
+                            'time': 'تمام روز',
+                        })
+                    if sp.planned_end_date == g_date:
+                        kpi_counts['stage_plan'] += 1
+                        day_events.append({
+                            'is_bale_event': False,
+                            'event_type': 'STAGE_PLAN',
+                            'type_title': 'پایان مرحله برنامه',
+                            'badge_class': 'event-end',
+                            'icon': '🔴',
+                            'title': f"مهلت {sp.stage.name}",
+                            'job_title': sp.plan.job.title,
+                            'job_code': sp.plan.job.code,
+                            'job_id': sp.plan.job.id,
+                            'time': 'پایان SLA',
+                        })
             
             days.append({
                 'day': day,
                 'date': g_date,
+                'jalali_date_str': f"{year}/{month:02d}/{day:02d}",
                 'is_today': g_date == today,
                 'is_holiday': is_holiday,
                 'holiday_title': holiday_title,
-                'events': day_events
+                'events': day_events,
+                'has_events': len(day_events) > 0
             })
             
         # Pad end
@@ -619,8 +758,166 @@ class PlanningCalendarView(LoginRequiredMixin, RoleRequiredMixin, View):
             'selected_month': month,
             'weeks': weeks,
             'today_jalali': to_jalali_string(today),
+            'selected_type': selected_type,
+            'selected_job_id': selected_job_id,
+            'search_query': search_query,
+            'kpi_counts': kpi_counts,
+            'all_jobs': all_jobs_qs,
         }
         return render(request, 'recruitment_planning/calendar.html', context)
+
+
+class BaleScheduleSaveView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def post(self, request):
+        import uuid
+        from django.http import JsonResponse
+        from django.db.models import Q
+        from .bale_service import save_bale_schedule, normalize_digits, normalize_jalali_date, normalize_time
+
+        try:
+            if request.content_type == 'application/json':
+                import json
+                data = json.loads(request.body.decode('utf-8'))
+            else:
+                data = request.POST.dict()
+
+            item_id = data.get('id') or str(uuid.uuid4())
+            job_id = data.get('job_id')
+            job_code = normalize_digits(data.get('job_code', ''))
+            event_type = (data.get('event_type') or 'INTERVIEW').upper()
+            jalali_date = normalize_jalali_date(data.get('jalali_date', ''))
+            time_val = normalize_time(data.get('time', '10:00'))
+            location = data.get('location', '').strip()
+            notes = data.get('notes', '').strip()
+
+            job = None
+            if job_id:
+                job = JobOpportunity.objects.filter(id=job_id, is_deleted=False).first()
+            elif job_code:
+                job = JobOpportunity.objects.filter(Q(code=job_code) | Q(request_number=job_code), is_deleted=False).first()
+
+            job_title = job.title if job else data.get('job_title', 'ارزیابی جذب')
+            unit = (job.department or job.unit) if job else data.get('unit', '')
+            req_num = (job.request_number or job.code) if job else (job_code or data.get('request_number', ''))
+            final_job_code = job.code if job else job_code
+
+            item = {
+                'id': item_id,
+                'request_number': req_num,
+                'job_code': final_job_code,
+                'job_title': job_title,
+                'unit': unit,
+                'event_type': event_type,
+                'jalali_date': jalali_date,
+                'time': time_val,
+                'location': location,
+                'notes': notes,
+                'registered_by': request.user.get_full_name() or request.user.username,
+                'source': 'ATS_WEB'
+            }
+
+            res = save_bale_schedule(item)
+            return JsonResponse({'ok': True, 'item': item, 'server_res': res})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+
+
+class BaleScheduleDeleteView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def post(self, request):
+        from django.http import JsonResponse
+        from .bale_service import delete_bale_schedule
+
+        try:
+            if request.content_type == 'application/json':
+                import json
+                data = json.loads(request.body.decode('utf-8'))
+            else:
+                data = request.POST.dict()
+
+            item_id = data.get('id', '')
+            req_num = data.get('request_number', '')
+            job_code = data.get('job_code', '')
+            j_date = data.get('jalali_date', '')
+            time_val = data.get('time', '')
+
+            res = delete_bale_schedule(item_id, req_num, job_code, j_date, time_val)
+            return JsonResponse({'ok': True, 'server_res': res})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+
+
+class BaleScheduleCandidateListView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request):
+        from django.http import JsonResponse
+        from django.db.models import Q
+        from django.urls import reverse
+        from apps.candidates.models import ApplicationStageState
+
+        job_code = request.GET.get('job_code', '').strip()
+        job_id = request.GET.get('job_id')
+        event_type = request.GET.get('event_type', '').strip().upper()
+
+        job = None
+        if job_id:
+            job = JobOpportunity.objects.filter(id=job_id, is_deleted=False).first()
+        elif job_code:
+            job = JobOpportunity.objects.filter(Q(code=job_code) | Q(request_number=job_code), is_deleted=False).first()
+
+        if not job:
+            return JsonResponse({'ok': False, 'error': 'فرصت شغلی مرتبط در سامانه یافت نشد'})
+
+        type_map = {
+            'INTERVIEW': 'INTERVIEW',
+            'WRITTEN_EXAM': 'EXAM',
+            'SKILL_TEST': 'SKILL_TEST',
+            'ASSESSMENT': 'ASSESSMENT'
+        }
+        st_type = type_map.get(event_type, 'INTERVIEW')
+        stage = job.stages.filter(stage_type=st_type, is_deleted=False).first()
+        if not stage:
+            stage = job.stages.filter(is_deleted=False).order_by('sequence').first()
+
+        if not stage:
+            return JsonResponse({'ok': False, 'error': 'مرحله‌ای برای این فرصت شغلی تعریف نشده است'})
+
+        states = ApplicationStageState.objects.filter(
+            stage=stage,
+            is_deleted=False,
+            application__is_deleted=False
+        ).select_related('application__candidate', 'stage')
+
+        candidates_data = []
+        for s in states:
+            c = s.application.candidate
+            candidates_data.append({
+                'id': s.id,
+                'name': f"{c.first_name} {c.last_name}",
+                'national_id': c.national_id,
+                'phone': c.phone_number,
+                'status': s.status,
+                'status_display': s.get_status_display(),
+                'score': s.score,
+                'notes': s.notes or '',
+                'url': reverse('candidate_detail', args=[c.id]),
+            })
+
+        score_entry_url = f"{reverse('candidate_score_entry')}?job_id={job.id}&stage_id={stage.id}"
+
+        return JsonResponse({
+            'ok': True,
+            'job_title': job.title,
+            'job_code': job.code,
+            'stage_name': stage.name,
+            'stage_id': stage.id,
+            'score_entry_url': score_entry_url,
+            'candidates': candidates_data
+        })
 
 
 class ExportWeeklyAgendaExcelView(LoginRequiredMixin, RoleRequiredMixin, View):
@@ -1368,6 +1665,7 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             for stage in stages:
                 reached_count = 0
                 passed_count = 0
+                absent_count = 0
                 for app in job_apps:
                     states_by_type = {s.stage.stage_type: s for s in app.stage_states.all() if not s.is_deleted}
                     
@@ -1384,14 +1682,19 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                         curr_state = states_by_type.get(stage.stage_type)
                         if curr_state and (curr_state.status == 'COMPLETED' or curr_state.is_conditional_pass):
                             passed_count += 1
+                        elif curr_state and curr_state.status == 'ABSENT':
+                            absent_count += 1
                 
                 pass_rate = round((passed_count / reached_count) * 100, 1) if reached_count > 0 else 0.0
+                absent_rate = round((absent_count / reached_count) * 100, 1) if reached_count > 0 else 0.0
                 conversion_rate = round((passed_count / total_apps) * 100, 1) if total_apps > 0 else 0.0
                 
                 funnel_data.append({
                     'stage_name': stage.name,
                     'reached': reached_count,
                     'passed': passed_count,
+                    'absent': absent_count,
+                    'absent_rate': absent_rate,
                     'pass_rate': pass_rate,
                     'conversion_rate': conversion_rate
                 })
@@ -1418,6 +1721,8 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 'stage_name': 'جذب نهایی',
                 'reached': reached_selected_count,
                 'passed': passed_selected_count,
+                'absent': 0,
+                'absent_rate': 0.0,
                 'pass_rate': pass_rate,
                 'conversion_rate': conversion_rate
             })
@@ -1427,12 +1732,12 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
             total_apps = global_apps.count()
             
             stats = {
-                'SCREENING': {'reached': 0, 'passed': 0, 'name': 'غربالگری اولیه'},
-                'EXAM': {'reached': 0, 'passed': 0, 'name': 'آزمون کتبی'},
-                'SKILL_TEST': {'reached': 0, 'passed': 0, 'name': 'آزمون مهارتی'},
-                'INTERVIEW': {'reached': 0, 'passed': 0, 'name': 'مصاحبه حضوری'},
-                'ASSESSMENT': {'reached': 0, 'passed': 0, 'name': 'کانون ارزیابی'},
-                'SELECTED': {'reached': 0, 'passed': 0, 'name': 'جذب نهایی'},
+                'SCREENING': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'غربالگری اولیه'},
+                'EXAM': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'آزمون کتبی'},
+                'SKILL_TEST': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'آزمون مهارتی'},
+                'INTERVIEW': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'مصاحبه حضوری'},
+                'ASSESSMENT': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'کانون ارزیابی'},
+                'SELECTED': {'reached': 0, 'passed': 0, 'absent': 0, 'name': 'جذب نهایی'},
             }
             
             for app in global_apps:
@@ -1462,6 +1767,8 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                         curr_state = states_by_type.get(stype)
                         if curr_state and (curr_state.status == 'COMPLETED' or curr_state.is_conditional_pass):
                             stats[stype]['passed'] += 1
+                        elif curr_state and curr_state.status == 'ABSENT':
+                            stats[stype]['absent'] += 1
                 
                 # Check Selected
                 reached_selected = True
@@ -1480,6 +1787,8 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                     'stage_name': 'کل متقاضیان',
                     'reached': total_apps,
                     'passed': total_apps,
+                    'absent': 0,
+                    'absent_rate': 0.0,
                     'pass_rate': 100.0,
                     'conversion_rate': 100.0
                 }
@@ -1488,12 +1797,16 @@ class AnalyticsDashboardView(LoginRequiredMixin, RoleRequiredMixin, View):
                 s_info = stats[key]
                 reached = s_info['reached']
                 passed = s_info['passed']
+                absent = s_info.get('absent', 0)
                 pass_rate = round((passed / reached) * 100, 1) if reached > 0 else 0.0
+                absent_rate = round((absent / reached) * 100, 1) if reached > 0 else 0.0
                 conversion_rate = round((passed / total_apps) * 100, 1) if total_apps > 0 else 0.0
                 funnel_data.append({
                     'stage_name': s_info['name'],
                     'reached': reached,
                     'passed': passed,
+                    'absent': absent,
+                    'absent_rate': absent_rate,
                     'pass_rate': pass_rate,
                     'conversion_rate': conversion_rate
                 })

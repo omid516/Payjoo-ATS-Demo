@@ -25,6 +25,7 @@
                         <option value="PENDING" {% if cell.status == 'PENDING' %}selected{% endif %}>در انتظار</option>
                         <option value="COMPLETED" {% if cell.status == 'COMPLETED' %}selected{% endif %}>قبول</option>
                         <option value="FAILED" {% if cell.status == 'FAILED' %}selected{% endif %}>رد</option>
+                        <option value="ABSENT" {% if cell.status == 'ABSENT' %}selected{% endif %}>غایب</option>
                     </select>
                     
                     <div class="dropdown d-inline-block mt-1">
@@ -55,6 +56,8 @@
                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">قبول</span>
                     {% elif cell.status == 'FAILED' %}
                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">رد</span>
+                    {% elif cell.status == 'ABSENT' %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">غایب</span>
                     {% else %}
                         <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded text-xs font-semibold">در انتظار</span>
                     {% endif %}
@@ -77,6 +80,7 @@
                             <option value="PENDING" {% if cell.status == 'PENDING' %}selected{% endif %}>در انتظار</option>
                             <option value="COMPLETED" {% if cell.status == 'COMPLETED' %}selected{% endif %}>قبول</option>
                             <option value="FAILED" {% if cell.status == 'FAILED' %}selected{% endif %}>مردود</option>
+                            <option value="ABSENT" {% if cell.status == 'ABSENT' %}selected{% endif %}>غایب</option>
                         </select>
                     </div>
                     
@@ -141,8 +145,8 @@
                 {% else %}
                     <!-- Read-Only View of Cell -->
                     <div class="text-center">
-                        <span class="font-bold text-secondary text-sm {% if cell.status == 'FAILED' %}text-danger{% elif cell.status == 'COMPLETED' %}text-success{% endif %}">
-                            {{ cell.score|floatformat:2 }}
+                        <span class="font-bold text-secondary text-sm {% if cell.status == 'FAILED' %}text-danger{% elif cell.status == 'COMPLETED' %}text-success{% elif cell.status == 'ABSENT' %}text-muted{% endif %}">
+                            {% if cell.status == 'ABSENT' %}۰.۰۰{% else %}{{ cell.score|floatformat:2 }}{% endif %}
                         </span>
                         <div class="text-xxs mt-0.5">
                             {% if cell.status == 'COMPLETED' %}
@@ -152,6 +156,8 @@
                                 {% if cell.is_conditional_pass %}
                                     <span class="text-warning d-block mt-0.5" style="font-size: 8px;">(مشروط)</span>
                                 {% endif %}
+                            {% elif cell.status == 'ABSENT' %}
+                                <span class="text-secondary font-semibold">غایب</span>
                             {% elif cell.has_failed_prior_stages %}
                                 <span class="text-danger font-semibold">مردود (در مراحل قبلی)</span>
                             {% else %}

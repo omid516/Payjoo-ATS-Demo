@@ -249,6 +249,68 @@
         }
 
         /* ----------------------------------------------------
+           Weight Column & Interactive Stepper Controls
+           ---------------------------------------------------- */
+        .weight-control-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .btn-weight-step {
+            width: 17px;
+            height: 20px;
+            line-height: 1;
+            padding: 0;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 3px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            color: #475569;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .btn-weight-step:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+        .weight-number-input {
+            width: 36px;
+            height: 21px;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            padding: 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+            color: #1d4ed8;
+            background-color: #ffffff;
+        }
+        .weight-number-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+        .weight-number-input::-webkit-inner-spin-button,
+        .weight-number-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .weight-percent-sign {
+            font-size: 9px;
+            font-weight: bold;
+            color: #64748b;
+        }
+        .weight-print-text {
+            display: none;
+        }
+        body.hide-weights .col-weight {
+            display: none !important;
+        }
+
+        /* ----------------------------------------------------
            A5 Two-Up Layout Styles (2 copies per A4 Landscape)
            ---------------------------------------------------- */
         body.a5-mode {
@@ -364,6 +426,19 @@
             height: 0.75rem;
             min-width: 35px;
         }
+        body.a5-mode .btn-weight-step {
+            width: 13px;
+            height: 16px;
+            font-size: 8px;
+        }
+        body.a5-mode .weight-number-input {
+            width: 25px;
+            height: 16px;
+            font-size: 8px;
+        }
+        body.a5-mode .weight-percent-sign {
+            font-size: 7px;
+        }
 
         /* ----------------------------------------------------
            Media Print Styles (Strict 1-Page Guarantee)
@@ -391,6 +466,17 @@
                 break-inside: avoid !important;
             }
             .no-print {
+                display: none !important;
+            }
+            .weight-control-box {
+                display: none !important;
+            }
+            .weight-print-text {
+                display: inline !important;
+                font-weight: 700;
+                color: #1e293b !important;
+            }
+            body.hide-weights .col-weight {
                 display: none !important;
             }
             .page-break-avoid {
@@ -521,20 +607,28 @@
         </div>
     </div>
 
-    <!-- Bottom Toolbar: Auto-Fit & Density Controls -->
+    <!-- Bottom Toolbar: Auto-Fit, Density & Weight Controls -->
     <div class="mt-2.5 pt-2 border-top d-flex flex-wrap align-items-center justify-content-between gap-2 text-xxs">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2.5">
             <!-- Auto-Fit Toggle -->
             <div class="form-check form-switch m-0 d-flex align-items-center gap-1.5">
                 <input class="form-check-input" type="checkbox" id="switchAutoFit" checked onchange="toggleAutoFit(this.checked)">
                 <label class="form-check-label fw-bold text-dark cursor-pointer" for="switchAutoFit">
-                    🎯 تطبیق خودکار و پر کردن هوشمند ارتفاع برگه (Auto-Fit)
+                    🎯 تطبیق ارتفاع (Auto-Fit)
+                </label>
+            </div>
+
+            <!-- Print Weights Toggle -->
+            <div class="form-check form-switch m-0 d-flex align-items-center gap-1.5 border-start ps-2.5 ms-1">
+                <input class="form-check-input" type="checkbox" id="switchPrintWeights" checked onchange="togglePrintWeights(this.checked)">
+                <label class="form-check-label fw-bold text-dark cursor-pointer" for="switchPrintWeights" title="با غیرفعال کردن، ستون وزن و جمع اوزان در چاپ برای مصاحبه‌گر مخفی خواهد شد">
+                    ⚖️ چاپ ستون اوزان
                 </label>
             </div>
 
             <!-- Density Buttons -->
-            <div class="d-flex align-items-center gap-1 ms-md-2">
-                <span class="text-muted fw-bold">تراکم سطرها:</span>
+            <div class="d-flex align-items-center gap-1 border-start ps-2.5 ms-1">
+                <span class="text-muted fw-bold">تراکم:</span>
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="button" id="btnDensityCompact" class="btn btn-outline-secondary btn-sm py-0 px-2 text-xxs" onclick="setDensity('compact')">
                         فشرده
@@ -550,6 +644,9 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-2 rounded-pill text-xxs" onclick="autoBalanceWeights()" title="تنظیم خودکار و تراز کردن مجموع اوزان همه شایستگی‌ها به ۱۰۰٪">
+                ⚖️ تراز خودکار به ۱۰۰٪
+            </button>
             <span id="currentLayoutIndicator" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded">حالت فعلی: A4 تک‌نسخه</span>
         </div>
     </div>
@@ -622,10 +719,10 @@
                 <tr class="table-light">
                     <th style="width: 4%;">ردیف</th>
                     <th style="width: 7%;">کد</th>
-                    <th class="text-start" style="width: 38%;">عنوان شایستگی / سرفصل ارزیابی</th>
+                    <th class="text-start" style="width: 37%;">عنوان شایستگی / سرفصل ارزیابی</th>
                     <th style="width: 6.5%;">سطح</th>
                     <th style="width: 6.5%;">اهمیت</th>
-                    <th style="width: 5.5%;">وزن</th>
+                    <th style="width: 6.5%;" class="col-weight text-center">وزن</th>
                     <th style="width: 15.5%;">نمره (۱ تا ۵)</th>
                     <th style="width: 13%;">شواهد ارزیاب</th>
                     <th style="width: 4%;" class="no-print">عملیات</th>
@@ -644,7 +741,15 @@
                     </td>
                     <td class="fw-bold text-secondary comp-level-cell">{{ comp.level }}</td>
                     <td class="comp-importance-cell">{{ comp.importance }}</td>
-                    <td class="fw-bold text-primary comp-weight-cell">{{ comp.weight }}٪</td>
+                    <td class="fw-bold text-primary comp-weight-cell col-weight text-center">
+                        <div class="weight-control-box no-print">
+                            <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, -1)" title="کاهش ۱٪">-</button>
+                            <input type="number" min="0" max="100" class="weight-number-input" value="{{ comp.weight }}" onchange="onWeightInputChange(this)" oninput="onWeightInputChange(this)" title="جهت تغییر دستی، عدد را ویرایش کنید">
+                            <span class="weight-percent-sign">٪</span>
+                            <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, 1)" title="افزایش ۱٪">+</button>
+                        </div>
+                        <span class="weight-print-text">{{ comp.weight }}٪</span>
+                    </td>
                     <td>
                         <div class="d-flex justify-content-center align-items-center gap-1">
                             <span class="score-circle">۱</span>
@@ -674,8 +779,8 @@
                 </tr>
                 {% endfor %}
                 <tr class="table-light fw-bold" id="totalRow">
-                    <td colspan="5" class="text-end">جمع کل اوزان و نمره نهایی ارزیاب:</td>
-                    <td class="text-primary text-center" id="totalWeightCell">۱۰۰٪</td>
+                    <td colspan="5" class="text-end" id="totalRowLabel">جمع کل اوزان و نمره نهایی ارزیاب:</td>
+                    <td class="text-primary text-center col-weight" id="totalWeightCell">۱۰۰٪</td>
                     <td colspan="2" class="text-start pe-2">
                         <span class="text-muted text-xxs">نمره کل مصاحبه (از ۱۰۰): </span>
                         <span class="blank-line" style="min-width: 50px;"></span>
@@ -764,7 +869,7 @@
                         <input type="text" id="newCompTitle" class="form-control form-control-sm" placeholder="مثلاً: تحلیل ارتعاشات تجهیزات دوار" required>
                     </div>
                     <div class="row g-2 mb-2.5">
-                        <div class="col-4">
+                        <div class="col-3">
                             <label class="form-label fw-bold text-dark">نوع شایستگی</label>
                             <select id="newCompType" class="form-select form-select-sm">
                                 <option value="SK" selected>مهارتی (SK)</option>
@@ -772,8 +877,8 @@
                                 <option value="AB">توانایی (AB)</option>
                             </select>
                         </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold text-dark">سطح مورد انتظار</label>
+                        <div class="col-3">
+                            <label class="form-label fw-bold text-dark">سطح</label>
                             <select id="newCompLevel" class="form-select form-select-sm">
                                 <option value="1">آشنایی</option>
                                 <option value="2" selected>توانایی</option>
@@ -781,13 +886,17 @@
                                 <option value="4">خبرگی</option>
                             </select>
                         </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold text-dark">اهمیت برای پست</label>
+                        <div class="col-3">
+                            <label class="form-label fw-bold text-dark">اهمیت</label>
                             <select id="newCompImportance" class="form-select form-select-sm">
-                                <option value="3" selected>حداقلی (ضروری)</option>
+                                <option value="3" selected>حداقلی</option>
                                 <option value="2">مهم</option>
                                 <option value="1">محوری</option>
                             </select>
+                        </div>
+                        <div class="col-3">
+                            <label class="form-label fw-bold text-dark">وزن اولیه (٪)</label>
+                            <input type="number" id="newCompWeight" class="form-control form-control-sm text-center font-monospace fw-bold" min="0" max="100" value="15">
                         </div>
                     </div>
                     <div class="form-check p-0 pe-4 mt-2">
@@ -824,7 +933,7 @@
                         <input type="text" id="editCompTitle" class="form-control form-control-sm" required>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-4">
+                        <div class="col-3">
                             <label class="form-label fw-bold text-dark">نوع</label>
                             <select id="editCompType" class="form-select form-select-sm">
                                 <option value="مهارت">مهارتی</option>
@@ -832,7 +941,7 @@
                                 <option value="توانایی">توانایی</option>
                             </select>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <label class="form-label fw-bold text-dark">سطح تسلط</label>
                             <select id="editCompLevel" class="form-select form-select-sm">
                                 <option value="آشنایی">آشنایی</option>
@@ -841,7 +950,7 @@
                                 <option value="خبرگی">خبرگی</option>
                             </select>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <label class="form-label fw-bold text-dark">اهمیت</label>
                             <select id="editCompImportance" class="form-select form-select-sm">
                                 <option value="حداقلی">حداقلی</option>
@@ -849,6 +958,10 @@
                                 <option value="محوری">محوری</option>
                                 <option value="تکلیف محور">تکلیف محور</option>
                             </select>
+                        </div>
+                        <div class="col-3">
+                            <label class="form-label fw-bold text-dark">وزن در مصاحبه (٪)</label>
+                            <input type="number" id="editCompWeight" class="form-control form-control-sm text-center font-monospace fw-bold" min="0" max="100" value="15">
                         </div>
                     </div>
                 </form>
@@ -894,6 +1007,8 @@
         tr.setAttribute('data-level', data.level || '');
         tr.setAttribute('data-importance', data.importance || '');
 
+        const weightVal = parseInt(data.weight !== undefined ? data.weight : (data.originalWeight || '15')) || 0;
+
         if (data.isManual) {
             tr.innerHTML = `
                 <td class="row-num fw-bold text-secondary"></td>
@@ -904,7 +1019,15 @@
                 </td>
                 <td class="fw-bold text-secondary comp-level-cell">-</td>
                 <td class="comp-importance-cell">-</td>
-                <td class="fw-bold text-primary comp-weight-cell">0٪</td>
+                <td class="fw-bold text-primary comp-weight-cell col-weight text-center">
+                    <div class="weight-control-box no-print">
+                        <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, -1)" title="کاهش ۱٪">-</button>
+                        <input type="number" min="0" max="100" class="weight-number-input" value="${weightVal}" onchange="onWeightInputChange(this)" oninput="onWeightInputChange(this)" title="جهت تغییر دستی، عدد را ویرایش کنید">
+                        <span class="weight-percent-sign">٪</span>
+                        <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, 1)" title="افزایش ۱٪">+</button>
+                    </div>
+                    <span class="weight-print-text">${weightVal}٪</span>
+                </td>
                 <td>
                     <div class="d-flex justify-content-center align-items-center gap-1">
                         <span class="score-circle">۱</span>
@@ -935,7 +1058,15 @@
                 </td>
                 <td class="fw-bold text-secondary comp-level-cell">${data.level || ''}</td>
                 <td class="comp-importance-cell">${data.importance || ''}</td>
-                <td class="fw-bold text-primary comp-weight-cell">${data.weight || 0}٪</td>
+                <td class="fw-bold text-primary comp-weight-cell col-weight text-center">
+                    <div class="weight-control-box no-print">
+                        <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, -1)" title="کاهش ۱٪">-</button>
+                        <input type="number" min="0" max="100" class="weight-number-input" value="${weightVal}" onchange="onWeightInputChange(this)" oninput="onWeightInputChange(this)" title="جهت تغییر دستی، عدد را ویرایش کنید">
+                        <span class="weight-percent-sign">٪</span>
+                        <button type="button" class="btn btn-weight-step" onclick="stepRowWeight(this, 1)" title="افزایش ۱٪">+</button>
+                    </div>
+                    <span class="weight-print-text">${weightVal}٪</span>
+                </td>
                 <td>
                     <div class="d-flex justify-content-center align-items-center gap-1">
                         <span class="score-circle">۱</span>
@@ -984,6 +1115,7 @@
                 layout: currentLayout,
                 density: currentDensity,
                 autoFit: isAutoFit,
+                printWeights: !document.body.classList.contains('hide-weights'),
                 interviewDate: document.getElementById('inputInterviewDate')?.value || '',
                 interviewTime: document.getElementById('inputInterviewTime')?.value || '',
                 assessorName: document.getElementById('inputAssessorName')?.value || '',
@@ -1009,6 +1141,11 @@
                 const sw = document.getElementById('switchAutoFit');
                 if (sw) sw.checked = state.autoFit;
                 toggleAutoFit(state.autoFit);
+            }
+            if (state.printWeights !== undefined) {
+                const sw = document.getElementById('switchPrintWeights');
+                if (sw) sw.checked = state.printWeights;
+                togglePrintWeights(state.printWeights);
             }
 
             if (state.interviewDate !== undefined && document.getElementById('inputInterviewDate')) {
@@ -1296,6 +1433,7 @@
 
     function openAddCompetencyModal() {
         document.getElementById('newCompTitle').value = '';
+        if (document.getElementById('newCompWeight')) document.getElementById('newCompWeight').value = '15';
         document.getElementById('saveToJobProfile').checked = false;
         const modalEl = document.getElementById('addCompetencyModal');
         const modal = new bootstrap.Modal(modalEl);
@@ -1315,6 +1453,10 @@
         const importanceCode = document.getElementById('newCompImportance').value;
         const importanceDisplay = importanceCode === '3' ? 'حداقلی' : (importanceCode === '2' ? 'مهم' : 'محوری');
         
+        const weightInput = document.getElementById('newCompWeight');
+        let initialWeight = weightInput ? (parseInt(weightInput.value) || 15) : 15;
+        initialWeight = Math.max(0, Math.min(100, initialWeight));
+
         const saveToDb = document.getElementById('saveToJobProfile').checked;
         const generatedCode = 'AD-' + Math.floor(1000 + Math.random() * 9000);
 
@@ -1330,8 +1472,8 @@
             type: typeDisplay,
             level: levelDisplay,
             importance: importanceDisplay,
-            originalWeight: '15',
-            weight: '15',
+            originalWeight: String(initialWeight),
+            weight: String(initialWeight),
             isManual: false
         });
 
@@ -1405,6 +1547,7 @@
         const currentTitle = titleText ? titleText.innerText.trim() : (currentRowToEdit.getAttribute('data-name') || '');
         const currentLevel = currentRowToEdit.querySelector('.comp-level-cell').innerText.trim();
         const currentImportance = currentRowToEdit.querySelector('.comp-importance-cell').innerText.trim();
+        const currentWeight = currentRowToEdit.getAttribute('data-weight') || '15';
 
         document.getElementById('editCompTitle').value = currentTitle;
         
@@ -1417,6 +1560,9 @@
         for (let opt of impSelect.options) {
             if (opt.value === currentImportance) opt.selected = true;
         }
+
+        const weightInput = document.getElementById('editCompWeight');
+        if (weightInput) weightInput.value = currentWeight;
 
         const modalEl = document.getElementById('editCompetencyModal');
         const modal = new bootstrap.Modal(modalEl);
@@ -1446,6 +1592,21 @@
         const impCell = currentRowToEdit.querySelector('.comp-importance-cell');
         if (impCell) impCell.innerText = newImportance;
 
+        const weightInput = document.getElementById('editCompWeight');
+        if (weightInput) {
+            let newWeight = parseInt(weightInput.value);
+            if (isNaN(newWeight)) newWeight = 0;
+            newWeight = Math.max(0, Math.min(100, newWeight));
+            currentRowToEdit.setAttribute('data-weight', newWeight);
+            const numInput = currentRowToEdit.querySelector('.weight-number-input');
+            if (numInput) {
+                numInput.value = newWeight;
+                numInput.setAttribute('value', newWeight);
+            }
+            const printText = currentRowToEdit.querySelector('.weight-print-text');
+            if (printText) printText.innerText = newWeight + '٪';
+        }
+
         currentRowToEdit.setAttribute('data-name', newTitle);
         currentRowToEdit.setAttribute('data-type', newType);
         currentRowToEdit.setAttribute('data-level', newLevel);
@@ -1455,43 +1616,116 @@
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
 
+        recalculateWeights();
+
         if (currentLayout === 'A5') {
             syncA5Copies();
         }
         saveInterviewState();
     }
 
+    // ----------------------------------------------------
+    // Manual Weight Adjustment & Balancing Controls
+    // ----------------------------------------------------
+    function stepRowWeight(button, delta) {
+        const row = button.closest('.comp-row');
+        if (!row) return;
+        const input = row.querySelector('.weight-number-input');
+        let current = parseInt(input ? input.value : row.getAttribute('data-weight')) || 0;
+        let next = Math.max(0, Math.min(100, current + delta));
+        if (input) {
+            input.value = next;
+            input.setAttribute('value', next);
+        }
+        setRowWeight(row, next);
+    }
+
+    function onWeightInputChange(input) {
+        const row = input.closest('.comp-row');
+        if (!row) return;
+        let val = parseInt(input.value);
+        if (isNaN(val)) val = 0;
+        val = Math.max(0, Math.min(100, val));
+        input.value = val;
+        input.setAttribute('value', val);
+        setRowWeight(row, val);
+    }
+
+    function setRowWeight(row, weight) {
+        row.setAttribute('data-weight', weight);
+        const printText = row.querySelector('.weight-print-text');
+        if (printText) printText.innerText = weight + '٪';
+        recalculateWeights();
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+    }
+
     function recalculateWeights() {
         const rows = document.querySelectorAll('#sheet1 .comp-row');
         const count = rows.length;
-        
         const totalWeightCell = document.querySelector('#sheet1 #totalWeightCell');
         
         if (count === 0) {
-            if (totalWeightCell) totalWeightCell.innerText = '۰٪';
+            if (totalWeightCell) {
+                totalWeightCell.innerHTML = '<span class="text-primary fw-bold">۰٪</span><span class="weight-print-text print-only">۰٪</span>';
+            }
             saveInterviewState();
             return;
         }
 
-        // Calculate sum of remaining original weights
+        let sum = 0;
+        rows.forEach((r, idx) => {
+            const rowNumEl = r.querySelector('.row-num');
+            if (rowNumEl) rowNumEl.innerText = idx + 1;
+
+            let w = parseInt(r.getAttribute('data-weight'));
+            if (isNaN(w)) {
+                w = parseInt(r.getAttribute('data-original-weight')) || 0;
+                r.setAttribute('data-weight', w);
+            }
+            sum += w;
+
+            const input = r.querySelector('.weight-number-input');
+            if (input && parseInt(input.value) !== w) {
+                input.value = w;
+                input.setAttribute('value', w);
+            }
+            const printText = r.querySelector('.weight-print-text');
+            if (printText) printText.innerText = w + '٪';
+        });
+
+        if (totalWeightCell) {
+            if (sum === 100) {
+                totalWeightCell.innerHTML = '<span class="text-primary fw-bold">۱۰۰٪</span><span class="weight-print-text print-only">۱۰۰٪</span>';
+                totalWeightCell.title = 'مجموع اوزان متعادل و برابر ۱۰۰٪ است';
+            } else {
+                totalWeightCell.innerHTML = `<span class="badge bg-warning bg-opacity-25 text-dark fw-bold" title="مجموع اوزان برابر ۱۰۰٪ نیست">مجموع: ${sum}٪ ⚠️</span><span class="weight-print-text print-only">${sum}٪</span>`;
+                totalWeightCell.title = `مجموع فعلی اوزان ${sum}٪ است (ناهمخوان با ۱۰۰٪)`;
+            }
+        }
+        saveInterviewState();
+    }
+
+    function autoBalanceWeights() {
+        const rows = document.querySelectorAll('#sheet1 .comp-row');
+        const count = rows.length;
+        if (count === 0) return;
+
         let sumOriginal = 0;
         rows.forEach(r => {
-            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
-            sumOriginal += w;
+            const w = parseFloat(r.getAttribute('data-weight')) || parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            sumOriginal += (w > 0 ? w : 1);
         });
 
         let newWeights = [];
         let distributedSum = 0;
 
-        rows.forEach((r, idx) => {
-            // Update row number
-            const rowNumEl = r.querySelector('.row-num');
-            if (rowNumEl) rowNumEl.innerText = idx + 1;
-
-            const w = parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
-            const calculatedPercent = sumOriginal > 0 ? (w / sumOriginal) * 100 : (100 / count);
+        rows.forEach(r => {
+            const w = parseFloat(r.getAttribute('data-weight')) || parseFloat(r.getAttribute('data-original-weight')) || (100 / count);
+            const basis = w > 0 ? w : 1;
+            const calculatedPercent = (basis / sumOriginal) * 100;
             const roundedPercent = Math.round(calculatedPercent);
-            
             newWeights.push({
                 row: r,
                 calc: calculatedPercent,
@@ -1522,12 +1756,38 @@
 
         // Apply updated weights to DOM
         newWeights.forEach(item => {
-            item.row.setAttribute('data-weight', item.final);
-            const cell = item.row.querySelector('.comp-weight-cell');
-            if (cell) cell.innerText = item.final + '٪';
+            const row = item.row;
+            const finalVal = item.final;
+            row.setAttribute('data-weight', finalVal);
+            const input = row.querySelector('.weight-number-input');
+            if (input) {
+                input.value = finalVal;
+                input.setAttribute('value', finalVal);
+            }
+            const printText = row.querySelector('.weight-print-text');
+            if (printText) printText.innerText = finalVal + '٪';
         });
 
-        if (totalWeightCell) totalWeightCell.innerText = '۱۰۰٪';
+        recalculateWeights();
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
+        saveInterviewState();
+    }
+
+    function togglePrintWeights(show) {
+        const body = document.body;
+        const totalLabel = document.getElementById('totalRowLabel');
+        if (show) {
+            body.classList.remove('hide-weights');
+            if (totalLabel) totalLabel.innerText = 'جمع کل اوزان و نمره نهایی ارزیاب:';
+        } else {
+            body.classList.add('hide-weights');
+            if (totalLabel) totalLabel.innerText = 'نمره نهایی ارزیاب و جمع‌بندی:';
+        }
+        if (currentLayout === 'A5') {
+            syncA5Copies();
+        }
         saveInterviewState();
     }
 </script>

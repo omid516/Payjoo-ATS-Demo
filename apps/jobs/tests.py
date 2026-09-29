@@ -3205,4 +3205,18 @@ class AreaCoordinatorTests(TestCase):
         self.assertTrue(ok)
         self.assertEqual(cid, '147982312')
 
+    def test_pdf_embedded_font_and_binary_discovery(self):
+        from apps.jobs.pdf_service import get_embedded_font_css, find_chrome_binary
+        font_css = get_embedded_font_css()
+        self.assertIn('@font-face', font_css)
+        self.assertIn('Vazirmatn', font_css)
+        self.assertIn('data:font/truetype;charset=utf-8;base64,', font_css)
+
+        # Test find_chrome_binary returns a valid executable when present
+        bin_path = find_chrome_binary()
+        if bin_path:
+            import os
+            self.assertTrue(os.path.exists(bin_path))
+
+
 

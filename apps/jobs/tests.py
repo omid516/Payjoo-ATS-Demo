@@ -2949,15 +2949,260 @@ class ExamCenterSettingsAndDecimalScoreTests(TestCase):
         self.assertContains(response, '84.75')
 
 
+class AreaCoordinatorTests(TestCase):
+    def setUp(self):
+        from apps.accounts.models import UserProfile
+        from apps.candidates.models import Candidate, JobApplication, ApplicationStageState
+        from apps.jobs.models import AreaCoordinator
 
+        self.admin = User.objects.create_superuser('admin_coord', 'admin@example.com', 'pass123')
+        if hasattr(self.admin, 'profile'):
+            self.admin_profile = self.admin.profile
+            self.admin_profile.role = UserProfile.ROLE_ADMIN
+            self.admin_profile.save()
+        else:
+            self.admin_profile = UserProfile.objects.create(user=self.admin, role=UserProfile.ROLE_ADMIN)
+        self.client.login(username='admin_coord', password='pass123')
 
+        self.org_setting = OrganizationSetting.get_active_setting()
+        self.org_setting.email_provider = 'MSC'
+        self.org_setting.smtp_host = ''
+        self.org_setting.smtp_port = 587
+        self.org_setting.smtp_sender_email = 'recruitment@msc.ir'
+        self.org_setting.save()
 
+        from unittest.mock import patch
+        self.patcher = patch('apps.candidates.signals.send_dynamic_email', return_value=(True, "Success"))
+        self.mock_signal_email = self.patcher.start()
+        self.addCleanup(self.patcher.stop)
 
+        # Jobs in two different departments
+        self.job_navard = JobOpportunity.objects.create(
+            title='مهندس نورد',
+            code='NAV-01',
+            request_number='REQ-NAV-01',
+            department='ناحیه نورد سرد',
+            headcount=2,
+            status=JobOpportunity.STATUS_IN_PROGRESS if hasattr(JobOpportunity, 'STATUS_IN_PROGRESS') else 'PLANNING'
+        )
+        self.stage_nav = JobOpportunityStage.objects.create(
+            job=self.job_navard,
+            name='مصاحبه تخصصی نورد',
+            sequence=1,
+            weight=100
+        )
+        self.cand1 = Candidate.objects.create(
+            first_name='علی',
+            last_name='اکبری',
+            national_id='1234567890',
+            personnel_number='981001',
+            email='ali@example.com',
+            phone_number='09131111111'
+        )
+        self.app1 = JobApplication.objects.create(
+            job=self.job_navard,
+            candidate=self.cand1,
+            status='IN_PROGRESS',
+            final_score=85.0
+        )
+        st_state, _ = ApplicationStageState.objects.get_or_create(
+            application=self.app1,
+            stage=self.stage_nav,
+            defaults={'status': ApplicationStageState.STATUS_COMPLETED, 'score': 85.0}
+        )
+        st_state.status = ApplicationStageState.STATUS_COMPLETED
+        st_state.score = 85.0
+        st_state.save()
 
+        self.job_foolad = JobOpportunity.objects.create(
+            title='تکنسین ذوب',
+            code='STL-01',
+            request_number='REQ-STL-01',
+            department='ناحیه فولادسازی',
+            headcount=3
+        )
 
+        # Coordinator for Navard
+        self.coord_navard = AreaCoordinator.objects.create(
+            name='مهندس رضایی',
+            personnel_number='554433',
+            email='rezaei@msc.ir',
+            phone_number='09132222222',
+            bale_id='@rezaei_bale',
+            departments=['ناحیه نورد سرد']
+        )
 
+    def test_coordinator_model_and_str(self):
+        self.assertIn('مهندس رضایی', str(self.coord_navard))
+        self.assertIn('ناحیه نورد سرد', str(self.coord_navard))
 
+    def test_coordinator_list_view(self):
+        url = reverse('area_coordinators_list')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'مهندس رضایی')
+        self.assertContains(resp, 'rezaei@msc.ir')
+        self.assertContains(resp, 'ناحیه نورد سرد')
 
+    def test_coordinator_create_view(self):
+        from apps.jobs.models import AreaCoordinator
+        url = reverse('area_coordinator_add')
+        data = {
+            'name': 'مهندس احمدی',
+            'personnel_number': '667788',
+            'email': 'ahmadi@msc.ir',
+            'phone_number': '09133333333',
+            'bale_id': '@ahmadi_bale',
+            'departments': ['ناحیه فولادسازی'],
+            'is_active': 'on'
+        }
+        resp = self.client.post(url, data)
+        self.assertEqual(resp.status_code, 302)
+        created = AreaCoordinator.objects.filter(name='مهندس احمدی').first()
+        self.assertIsNotNone(created)
+        self.assertEqual(created.departments, ['ناحیه فولادسازی'])
 
+    def test_coordinator_update_view(self):
+        url = reverse('area_coordinator_edit', kwargs={'pk': self.coord_navard.pk})
+        data = {
+            'name': 'مهندس مهدی رضایی',
+            'personnel_number': '554433',
+            'email': 'm_rezaei@msc.ir',
+            'phone_number': '09132222222',
+            'bale_id': '@rezaei_updated',
+            'departments': ['ناحیه نورد سرد', 'ناحیه نورد گرم'],
+            'is_active': 'on'
+        }
+        resp = self.client.post(url, data)
+        self.assertEqual(resp.status_code, 302)
+        self.coord_navard.refresh_from_db()
+        self.assertEqual(self.coord_navard.name, 'مهندس مهدی رضایی')
+        self.assertEqual(self.coord_navard.email, 'm_rezaei@msc.ir')
+        self.assertIn('ناحیه نورد گرم', self.coord_navard.departments)
+
+    def test_coordinator_delete_view(self):
+        url = reverse('area_coordinator_delete', kwargs={'pk': self.coord_navard.pk})
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)
+        self.coord_navard.refresh_from_db()
+        self.assertTrue(self.coord_navard.is_deleted)
+
+    def test_coordinator_isolation_and_report_summary(self):
+        from apps.jobs.coordinator_service import get_coordinator_jobs, build_job_report_summary
+        
+        # Verify coordinator only gets their assigned department jobs
+        jobs = get_coordinator_jobs(self.coord_navard)
+        self.assertIn(self.job_navard, jobs)
+        self.assertNotIn(self.job_foolad, jobs)
+
+        # Verify summary contains shortlisted candidate
+        summary = build_job_report_summary(self.job_navard)
+        self.assertEqual(summary['title'], 'مهندس نورد')
+        self.assertEqual(summary['shortlisted_count'], 1)
+        self.assertEqual(summary['shortlisted_candidates'][0]['name'], 'علی اکبری')
+        self.assertEqual(summary['shortlisted_candidates'][0]['score'], 85.0)
+
+    def test_send_single_job_report_to_coordinator(self):
+        from unittest.mock import patch
+        url = reverse('send_coordinator_report_bulk')
+        with patch('apps.jobs.coordinator_service.send_dynamic_email') as mock_send:
+            mock_send.return_value = (True, "ایمیل با موفقیت ارسال شد.")
+            resp = self.client.post(url, {'job_id': self.job_navard.id})
+            self.assertEqual(resp.status_code, 302)
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args[0]
+            to_email = call_args[1]
+            subject = call_args[2]
+            body = call_args[3]
+            self.assertEqual(to_email, 'rezaei@msc.ir')
+            self.assertIn('ناحیه نورد سرد', subject)
+            self.assertIn('علی اکبری', body)
+            self.assertIn('مهندس نورد', body)
+
+    def test_test_email_connection_endpoint(self):
+        from unittest.mock import patch
+        url = reverse('test_email_connection')
+        with patch('apps.jobs.coordinator_service.send_dynamic_email') as mock_send:
+            mock_send.return_value = (True, "ایمیل آزمایشی با موفقیت ارسال شد.")
+            resp = self.client.post(url, {'recipient_email': 'test@msc.ir'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertTrue(data['success'])
+            mock_send.assert_called_once()
+
+    def test_test_email_connection_endpoint_failure(self):
+        from unittest.mock import patch
+        url = reverse('test_email_connection')
+        with patch('apps.jobs.coordinator_service.send_dynamic_email') as mock_send:
+            mock_send.return_value = (False, "خطای اتصال به سرور")
+            resp = self.client.post(url, {'recipient_email': 'test@msc.ir'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertFalse(data['success'])
+            self.assertIn('خطای اتصال', data['message'])
+
+    def test_download_coordinator_report_pdf(self):
+        from unittest.mock import patch
+        url = reverse('download_coordinator_report_pdf', kwargs={'pk': self.coord_navard.pk})
+        with patch('apps.jobs.pdf_service.generate_coordinator_report_pdf') as mock_gen_pdf:
+            mock_gen_pdf.return_value = (b'%PDF-1.4 dummy pdf bytes', 'گزارش اعلان شغلی ناحیه نورد سرد - 1405-07-08.pdf')
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp['Content-Type'], 'application/pdf')
+            self.assertIn('filename', resp['Content-Disposition'])
+            self.assertEqual(resp.content, b'%PDF-1.4 dummy pdf bytes')
+
+    def test_download_job_coordinator_report_pdf(self):
+        from unittest.mock import patch
+        url = reverse('download_job_coordinator_report_pdf', kwargs={'job_id': self.job_navard.id})
+        with patch('apps.jobs.pdf_service.generate_coordinator_report_pdf') as mock_gen_pdf:
+            mock_gen_pdf.return_value = (b'%PDF-1.4 dummy pdf bytes', 'گزارش اعلان شغلی ناحیه نورد سرد - 1405-07-08.pdf')
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp['Content-Type'], 'application/pdf')
+            self.assertEqual(resp.content, b'%PDF-1.4 dummy pdf bytes')
+
+    def test_send_coordinator_bale_report_view(self):
+        from unittest.mock import patch
+        url = reverse('send_coordinator_bale_report', kwargs={'pk': self.coord_navard.pk})
+        with patch('apps.jobs.bale_service.send_area_coordinator_bale_report') as mock_bale:
+            mock_bale.return_value = (True, "فایل PDF با موفقیت به بله هماهنگ‌کننده ارسال شد.", "filename.pdf")
+            resp = self.client.post(url, HTTP_REFERER=reverse('area_coordinators_list'))
+            self.assertEqual(resp.status_code, 302)
+            mock_bale.assert_called_once()
+
+    def test_test_bale_connection_endpoint(self):
+        from unittest.mock import patch
+        url = reverse('test_bale_connection')
+        with patch('apps.jobs.bale_service.test_bale_bot_connection') as mock_bale_test:
+            mock_bale_test.return_value = (True, "اتصال موفقیت‌آمیز بود: @msc_recruitment_bot", {'username': 'msc_recruitment_bot'})
+            resp = self.client.post(url, {'bot_token': '123456:abcdef'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertTrue(data['success'])
+            self.assertIn('@msc_recruitment_bot', data['message'])
+
+    def test_pdf_filename_generation_format(self):
+        from apps.jobs.pdf_service import generate_coordinator_report_filename
+        # Test cleaning duplicate 'ناحیه'
+        name1 = generate_coordinator_report_filename('ناحیه فولادسازی', '1405-07-08')
+        self.assertEqual(name1, 'گزارش اعلان شغلی ناحیه فولادسازی - 1405-07-08.pdf')
+        
+        # Test without 'ناحیه' prefix in department
+        name2 = generate_coordinator_report_filename('آهن سازی', '1405-07-08')
+        self.assertEqual(name2, 'گزارش اعلان شغلی ناحیه آهن سازی - 1405-07-08.pdf')
+
+    def test_bale_chat_id_numeric_and_resolution(self):
+        from apps.jobs.bale_service import is_numeric_chat_id, resolve_bale_chat_id
+        # Numeric checks
+        self.assertTrue(is_numeric_chat_id('147982312'))
+        self.assertTrue(is_numeric_chat_id('-1001234567'))
+        self.assertFalse(is_numeric_chat_id('@omiddsalehi'))
+        self.assertFalse(is_numeric_chat_id('omiddsalehi'))
+
+        # Direct numeric resolution
+        ok, cid, msg = resolve_bale_chat_id('147982312')
+        self.assertTrue(ok)
+        self.assertEqual(cid, '147982312')
 
 

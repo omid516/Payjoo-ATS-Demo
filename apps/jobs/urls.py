@@ -39,7 +39,17 @@ from .views import (
     CompetencyModelManageView,
     CompetencyModelItemManageView,
     GenerateJobSpecsApiView,
-    SummarizeTextApiView
+    SummarizeTextApiView,
+    AreaCoordinatorListView,
+    AreaCoordinatorCreateView,
+    AreaCoordinatorUpdateView,
+    AreaCoordinatorDeleteView,
+    SendCoordinatorReportView,
+    TestEmailConnectionView,
+    CoordinatorReportPreviewView,
+    SendCoordinatorBaleReportView,
+    DownloadCoordinatorReportPdfView,
+    TestBaleConnectionView,
 )
 
 
@@ -87,4 +97,20 @@ urlpatterns = [
     path('<int:job_id>/interview-form/print/', JobInterviewFormPrintView.as_view(), name='job_interview_form_print'),
     path('<int:job_id>/skill-test-specification/print/', JobSkillTestSpecificationPrintView.as_view(), name='job_skill_test_specification_print'),
     path('competencies/patterns/print-ai-strategy/', JobAIStrategyPrintView.as_view(), name='job_ai_strategy_print'),
+
+    # مدیریت هماهنگ‌کنندگان نواحی و ارسال گزارش اعلان‌ها
+    path('coordinators/', AreaCoordinatorListView.as_view(), name='area_coordinators_list'),
+    path('coordinators/add/', AreaCoordinatorCreateView.as_view(), name='area_coordinator_add'),
+    path('coordinators/<int:pk>/edit/', AreaCoordinatorUpdateView.as_view(), name='area_coordinator_edit'),
+    path('coordinators/<int:pk>/delete/', AreaCoordinatorDeleteView.as_view(), name='area_coordinator_delete'),
+    path('coordinators/send-report/', SendCoordinatorReportView.as_view(), name='send_coordinator_report_bulk'),
+    path('coordinators/<int:pk>/send-report/', SendCoordinatorReportView.as_view(), name='send_coordinator_report'),
+    path('coordinators/<int:pk>/preview/', CoordinatorReportPreviewView.as_view(), name='coordinator_report_preview'),
+    path('coordinators/preview-job/<int:job_id>/', CoordinatorReportPreviewView.as_view(), name='job_coordinator_report_preview'),
+    path('coordinators/<int:pk>/send-bale/', SendCoordinatorBaleReportView.as_view(), name='send_coordinator_bale_report'),
+    path('coordinators/send-bale/', SendCoordinatorBaleReportView.as_view(), name='send_coordinator_bale_report_bulk'),
+    path('coordinators/<int:pk>/download-pdf/', DownloadCoordinatorReportPdfView.as_view(), name='download_coordinator_report_pdf'),
+    path('coordinators/download-pdf/<int:job_id>/', DownloadCoordinatorReportPdfView.as_view(), name='download_job_coordinator_report_pdf'),
+    path('api/test-email/', TestEmailConnectionView.as_view(), name='test_email_connection'),
+    path('api/test-bale/', TestBaleConnectionView.as_view(), name='test_bale_connection'),
 ]

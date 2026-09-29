@@ -31,3 +31,6 @@ resumes/
 # Scratch files
 scratch/
 scratch_backup/
+
+# Knowledge graph artifacts
+graphify-out/

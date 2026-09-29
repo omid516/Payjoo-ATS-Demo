@@ -141,6 +141,53 @@
             </ul>
         </div>
 
+        <!-- Dropdown for Coordinator Reports & Dispatch -->
+        <div class="dropdown">
+            <button class="btn btn-sm btn-primary dropdown-toggle d-inline-flex align-items-center gap-1.5 font-semibold py-2 px-3 rounded-3 shadow-xs" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="گزارش اعلان شغلی و ارسال به هماهنگ‌کننده ناحیه">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>گزارش هماهنگ‌کننده</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end text-sm p-1 shadow border-slate" style="border-radius: 10px; min-width: 220px;">
+                <li>
+                    <span class="dropdown-header text-xxs font-bold text-muted px-3 py-1">مشاهده و دریافت</span>
+                </li>
+                <li>
+                    <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'job_coordinator_report_preview' job.id %}" target="_blank">
+                        <span>👁️</span> پیش‌نمایش زنده گزارش
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" href="{% url 'download_job_coordinator_report_pdf' job.id %}" target="_blank">
+                        <span>📄</span> دانلود فایل PDF گزارش
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                    <span class="dropdown-header text-xxs font-bold text-muted px-3 py-1">ارسال مستقیم</span>
+                </li>
+                <li>
+                    <form method="post" action="{% url 'send_coordinator_report_bulk' %}" class="m-0 p-0" onsubmit="return confirm('آیا مایلید گزارش آخرین وضعیت این اعلان شغلی به ایمیل هماهنگ‌کننده ناحیه ({{ job.department }}) ارسال شود؟');">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ job.id }}">
+                        <button type="submit" class="dropdown-item rounded d-flex align-items-center gap-2 py-2 text-primary w-100 border-0 bg-transparent text-start">
+                            <span>✉️</span> ارسال ایمیل به هماهنگ‌کننده
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <form method="post" action="{% url 'send_coordinator_bale_report_bulk' %}" class="m-0 p-0" onsubmit="return confirm('آیا مایلید فایل PDF گزارش این اعلان شغلی به پیام‌رسان بله هماهنگ‌کننده ناحیه ({{ job.department }}) ارسال شود؟');">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ job.id }}">
+                        <button type="submit" class="dropdown-item rounded d-flex align-items-center gap-2 py-2 text-success w-100 border-0 bg-transparent text-start">
+                            <span>📱</span> ارسال PDF به پیام‌رسان بله
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
         <a href="{% url 'job_final_ranking' job.id %}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 font-semibold py-2 px-3 rounded-3">
             <span>{{ t.jp_final_ranking }}</span>
         </a>

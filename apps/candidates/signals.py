@@ -5,6 +5,9 @@ from django.utils.html import strip_tags
 from django.urls import reverse
 from django.conf import settings
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 from apps.candidates.models import JobApplication, ApplicationStageState, NotificationLog
 from apps.jobs.models import OrganizationSetting
@@ -30,33 +33,55 @@ def log_notification(channel, recipient, subject, body):
     with open(LOG_FILE_PATH, 'a', encoding='utf-8') as f:
         f.write(log_content)
 
-def send_dynamic_email(org_setting, to_email, subject, html_content):
+def send_dynamic_email(org_setting, to_email, subject, html_content, fail_silently=True):
+    """
+    ارسال ایمیل پویا با تنظیمات سرور سازمان یا سرور پیش‌فرض سامانه.
+    خروجی: (is_success: bool, status_message: str)
+    در صورت fail_silently=False و بروز خطا، استثنا پرتاب می‌شود.
+    """
     if not to_email:
-        return
-    text_content = strip_tags(html_content)
+        err = "آدرس ایمیل گیرنده مشخص نشده است."
+        if not fail_silently:
+            raise ValueError(err)
+        return False, err
     
-    # در صورت وجود تنظیمات SMTP در مدل تنظیمات سازمان، از آن استفاده پویا می‌کنیم
+    text_content = strip_tags(html_content)
+    last_error = None
+    
+    # ۱. در صورت وجود تنظیمات اختصاصی SMTP در سازمان
     if org_setting:
         from django.core.mail import get_connection
         email_provider = getattr(org_setting, 'email_provider', 'CUSTOM')
         
-        # مقداردهی تنظیمات بر اساس سرویس‌دهنده انتخابی
+        # مقداردهی پارامترها بر اساس سرویس‌دهنده
         if email_provider == 'GMAIL':
-            host = 'smtp.gmail.com'
-            port = 587
-            use_tls = True
-            use_ssl = False
+            host = org_setting.smtp_host or 'smtp.gmail.com'
+            port = int(org_setting.smtp_port or 587)
+            use_tls = org_setting.smtp_use_tls if org_setting.smtp_use_tls is not None else True
+            use_ssl = org_setting.smtp_use_ssl if org_setting.smtp_use_ssl is not None else False
+        elif email_provider == 'MSC':
+            host = org_setting.smtp_host or 'mail.msc.ir'
+            port = int(org_setting.smtp_port or 587)
+            use_tls = org_setting.smtp_use_tls if org_setting.smtp_use_tls is not None else True
+            use_ssl = org_setting.smtp_use_ssl if org_setting.smtp_use_ssl is not None else False
         elif email_provider == 'OUTLOOK':
-            host = 'smtp-mail.outlook.com'
-            port = 587
+            host = org_setting.smtp_host or 'smtp-mail.outlook.com'
+            port = int(org_setting.smtp_port or 587)
             use_tls = True
             use_ssl = False
         else:  # CUSTOM
             host = org_setting.smtp_host
-            port = org_setting.smtp_port
+            port = int(org_setting.smtp_port or 587)
             use_tls = org_setting.smtp_use_tls
             use_ssl = org_setting.smtp_use_ssl
             
+        # بررسی تضاد SSL و TLS
+        if port == 465:
+            use_ssl = True
+            use_tls = False
+        elif use_tls and use_ssl:
+            use_ssl = False
+
         if host:
             try:
                 connection = get_connection(
@@ -67,8 +92,9 @@ def send_dynamic_email(org_setting, to_email, subject, html_content):
                     password=org_setting.smtp_password,
                     use_tls=use_tls,
                     use_ssl=use_ssl,
+                    timeout=25,
                 )
-                from_email = org_setting.smtp_sender_email or getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@payjoo.ir')
+                from_email = org_setting.smtp_sender_email or org_setting.smtp_user or getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@payjoo.ir')
                 msg = EmailMultiAlternatives(
                     subject,
                     text_content,
@@ -79,7 +105,7 @@ def send_dynamic_email(org_setting, to_email, subject, html_content):
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=False)
                 
-                # ثبت موفقیت در دیتابیس
+                # ثبت موفقیت در لاگ اعلان‌ها
                 NotificationLog.objects.create(
                     notification_type='EMAIL',
                     recipient=to_email,
@@ -87,20 +113,24 @@ def send_dynamic_email(org_setting, to_email, subject, html_content):
                     body=text_content,
                     status='SENT'
                 )
-                return
+                return True, "ایمیل با موفقیت ارسال شد."
             except Exception as e:
                 err_msg = str(e)
-                print(f"SMTP sending failed ({email_provider}): {err_msg}. Falling back to default mail settings.")
+                last_error = f"خطای سرور SMTP ({email_provider}): {err_msg}"
+                logger.error(f"SMTP sending failed ({email_provider}): {err_msg}")
                 NotificationLog.objects.create(
                     notification_type='EMAIL',
                     recipient=to_email,
                     subject=subject,
                     body=text_content,
                     status='FAILED',
-                    error_message=f"SMTP Gateway Error ({email_provider}): {err_msg}"
+                    error_message=last_error
                 )
-            
-    # استفاده از بک‌اند پیش‌فرض پروژه جنگو
+                if not fail_silently:
+                    raise RuntimeError(last_error)
+                return False, last_error
+
+    # ۲. استفاده از بک‌اند پیش‌فرض پروژه جنگو
     try:
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@payjoo.ir')
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
@@ -114,17 +144,22 @@ def send_dynamic_email(org_setting, to_email, subject, html_content):
             body=text_content,
             status='SENT'
         )
+        return True, "ایمیل با موفقیت ارسال شد."
     except Exception as e:
         err_msg = str(e)
-        print(f"Fallback email sending failed: {err_msg}")
+        last_error = f"خطای سرور ایمیل پیش‌فرض: {err_msg}"
+        logger.error(f"Fallback email sending failed: {err_msg}")
         NotificationLog.objects.create(
             notification_type='EMAIL',
             recipient=to_email,
             subject=subject,
             body=text_content,
             status='FAILED',
-            error_message=f"Fallback System Error: {err_msg}"
+            error_message=last_error
         )
+        if not fail_silently:
+            raise RuntimeError(last_error)
+        return False, last_error
 
 def send_kavenegar_sms(api_key, receptor, sender, message):
     import urllib.request

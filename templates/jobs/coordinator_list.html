@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load jalali_tags %}
+
+{% block title %}هماهنگ‌کنندگان نواحی | سامانه پیجو{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="font-bold text-secondary m-0 d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-people-fill text-primary" viewBox="0 0 16 16">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                </svg>
+                مدیریت هماهنگ‌کنندگان نواحی و ارسال گزارش اعلان‌ها
+            </h4>
+            <p class="text-muted text-xs m-0 mt-1">تعریف هماهنگ‌کننده به تفکیک دپارتمان‌ها و نواحی سازمانی جهت ارسال خودکار آخرین وضعیت اعلان‌ها و اسامی برگزیدگان مراحل ارزیابی از طریق ایمیل.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkSendModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-send-check" viewBox="0 0 16 16">
+                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.75.75 0 0 0-.124 1.329l4.995 3.178 1.531 2.406a.5.5 0 0 0 .844-.536L6.637 10.07l7.494-7.494-1.895 4.738a.5.5 0 1 0 .928.372zm-2.54 1.183L5.93 9.363 1.591 6.602z"/>
+                    <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                </svg>
+                ارسال گزارش وضعیت به همه نواحی
+            </button>
+            <a href="{% url 'area_coordinator_add' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-person-plus-fill" viewBox="0 0 16 16">
+                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                افزودن هماهنگ‌کننده جدید
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-end border-primary border-4">
+                <div class="text-muted text-xxs font-semibold">تعداد کل هماهنگ‌کنندگان</div>
+                <div class="d-flex align-items-baseline justify-content-between mt-1">
+                    <div class="fs-4 font-bold text-secondary">{{ total_coordinators }}</div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary text-xxs">نفر</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-end border-success border-4">
+                <div class="text-muted text-xxs font-semibold">هماهنگ‌کنندگان فعال</div>
+                <div class="d-flex align-items-baseline justify-content-between mt-1">
+                    <div class="fs-4 font-bold text-success">{{ active_coordinators }}</div>
+                    <span class="badge bg-success bg-opacity-10 text-success text-xxs">فعال</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-end border-info border-4">
+                <div class="text-muted text-xxs font-semibold">نواحی و دپارتمان‌های ثبت‌شده</div>
+                <div class="d-flex align-items-baseline justify-content-between mt-1">
+                    <div class="fs-4 font-bold text-info">{{ all_departments|length }}</div>
+                    <span class="badge bg-info bg-opacity-10 text-info text-xxs">ناحیه سازمانی</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-end border-warning border-4">
+                <div class="text-muted text-xxs font-semibold">درگاه پیش‌فرض گزارش</div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <div class="fs-6 font-bold text-secondary">پست الکترونیک (Email)</div>
+                    <span class="badge bg-warning bg-opacity-15 text-warning text-xxs">SMTP فعال</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-12 col-md-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-slate text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                            </svg>
+                        </span>
+                        <input type="text" name="q" value="{{ q }}" class="form-control border-slate" placeholder="جستجو بر اساس نام هماهنگ‌کننده، ایمیل، پرسنلی، موبایل یا شناسه بله...">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select name="department" class="form-select form-select-sm border-slate">
+                        <option value="">-- فیلتر بر اساس ناحیه / دپارتمان سازمانی --</option>
+                        {% for dep in all_departments %}
+                            <option value="{{ dep }}" {% if selected_dep == dep %}selected{% endif %}>{{ dep }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-secondary btn-sm flex-fill">اعمال فیلتر</button>
+                    {% if q or selected_dep %}
+                        <a href="{% url 'area_coordinators_list' %}" class="btn btn-outline-danger btn-sm">حذف فیلتر</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Coordinators Table -->
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary text-xxs font-bold">
+                    <tr>
+                        <th class="ps-3" style="width: 50px;">ردیف</th>
+                        <th>مشخصات هماهنگ‌کننده</th>
+                        <th>نواحی تحت پوشش</th>
+                        <th>راه‌های ارتباطی</th>
+                        <th class="text-center">اعلان‌های فعال</th>
+                        <th class="text-center">وضعیت</th>
+                        <th class="pe-3 text-center" style="width: 270px;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs">
+                    {% for coord in coordinators %}
+                    <tr>
+                        <td class="ps-3 text-muted">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="font-bold text-secondary">{{ coord.name }}</div>
+                            <div class="text-muted text-xxs mt-0.5">
+                                {% if coord.personnel_number %}
+                                    <span class="badge bg-light text-muted border border-slate px-1.5 py-0.5">پرسنلی: {{ coord.personnel_number }}</span>
+                                {% else %}
+                                    <span class="text-muted">بدون شماره پرسنلی</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if coord.departments %}
+                                    {% for dep in coord.departments %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 text-xxs font-medium">
+                                            {{ dep }}
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="badge bg-light text-danger border border-danger border-opacity-25 text-xxs">ناحیه‌ای انتخاب نشده</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column gap-1">
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-envelope text-primary" viewBox="0 0 16 16">
+                                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/>
+                                    </svg>
+                                    <a href="mailto:{{ coord.email }}" class="text-decoration-none text-secondary font-mono">{{ coord.email }}</a>
+                                </div>
+                                {% if coord.phone_number %}
+                                <div class="d-flex align-items-center gap-1.5 text-muted text-xxs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" class="bi bi-telephone text-success" viewBox="0 0 16 16">
+                                        <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                                    </svg>
+                                    <span class="font-mono">{{ coord.phone_number }}</span>
+                                </div>
+                                {% endif %}
+                                {% if coord.bale_id %}
+                                <div class="d-flex align-items-center gap-1.5 text-info text-xxs">
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-1.5 py-0.5">بله: {{ coord.bale_id }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-center font-bold text-secondary">
+                            {% with c_id=coord.id %}
+                                {% for k, val in coord_jobs_count.items %}
+                                    {% if k == c_id %}
+                                        <span class="badge bg-light text-dark border border-slate px-2 py-1">{{ val }} شغل</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </td>
+                        <td class="text-center">
+                            {% if coord.is_active %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 text-xxs font-semibold">فعال</span>
+                            {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 text-xxs font-semibold">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td class="pe-3 text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-1.5">
+                                <a href="{% url 'coordinator_report_preview' coord.id %}" target="_blank" class="btn btn-outline-secondary btn-xs d-flex align-items-center gap-1" title="مشاهده پیش‌نمایش گزارش وضعیت این هماهنگ‌کننده">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-8.83 1.12-2.153 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                                    </svg>
+                                    مشاهده
+                                </a>
+                                <a href="{% url 'download_coordinator_report_pdf' coord.id %}" target="_blank" class="btn btn-light btn-xs text-secondary border border-slate d-flex align-items-center gap-1" title="دانلود فایل PDF گزارش (گزارش اعلان شغلی ناحیه...)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                                        <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                    </svg>
+                                    PDF
+                                </a>
+                                <form method="post" action="{% url 'send_coordinator_report' coord.id %}" class="d-inline" onsubmit="return confirm('آیا از ارسال ایمیل گزارش وضعیت به {{ coord.name }} ({{ coord.email }}) اطمینان دارید؟');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-primary btn-xs d-flex align-items-center gap-1" title="ارسال ایمیل وضعیت اعلان‌ها">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-envelope-arrow-up" viewBox="0 0 16 16">
+                                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4.5a.5.5 0 0 1-1 0V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/>
+                                            <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.354 1.25 1.25a.5.5 0 0 1-.708.708L13 12.207V14a.5.5 0 0 1-1 0v-1.793l-.396.397a.5.5 0 1 1-.708-.708l1.25-1.25a.5.5 0 0 1 .708 0"/>
+                                        </svg>
+                                        ایمیل
+                                    </button>
+                                </form>
+                                {% if coord.bale_id %}
+                                <form method="post" action="{% url 'send_coordinator_bale_report' coord.id %}" class="d-inline" onsubmit="return confirm('آیا از ارسال فایل PDF گزارش به پیام‌رسان بله {{ coord.name }} (شناسه: {{ coord.bale_id }}) اطمینان دارید؟');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-success btn-xs d-flex align-items-center gap-1 font-semibold" title="ارسال فایل PDF گزارش به پیام‌رسان بله ({{ coord.bale_id }})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                            <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                                            <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                                        </svg>
+                                        بله
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'area_coordinator_edit' coord.id %}" class="btn btn-light btn-xs text-secondary border border-slate" title="ویرایش">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.293-.081"/>
+                                    </svg>
+                                </a>
+                                <form method="post" action="{% url 'area_coordinator_delete' coord.id %}" class="d-inline" onsubmit="return confirm('آیا از حذف این هماهنگ‌کننده مطمئن هستید؟');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-light btn-xs text-danger border border-slate" title="حذف">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-people text-muted opacity-50" viewBox="0 0 16 16">
+                                    <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.022.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+                                </svg>
+                            </div>
+                            <h6 class="font-bold text-secondary">هیچ هماهنگ‌کننده‌ای یافت نشد</h6>
+                            <p class="text-xs text-muted mb-3">شما می‌توانید با ثبت هماهنگ‌کنندگان نواحی، گزارش اعلان‌ها را با یک کلیک به ایمیل ایشان ارسال کنید.</p>
+                            <a href="{% url 'area_coordinator_add' %}" class="btn btn-primary btn-sm">افزودن اولین هماهنگ‌کننده</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Send Confirmation Modal -->
+<div class="modal fade" id="bulkSendModal" tabindex="-1" aria-labelledby="bulkSendModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-3">
+            <form method="post" action="{% url 'send_coordinator_report_bulk' %}">
+                {% csrf_token %}
+                <input type="hidden" name="bulk" value="1">
+                <div class="modal-header bg-light border-bottom border-slate py-3">
+                    <h6 class="modal-title font-bold text-secondary d-flex align-items-center gap-2" id="bulkSendModalLabel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-check text-primary" viewBox="0 0 16 16">
+                            <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.75.75 0 0 0-.124 1.329l4.995 3.178 1.531 2.406a.5.5 0 0 0 .844-.536L6.637 10.07l7.494-7.494-1.895 4.738a.5.5 0 1 0 .928.372zm-2.54 1.183L5.93 9.363 1.591 6.602z"/>
+                            <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                        </svg>
+                        ارسال تجمیعی گزارش وضعیت به تمامی نواحی
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-xs">
+                    <div class="alert alert-info border-0 rounded-2 p-3 mb-3 d-flex gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-info-circle-fill flex-shrink-0 text-info mt-0.5" viewBox="0 0 16 16">
+                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                        </svg>
+                        <div>
+                            با تایید این درخواست، سامانه به ازای هر هماهنگ‌کننده فعال، یک بسته اختصاصی شامل خلاصه مرحله جاری و فهرست برگزیدگان مربوط به <strong>همان ناحیه</strong> را آماده و از طریق ایمیل ارسال می‌کند.
+                        </div>
+                    </div>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2 text-secondary">
+                        <li class="d-flex align-items-center gap-2">
+                            <span class="text-success font-bold">✔</span>
+                            تعداد هماهنگ‌کنندگان فعال دریافت‌کننده: <strong>{{ active_coordinators }} نفر</strong>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <span class="text-success font-bold">✔</span>
+                            تفکیک کامل اطلاعات (هر هماهنگ‌کننده فقط اعلان‌های خودش را می‌بیند)
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <span class="text-success font-bold">✔</span>
+                            ثبت در تاریخچه و لاگ اعلانات ارسالی سامانه
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light border-top border-slate py-2.5">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
+                            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                        </svg>
+                        تایید و ارسال کلیه ایمیل‌ها
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

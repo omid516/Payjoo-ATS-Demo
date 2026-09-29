@@ -938,6 +938,7 @@ class OrganizationSetting(SoftDeleteModel):
     EMAIL_PROVIDER_CHOICES = [
         ('CUSTOM', 'ایجاد دستی (SMTP سفارشی)'),
         ('GMAIL', 'گوگل (Gmail)'),
+        ('MSC', 'پست الکترونیک فولاد مبارکه (msc.ir)'),
         ('OUTLOOK', 'اوتلوک (Outlook)'),
     ]
     email_provider = models.CharField(max_length=30, choices=EMAIL_PROVIDER_CHOICES, default='CUSTOM', verbose_name="سرویس‌دهنده ایمیل")
@@ -963,6 +964,11 @@ class OrganizationSetting(SoftDeleteModel):
     sms_sender_number = models.CharField(max_length=50, default="", blank=True, verbose_name="شماره خط اختصاصی فرستنده")
     sms_custom_url = models.CharField(max_length=500, default="", blank=True, verbose_name="آدرس API اختصاصی / دستی")
     license_key = models.TextField(default="", blank=True, verbose_name="کلید لایسنس سیستم")
+
+    # تنظیمات ربات پیام‌رسان بله (Bale Messenger Bot)
+    bale_bot_token = models.CharField(max_length=255, default="", blank=True, verbose_name="توکن ربات بله (Bale Bot Token)")
+    bale_bot_username = models.CharField(max_length=100, default="", blank=True, verbose_name="شناسه کاربری ربات بله (Username)")
+    bale_api_url = models.CharField(max_length=255, default="https://tapi.bale.ai/bot", blank=True, verbose_name="آدرس API ربات بله")
 
     class Meta:
         verbose_name = "تنظیمات سازمان"
@@ -1005,4 +1011,29 @@ class JobDescriptionTemplate(SoftDeleteModel):
 
     def __str__(self):
         return f"{self.title} ({self.job_code})"
+
+
+class AreaCoordinator(SoftDeleteModel):
+    name = models.CharField(max_length=150, verbose_name="نام و نام خانوادگی هماهنگ‌کننده")
+    personnel_number = models.CharField(max_length=50, blank=True, null=True, verbose_name="شماره پرسنلی")
+    email = models.EmailField(verbose_name="پست الکترونیک (ایمیل)")
+    phone_number = models.CharField(max_length=30, blank=True, verbose_name="شماره همراه")
+    bale_id = models.CharField(max_length=100, blank=True, verbose_name="شناسه بله (Bale ID / Username / Chat ID)")
+    departments = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="نواحی / دپارتمان‌های تحت پوشش",
+        help_text="لیست دپارتمان‌ها یا نواحی سازمانی که این هماهنگ‌کننده مسئول آنهاست"
+    )
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+    notes = models.TextField(blank=True, verbose_name="یادداشت‌ها")
+
+    class Meta:
+        verbose_name = "هماهنگ‌کننده ناحیه"
+        verbose_name_plural = "هماهنگ‌کنندگان نواحی"
+        ordering = ['name']
+
+    def __str__(self):
+        deps = "، ".join(self.departments) if self.departments else "بدون ناحیه"
+        return f"{self.name} ({deps})"
 

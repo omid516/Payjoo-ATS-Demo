@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_edit %}ویرایش هماهنگ‌کننده | {{ form.instance.name }}{% else %}افزودن هماهنگ‌کننده ناحیه{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0" style="max-width: 900px;">
+    
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="font-bold text-secondary m-0">
+                {% if is_edit %}
+                    ✏️ ویرایش هماهنگ‌کننده: {{ form.instance.name }}
+                {% else %}
+                    ➕ افزودن هماهنگ‌کننده ناحیه جدید
+                {% endif %}
+            </h4>
+            <p class="text-muted text-xs m-0 mt-1">
+                اطلاعات هماهنگ‌کننده و نواحی تحت پوشش را وارد نمایید تا گزارش اعلان‌های شغلی به صورت خودکار برای ایشان ارسال شود.
+            </p>
+        </div>
+        <a href="{% url 'area_coordinators_list' %}" class="btn btn-outline-secondary btn-sm">
+            بازگشت به فهرست
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+        <form method="post" id="coordinatorForm">
+            {% csrf_token %}
+            {{ form.departments_input }}
+
+            <div class="card-body p-4">
+                
+                <!-- Section 1: Personal and Contact Details -->
+                <h6 class="font-bold text-secondary mb-3 pb-2 border-bottom border-slate d-flex align-items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-badge text-primary" viewBox="0 0 16 16">
+                        <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                        <path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                    </svg>
+                    اطلاعات فردی و راه‌های ارتباطی
+                </h6>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label font-semibold text-xs text-secondary">نام و نام خانوادگی هماهنگ‌کننده: <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger text-xxs mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-semibold text-xs text-secondary">شماره پرسنلی: <span class="text-muted text-xxs">(اختیاری)</span></label>
+                        {{ form.personnel_number }}
+                        {% if form.personnel_number.errors %}
+                            <div class="text-danger text-xxs mt-1">{{ form.personnel_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-semibold text-xs text-secondary">پست الکترونیک (ایمیل سازمانی / شخصی): <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                        <div class="form-text text-xxs text-muted">گزارش وضعیت و کارنامه اعلان‌ها به این آدرس ایمیل ارسال خواهد شد.</div>
+                        {% if form.email.errors %}
+                            <div class="text-danger text-xxs mt-1">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-semibold text-xs text-secondary">شماره تلفن همراه: <span class="text-muted text-xxs">(جهت پیامک آتی)</span></label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}
+                            <div class="text-danger text-xxs mt-1">{{ form.phone_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-semibold text-xs text-secondary">شناسه پیام‌رسان بله (Chat ID عددی یا نام کاربری):</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-slate text-info font-bold">بله</span>
+                            {{ form.bale_id }}
+                        </div>
+                        <div class="form-text text-xxs text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>نکته مهم:</strong> ربات‌های بله فقط به <strong>شناسه عددی (Numeric Chat ID)</strong> پیام ارسال می‌کنند. هماهنگ‌کننده باید ابتدا ربات بله را در چت خصوصی استارت (<code>/start</code>) کند.
+                        </div>
+                        {% if form.bale_id.errors %}
+                            <div class="text-danger text-xxs mt-1">{{ form.bale_id.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check form-switch mt-3">
+                            {{ form.is_active }}
+                            <label class="form-check-label font-semibold text-xs text-secondary ms-2" for="{{ form.is_active.id_for_label }}">
+                                هماهنگ‌کننده فعال باشد (دریافت گزارش‌های دوره‌ای)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Department Assignment -->
+                <h6 class="font-bold text-secondary mb-2 pb-2 border-bottom border-slate d-flex align-items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-diagram-3 text-primary" viewBox="0 0 16 16">
+                        <path d="M7 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.5 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4m-5-6a2 2 0 1 0 0-4 2 2 0 0 0 0 4m10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
+                        <path d="M6 7.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1.293l1.146 1.147a.5.5 0 0 1-.708.708L9.5 9.707V11h-3V9.707L5.56 10.648a.5.5 0 0 1-.708-.708L6 8.793zM2.5 7A1.5 1.5 0 0 0 1 8.5v1A1.5 1.5 0 0 0 2.5 11h1A1.5 1.5 0 0 0 5 9.5v-1A1.5 1.5 0 0 0 3.5 7zM12 7a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 9.5 9.5v-1A1.5 1.5 0 0 1 11 7z"/>
+                    </svg>
+                    نواحی و دپارتمان‌های سازمانی تحت پوشش
+                </h6>
+                <p class="text-muted text-xxs mb-3">یک یا چند ناحیه که این هماهنگ‌کننده مسئول دریافت اطلاعات اعلان‌های آن‌هاست را علامت بزنید:</p>
+
+                <div class="bg-light p-3 rounded-3 border border-slate mb-3" style="max-height: 250px; overflow-y: auto;">
+                    <div class="row g-2" id="departmentsContainer">
+                        {% for dep in all_departments %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-check">
+                                <input class="form-check-input dept-checkbox" type="checkbox" name="departments" value="{{ dep }}" id="dept_{{ forloop.counter }}"
+                                       {% if dep in selected_departments %}checked{% endif %}>
+                                <label class="form-check-label text-xs text-secondary font-medium" for="dept_{{ forloop.counter }}">
+                                    {{ dep }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Custom Department Add -->
+                <div class="input-group input-group-sm mb-4" style="max-width: 450px;">
+                    <input type="text" id="newDeptInput" class="form-control" placeholder="افزودن ناحیه دیگر (در صورت عدم وجود در لیست)...">
+                    <button class="btn btn-outline-primary" type="button" id="addNewDeptBtn">
+                        ➕ افزودن به لیست
+                    </button>
+                </div>
+
+                <!-- Section 3: Notes -->
+                <div class="mb-3">
+                    <label class="form-label font-semibold text-xs text-secondary">یادداشت‌ها و توضیحات داخلی:</label>
+                    {{ form.notes }}
+                </div>
+
+            </div>
+
+            <!-- Card Footer -->
+            <div class="card-footer bg-light border-top border-slate p-3 d-flex justify-content-between align-items-center">
+                <a href="{% url 'area_coordinators_list' %}" class="btn btn-outline-secondary btn-sm">انصراف</a>
+                <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm">
+                    💾 ذخیره هماهنگ‌کننده
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addBtn = document.getElementById('addNewDeptBtn');
+    const input = document.getElementById('newDeptInput');
+    const container = document.getElementById('departmentsContainer');
+
+    if (addBtn && input && container) {
+        addBtn.addEventListener('click', function() {
+            const val = input.value.trim();
+            if (!val) return;
+
+            // Check if already exists
+            const existing = Array.from(container.querySelectorAll('.dept-checkbox')).some(cb => cb.value === val);
+            if (existing) {
+                alert('این ناحیه قبلاً در لیست وجود دارد.');
+                return;
+            }
+
+            const id = 'dept_custom_' + Date.now();
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4';
+            col.innerHTML = `
+                <div class="form-check">
+                    <input class="form-check-input dept-checkbox" type="checkbox" name="departments" value="${val}" id="${id}" checked>
+                    <label class="form-check-label text-xs text-secondary font-medium text-primary font-bold" for="${id}">
+                        ${val} (جدید)
+                    </label>
+                </div>
+            `;
+            container.appendChild(col);
+            input.value = '';
+        });
+    }
+});
+</script>
+{% endblock %}

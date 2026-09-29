@@ -691,6 +691,7 @@ class NotificationLog(SoftDeleteModel):
     NOTIFICATION_TYPES = [
         ('SMS', 'پیامک'),
         ('EMAIL', 'ایمیل'),
+        ('BALE', 'پیام‌رسان بله'),
     ]
     STATUS_CHOICES = [
         ('SENT', 'ارسال شده'),

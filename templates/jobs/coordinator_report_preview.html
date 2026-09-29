@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پیش‌نمایش گزارش اعلان‌های شغلی هماهنگ‌کننده | {{ coordinator.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3 px-3 px-md-4">
+    <!-- Top Action & Info Bar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 text-primary p-2.5 rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-8.83 1.12-2.153 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-secondary mb-1 text-sm md:text-base">
+                            پیش‌نمایش زنده ایمیل گزارش وضعیت اعلان‌های شغلی
+                        </h5>
+                        <div class="d-flex flex-wrap align-items-center gap-2 text-xxs text-muted">
+                            <span>👤 گیرنده: <strong class="text-dark">{{ coordinator.name }}</strong></span>
+                            <span>•</span>
+                            <span>✉️ ایمیل: <strong class="text-primary font-mono">{{ coordinator.email }}</strong></span>
+                            <span>•</span>
+                            <span>🏢 ناحیه: <strong class="text-dark">{{ coordinator.departments|join:"، "|default:"کلیه نواحی" }}</strong></span>
+                            <span>•</span>
+                            <span class="badge bg-light text-secondary border border-slate">{{ total_jobs }} اعلان شغلی</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5" onclick="printReportPreview()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                            <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                            <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1"/>
+                        </svg>
+                        چاپ / ذخیره PDF
+                    </button>
+
+                    {% if job %}
+                    <a href="{% url 'download_job_coordinator_report_pdf' job.id %}" target="_blank" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5" title="دانلود مستقیم فایل PDF رسمی گزارش">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                            <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                        </svg>
+                        دانلود فایل PDF
+                    </a>
+                    {% elif coordinator.id %}
+                    <a href="{% url 'download_coordinator_report_pdf' coordinator.id %}" target="_blank" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5" title="دانلود مستقیم فایل PDF رسمی گزارش">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                            <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                        </svg>
+                        دانلود فایل PDF
+                    </a>
+                    {% endif %}
+
+                    {% if can_send %}
+                        {% if job %}
+                        <form method="post" action="{% url 'send_coordinator_report_bulk' %}" class="d-inline" onsubmit="return confirm('آیا از ارسال ایمیل این گزارش به {{ coordinator.name }} ({{ coordinator.email }}) اطمینان دارید؟');">
+                            {% csrf_token %}
+                            <input type="hidden" name="job_id" value="{{ job.id }}">
+                            <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5 font-bold shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z"/>
+                                </svg>
+                                ارسال ایمیل گزارش
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'send_coordinator_report' coordinator.id %}" class="d-inline" onsubmit="return confirm('آیا از ارسال ایمیل این گزارش به {{ coordinator.name }} ({{ coordinator.email }}) اطمینان دارید؟');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5 font-bold shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z"/>
+                                </svg>
+                                ارسال ایمیل گزارش
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-2 text-xxs">
+                            ⚠️ برای ارسال ایمیل، هماهنگ‌کننده این ناحیه را ثبت نمایید.
+                        </span>
+                    {% endif %}
+
+                    {% if can_send_bale %}
+                        {% if job %}
+                        <form method="post" action="{% url 'send_coordinator_bale_report_bulk' %}" class="d-inline" onsubmit="return confirm('آیا از ارسال فایل PDF گزارش به پیام‌رسان بله {{ coordinator.name }} (شناسه: {{ coordinator.bale_id }}) اطمینان دارید؟');">
+                            {% csrf_token %}
+                            <input type="hidden" name="job_id" value="{{ job.id }}">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-1.5 font-bold shadow-sm" title="ارسال فایل PDF به بله {{ coordinator.bale_id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                                    <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                                </svg>
+                                ارسال PDF به پیام‌رسان بله
+                            </button>
+                        </form>
+                        {% elif coordinator.id %}
+                        <form method="post" action="{% url 'send_coordinator_bale_report' coordinator.id %}" class="d-inline" onsubmit="return confirm('آیا از ارسال فایل PDF گزارش به پیام‌رسان بله {{ coordinator.name }} (شناسه: {{ coordinator.bale_id }}) اطمینان دارید؟');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-1.5 font-bold shadow-sm" title="ارسال فایل PDF به بله {{ coordinator.bale_id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                                    <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                                </svg>
+                                ارسال PDF به پیام‌رسان بله
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% elif not has_bale_id %}
+                        <span class="badge bg-light text-muted border border-slate px-2 py-1.5 text-xxs" title="شناسه بله برای این هماهنگ‌کننده ثبت نشده است">
+                            بله: شناسه ثبت نشده
+                        </span>
+                    {% elif not has_bale_configured %}
+                        <a href="{% url 'organization_setting' %}?tab=connect" class="btn btn-outline-warning btn-sm text-xxs font-semibold" title="برای فعال‌سازی ارسال به بله، توکن ربات بله را در تنظیمات سازمان ثبت کنید">
+                            ⚠️ ثبت توکن بله در تنظیمات
+                        </a>
+                    {% endif %}
+
+                    {% if job %}
+                        <a href="{% url 'job_pipeline' job.id %}" class="btn btn-light btn-sm border border-slate">بازگشت به پایپ‌لاین</a>
+                    {% else %}
+                        <a href="{% url 'area_coordinators_list' %}" class="btn btn-light btn-sm border border-slate">بازگشت به لیست هماهنگ‌کنندگان</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject Preview Bar -->
+    <div class="alert alert-info border-0 shadow-sm rounded-3 py-2.5 px-3 mb-4 d-flex align-items-center gap-2 text-xs">
+        <strong class="text-primary">📌 عنوان ایمیل (Subject):</strong>
+        <span class="text-dark font-medium">{{ subject }}</span>
+    </div>
+
+    <!-- Email Render Container -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="background-color: #f1f5f9;">
+        <div class="card-header bg-white border-bottom border-slate py-2 px-3 d-flex align-items-center justify-content-between text-xxs text-muted">
+            <span class="d-flex align-items-center gap-1.5">
+                <span class="d-inline-block rounded-circle bg-danger" style="width: 8px; height: 8px;"></span>
+                <span class="d-inline-block rounded-circle bg-warning" style="width: 8px; height: 8px;"></span>
+                <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
+                <span class="ms-2">پیش‌نمایش دقیق قالب ارسالی به صندوق پستی هماهنگ‌کننده</span>
+            </span>
+            <span>طراحی واکنش‌گرا و سازگار با انواع نرم‌افزارهای پست الکترونیک (Outlook / Gmail / Webmail)</span>
+        </div>
+        <div class="card-body p-3 p-md-5 d-flex justify-content-center">
+            <div id="emailPreviewFrame" class="w-100" style="max-width: 800px;">
+                {{ report_html|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function printReportPreview() {
+    window.print();
+}
+</script>
+<style>
+@media print {
+    .sidebar, .navbar, .card:first-child, .alert, .card-header, #settings-save-actions, .btn {
+        display: none !important;
+    }
+    body, .main-content, .container-fluid, .card, .card-body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    #emailPreviewFrame {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}
+</style>
+{% endblock %}

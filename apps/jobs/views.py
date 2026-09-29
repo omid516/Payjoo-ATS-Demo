@@ -1,16 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db import transaction
 from django.utils import timezone
 
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.accounts.models import UserProfile
-from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, CompetencyModel, JobDescriptionTemplate
-from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet, JobDescriptionTemplateForm
+from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, CompetencyModel, JobDescriptionTemplate, AreaCoordinator, OrganizationSetting
+from .forms import JobOpportunityForm, JobOpportunityFormSet, WorkflowTemplateForm, WorkflowStageTemplateFormSet, JobDescriptionTemplateForm, AreaCoordinatorForm
 
 def normalize_digits(s):
     if not s:
@@ -3610,6 +3610,442 @@ class JobDescriptionUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView
         from django.contrib import messages
         messages.success(self.request, "شرح وظایف استاندارد با موفقیت ویرایش شد.")
         return super().form_valid(form)
+
+
+class AreaCoordinatorListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = AreaCoordinator
+    template_name = 'jobs/coordinator_list.html'
+    context_object_name = 'coordinators'
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+    ]
+
+    def get_queryset(self):
+        from django.db.models import Q
+        qs = AreaCoordinator.objects.filter(is_deleted=False)
+        q = self.request.GET.get('q', '').strip()
+        dep = self.request.GET.get('department', '').strip()
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(email__icontains=q) |
+                Q(personnel_number__icontains=q) |
+                Q(phone_number__icontains=q) |
+                Q(bale_id__icontains=q)
+            )
+        if dep:
+            qs = [c for c in qs if dep in (c.departments or [])]
+        return qs
+
+    def get_context_data(self, **kwargs):
+        from .coordinator_service import get_distinct_departments
+        context = super().get_context_data(**kwargs)
+        all_coordinators = AreaCoordinator.objects.filter(is_deleted=False)
+        context['total_coordinators'] = all_coordinators.count()
+        context['active_coordinators'] = all_coordinators.filter(is_active=True).count()
+        context['all_departments'] = get_distinct_departments()
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['selected_dep'] = self.request.GET.get('department', '').strip()
+        
+        # محاسبه تعداد اعلان‌های شغلی مرتبط با هر هماهنگ‌کننده
+        coord_jobs_count = {}
+        for c in all_coordinators:
+            if c.departments:
+                cnt = JobOpportunity.objects.filter(is_deleted=False, department__in=c.departments).count()
+                coord_jobs_count[c.id] = cnt
+            else:
+                coord_jobs_count[c.id] = 0
+        context['coord_jobs_count'] = coord_jobs_count
+        return context
+
+
+class AreaCoordinatorCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
+    model = AreaCoordinator
+    form_class = AreaCoordinatorForm
+    template_name = 'jobs/coordinator_form.html'
+    success_url = reverse_lazy('area_coordinators_list')
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+    ]
+
+    def get_context_data(self, **kwargs):
+        from .coordinator_service import get_distinct_departments
+        context = super().get_context_data(**kwargs)
+        context['all_departments'] = get_distinct_departments()
+        context['is_edit'] = False
+        return context
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        messages.success(self.request, f"هماهنگ‌کننده «{form.instance.name}» با موفقیت افزوده شد.")
+        return super().form_valid(form)
+
+
+class AreaCoordinatorUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
+    model = AreaCoordinator
+    form_class = AreaCoordinatorForm
+    template_name = 'jobs/coordinator_form.html'
+    success_url = reverse_lazy('area_coordinators_list')
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+    ]
+
+    def get_context_data(self, **kwargs):
+        from .coordinator_service import get_distinct_departments
+        context = super().get_context_data(**kwargs)
+        context['all_departments'] = get_distinct_departments()
+        context['is_edit'] = True
+        context['selected_departments'] = self.object.departments if isinstance(self.object.departments, list) else []
+        return context
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        messages.success(self.request, f"مشخصات هماهنگ‌کننده «{form.instance.name}» با موفقیت به‌روزرسانی شد.")
+        return super().form_valid(form)
+
+
+class AreaCoordinatorDeleteView(LoginRequiredMixin, RoleRequiredMixin, DeleteView):
+    model = AreaCoordinator
+    success_url = reverse_lazy('area_coordinators_list')
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR]
+
+    def delete(self, request, *args, **kwargs):
+        from django.contrib import messages
+        obj = self.get_object()
+        name = obj.name
+        obj.is_deleted = True
+        obj.save(update_fields=['is_deleted'])
+        messages.success(request, f"هماهنگ‌کننده «{name}» از سامانه حذف گردید.")
+        return redirect(self.success_url)
+
+    def post(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+
+class SendCoordinatorReportView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [
+        UserProfile.ROLE_ADMIN,
+        UserProfile.ROLE_RECRUITMENT_DIRECTOR,
+        UserProfile.ROLE_RECRUITMENT_SPECIALIST,
+    ]
+
+    def post(self, request, pk=None):
+        from django.contrib import messages
+        from .coordinator_service import send_area_coordinator_email_report, get_coordinator_jobs
+        
+        job_id = request.POST.get('job_id') or request.GET.get('job_id')
+        is_bulk = request.POST.get('bulk') == '1' or request.GET.get('bulk') == '1'
+        
+        # ۱. حالت ارسال تکی برای یک شغل به هماهنگ‌کننده‌های آن شغل
+        if job_id:
+            job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+            target_coordinators = [
+                c for c in AreaCoordinator.objects.filter(is_active=True, is_deleted=False)
+                if job.department and job.department in (c.departments or [])
+            ]
+            if not target_coordinators:
+                err_msg = f"هیچ هماهنگ‌کننده فعالی برای ناحیه «{job.department}» تعریف نشده است. لطفاً ابتدا از منوی هماهنگ‌کنندگان، هماهنگ‌کننده این ناحیه را ثبت نمایید."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': False, 'message': err_msg})
+                messages.warning(request, err_msg)
+                return redirect('job_pipeline', pk=job.id)
+                
+            sent_names = []
+            err_details = []
+            for coord in target_coordinators:
+                ok, msg, cnt = send_area_coordinator_email_report(coord, jobs=[job], request=request)
+                if ok:
+                    sent_names.append(f"{coord.name} ({coord.email})")
+                else:
+                    err_details.append(msg)
+            
+            if sent_names:
+                success_msg = f"گزارش وضعیت اعلان «{job.title}» با موفقیت برای: {', '.join(sent_names)} ارسال گردید."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': True, 'message': success_msg})
+                messages.success(request, success_msg)
+            else:
+                detail_str = f": {'; '.join(err_details)}" if err_details else ""
+                err_msg = f"ارسال ایمیل با خطا مواجه شد{detail_str}. لطفاً تنظیمات سرور ایمیل (SMTP) را در بخش تنظیمات سازمان بررسی نمایید."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': False, 'message': err_msg})
+                messages.error(request, err_msg)
+            return redirect('job_pipeline', pk=job.id)
+
+        # ۲. حالت ارسال تجمیعی برای همه هماهنگ‌کنندگان فعال
+        if is_bulk:
+            coordinators = AreaCoordinator.objects.filter(is_active=True, is_deleted=False)
+            if not coordinators.exists():
+                messages.warning(request, "هیچ هماهنگ‌کننده فعالی در سامانه ثبت نشده است.")
+                return redirect('area_coordinators_list')
+                
+            success_count = 0
+            fail_count = 0
+            total_jobs_sent = 0
+            for coord in coordinators:
+                ok, msg, j_cnt = send_area_coordinator_email_report(coord, request=request)
+                if ok:
+                    success_count += 1
+                    total_jobs_sent += j_cnt
+                else:
+                    fail_count += 1
+                    
+            if success_count > 0:
+                messages.success(request, f"گزارش دوره‌ای با موفقیت برای {success_count} هماهنگ‌کننده ناحیه (مجموعاً {total_jobs_sent} اعلان شغلی) ایمیل شد.")
+            if fail_count > 0:
+                messages.warning(request, f"ارسال گزارش برای {fail_count} هماهنگ‌کننده با خطا مواجه شد یا اعلان شغلی فعالی نداشتند.")
+            return redirect('area_coordinators_list')
+
+        # ۳. حالت ارسال برای یک هماهنگ‌کننده خاص (با pk)
+        if pk:
+            coord = get_object_or_404(AreaCoordinator, pk=pk, is_deleted=False)
+            ok, msg, cnt = send_area_coordinator_email_report(coord, request=request)
+            if ok:
+                messages.success(request, msg)
+            else:
+                messages.error(request, msg)
+            return redirect('area_coordinators_list')
+
+        messages.error(request, "پارامترهای درخواست ارسال نامعتبر است.")
+        return redirect('area_coordinators_list')
+
+
+class TestEmailConnectionView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR]
+
+    def post(self, request):
+        from .coordinator_service import test_smtp_connection
+        org_setting = OrganizationSetting.get_active_setting()
+        
+        recipient_email = request.POST.get('recipient_email', '').strip()
+        if not recipient_email and org_setting:
+            recipient_email = request.user.email or org_setting.smtp_sender_email or org_setting.smtp_user
+            
+        if not recipient_email:
+            return JsonResponse({'success': False, 'message': 'لطفاً یک آدرس ایمیل معتبر برای دریافت پیام آزمایشی وارد نمایید.'})
+            
+        custom_params = {}
+        if request.POST.get('email_provider'):
+            custom_params['email_provider'] = request.POST.get('email_provider')
+        if request.POST.get('smtp_host') is not None:
+            custom_params['smtp_host'] = request.POST.get('smtp_host')
+        if request.POST.get('smtp_port'):
+            custom_params['smtp_port'] = request.POST.get('smtp_port')
+        if request.POST.get('smtp_user') is not None:
+            custom_params['smtp_user'] = request.POST.get('smtp_user')
+        if request.POST.get('smtp_password'):
+            custom_params['smtp_password'] = request.POST.get('smtp_password')
+        if request.POST.get('smtp_sender_email') is not None:
+            custom_params['smtp_sender_email'] = request.POST.get('smtp_sender_email')
+        if 'smtp_use_tls' in request.POST:
+            custom_params['smtp_use_tls'] = request.POST.get('smtp_use_tls') in ['true', 'True', '1', True]
+        if 'smtp_use_ssl' in request.POST:
+            custom_params['smtp_use_ssl'] = request.POST.get('smtp_use_ssl') in ['true', 'True', '1', True]
+
+        success, message = test_smtp_connection(org_setting, recipient_email, custom_params=custom_params if custom_params else None)
+        return JsonResponse({'success': success, 'message': message})
+
+
+class CoordinatorReportPreviewView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, pk=None, job_id=None):
+        from .models import AreaCoordinator, JobOpportunity
+        from .coordinator_service import generate_coordinator_report_payload
+        from django.http import HttpResponse
+
+        coordinator = None
+        jobs_qs = None
+        current_job = None
+
+        if job_id:
+            current_job = get_object_or_404(JobOpportunity, pk=job_id)
+            jobs_qs = [current_job]
+            # جستجوی هماهنگ‌کننده مسئول این ناحیه
+            coordinator = None
+            for c in AreaCoordinator.objects.filter(is_active=True, is_deleted=False):
+                if c.departments and current_job.department in c.departments:
+                    coordinator = c
+                    break
+            if not coordinator:
+                coordinator = AreaCoordinator(
+                    name=f"هماهنگ‌کننده ناحیه {current_job.department}",
+                    email="ثبت نشده",
+                    departments=[current_job.department]
+                )
+        elif pk:
+            coordinator = get_object_or_404(AreaCoordinator, pk=pk, is_deleted=False)
+            filter_job_id = request.GET.get('job_id')
+            if filter_job_id:
+                current_job = get_object_or_404(JobOpportunity, pk=filter_job_id)
+                jobs_qs = [current_job]
+
+        if not coordinator:
+            messages.error(request, "هماهنگ‌کننده مورد نظر یافت نشد.")
+            return redirect('area_coordinators_list')
+
+        html_content, subject, context, jobs_data = generate_coordinator_report_payload(coordinator, jobs_qs=jobs_qs)
+
+        if request.GET.get('raw') == '1':
+            return HttpResponse(html_content, content_type='text/html; charset=utf-8')
+
+        has_bale_configured = False
+        org_setting = OrganizationSetting.get_active_setting()
+        if org_setting and org_setting.bale_bot_token:
+            has_bale_configured = True
+
+        context = {
+            'coordinator': coordinator,
+            'subject': subject,
+            'report_html': html_content,
+            'total_jobs': len(jobs_data),
+            'job': current_job,
+            'can_send': bool(coordinator.pk and coordinator.email and coordinator.email != 'ثبت نشده'),
+            'can_send_bale': bool(coordinator.bale_id and coordinator.bale_id.strip() and has_bale_configured),
+            'has_bale_id': bool(coordinator.bale_id and coordinator.bale_id.strip()),
+            'has_bale_configured': has_bale_configured,
+        }
+        return render(request, 'jobs/coordinator_report_preview.html', context)
+
+
+class DownloadCoordinatorReportPdfView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def get(self, request, pk=None, job_id=None):
+        from .models import AreaCoordinator, JobOpportunity
+        from .pdf_service import generate_coordinator_report_pdf
+        from django.http import HttpResponse, Http404
+        import urllib.parse
+
+        coordinator = None
+        jobs_qs = None
+
+        if job_id:
+            job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+            jobs_qs = [job]
+            for c in AreaCoordinator.objects.filter(is_active=True, is_deleted=False):
+                if c.departments and job.department in c.departments:
+                    coordinator = c
+                    break
+            if not coordinator:
+                coordinator = AreaCoordinator(
+                    name=f"هماهنگ‌کننده ناحیه {job.department}",
+                    email="ثبت نشده",
+                    departments=[job.department]
+                )
+        elif pk:
+            coordinator = get_object_or_404(AreaCoordinator, pk=pk, is_deleted=False)
+            filter_job_id = request.GET.get('job_id')
+            if filter_job_id:
+                job = get_object_or_404(JobOpportunity, pk=filter_job_id, is_deleted=False)
+                jobs_qs = [job]
+
+        if not coordinator:
+            raise Http404("هماهنگ‌کننده مورد نظر یافت نشد.")
+
+        pdf_bytes, filename = generate_coordinator_report_pdf(coordinator, jobs_qs=jobs_qs)
+        if not pdf_bytes:
+            messages.error(request, "خطا در تولید فایل PDF گزارش.")
+            return redirect('area_coordinators_list')
+
+        # هدر استاندارد دانلود با انکودینگ UTF-8 برای حروف فارسی نام فایل
+        encoded_filename = urllib.parse.quote(filename)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{encoded_filename}"; filename*=UTF-8\'\'{encoded_filename}'
+        return response
+
+
+class SendCoordinatorBaleReportView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR, UserProfile.ROLE_RECRUITMENT_SPECIALIST]
+
+    def post(self, request, pk=None):
+        from .models import AreaCoordinator, JobOpportunity
+        from .bale_service import send_area_coordinator_bale_report
+
+        job_id = request.POST.get('job_id') or request.GET.get('job_id')
+        next_url = request.POST.get('next') or request.GET.get('next')
+
+        # ۱. حالت ارسال برای یک شغل خاص (از صفحه پایپ‌لاین یا پیش‌نمایش)
+        if job_id:
+            job = get_object_or_404(JobOpportunity, pk=job_id, is_deleted=False)
+            target_coordinators = [
+                c for c in AreaCoordinator.objects.filter(is_active=True, is_deleted=False)
+                if job.department and job.department in (c.departments or [])
+            ]
+            if not target_coordinators:
+                err_msg = f"هیچ هماهنگ‌کننده فعالی برای ناحیه «{job.department}» تعریف نشده است. لطفاً ابتدا از منوی هماهنگ‌کنندگان، هماهنگ‌کننده این ناحیه را ثبت کنید."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': False, 'message': err_msg})
+                messages.warning(request, err_msg)
+                return redirect(next_url or 'job_pipeline', pk=job.id)
+
+            sent_names = []
+            err_details = []
+            for coord in target_coordinators:
+                if not coord.bale_id or not coord.bale_id.strip():
+                    err_details.append(f"هماهنگ‌کننده «{coord.name}» فاقد شناسه بله است")
+                    continue
+                ok, msg, fname = send_area_coordinator_bale_report(coord, jobs=[job], request=request)
+                if ok:
+                    sent_names.append(f"{coord.name} ({coord.bale_id})")
+                else:
+                    err_details.append(f"{coord.name}: {msg}")
+
+            if sent_names:
+                success_msg = f"فایل PDF گزارش اعلان شغلی با موفقیت به بله هماهنگ‌کننده ({', '.join(sent_names)}) ارسال شد."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': True, 'message': success_msg})
+                messages.success(request, success_msg)
+            else:
+                detail_str = f": {'; '.join(err_details)}" if err_details else ""
+                err_msg = f"ارسال گزارش به پیام‌رسان بله با خطا مواجه شد{detail_str}."
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': False, 'message': err_msg})
+                messages.error(request, err_msg)
+            return redirect(next_url or 'job_pipeline', pk=job.id)
+
+        # ۲. حالت ارسال برای یک هماهنگ‌کننده مشخص (با pk)
+        if pk:
+            coord = get_object_or_404(AreaCoordinator, pk=pk, is_deleted=False)
+            ok, msg, fname = send_area_coordinator_bale_report(coord, request=request)
+            if ok:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': True, 'message': msg, 'filename': fname})
+                messages.success(request, msg)
+            else:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+                    return JsonResponse({'success': False, 'message': msg})
+                messages.error(request, msg)
+            return redirect(next_url or 'area_coordinators_list')
+
+        messages.error(request, "پارامترهای درخواست نامعتبر است.")
+        return redirect('area_coordinators_list')
+
+
+class TestBaleConnectionView(LoginRequiredMixin, RoleRequiredMixin, View):
+    allowed_roles = [UserProfile.ROLE_ADMIN, UserProfile.ROLE_RECRUITMENT_DIRECTOR]
+
+    def post(self, request):
+        from .bale_service import test_bale_bot_connection
+        org_setting = OrganizationSetting.get_active_setting()
+        
+        token = request.POST.get('bale_bot_token', '').strip()
+        if not token and org_setting:
+            token = org_setting.bale_bot_token
+
+        api_url = request.POST.get('bale_api_url', '').strip()
+        if not api_url and org_setting:
+            api_url = org_setting.bale_api_url
+
+        success, message, bot_info = test_bale_bot_connection(token=token, api_url=api_url)
+        return JsonResponse({'success': success, 'message': message, 'bot_info': bot_info})
+
 
 
 

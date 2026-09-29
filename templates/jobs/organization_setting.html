@@ -533,6 +533,18 @@
                                         <label class="form-check-label font-semibold text-xs text-secondary ms-2" for="id_smtp_use_ssl">استفاده از SSL</label>
                                     </div>
                                 </div>
+                                <div class="pt-2 border-top border-slate">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="text-xxs text-muted">بررسی صحت اتصال به سرور پست الکترونیک:</span>
+                                        <button type="button" class="btn btn-outline-primary btn-xs d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#testEmailModal" id="btnOpenTestEmailModal">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-send-check" viewBox="0 0 16 16">
+                                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.75.75 0 0 0-.124 1.329l4.995 3.178 1.531 2.406a.5.5 0 0 0 .844-.536L6.637 10.07l7.494-7.494-1.895 4.738a.5.5 0 1 0 .928.372zm-2.54 1.183L5.93 9.363 1.591 6.602z"/>
+                                                <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                                            </svg>
+                                            تست اتصال و ارسال ایمیل آزمایشی
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- وب‌سرویس پیامکی -->
@@ -558,6 +570,42 @@
                                     <label for="id_sms_custom_url" class="form-label font-semibold text-xxs text-secondary">آدرس API اختصاصی / دستی:</label>
                                     {{ form.sms_custom_url }}
                                     <div class="form-text text-xxs text-muted">آدرس کامل وب‌سرویس دلخواه (مثال: https://api.mysms.ir/v1/send)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ۳. اتصال به ربات پیام‌رسان بله (Bale Bot Gateway) -->
+                        <div class="card border border-light shadow-sm p-3.5 mt-4" style="border-radius: 14px; background-color: #f8fafc;">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom border-slate">
+                                <h6 class="font-bold text-success mb-0 text-xs d-flex align-items-center gap-2">
+                                    <span class="badge bg-success bg-opacity-10 text-success py-1 px-2 rounded-2 font-bold">بله</span>
+                                    <span>🤖 تنظیمات ربات پیام‌رسان بله (Bale Bot Gateway)</span>
+                                </h6>
+                                <span class="badge bg-light text-muted border border-slate text-xxs font-normal">ارسال مستقیم فایل PDF گزارش به هماهنگ‌کنندگان</span>
+                            </div>
+                            <p class="text-xxs text-muted mb-3 leading-relaxed">
+                                با تنظیم توکن ربات بله، علاوه بر ایمیل می‌توانید گزارش وضعیت اعلان‌های شغلی و فهرست داوطلبان برگزیده را به‌صورت یک فایل <strong>PDF</strong> رسمی مستقیماً به حساب یا گروه بله هماهنگ‌کنندگان نواحی ارسال کنید.
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_bale_bot_token" class="form-label font-semibold text-xxs text-secondary">توکن ربات بله (Bot Token):</label>
+                                    {{ form.bale_bot_token }}
+                                    <div class="form-text text-xxs text-muted">توکن دریافتی از بات‌فادر بله (<strong>@BotFather</strong>).</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_bale_bot_username" class="form-label font-semibold text-xxs text-secondary">شناسه/نام کاربری ربات (Username):</label>
+                                    {{ form.bale_bot_username }}
+                                    <div class="form-text text-xxs text-muted">شناسه کاربری ربات با @ (مثال: @payjoo_ats_bot).</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center justify-content-between pt-2 border-top border-slate">
+                                        <span class="text-xxs text-muted">بررسی صحت توکن و استعلام مشخصات ربات (getMe):</span>
+                                        <button type="button" class="btn btn-outline-success btn-xs d-flex align-items-center gap-1.5" id="btnTestBaleConnection">
+                                            <span class="spinner-border spinner-border-sm d-none" id="testBaleSpinner" role="status" aria-hidden="true"></span>
+                                            <span id="testBaleBtnText">تست اتصال به ربات بله</span>
+                                        </button>
+                                    </div>
+                                    <div id="testBaleAlert" class="alert d-none text-xs p-2.5 mt-2.5 mb-0" style="word-break: break-word;"></div>
                                 </div>
                             </div>
                         </div>
@@ -915,6 +963,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Test Email Modal -->
+    <div class="modal fade" id="testEmailModal" tabindex="-1" aria-labelledby="testEmailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-3">
+                <div class="modal-header bg-light border-bottom border-slate py-2.5">
+                    <h6 class="modal-title font-bold text-secondary d-flex align-items-center gap-2" id="testEmailModalLabel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-check text-primary" viewBox="0 0 16 16">
+                            <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.75.75 0 0 0-.124 1.329l4.995 3.178 1.531 2.406a.5.5 0 0 0 .844-.536L6.637 10.07l7.494-7.494-1.895 4.738a.5.5 0 1 0 .928.372zm-2.54 1.183L5.93 9.363 1.591 6.602z"/>
+                            <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                        </svg>
+                        تست اتصال به سرور ایمیل (SMTP)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-xs">
+                    <p class="text-muted mb-3">
+                        برای بررسی عملکرد صحیح سرور پست الکترونیک، آدرس ایمیل دریافت‌کننده پیام آزمایشی را وارد کرده و دکمه ارسال را بزنید:
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label font-semibold text-secondary">آدرس ایمیل گیرنده پیام آزمایشی:</label>
+                        <input type="email" id="testEmailRecipient" class="form-control form-control-sm font-mono" value="{{ request.user.email|default:setting.smtp_sender_email|default:setting.smtp_user }}" placeholder="example@msc.ir">
+                    </div>
+                    <div id="testEmailAlert" class="alert d-none text-xs p-2.5 mb-0" style="word-break: break-word;"></div>
+                </div>
+                <div class="modal-footer bg-light border-top border-slate py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">بستن</button>
+                    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5" id="btnSendTestEmail">
+                        <span class="spinner-border spinner-border-sm d-none" id="testEmailSpinner" role="status" aria-hidden="true"></span>
+                        <span id="testEmailBtnText">ارسال ایمیل آزمایشی</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -1028,6 +1111,7 @@
         function updateEmailFields() {
             if (!emailProvider || !smtpHost || !smtpPort) return;
             const val = emailProvider.value;
+            const helpEl = document.getElementById('smtp-password-help');
             if (val === 'GMAIL') {
                 smtpHost.value = 'smtp.gmail.com';
                 smtpHost.readOnly = true;
@@ -1035,6 +1119,17 @@
                 smtpPort.readOnly = true;
                 if (smtpTls) smtpTls.checked = true;
                 if (smtpSsl) smtpSsl.checked = false;
+                if (helpEl) helpEl.innerHTML = 'در صورت استفاده از Gmail، باید <strong>رمز عبور برنامه (App Password ۱۶ رقمی)</strong> را از تنظیمات امنیتی حساب گوگل دریافت و در کادر کلمه عبور وارد نمایید.';
+            } else if (val === 'MSC') {
+                if (!smtpHost.value || smtpHost.value === 'smtp.gmail.com' || smtpHost.value === 'smtp-mail.outlook.com') {
+                    smtpHost.value = 'mail.msc.ir';
+                }
+                smtpHost.readOnly = false;
+                smtpPort.value = '587';
+                smtpPort.readOnly = false;
+                if (smtpTls) smtpTls.checked = true;
+                if (smtpSsl) smtpSsl.checked = false;
+                if (helpEl) helpEl.innerHTML = 'تنظیمات پست الکترونیک <strong>شرکت فولاد مبارکه اصفهان (msc.ir)</strong>. نام کاربری و کلمه عبور سازمانی خود را وارد نمایید. (در صورت نیاز به پورت یا سرور داخلی، مقادیر قابل ویرایش هستند).';
             } else if (val === 'OUTLOOK') {
                 smtpHost.value = 'smtp-mail.outlook.com';
                 smtpHost.readOnly = true;
@@ -1042,9 +1137,11 @@
                 smtpPort.readOnly = true;
                 if (smtpTls) smtpTls.checked = true;
                 if (smtpSsl) smtpSsl.checked = false;
+                if (helpEl) helpEl.innerHTML = 'در صورت استفاده از Outlook، باید رمز عبور یا App Password مایکروسافت را وارد نمایید.';
             } else { // CUSTOM
                 smtpHost.readOnly = false;
                 smtpPort.readOnly = false;
+                if (helpEl) helpEl.innerHTML = 'تنظیمات دلخواه سرور SMTP سفارشی خود را وارد نمایید.';
             }
         }
 
@@ -1179,5 +1276,179 @@
         timeQInput.addEventListener('input', updateExamCalcSummary);
         updateExamCalcSummary();
     }
+
+    // فعال‌سازی و تست ارسال ایمیل
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnOpenModal = document.getElementById('btnOpenTestEmailModal');
+        if (btnOpenModal) {
+            btnOpenModal.addEventListener('click', function(e) {
+                const modalEl = document.getElementById('testEmailModal');
+                if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
+            });
+        }
+
+        const btnSendTest = document.getElementById('btnSendTestEmail');
+        if (btnSendTest) {
+            btnSendTest.addEventListener('click', function() {
+                const recipientInput = document.getElementById('testEmailRecipient');
+                const recipient = recipientInput ? recipientInput.value.trim() : '';
+                const alertBox = document.getElementById('testEmailAlert');
+                const spinner = document.getElementById('testEmailSpinner');
+                const btnText = document.getElementById('testEmailBtnText');
+
+                if (!recipient) {
+                    alertBox.className = 'alert alert-danger text-xs p-2.5 mb-0';
+                    alertBox.innerText = 'لطفاً آدرس ایمیل گیرنده را وارد نمایید.';
+                    alertBox.classList.remove('d-none');
+                    return;
+                }
+
+                spinner.classList.remove('d-none');
+                btnText.innerText = 'در حال برقراری ارتباط با سرور...';
+                btnSendTest.disabled = true;
+                alertBox.classList.add('d-none');
+
+                const formData = new FormData();
+                formData.append('recipient_email', recipient);
+
+                // مقادیر فعلی فرم برای تست لحظه‌ای
+                const providerEl = document.getElementById('id_email_provider');
+                if (providerEl) formData.append('email_provider', providerEl.value);
+                const hostEl = document.getElementById('id_smtp_host');
+                if (hostEl) formData.append('smtp_host', hostEl.value);
+                const portEl = document.getElementById('id_smtp_port');
+                if (portEl) formData.append('smtp_port', portEl.value);
+                const userEl = document.getElementById('id_smtp_user');
+                if (userEl) formData.append('smtp_user', userEl.value);
+                const passEl = document.getElementById('id_smtp_password');
+                if (passEl) formData.append('smtp_password', passEl.value);
+                const senderEl = document.getElementById('id_smtp_sender_email');
+                if (senderEl) formData.append('smtp_sender_email', senderEl.value);
+                const tlsEl = document.getElementById('id_smtp_use_tls');
+                if (tlsEl) formData.append('smtp_use_tls', tlsEl.checked);
+                const sslEl = document.getElementById('id_smtp_use_ssl');
+                if (sslEl) formData.append('smtp_use_ssl', sslEl.checked);
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+                fetch("{% url 'test_email_connection' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData,
+                    signal: controller.signal
+                })
+                .then(res => res.json())
+                .then(data => {
+                    clearTimeout(timeoutId);
+                    spinner.classList.add('d-none');
+                    btnText.innerText = 'ارسال ایمیل آزمایشی';
+                    btnSendTest.disabled = false;
+                    alertBox.classList.remove('d-none');
+                    if (data.success) {
+                        alertBox.className = 'alert alert-success text-xs p-2.5 mb-0';
+                        alertBox.innerText = data.message;
+                    } else {
+                        alertBox.className = 'alert alert-danger text-xs p-2.5 mb-0';
+                        alertBox.innerText = data.message;
+                    }
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    spinner.classList.add('d-none');
+                    btnText.innerText = 'ارسال ایمیل آزمایشی';
+                    btnSendTest.disabled = false;
+                    alertBox.classList.remove('d-none');
+                    if (err.name === 'AbortError') {
+                        alertBox.className = 'alert alert-danger text-xs p-2.5 mb-0';
+                        alertBox.innerText = 'مهلت اتصال به پایان رسید (Timeout). سرور SMTP یا پورت انتخابی پاسخ نداد (احتمالاً به دلیل مسدودیت پورت توسط شبکه یا اشتباه بودن آدرس).';
+                    } else {
+                        alertBox.className = 'alert alert-danger text-xs p-2.5 mb-0';
+                        alertBox.innerText = 'خطا در برقراری ارتباط با سامانه: ' + err;
+                    }
+                });
+            });
+        }
+
+        // تست اتصال به ربات بله
+        const btnTestBale = document.getElementById('btnTestBaleConnection');
+        if (btnTestBale) {
+            btnTestBale.addEventListener('click', function() {
+                const tokenInput = document.getElementById('id_bale_bot_token');
+                const token = tokenInput ? tokenInput.value.trim() : '';
+                const alertBox = document.getElementById('testBaleAlert');
+                const spinner = document.getElementById('testBaleSpinner');
+                const btnText = document.getElementById('testBaleBtnText');
+
+                if (!token) {
+                    alertBox.className = 'alert alert-danger text-xs p-2.5 mt-2.5 mb-0';
+                    alertBox.innerText = 'لطفاً ابتدا توکن ربات بله را وارد نمایید.';
+                    alertBox.classList.remove('d-none');
+                    return;
+                }
+
+                spinner.classList.remove('d-none');
+                btnText.innerText = 'در حال استعلام از سرور بله...';
+                btnTestBale.disabled = true;
+                alertBox.classList.add('d-none');
+
+                const formData = new FormData();
+                formData.append('bale_bot_token', token);
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+                fetch("{% url 'test_bale_connection' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData,
+                    signal: controller.signal
+                })
+                .then(res => res.json())
+                .then(data => {
+                    clearTimeout(timeoutId);
+                    spinner.classList.add('d-none');
+                    btnText.innerText = 'تست اتصال به ربات بله';
+                    btnTestBale.disabled = false;
+                    alertBox.classList.remove('d-none');
+                    if (data.success) {
+                        alertBox.className = 'alert alert-success text-xs p-2.5 mt-2.5 mb-0';
+                        alertBox.innerHTML = `<strong>✅ موفق:</strong> ${data.message}`;
+                        // خودکار پر کردن نام کاربری اگر در فرم خالی باشد
+                        const usernameInput = document.getElementById('id_bale_bot_username');
+                        if (usernameInput && !usernameInput.value && data.bot_info && data.bot_info.username) {
+                            usernameInput.value = '@' + data.bot_info.username;
+                        }
+                    } else {
+                        alertBox.className = 'alert alert-danger text-xs p-2.5 mt-2.5 mb-0';
+                        alertBox.innerHTML = `<strong>❌ خطا:</strong> ${data.message}`;
+                    }
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    spinner.classList.add('d-none');
+                    btnText.innerText = 'تست اتصال به ربات بله';
+                    btnTestBale.disabled = false;
+                    alertBox.classList.remove('d-none');
+                    alertBox.className = 'alert alert-danger text-xs p-2.5 mt-2.5 mb-0';
+                    if (err.name === 'AbortError') {
+                        alertBox.innerText = 'مهلت اتصال به وب‌سرویس بله به پایان رسید (Timeout). لطفاً اتصال اینترنت سرور به درگاه بله را بررسی کنید.';
+                    } else {
+                        alertBox.innerText = 'خطا در برقراری ارتباط با وب‌سرویس: ' + err;
+                    }
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}
+

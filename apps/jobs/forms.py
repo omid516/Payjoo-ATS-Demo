@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
-from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, AISetting, OrganizationSetting, JobDescriptionTemplate
+from .models import JobOpportunity, JobOpportunityStage, WorkflowTemplate, WorkflowStageTemplate, AISetting, OrganizationSetting, JobDescriptionTemplate, AreaCoordinator
 
 class JobOpportunityForm(forms.ModelForm):
     start_date = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control date-picker', 'placeholder': '۱۴۰۲/۰۱/۰۱'}))
@@ -250,6 +250,7 @@ class OrganizationSettingForm(forms.ModelForm):
             'reject_email_enabled', 'reject_email_subject', 'reject_email_body', 'reject_sms_enabled', 'reject_sms_body',
             'email_provider', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_use_tls', 'smtp_use_ssl', 'smtp_sender_email',
             'sms_provider', 'sms_api_key', 'sms_sender_number', 'sms_custom_url',
+            'bale_bot_token', 'bale_bot_username', 'bale_api_url',
             'license_key',
         ]
         widgets = {
@@ -306,6 +307,11 @@ class OrganizationSettingForm(forms.ModelForm):
             'sms_api_key': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'کلید API / رمز عبور'}),
             'sms_sender_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 100020003000'}),
             'sms_custom_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'https://api.yourdomain.com/send-sms'}),
+
+            # Bale Bot
+            'bale_bot_token': forms.PasswordInput(render_value=True, attrs={'class': 'form-control font-monospace', 'style': 'direction: ltr;', 'placeholder': 'مثال: 123456789:ABCDefGhIjKlmnOpQrStUvWxYz'}),
+            'bale_bot_username': forms.TextInput(attrs={'class': 'form-control font-monospace', 'style': 'direction: ltr;', 'placeholder': '@YourBotName'}),
+            'bale_api_url': forms.TextInput(attrs={'class': 'form-control font-monospace', 'style': 'direction: ltr;', 'placeholder': 'https://tapi.bale.ai/bot'}),
         }
 
     def clean_exam_default_total_questions(self):
@@ -346,5 +352,50 @@ class JobDescriptionTemplateForm(forms.ModelForm):
             'job_type_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'expected_results': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+
+class AreaCoordinatorForm(forms.ModelForm):
+    departments_input = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="لیست دپارتمان‌های انتخاب‌شده"
+    )
+
+    class Meta:
+        model = AreaCoordinator
+        fields = ['name', 'personnel_number', 'email', 'phone_number', 'bale_id', 'is_active', 'notes']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: مهندس مهدی رضایی'}),
+            'personnel_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 981240'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'مثال: coordinator@msc.ir'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 09131234567'}),
+            'bale_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثال: 147982312 (شناسه عددی Chat ID) یا @username'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'cursor: pointer;'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'توضیحات و یادداشت‌های هماهنگی'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            if isinstance(self.instance.departments, list):
+                self.fields['departments_input'].initial = ",".join(self.instance.departments)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        deps_str = self.data.get('departments_list') or self.cleaned_data.get('departments_input') or ""
+        deps_list = self.data.getlist('departments')
+        if not deps_list and deps_str:
+            deps_list = [d.strip() for d in deps_str.split(',') if d.strip()]
+        cleaned_data['selected_departments'] = [d.strip() for d in deps_list if d.strip()]
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        selected_deps = self.cleaned_data.get('selected_departments')
+        if selected_deps is not None:
+            instance.departments = selected_deps
+        if commit:
+            instance.save()
+        return instance
 
 
